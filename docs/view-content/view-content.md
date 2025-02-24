@@ -103,7 +103,6 @@ Target: VG.010.001
         <td>The student successfully views course materials and stays updated on relevant learning resources.</td>
     </tr>
 </table>
-
       </td>
   </tr>
   <tr>

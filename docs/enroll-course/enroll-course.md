@@ -105,7 +105,6 @@ Target: VG.010.001
         <td>The user successfully enrolls in the course and is assigned a mentor.</td>
     </tr>
 </table>
-
       </td>
   </tr>
   <tr>

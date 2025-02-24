@@ -103,7 +103,6 @@ Target: VG.010.001
         <td>The student successfully selects a mentor and proceeds with the mentoring session.</td>
     </tr>
 </table>
-
       </td>
   </tr>
   <tr>
