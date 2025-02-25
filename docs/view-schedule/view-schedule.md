@@ -65,9 +65,9 @@ Target: VG.010.001
         <br><a href="https://github.com/VSUrhuel/voyager/blob/main/docs/view-content/view-content.md">View Content</a>
       </td>
       <td valign="top" style="width: 30%;">
-          <a href="#">Homepage</a> &gt; <a href="#">Login</a> &gt; <a href="#">Mentee Homepage</a> &gt;  <a href="#">My Session</a><br><br>
-          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/view-schedule-1.png?token=GHSAT0AAAAAAC26334XOWUIESXFB7IRXG66Z55LOYA" alt="View Schedule 1" width="200">
-        <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/view-schedule-2.png?token=GHSAT0AAAAAAC26334XLIOY6PD2Y24ONHHGZ55LPDQ" alt="View Schedule 2" width="200">
+          <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/homepage/homepage.md">Homepage</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/login-account/login-account.md">Login</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/view-schedule/view-schedule.md">My Session</a><br><br>
+          <img src="https://github.com/VSUrhuel/voyager/blob/main/docs/images/view-schedule-1.png?raw=true" alt="View Schedule 1" width="200">
+        <img src="https://github.com/VSUrhuel/voyager/blob/main/docs/images/view-schedule-2.png?raw=true" alt="View Schedule 2" width="200">
         <!--![image](https://github.com/user-attachments/assets/fd6b188d-8c9e-4366-ba60-ce4a3dbf764e)-->
         <!--![image](https://github.com/user-attachments/assets/1a951978-a345-437a-8809-0eb5ae795045)-->
         <h2>View Schedule</h2>  

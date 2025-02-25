@@ -65,8 +65,8 @@ Target: VG.010.001
         <br><a href="https://github.com/VSUrhuel/voyager/blob/main/docs/view-content/view-content.md">View Content</a>
       </td>
       <td valign="top" style="width: 30%;">
-          <a href="#">Homepage</a> &gt; <a href="#">Login</a> &gt; <a href="#">Mentee Homepage</a> &gt; <a href="#">Course Offered</a> &gt; <a href="#">Course Information</a><br><br>
-          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/view-course-info.png?token=GHSAT0AAAAAAC26334WVJVFFPRHA6S5UW5UZ55LLAQ" alt="View Course Info" width="200">
+          <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/homepage/homepage.md">Homepage</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/login-account/login-account.md">Login</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/search-course/view-course-offered.md">Course Offered</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/search-course/view-course-information.md">Course Information</a><br><br>
+          <img src="https://github.com/VSUrhuel/voyager/blob/main/docs/images/view-course-info.png?raw=true" alt="View Course Info" width="200">
         <!--![image](https://github.com/user-attachments/assets/1a88883e-2452-4222-b591-1ff89ad7a01e)-->
         <h2>Course Information</h2>  
 <p>The Course Information feature provides users with detailed insights into a selected course, including its description, learning outcomes, mentors, and schedule.</p>

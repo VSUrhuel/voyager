@@ -65,8 +65,8 @@ Target: VG.010.001
         <br><a href="https://github.com/VSUrhuel/voyager/blob/main/docs/view-content/view-content.md">View Content</a>
       </td>
       <td valign="top" style="width: 30%;">
-          <a href="#">Homepage</a> &gt; <a href="#">Login</a> &gt; <a href="#">Mentee Homepage</a> &gt; <a href="#">Course Offered</a><br><br>
-          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/search-course.png?token=GHSAT0AAAAAAC26334XZFRD3GGCU6D6KGVAZ55LKOQ" alt="Search Course" width="200">
+          <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/homepage/homepage.md">Homepage</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/login-account/login-account.md">Login</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/search-course/search-course.md">Search Course</a><br><br>
+          <img src="https://github.com/VSUrhuel/voyager/blob/main/docs/images/search-course.png?raw=true" alt="Search Course" width="200">
         <!--![image](https://github.com/user-attachments/assets/0cd994bc-ead8-484b-9c83-5e9f8df35aa9)-->
         <h2>Search Course</h2>  
 <p>The Search Course feature allows users to quickly find courses by entering keywords in the search bar. This feature helps users efficiently browse available courses, filter relevant options, and access course details seamlessly.</p>

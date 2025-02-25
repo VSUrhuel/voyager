@@ -65,8 +65,8 @@ Target: VG.010.001
         <br><a href="https://github.com/VSUrhuel/voyager/blob/main/docs/view-content/view-content.md">View Content</a>
       </td>
       <td valign="top" style="width: 30%;">
-          <a href="#">Homepage</a> &gt; <a href="#">Login</a> &gt; <a href="#">Course Offered</a> &gt; <a href="#">Enroll Course</a><br><br>
-          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/enroll-course.png?token=GHSAT0AAAAAAC26334WZCJDBEZUOQR4JUCKZ55K52Q" alt="Enroll Course" width="200">
+          <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/homepage/homepage.md">Homepage</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/login-account/login-account.md">Login</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/search-course/view-course-offered.md">Course Offered</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/enroll-course/enroll-course.md">Enroll Course</a><br><br>
+          <img src="https://github.com/VSUrhuel/voyager/blob/main/docs/images/enroll-course.png?raw=true" alt="Enroll Course" width="200">
         <!--![image](https://github.com/user-attachments/assets/38e8a315-9254-4204-9d33-66703ec6c7e7)-->
         <!--![image](https://github.com/user-attachments/assets/71712feb-f196-4185-8511-e5ad5f4eb0de)-->
         <h2>Enroll Course</h2>  

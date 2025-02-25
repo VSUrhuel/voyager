@@ -65,8 +65,8 @@ Target: VG.010.001
         <br><a href="https://github.com/VSUrhuel/voyager/blob/main/docs/view-content/view-content.md">View Content</a>
       </td>
       <td valign="top" style="width: 30%;">
-          <a href="#">Homepage</a> &gt; <a href="#">Login</a> &gt; <a href="#">Mentee Homepage</a> &gt; <a href="#">Mentors</a><br><br>
-          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/search-mentor.png?token=GHSAT0AAAAAAC26334XKMTKBKHDD4OMKITKZ55LNBQ" alt="Alt Text" width="200">
+          <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/homepage/homepage.md">Homepage</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/login-account/login-account.md">Login</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/search-mentor/search-mentor.md">Search Mentor</a><br><br>
+          <img src="https://github.com/VSUrhuel/voyager/blob/main/docs/images/search-mentor.png?raw=true" alt="Alt Text" width="200">
         <!--![image](https://github.com/user-attachments/assets/f2d69088-86fa-4abf-b499-5a0da6446df2)-->
         <h2>Search Mentor</h2>  
 <p>The Search Mentor feature allows users to find available mentors. Users can enter a keyword in the search bar to filter and locate the right mentor for their learning needs.</p>

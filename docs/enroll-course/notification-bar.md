@@ -65,8 +65,8 @@ Target: VG.010.001
         <br><a href="https://github.com/VSUrhuel/voyager/blob/main/docs/view-content/view-content.md">View Content</a>
       </td>
       <td valign="top" style="width: 30%;">
-          <a href="#">Homepage</a> &gt; <a href="#">Login</a> &gt; <a href="#">Mentee Homepage</a><br><br>
-          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/notification-bar.png?token=GHSAT0AAAAAAC26334X3LWVDJGZV5OM7XV4Z55K6NQ" alt="Notification Bar" width="200">
+          <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/homepage/homepage.md">Homepage</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/login-account/login-account.md">Login</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/enroll-course/notification-bar.md">Notification Bar</a><br><br>
+          <img src="https://github.com/VSUrhuel/voyager/blob/main/docs/images/notification-bar.png?raw=true" alt="Notification Bar" width="200">
         <!--![image](https://github.com/user-attachments/assets/7991b6b8-0504-45d3-aa0d-bda7564c9f21)-->
         <h2>Notification Bar (Popup)</h2>  
 <p>The notification bar is a temporary popup that appears on any screen to alert users of important updates, reminders, or announcements in real-time. It ensures users stay informed without navigating away from their current activity.</p>

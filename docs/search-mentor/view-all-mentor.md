@@ -65,8 +65,8 @@ Target: VG.010.001
         <br><a href="https://github.com/VSUrhuel/voyager/blob/main/docs/view-content/view-content.md">View Content</a>
       </td>
       <td valign="top" style="width: 30%;">
-          <a href="#">Homepage</a> &gt; <a href="#">Login</a> &gt; <a href="#">Mentee Homepage</a> &gt; <a href="#">Mentors</a><br><br>
-          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/view-all-mentor.png?token=GHSAT0AAAAAAC26334XIXISS6WVPM7G4JPKZ55LNNQ" alt="View All Mentor" width="200">
+          <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/homepage/homepage.md">Homepage</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/login-account/login-account.md">Login</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/search-mentor/view-all-mentor.md">Mentors</a><br><br>
+          <img src="https://github.com/VSUrhuel/voyager/blob/main/docs/images/view-all-mentor.png?raw=true" alt="View All Mentor" width="200">
         <!--![image](https://github.com/user-attachments/assets/820c4cbe-0da7-4213-952c-e11161d71c89)-->
         <h2>Mentors</h2>  
 <p>The Mentors page provides users with a list of available mentors, displaying their name, experience, expertise, and other relevant details. Users can browse the list, search for specific mentors, and view their profiles.</p>
