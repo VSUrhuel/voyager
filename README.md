@@ -77,11 +77,11 @@ Target: VG.010.001
               </thead>
               <tbody>
                   <tr>
-                      <td>2025-02-20</td>
-                      <td>v1.0.0</td>
-                      <td></td>
-                      <td></td>
-                      <td><br></td>
+                    <td>2025-02-20</td>
+                    <td>v1.0.0</td>
+                    <td>Initial document release</td>
+                    <td>N/A</td>
+                    <td>John Rhuel Laurente<br><em>Project Manager</em></td>
                   </tr>
               </tbody>
           </table>
