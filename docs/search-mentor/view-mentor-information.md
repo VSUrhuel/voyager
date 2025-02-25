@@ -66,7 +66,7 @@ Target: VG.010.001
       </td>
       <td valign="top" style="width: 30%;">
           <a href="#">Homepage</a> &gt; <a href="#">Login</a> &gt; <a href="#">Mentee Homepage</a> &gt; <a href="#">Mentors</a> &gt; <a href="#">Mentor Profile</a><br><br>
-          <img src="https://github.com/user-attachments/assets/e8b74925-338e-4251-a7e4-00b11dd3e51d" alt="Alt Text" width="200">
+          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/view-mentor-info.png?token=GHSAT0AAAAAAC26334WN2UW4HAG7YIQBOC4Z55LN3Q" alt="View Mentor Info" width="200">
         <!--![image](https://github.com/user-attachments/assets/e8b74925-338e-4251-a7e4-00b11dd3e51d)-->
         <h2>Mentor Information</h2>  
 <p>The Mentor Information page provides detailed information about a selected mentor, including their name, contact details, experience, languages spoken, and completed mentorship sessions. Users can review a mentor's profile before deciding to connect with them.</p>

@@ -66,7 +66,7 @@ Target: VG.010.001
       </td>
       <td valign="top" style="width: 30%;">
         <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/homepage/homepage.md">Homepage</a> <br><br>
-    <img src="https://github.com/user-attachments/assets/7b47fc90-4fb6-4ece-921e-d31bbbb2dc68"
+    <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/homepage.png?token=GHSAT0AAAAAAC26334WGFNDHLD2ICFSDWWYZ55K7NA"
          alt="Homepage Screen" width="200">    
     <h2>Homepage (Public View)</h2>  
     <p>

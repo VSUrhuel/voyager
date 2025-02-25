@@ -68,7 +68,7 @@ Target: VG.010.001
         <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/homepage/homepage.md">Homepage</a> &gt; 
         <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/login-account/login-account.md">Login</a> &gt; 
         <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/manage-schedule/upcoming.md">Upcoming Schedule</a> <br><br>
-        <img src="https://github.com/user-attachments/assets/7f2600b1-5b91-442c-b012-82b7cbdd2d60"
+        <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/upcoming-schedule.png?token=GHSAT0AAAAAAC26334X4ZENVYIA4IGNVUOQZ55LKBQ"
              alt="Upcoming Schedule" width="200">
         <h2>Upcoming Schedule</h2>  
         <p>

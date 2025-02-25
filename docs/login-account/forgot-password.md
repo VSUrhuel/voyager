@@ -66,7 +66,7 @@ Target: VG.010.001
       </td>
       <td valign="top" style="width: 30%;">
           <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/homepage/homepage.md">Homepage</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/login-account/login-account.md">Login</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/login-account/forgot-password.md">Forgot Password</a><br><br>
-          <img src="https://github.com/user-attachments/assets/8b4f52c4-7b06-4951-9ed4-e335248c54fe" alt="Forgot Password" width="200">
+          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/forgot-password.jpg?token=GHSAT0AAAAAAC26334XOE5MWW656X7LVKTGZ55K75Q" alt="Forgot Password" width="200">
           <h2>Forgot Password</h2>  
     <p>
         The Forgot Password feature allows users to securely reset their password in case they lose access to their account. 

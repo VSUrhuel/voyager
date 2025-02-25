@@ -68,7 +68,7 @@ Target: VG.010.001
          <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/homepage/homepage.md">Homepage</a> &gt; 
       <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/login-account/login-account.md">Login</a> &gt; 
       <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/manage-mentee/manage-mentee.md">Manage Mentee</a><br><br> 
-      <img src="https://github.com/user-attachments/assets/1fd75a7a-2a91-47b8-b1cc-bdda3954a9ee" 
+      <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/manage-mentee.png?token=GHSAT0AAAAAAC26334XLNYIA2AJRIMUTAQGZ55LE7Q" 
            alt="Manage Mentee" width="200">  
       <h2>Manage Mentee</h2>  
       <p>

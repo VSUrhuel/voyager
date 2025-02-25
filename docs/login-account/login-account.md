@@ -66,7 +66,7 @@ Target: VG.010.001
       </td>
       <td valign="top" style="width: 30%;">
            <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/homepage/homepage.md">Homepage</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/login-account/login-account.md">Login</a>  <br><br>
-          <img src="https://github.com/user-attachments/assets/e2e9b59f-2754-4b7b-9f66-dac295d48342" alt="Alt Text" width="200">
+          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/login-account.jpg?token=GHSAT0AAAAAAC26334XSR2RZL6PCPYRQR66Z55LALA" alt="Login Account" width="200">
     <h2>Log in</h2>  
     <p>
         The Login feature allows registered users to access their accounts securely. Users can enter their 

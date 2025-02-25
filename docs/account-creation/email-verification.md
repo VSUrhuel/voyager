@@ -67,7 +67,7 @@ Target: VG.010.001
       <td valign="top" style="width: 30%;">
           <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/homepage/homepage.md">Homepage</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/account-creation/account-creation.md">Account Creation</a> &gt;
         <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/account-creation/email-verification.md">Email Verification</a><br><br>
-        <img src="https://github.com/user-attachments/assets/912f3129-c337-4f3c-9f9f-7264b7ebffff" 
+        <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/email-verification.jpg?token=GHSAT0AAAAAAC26334WHZSP5ZHJV27RPY42Z55K2ZA" 
      alt="Email Verification" width="200">
     <h2>Email Verification</h2>  
     <p>After signing up, users must verify their email to activate their account. This step ensures security and prevents unauthorized access.</p>

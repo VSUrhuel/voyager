@@ -69,7 +69,7 @@ Target: VG.010.001
          <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/homepage/homepage.md">Homepage</a> &gt; 
       <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/account-creation/register.md">Register</a> &gt; 
       <br><br>   
-      <img src="https://github.com/user-attachments/assets/b0ad81ac-3784-4034-af0b-6f24cb4bbdc0" 
+      <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/register.jpg?token=GHSAT0AAAAAAC26334X7ZCZL3COSA7C7DVMZ55K3TA" 
            alt="Register" width="200">
       <h2>Register</h2>  
       <p>

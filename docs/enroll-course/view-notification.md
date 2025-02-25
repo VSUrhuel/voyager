@@ -66,7 +66,7 @@ Target: VG.010.001
       </td>
       <td valign="top" style="width: 30%;">
           <a href="#">Homepage</a> &gt; <a href="#">Login</a> &gt; <a href="#">Mentee Homepage</a> &gt; <a href="#">Notification</a><br><br>
-          <img src="https://github.com/user-attachments/assets/be4ad49c-0c0c-4b28-a689-6bed9c6b913f" alt="Alt Text" width="200">
+          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/view-notification.png?token=GHSAT0AAAAAAC26334WJNVRYIGZ3VQM3ADSZ55K65Q" alt="View Notification" width="200">
         <!--![image](https://github.com/user-attachments/assets/be4ad49c-0c0c-4b28-a689-6bed9c6b913f)-->
         <h2>Notifications</h2>  
 <p>This page displays important updates, reminders, and announcements for the user. Notifications may include upcoming mentorship sessions, study reminders, and other relevant alerts. The page categorizes notifications into "Today" for recent updates and "Previous Notifications" for older messages.</p>

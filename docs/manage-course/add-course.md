@@ -66,7 +66,7 @@ Target: VG.010.001
       </td>
       <td valign="top" style="width: 30%;">
           <a href="#">Homepage</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/manage-course/manage-course.md">Manage Course</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/manage-course/add-course.md">Add Course</a><br><br>
-          <img src="https://github.com/user-attachments/assets/10c26827-7f8f-48c2-95ad-2147ce98712d" alt="Alt Text" width="200">
+          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/add-course.png?token=GHSAT0AAAAAAC26334XDVBQPL7GXJ4G7OTIZ55LC3A" alt="Add Course" width="200">
         <h2>Add Course</h2>  
         <p>This is the page where courses are created. This enables the admin to add a new course for the mentorship.</p>
         <h2>Use Case Scenario</h2> 

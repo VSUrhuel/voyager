@@ -66,7 +66,7 @@ Target: VG.010.001
       </td>
       <td valign="top" style="width: 30%;">
           <a href="#">Homepage</a> &gt; <a href="#">Login</a> &gt;<a href="#">Mentee Homepage</a> &gt; <a href="#">Contents</a><br><br>
-          <img src="https://github.com/user-attachments/assets/ae8d16b2-2a89-4978-acb2-3bce16f0e41a" alt="Alt Text" width="200">
+          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/view-content.png?token=GHSAT0AAAAAAC26334W3DD3UIHU4CA43N4UZ55LOMA" alt="View Content" width="200">
         <!--![image](https://github.com/user-attachments/assets/ae8d16b2-2a89-4978-acb2-3bce16f0e41a)-->
         <h2>View Content</h2>  
 <p>The View Content page allows users to access important learning materials, announcements, and updates related to their courses. It provides categorized content based on recent and past updates.</p>

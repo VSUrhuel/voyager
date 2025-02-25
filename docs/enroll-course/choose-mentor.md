@@ -66,8 +66,7 @@ Target: VG.010.001
       </td>
       <td valign="top" style="width: 30%;">
           <a href="#">Homepage</a> &gt; <a href="#">Login</a> &gt; <a href="#">Course Offered</a> &gt; <a href="#">Enroll Course</a><br><br>
-          <img src="https://github.com/user-attachments/assets/0a24eecc-e1b0-47ff-aa69-b6965a117905" alt="Alt Text" width="200">
-        <!--![image](https://github.com/user-attachments/assets/0a24eecc-e1b0-47ff-aa69-b6965a117905)-->
+          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/choose-mentor.png?token=GHSAT0AAAAAAC26334W6LCPR45NN7ZR7SSMZ55K4IQ" alt="Choose Mentor" width="200">
         <h2>Choose Mentor</h2>  
 <p>This page enables users to browse and select a mentor based on their availability, expertise, and experience. Users can view mentor profiles, check their schedules, and choose the mentor that best fits their learning needs. This ensures a personalized and effective mentorship experience.</p>
 

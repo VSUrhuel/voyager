@@ -66,8 +66,7 @@ Target: VG.010.001
       </td>
       <td valign="top" style="width: 30%;">
           <a href="#">Homepage</a> &gt; <a href="#">Login</a> &gt; <a href="#">Course Offered</a> &gt; <a href="#">Enroll Course</a><br><br>
-          <img src="https://github.com/user-attachments/assets/38e8a315-9254-4204-9d33-66703ec6c7e7" alt="Alt Text" width="200">
-        <img src="https://github.com/user-attachments/assets/71712feb-f196-4185-8511-e5ad5f4eb0de7" alt="Alt Text" width="200">
+          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/enroll-course.png?token=GHSAT0AAAAAAC26334WZCJDBEZUOQR4JUCKZ55K52Q" alt="Enroll Course" width="200">
         <!--![image](https://github.com/user-attachments/assets/38e8a315-9254-4204-9d33-66703ec6c7e7)-->
         <!--![image](https://github.com/user-attachments/assets/71712feb-f196-4185-8511-e5ad5f4eb0de)-->
         <h2>Enroll Course</h2>  

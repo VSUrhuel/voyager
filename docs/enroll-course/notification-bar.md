@@ -66,7 +66,7 @@ Target: VG.010.001
       </td>
       <td valign="top" style="width: 30%;">
           <a href="#">Homepage</a> &gt; <a href="#">Login</a> &gt; <a href="#">Mentee Homepage</a><br><br>
-          <img src="https://github.com/user-attachments/assets/7991b6b8-0504-45d3-aa0d-bda7564c9f21" alt="Alt Text" width="200">
+          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/notification-bar.png?token=GHSAT0AAAAAAC26334X3LWVDJGZV5OM7XV4Z55K6NQ" alt="Notification Bar" width="200">
         <!--![image](https://github.com/user-attachments/assets/7991b6b8-0504-45d3-aa0d-bda7564c9f21)-->
         <h2>Notification Bar (Popup)</h2>  
 <p>The notification bar is a temporary popup that appears on any screen to alert users of important updates, reminders, or announcements in real-time. It ensures users stay informed without navigating away from their current activity.</p>

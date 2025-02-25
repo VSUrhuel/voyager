@@ -66,7 +66,7 @@ Target: VG.010.001
       </td>
       <td valign="top" style="width: 30%;">
           <a href="#">Homepage</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/manage-mentors/manage-mentors.md">Manage Mentors</a><br><br>
-          <img src="https://github.com/user-attachments/assets/5dd7d094-6c7e-4ece-8a0e-77d805b97a41" alt="Alt Text" width="200">
+          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/manage-mentor.png?token=GHSAT0AAAAAAC26334XMLOHTBHALCUBDR4EZ55LH2A" alt="Manage Mentors" width="200">
         <h2>Manage Mentors</h2>  
         <p>This page serves as the gateway for the admin in managing all mentors in a course.</p>
         <h2>Use Case Scenario</h2> 

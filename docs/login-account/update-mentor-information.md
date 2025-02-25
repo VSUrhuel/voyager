@@ -66,8 +66,8 @@ Target: VG.010.001
       </td>
       <td valign="top" style="width: 30%;">
           <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/homepage/homepage.md">Homepage</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/login-account/login-account.md">Login</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/login-account/update-mentor-information.md">Update Mentor Info</a><br><br>
-          <img src="https://github.com/user-attachments/assets/74be2030-dbcc-45e5-af16-fffc2db1fc33" alt="Update Information 1" width="200">
-          <img src="https://github.com/user-attachments/assets/e4e207e4-736d-4b30-b73f-62f68ff7d0ec" alt="Update Information 2" width="200">
+          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/upate-mentor-info-1.jpg?token=GHSAT0AAAAAAC26334WFTHIQN2MSG6ZYSQMZ55LBJA" alt="Update Information 1" width="200">
+          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/update-mentor-info-2.jpg?token=GHSAT0AAAAAAC26334WFJ2NNKGXWDM6VPD6Z55LBTQ" alt="Update Information 2" width="200">
         <h2>Update Mentor Information</h2>  
         <p>
             When a mentor logs in for the first time, they must provide necessary details to complete their profile. 

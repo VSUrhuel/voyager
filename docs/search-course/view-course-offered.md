@@ -66,7 +66,7 @@ Target: VG.010.001
       </td>
       <td valign="top" style="width: 30%;">
           <a href="#">Homepage</a> &gt; <a href="#">Login</a> &gt; <a href="#">Mentee Homepage</a> &gt; <a href="#">Course Offered</a><br><br>
-          <img src="https://github.com/user-attachments/assets/f0a44d35-2c6f-4c36-aa4d-19e4942bcfe1" alt="Alt Text" width="200">
+          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/view-course-offered.png?token=GHSAT0AAAAAAC26334WQJMJA4GP3Z4LUFUMZ55LLMA" alt="View Course Offered" width="200">
         <!--![image](https://github.com/user-attachments/assets/f0a44d35-2c6f-4c36-aa4d-19e4942bcfe1)-->
         <h2>Courses Offered</h2>  
 <p>The Courses Offered feature displays a list of available courses that users can browse and enroll in. Each course card provides essential details, including course name, duration, and mentors.</p>

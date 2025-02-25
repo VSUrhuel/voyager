@@ -66,7 +66,7 @@ Target: VG.010.001
       </td>
       <td valign="top" style="width: 30%;">
           <a href="#">Homepage</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/manage-mentors/manage-mentors.md">Manage Mentors</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/manage-mentors/archived.md">Archived</a><br><br>
-          <img src="https://github.com/user-attachments/assets/28019c6e-3d3e-45c3-9b74-2fa19f93141c" alt="Alt Text" width="200">
+          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/archived-mentor.png?token=GHSAT0AAAAAAC26334W2GKO7CNP64PHBJAKZ55LHJA" alt="Archived Mentor" width="200">
         <h2>Archived Mentors</h2>  
         <p>This page displays all the archived mentors. This gives the admin an access to view all the soft-deleted or archived mentors.</p>
         <h2>Use Case Scenario</h2> 

@@ -68,7 +68,7 @@ Target: VG.010.001
          <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/homepage/homepage.md">Homepage</a> &gt; 
         <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/login-account/login-account.md">Login</a> &gt; 
         <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/manage-schedule/completed.md">Completed Sessions</a> <br><br>
-        <img src="https://github.com/user-attachments/assets/42b28c0d-13f9-4161-b0ba-516b55ba7949"
+        <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/completed-schedule.png?token=GHSAT0AAAAAAC26334W2ZT3LYYCTCQIB3O4Z55LJJA"
              alt="Completed Sessions" width="200">
         <h2>Completed Sessions</h2>  
         <p>

@@ -66,7 +66,7 @@ Target: VG.010.001
       </td>
       <td valign="top" style="width: 30%;">
           <a href="#">Homepage</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/manage-course/manage-course.md">Manage Course</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/manage-course/active.md">Active</a><br><br>
-          <img src="https://github.com/user-attachments/assets/e916782e-63ef-417c-a7a8-2eadcdfeab20" alt="Alt Text" width="200">
+          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/active-course.png?token=GHSAT0AAAAAAC26334XASS3YNSYRFFBNNBKZ55LCOA" alt="Active Courses" width="200">
         <h2>Active Courses</h2>  
         <p>This is the page where active courses are displayed. This enables the admin to manage different active courses.</p>
         <h2>Use Case Scenario</h2> 
