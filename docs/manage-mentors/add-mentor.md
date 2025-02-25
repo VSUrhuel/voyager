@@ -66,7 +66,7 @@ Target: VG.010.001
       </td>
       <td valign="top" style="width: 30%;">
           <a href="#">Homepage</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/manage-mentors/manage-mentors.md">Manage Mentors</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/manage-mentors/add-mentor.md">Add Mentor</a><br><br>
-          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/add-mentor.png?token=GHSAT0AAAAAAC26334WYNOEAOENXFQRXCCWZ55LGYQ" alt="Add Mentor" width="200">
+          <img src="https://github.com/VSUrhuel/voyager/blob/main/docs/images/add-mentor.png?raw=true" alt="Add Mentor" width="200">
         <h2>Add Mentor</h2>  
         <p>This page displays an input form that asks for the mentor information. This enables the admin to create a new mentor.</p>
         <h2>Use Case Scenario</h2> 

@@ -66,7 +66,7 @@ Target: VG.010.001
       </td>
       <td valign="top" style="width: 30%;">
           <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/homepage/homepage.md">Homepage</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/login-account/login-with-google.md">Login with Google</a> <br><br>
-          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/login-with-google.jpg?token=GHSAT0AAAAAAC26334WQO5EVCS6QFTM3G52Z55LAZA" alt="Login with Google" width="200">
+          <img src="https://github.com/VSUrhuel/voyager/blob/main/docs/images/login-with-google.jpg?raw=true" alt="Login with Google" width="200">
         <h2>Login with Google</h2>  
     <p>
         The Login with Google feature allows users to quickly and securely access their accounts using 

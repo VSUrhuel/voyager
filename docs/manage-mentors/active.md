@@ -66,7 +66,7 @@ Target: VG.010.001
       </td>
       <td valign="top" style="width: 30%;">
           <a href="#">Homepage</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/manage-mentors/manage-mentors.md">Manage Mentors</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/manage-mentors/active.md">Active</a><br><br>
-          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/active-mentor.png?token=GHSAT0AAAAAAC26334XPBAH4LCSFKIJD66MZ55LGJQ" alt="Active Mentors" width="200">
+          <img src="https://github.com/VSUrhuel/voyager/blob/main/docs/images/active-mentor.png?raw=true" alt="Active Mentors" width="200">
         <h2>Active Mentors</h2>  
         <p>This page displays all the active mentors within the application for management.</p>
         <h2>Use Case Scenario</h2> 

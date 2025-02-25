@@ -68,7 +68,7 @@ Target: VG.010.001
        <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/homepage/homepage.md">Homepage</a> &gt; 
         <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/login-account/login-account.md">Login</a> &gt; 
         <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/manage-content/manage-content.md">Manage Content</a> <br><br> 
-        <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/manage-content.png?token=GHSAT0AAAAAAC26334X73OTKZFGEL7ZY6ISZ55LB6A"
+        <img src="https://github.com/VSUrhuel/voyager/blob/main/docs/images/manage-content.png?raw=true"
              alt="Manage Content" width="200">
         <h2>Manage Content</h2>  
         <p>
