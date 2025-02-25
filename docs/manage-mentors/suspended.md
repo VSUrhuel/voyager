@@ -66,7 +66,7 @@ Target: VG.010.001
       </td>
       <td valign="top" style="width: 30%;">
           <a href="#">Homepage</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/manage-mentors/manage-mentors.md">Manage Mentors</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/manage-mentors/suspended.md">Suspended</a><br><br>
-          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/suspended-mentor.png?token=GHSAT0AAAAAAC26334WUV5SYSADX3QDDBJSZ55LIIQ" alt="Suspended Mentors" width="200">
+          <img src="https://github.com/VSUrhuel/voyager/blob/main/docs/images/suspended-mentor.png?raw=true" alt="Suspended Mentors" width="200">
         <h2>Suspended Mentors</h2>  
         <p>This displays all the suspended mentors. This enables the admin to keep on track about the mentors' suspension.</p>
         <h2>Use Case Scenario</h2> 

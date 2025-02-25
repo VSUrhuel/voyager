@@ -66,7 +66,7 @@ Target: VG.010.001
       </td>
       <td valign="top" style="width: 30%;">
           <a href="#">Homepage</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/manage-course/manage-course.md">Manage Course</a><br><br>
-          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/manage-course.png?token=GHSAT0AAAAAAC26334XVNLZDPOPZVVSZR3UZ55LD6Q" alt="Manage Course" width="200">
+          <img src="https://github.com/VSUrhuel/voyager/blob/main/docs/images/manage-course.png?raw=true" alt="Manage Course" width="200">
         <h2>Manage Course</h2>  
         <p>This page serves as the gateway for the admin in managing all courses regardless the status of the course.</p>
         <h2>Use Case Scenario</h2> 

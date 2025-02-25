@@ -66,7 +66,7 @@ Target: VG.010.001
       </td>
       <td valign="top" style="width: 30%;">
           <a href="#">Homepage</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/manage-course/manage-course.md">Manage Course</a> &gt; <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/manage-course/archived.md">Archived</a><br><br>
-          <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/archived-course.png?token=GHSAT0AAAAAAC26334W4N6EWNEE4VKDEQSCZ55LDNQ" alt="Archived Course" width="200">
+          <img src="https://github.com/VSUrhuel/voyager/blob/main/docs/images/archived-course.png?raw=true" alt="Archived Course" width="200">
         <h2>Archived Courses</h2>  
         <p>This page displays all the archived courses by the admin. This page stores all soft-deleted courses.</p>
         <h2>Use Case Scenario</h2> 
