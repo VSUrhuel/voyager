@@ -69,7 +69,7 @@ Target: VG.010.001
       <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/login-account/login-account.md">Login</a> &gt; 
       <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/manage-mentee/manage-mentee.md">Manage Mentees</a> &gt; 
       <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/manage-mentee/rejected.md">Rejected Mentees</a><br><br> 
-      <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/rejected-mentee.png?token=GHSAT0AAAAAAC26334WYB4J6S3QUSTH724KZ55LFLA"
+      <img src="https://github.com/VSUrhuel/voyager/blob/main/docs/images/rejected-mentee.png?raw=true"
            alt="Rejected Mentees" width="200">
       <h2>Rejected Mentees</h2>  
       <p>

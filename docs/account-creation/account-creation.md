@@ -66,7 +66,7 @@ Target: VG.010.001
       </td>
       <td valign="top" style="width: 30%;">
           <a href="https://github.com/VSUrhuel/voyager/blob/main/docs/homepage/homepage.md">Homepage</a> &gt; <a href="https://github.com/VSUrhuel/voyager/edit/main/docs/account-creation/account-creation.md">Account Creation</a> <br><br>
-         <img src="https://raw.githubusercontent.com/VSUrhuel/voyager/refs/heads/main/docs/images/account-creation.jpg?token=GHSAT0AAAAAAC26334WNEIBFVRZPMDCYEYYZ55KZEQ" 
+         <img src="https://github.com/VSUrhuel/voyager/blob/main/docs/images/account-creation.jpg?raw=true" 
      alt="Account Creation" width="200">
         <h2>Account Creation</h2>  
     <p>Mentees can create a new account to access the platform's features. This step involves providing necessary details such as student ID, name, email, and password. </p>
