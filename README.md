@@ -81,7 +81,7 @@ Target: VG.010.001
                     <td>v1.0.0</td>
                     <td>Initial document release</td>
                     <td>N/A</td>
-                    <td>John Rhuel Laurente<br><em>Project Manager</em></td>
+                    <td>Laurente, John Rhuel<br><em>Project Manager</em></td>
                   </tr>
               </tbody>
           </table>
