@@ -1,5 +1,6 @@
 ## Voyager
-Target: VG.010.001
+
+Development of a Mobile-based Mentorship Application using Flutter for Computer Science Students at VSU
 
 <table border="1" cellpadding="0" cellspacing="0" style="width: 80%; font-size: 10px;"> 
   
@@ -68,23 +69,48 @@ Target: VG.010.001
           <table border="1" cellpadding="1" cellspacing="0" style="width: 100%; font-size: 10px;"> 
               <thead>
                   <tr>
-                       <th>Revision<br>Date</th>
-                      <th>Document<br>Version</th>
-                      <th>Description</th>
-                      <th>Tracking<br>Notes</th>
-                      <th>Approved By</th>
+                       <th>Internal Release Code</th>
+                      <th>Date Released</th>
                   </tr>
               </thead>
               <tbody>
                   <tr>
-                    <td>2025-02-20</td>
-                    <td>v1.0.0</td>
-                    <td>Initial document release</td>
-                    <td>N/A</td>
-                    <td>Laurente, John Rhuel<br><em>Project Manager</em></td>
+                    <td>AB.010.001</td>
+                    <td>2025-mm-dd</td>
+                  </tr>
+                  <tr>
+                    <td>AB.010.001</td>
+                    <td>2025-mm-dd</td>
+                  </tr>
+                  <tr>
+                    <td>AB.010.001</td>
+                    <td>2025-mm-dd</td>
+                  </tr>
+                  <tr>
+                    <td>...</td>
+                    <td>...</td>
                   </tr>
               </tbody>
           </table>
+          <br/>
+          ## AB.010.001 Release Notes (reverse chronological order)
+          <ul>
+            <li>Add database helper</li>
+            <li>Refactor ABCD</li>
+            <li>Fix Bug #wxyz slow modal transition</li>
+            <li>Insert all commit messages here…</li>
+            <li>NOTES: XYZ is a known bug (see report link), a workaround is possible…</li>
+          </ul>
+          <br/>
+          ## AB.010.000 Release Notes
+          <ul>
+            <li>Insert all commit messages here</li>
+          </ul>
+          <br/>
+          Important Links:
+          <ul>
+            <li>Design Specs: https:github.com/…</li>
+          </ul>
       </td>
   </tr>
   <tr>
