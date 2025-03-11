@@ -38,8 +38,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Voyager',
-      theme: CS3AppTheme.lightTheme,
-      darkTheme: CS3AppTheme.darkTheme,
+      theme: VoyagerTheme.lightTheme,
       themeMode: ThemeMode.light,
       debugShowCheckedModeBanner: false,
       //initialRoute: initScreen == 0 ? MRoutes.onBoarding : MRoutes.welcome,
