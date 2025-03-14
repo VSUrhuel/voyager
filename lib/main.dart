@@ -1,9 +1,12 @@
+import 'package:voyager/src/repository/authentication-repository/supabase_auth_repository.dart';
 import 'package:voyager/src/utils/themes/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Import the SupabaseAuthRepository
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:voyager/src/routing/app_routes.dart';
+import 'package:voyager/src/routing/routes.dart';
 
 int initScreen = 0;
 
@@ -17,7 +20,8 @@ Future<void> main() async {
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5cXhuenh1ZHdvZnJsdmR6YnZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE3MDQ1NjEsImV4cCI6MjA1NzI4MDU2MX0.Sbj42rsklbYOk0ug5rjswXefwlksX8MwkjFq5T6DH0E',
   );
 
-  //Get.put(SupabaseAuthRepository()); // Replace FirebaseAuth with SupabaseAuth
+  AuthenticationRepository auth = Get.put(
+      AuthenticationRepository()); // Replace FirebaseAuth with SupabaseAuth
 
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
@@ -27,7 +31,7 @@ Future<void> main() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   initScreen = prefs.getInt("initScreen") ?? 0;
   await prefs.setInt("initScreen", 1);
-
+  await auth.initDeepLinks();
   runApp(const MyApp());
 }
 
@@ -41,8 +45,8 @@ class MyApp extends StatelessWidget {
       theme: VoyagerTheme.lightTheme,
       themeMode: ThemeMode.light,
       debugShowCheckedModeBanner: false,
-      //initialRoute: initScreen == 0 ? MRoutes.onBoarding : MRoutes.welcome,
-      // getPages: MAppRoutes.pages,
+      initialRoute: initScreen == 0 ? MRoutes.onBoarding : MRoutes.welcome,
+      getPages: MAppRoutes.pages,
     );
   }
 }

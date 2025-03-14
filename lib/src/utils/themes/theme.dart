@@ -16,7 +16,7 @@ class VoyagerTheme {
     colorScheme: lightColorScheme,
     primaryColor: primaryColor,
     primarySwatch: MaterialColor(
-      primaryColor.value,
+      0xFF1877F2,
       <int, Color>{
         50: Color(0xFFe3f2fd),
         100: Color(0xFFbbdefb),
