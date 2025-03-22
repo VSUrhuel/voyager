@@ -28,6 +28,7 @@ class SignupController extends GetxController {
 
   void registerUser(String email, String password) async {
     try {
+      // Validate input fields
       if (email.isEmpty ||
           password.isEmpty ||
           fullName.text.isEmpty ||
@@ -41,7 +42,7 @@ class SignupController extends GetxController {
             ),
             width: MediaQuery.of(Get.context!).size.width,
             behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.transparent, // Makes it seamless
+            backgroundColor: Colors.transparent,
             elevation: 0,
           ),
         );
@@ -49,8 +50,6 @@ class SignupController extends GetxController {
       }
 
       isLoading.value = true;
-
-      // Initialize Supabase client
 
       // Register user with Supabase
       final AuthResponse authResponse = await AuthenticationRepository.instance
@@ -67,12 +66,16 @@ class SignupController extends GetxController {
             ),
             width: MediaQuery.of(Get.context!).size.width,
             behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.transparent, // Makes it seamless
+            backgroundColor: Colors.transparent,
             elevation: 0,
           ),
         );
         return;
       }
+
+      // Sign in the user after registration
+
+      Get.offAll(() => EmailVerification());
 
       // Create user model
       UserModel user = UserModel(
@@ -88,14 +91,17 @@ class SignupController extends GetxController {
         accountModifiedTimestamp: DateTime.now(),
         accountSoftDeleted: false,
       );
-
-      // Insert user data into Supabase table
+      print("user: $user");
+      // In sert user data into Supabase table
       await supabase
           .from('users') // Replace 'users' with your table name
           .insert(user.toJson()); // Convert user model to JSON
+      print("user inserted");
+      // Send email verification
 
       // Navigate to email verification screen
-      Get.offAll(() => EmailVerification());
+
+      print("email verification");
       isLoading.value = false;
     } on AuthException catch (e) {
       // Handle Supabase auth exceptions
@@ -103,13 +109,14 @@ class SignupController extends GetxController {
       ScaffoldMessenger.of(Get.context!).showSnackBar(
         SnackBar(
           content: AwesomeSnackbarContent(
-              title: 'Registration Error',
-              message: e.message,
-              contentType: ContentType.failure,
-              color: Colors.red),
+            title: 'Registration Error',
+            message: e.message,
+            contentType: ContentType.failure,
+            color: Colors.red,
+          ),
           width: MediaQuery.of(Get.context!).size.width,
           behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent, // Makes it seamless
+          backgroundColor: Colors.transparent,
           elevation: 0,
         ),
       );
@@ -118,13 +125,14 @@ class SignupController extends GetxController {
       ScaffoldMessenger.of(Get.context!).showSnackBar(
         SnackBar(
           content: AwesomeSnackbarContent(
-              title: 'Unexpected Error',
-              message: e.toString(),
-              contentType: ContentType.failure,
-              color: Colors.red),
+            title: 'Unexpected Error',
+            message: e.toString(),
+            contentType: ContentType.failure,
+            color: Colors.red,
+          ),
           width: MediaQuery.of(Get.context!).size.width,
           behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent, // Makes it seamless
+          backgroundColor: Colors.transparent,
           elevation: 0,
         ),
       );

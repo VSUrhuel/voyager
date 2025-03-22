@@ -134,18 +134,23 @@ class AuthenticationRepository extends GetxController {
     }
   }
 
-  Future<void> verifyEmailToken(String token) async {
+  Future<void> verifyEmailCode(String code) async {
     try {
-      await Supabase.instance.client.auth.verifyOTP(
-        token: token,
+      final response = await Supabase.instance.client.auth.verifyOTP(
+        token: code,
         type: OtpType.signup,
       );
+      print('hello');
+      Get.snackbar("title", response.toString());
       // Email verified successfully
-      ScaffoldMessenger.of(Get.context!).showSnackBar(
-        SnackBar(
-          content: Text('Email verified successfully!'),
-        ),
-      );
+      if (response.user != null) {
+        ScaffoldMessenger.of(Get.context!).showSnackBar(
+          SnackBar(
+            content: Text('Email verified successfully!'),
+          ),
+        );
+      }
+
       // Navigate to the next screen
       Get.offAllNamed(MRoutes.splash);
     } catch (e) {
@@ -160,13 +165,13 @@ class AuthenticationRepository extends GetxController {
 
   Future<void> initDeepLinks() async {
     final appLinks = AppLinks();
-
+    print('hi');
     // Listen for deep links
     appLinks.uriLinkStream.listen((Uri? uri) {
-      if (uri != null && uri.host == 'verify') {
-        final token = uri.queryParameters['token'];
-        if (token != null) {
-          verifyEmailToken(token);
+      if (uri != null && uri.host == 'random-string.lhr.life') {
+        final code = uri.queryParameters['code'];
+        if (code != null) {
+          verifyEmailCode(code);
         }
       }
     });
@@ -175,6 +180,9 @@ class AuthenticationRepository extends GetxController {
   Future<void> sendEmailVerification() async {
     try {
       final user = _supabase.auth.currentUser;
+
+      // Debugging: Print the user object
+      print('User: $user');
 
       // Check if the user exists and their email is not already verified
       if (user != null && user.emailConfirmedAt == null) {
@@ -228,8 +236,7 @@ class AuthenticationRepository extends GetxController {
         SnackBar(
           content: AwesomeSnackbarContent(
             title: 'Oh Snap!',
-            message:
-                "Error sending verification email. Please try again later!",
+            message: e.toString(),
             contentType: ContentType.failure,
             color: Colors.red,
           ),
