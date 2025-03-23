@@ -1,5 +1,5 @@
 import 'package:voyager/src/features/authentication/screens/login_screen/login_screen.dart';
-import 'package:voyager/src/repository/authentication-repository/supabase_auth_repository.dart';
+import 'package:voyager/src/repository/authentication_repository_firebase/authentication_repository.dart';
 import 'package:voyager/src/repository/exceptions/authentication_exceptions.dart';
 import 'package:voyager/src/widgets/custom_page_route.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -41,7 +41,8 @@ class ForgotPasswordController extends GetxController {
         return;
       }
       isLoading.value = true;
-      await AuthenticationRepository.instance.sendPasswordResetEmail(email);
+      await FirebaseAuthenticationRepository.instance
+          .sendPasswordResteEmail(email);
       isLoading.value = false;
       ScaffoldMessenger.of(Get.context!).showSnackBar(
         SnackBar(

@@ -1,15 +1,14 @@
-import 'dart:async';
-
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:voyager/src/features/authentication/controllers/user_role_enum.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/authentication/screens/email_verification/email_verification.dart';
-import 'package:voyager/src/repository/supabase_repository/supabase_instance.dart';
+import 'package:voyager/src/repository/authentication_repository_firebase/authentication_repository.dart';
+import 'package:voyager/src/repository/authentication_repository_firebase/exceptions/authentication_exceptions.dart';
+import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/routing/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:voyager/src/repository/authentication-repository/supabase_auth_repository.dart';
 
 class SignupController extends GetxController {
   static SignupController get instance => Get.find();
@@ -19,16 +18,13 @@ class SignupController extends GetxController {
   final email = TextEditingController();
   final password = TextEditingController();
 
-  final auth = Get.put(AuthenticationRepository());
+  final auth = Get.put(FirebaseAuthenticationRepository());
 
   final isGoogleLoading = false.obs;
   final isLoading = false.obs;
-  final supabase = SupabaseClient('https://zyqxnzxudwofrlvdzbvf.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5cXhuenh1ZHdvZnJsdmR6YnZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE3MDQ1NjEsImV4cCI6MjA1NzI4MDU2MX0.Sbj42rsklbYOk0ug5rjswXefwlksX8MwkjFq5T6DH0E');
 
   void registerUser(String email, String password) async {
     try {
-      // Validate input fields
       if (email.isEmpty ||
           password.isEmpty ||
           fullName.text.isEmpty ||
@@ -42,20 +38,18 @@ class SignupController extends GetxController {
             ),
             width: MediaQuery.of(Get.context!).size.width,
             behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.transparent,
+            backgroundColor: Colors.transparent, // Makes it seamless
             elevation: 0,
           ),
         );
+
         return;
       }
-
       isLoading.value = true;
+      final firestore = FirestoreInstance();
+      await auth.createUserWithEmailandPassword(email, password);
 
-      // Register user with Supabase
-      final AuthResponse authResponse = await AuthenticationRepository.instance
-          .createUserWithEmailandPassword(email, password);
-
-      if (authResponse.user == null) {
+      if (auth.firebaseUser.value == null) {
         isLoading.value = false;
         ScaffoldMessenger.of(Get.context!).showSnackBar(
           SnackBar(
@@ -66,73 +60,62 @@ class SignupController extends GetxController {
             ),
             width: MediaQuery.of(Get.context!).size.width,
             behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.transparent,
+            backgroundColor: Colors.transparent, // Makes it seamless
             elevation: 0,
           ),
         );
         return;
       }
 
-      // Sign in the user after registration
-
-      Get.offAll(() => EmailVerification());
-
-      // Create user model
       UserModel user = UserModel(
-        accountApiID: authResponse.user!.id, // Use Supabase user ID
-        accountApiEmail: authResponse.user!.email ?? "", // Use Supabase email
+        accountApiID:
+            auth.firebaseUser.value?.uid ?? "", // Use empty string if null
+        accountApiEmail:
+            auth.firebaseUser.value?.email ?? "", // Provide a default
         accountApiName: fullName.text,
-        accountApiPhoto: "", // Supabase doesn't provide a photo URL by default
-        accountPassword: '', // Password is managed by Supabase
-        accountUsername: fullName.text, // Use full name as username
+        accountApiPhoto:
+            auth.firebaseUser.value?.photoURL ?? "", // Handle null safely
+        accountPassword: '',
+        accountUsername: auth.firebaseUser.value?.displayName ??
+            "Unknown", // Provide default username
         accountRole: UserRoleEnum.mentee,
         accountStudentId: studentID.text,
         accountCreatedTimestamp: DateTime.now(),
         accountModifiedTimestamp: DateTime.now(),
         accountSoftDeleted: false,
       );
-      print("user: $user");
-      // In sert user data into Supabase table
-      await supabase
-          .from('users') // Replace 'users' with your table name
-          .insert(user.toJson()); // Convert user model to JSON
-      print("user inserted");
-      // Send email verification
 
-      // Navigate to email verification screen
-
-      print("email verification");
+      firestore.setUser(user);
+      Get.offAll(() => EmailVerification());
       isLoading.value = false;
-    } on AuthException catch (e) {
-      // Handle Supabase auth exceptions
+    } on AuthenticationExceptions catch (e) {
       isLoading.value = false;
       ScaffoldMessenger.of(Get.context!).showSnackBar(
         SnackBar(
           content: AwesomeSnackbarContent(
-            title: 'Registration Error',
-            message: e.message,
-            contentType: ContentType.failure,
-            color: Colors.red,
-          ),
+              title: 'Registration Error',
+              message: e.message,
+              contentType: ContentType.failure,
+              color: Colors.red),
           width: MediaQuery.of(Get.context!).size.width,
           behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
+          backgroundColor: Colors.transparent, // Makes it seamless
           elevation: 0,
         ),
       );
     } catch (e) {
+      Get.snackbar('Error', e.toString());
       isLoading.value = false;
       ScaffoldMessenger.of(Get.context!).showSnackBar(
         SnackBar(
           content: AwesomeSnackbarContent(
-            title: 'Unexpected Error',
-            message: e.toString(),
-            contentType: ContentType.failure,
-            color: Colors.red,
-          ),
+              title: 'Unexpected Error',
+              message: 'An unexpected error occurred. Please try again.',
+              contentType: ContentType.failure,
+              color: Colors.red),
           width: MediaQuery.of(Get.context!).size.width,
           behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
+          backgroundColor: Colors.transparent, // Makes it seamless
           elevation: 0,
         ),
       );
@@ -142,13 +125,13 @@ class SignupController extends GetxController {
   Future<void> googleSignUp() async {
     try {
       isGoogleLoading.value = true;
-      await auth.signInWithGoogle();
-      if (auth.supabaseUser.value == null) {
+      await auth.sigInWithGoogle();
+      final firestore = FirestoreInstance();
+      if (auth.firebaseUser.value == null) {
         Get.snackbar('Error', "User is null");
         return;
       }
-      final supabaseUser = Rx<User?>(Supabase.instance.client.auth.currentUser);
-      await SupabaseInstance().setUserFromGoogle(supabaseUser);
+      await firestore.setUserFromGoogle(Rx<User>(auth.firebaseUser.value!));
       Get.offAllNamed(MRoutes.splash);
       isGoogleLoading.value = false;
     } catch (e) {

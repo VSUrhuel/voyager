@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "539125746584",
+    "project_id": "mentorship-app-5c5e5",
+    "storage_bucket": "mentorship-app-5c5e5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:539125746584:android:53629d9ac6c02bab96b9ed",
+        "android_client_info": {
+          "package_name": "com.mentorship.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBLoQDDBI6_CuYSXe1eqSK_UVn_kY4FY-o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

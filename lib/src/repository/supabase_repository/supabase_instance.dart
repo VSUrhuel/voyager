@@ -48,7 +48,7 @@ class SupabaseInstance {
       }
 
       final auth = Get.put(AuthenticationRepository());
-      if ((await getAPIId()).contains(auth.supabaseUser.value?.id)) {
+      if ((await getAPIIds()).contains(auth.supabaseUser.value?.id)) {
         return; // User already exists, no need to upsert
       }
 
@@ -170,8 +170,18 @@ class SupabaseInstance {
     }
   }
 
+  Future<String> getSupabaseUser() async {
+    try {
+      final user = _supabase.auth.currentUser;
+      return user!.id;
+    } catch (e) {
+      _handleError('Error fetching Supabase user', e);
+      return '';
+    }
+  }
+
   // Fetch all accountApiIDs from the 'users' table
-  Future<List<String>> getAPIId() async {
+  Future<List<String>> getAPIIds() async {
     try {
       final users = await _supabase.from('users').select('accountApiID');
       return users
@@ -193,6 +203,20 @@ class SupabaseInstance {
     } catch (e) {
       _handleError('Error fetching mentor accountApiIDs', e);
       return [];
+    }
+  }
+
+  Future<String> getMentorID(String uid) async {
+    try {
+      final mentor = await _supabase
+          .from('mentors')
+          .select('id')
+          .eq('accountApiID', uid)
+          .single();
+      return mentor['id'].toString();
+    } catch (e) {
+      _handleError('Error fetching mentor ID', e);
+      return '';
     }
   }
 

@@ -1,9 +1,9 @@
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
-import 'package:voyager/src/features/authentication/screens/welcome/welcome.dart';
-import 'package:voyager/src/repository/authentication-repository/supabase_auth_repository.dart';
-import 'package:voyager/src/repository/supabase_repository/supabase_instance.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:voyager/src/features/mentor/screens/input_information/rest_pass.dart';
+import 'package:voyager/src/repository/authentication_repository_firebase/authentication_repository.dart';
+import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/routing/routes.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -13,7 +13,7 @@ class LoginController extends GetxController {
   final email = TextEditingController();
   final password = TextEditingController();
 
-  final auth = Get.put(AuthenticationRepository());
+  final auth = Get.put(FirebaseAuthenticationRepository());
 
   final isGoogleLoading = false.obs;
   final isLoading = false.obs;
@@ -39,26 +39,27 @@ class LoginController extends GetxController {
         return;
       }
       isLoading.value = true;
-
-      // If the user has a default password, direct them to the reset password page
+      // If the user has a default password it will direct to the reset password page,wherein it will reset  the user password and re login the mentor to its input information page
       if (password == "mentor2025") {
-        await auth.loginUserWithEmailandPassword(email, password);
+        final userCredential = await FirebaseAuth.instance
+            .signInWithEmailAndPassword(email: email, password: password);
+
         Navigator.push(
-            Get.context!, MaterialPageRoute(builder: (context) => Welcome()));
+            Get.context!, MaterialPageRoute(builder: (context) => ResetPass()));
         isLoading.value = false;
         return;
       }
-
       await auth.loginUserWithEmailandPassword(email, password);
+
       isLoading.value = false;
-    } on AuthException catch (e) {
+    } on FirebaseAuthException catch (e) {
       isLoading.value = false;
       if (Get.context != null) {
         ScaffoldMessenger.of(Get.context!).showSnackBar(
           SnackBar(
             content: AwesomeSnackbarContent(
               title: 'Login Error',
-              message: e.message,
+              message: e.message!,
               contentType: ContentType.failure,
             ),
             width: MediaQuery.of(Get.context!).size.width,
@@ -70,13 +71,32 @@ class LoginController extends GetxController {
       }
     } catch (e) {
       isLoading.value = false;
-      if (Get.context != null) {
+    }
+  }
+
+  Future<void> googleSignIn() async {
+    try {
+      isGoogleLoading.value = true;
+      await FirebaseAuth.instance.setLanguageCode('en');
+      await auth.sigInWithGoogle();
+      await Future.delayed(Duration(seconds: 3));
+      final firestore = FirestoreInstance();
+      final apiIDs = await firestore.getAPIId();
+
+      if (auth.firebaseUser.value != null) {
+        if (apiIDs.contains(auth.firebaseUser.value?.uid)) {
+          Get.offAllNamed(MRoutes.splash);
+          return;
+        }
+        await firestore.setUserFromGoogle(Rx<User>(auth.firebaseUser.value!));
+
+        Get.offAllNamed(MRoutes.splash);
         ScaffoldMessenger.of(Get.context!).showSnackBar(
           SnackBar(
             content: AwesomeSnackbarContent(
-              title: 'Unexpected Error',
-              message: 'An unexpected error occurred. Please try again.',
-              contentType: ContentType.failure,
+              title: 'Welcome back!',
+              message: "You have sucessfully log in your Google account!",
+              contentType: ContentType.success,
             ),
             width: MediaQuery.of(Get.context!).size.width,
             behavior: SnackBarBehavior.floating,
@@ -84,47 +104,6 @@ class LoginController extends GetxController {
             elevation: 0,
           ),
         );
-      }
-    }
-  }
-
-  Future<void> googleSignIn() async {
-    try {
-      isGoogleLoading.value = true;
-      await auth.signInWithGoogle();
-      await Future.delayed(Duration(seconds: 3));
-      print('User: ${auth.supabaseUser.value}');
-      final supabaseInstance = SupabaseInstance();
-      final apiIDs = await supabaseInstance.getAPIId();
-
-      if (auth.supabaseUser.value != null) {
-        print('API IDs: $apiIDs');
-        if (apiIDs.contains(auth.supabaseUser.value?.id)) {
-          Get.offAllNamed(MRoutes.splash);
-          return;
-        }
-        print('User ID: ${auth.supabaseUser.value?.id}');
-        await supabaseInstance
-            .setUserFromGoogle(Rx<User?>(auth.supabaseUser.value!));
-        print('done');
-        Get.offAllNamed(MRoutes.splash);
-
-        if (Get.context != null) {
-          ScaffoldMessenger.of(Get.context!).showSnackBar(
-            SnackBar(
-              content: AwesomeSnackbarContent(
-                title: 'Welcome back!',
-                message:
-                    "You have successfully logged in with your Google account!",
-                contentType: ContentType.success,
-              ),
-              width: MediaQuery.of(Get.context!).size.width,
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: Colors.transparent, // Makes it seamless
-              elevation: 0,
-            ),
-          );
-        }
       } else {
         Get.snackbar('Error', "User is null");
       }
@@ -132,21 +111,6 @@ class LoginController extends GetxController {
       isGoogleLoading.value = false;
     } catch (e) {
       isGoogleLoading.value = false;
-      if (Get.context != null) {
-        ScaffoldMessenger.of(Get.context!).showSnackBar(
-          SnackBar(
-            content: AwesomeSnackbarContent(
-              title: 'Google Sign-In Error',
-              message: 'An error occurred while signing in with Google.',
-              contentType: ContentType.failure,
-            ),
-            width: MediaQuery.of(Get.context!).size.width,
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.transparent, // Makes it seamless
-            elevation: 0,
-          ),
-        );
-      }
     }
   }
 }

@@ -382,6 +382,16 @@ class AuthenticationRepository extends GetxController {
     }
   }
 
+  Future<void> updateUsername(String username, String uid) async {
+    try {
+      await _supabase.from('users').upsert({
+        'accountUsername': username,
+      }).eq('accountApiID', uid);
+    } catch (e) {
+      Get.snackbar("Error", e.toString());
+    }
+  }
+
   Future<void> resetMentorPassword(TextEditingController password) async {
     try {
       final user = _supabase.auth.currentUser;

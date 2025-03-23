@@ -1,10 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:voyager/src/features/authentication/screens/welcome/welcome.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:voyager/src/features/authentication/controllers/user_role_enum.dart';
 import 'package:voyager/src/features/authentication/screens/email_verification/email_verification.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:voyager/src/repository/supabase_repository/supabase_instance.dart';
+import 'package:voyager/src/features/mentee/screens/mentee_home.dart';
+import 'package:voyager/src/features/mentor/screens/input_information/mentor_info1.dart';
+import 'package:voyager/src/features/mentor/screens/mentor_dashboard.dart';
+import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 
 class MRouteMiddleware extends GetMiddleware {
   @override
@@ -28,17 +31,15 @@ class MRouteMiddleware extends GetMiddleware {
             Get.context!, MaterialPageRoute(builder: (context) => Welcome()));
         return;
       }
-      print(user.emailVerified);
       if (user.emailVerified == false) {
-        print('im isnizdse');
         Get.offAll(() => EmailVerification());
         return;
       }
-      final firestore = SupabaseInstance();
+      final firestore = FirestoreInstance();
       // Check authentication state
       final userDetails = await firestore.getUser(user.uid);
 
-      // Handle email verification+
+      // Handle email verification
 
       // Navigate based on user role
 
@@ -46,7 +47,7 @@ class MRouteMiddleware extends GetMiddleware {
         case UserRoleEnum.mentee:
           if (Get.context != null) {
             Navigator.pushReplacement(Get.context!,
-                MaterialPageRoute(builder: (context) => Welcome()));
+                MaterialPageRoute(builder: (context) => MenteeHome()));
           }
           break;
         case UserRoleEnum.mentor:
@@ -54,10 +55,10 @@ class MRouteMiddleware extends GetMiddleware {
             final accountIDs = await firestore.getMentorApPIIds();
             if (!accountIDs.contains(user.uid)) {
               Navigator.pushReplacement(Get.context!,
-                  MaterialPageRoute(builder: (context) => Welcome()));
+                  MaterialPageRoute(builder: (context) => MentorInfo1()));
             } else {
               Navigator.pushReplacement(Get.context!,
-                  MaterialPageRoute(builder: (context) => Welcome()));
+                  MaterialPageRoute(builder: (context) => MentorDashboard()));
             }
           }
           break;

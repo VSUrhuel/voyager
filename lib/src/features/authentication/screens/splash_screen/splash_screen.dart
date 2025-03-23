@@ -1,5 +1,5 @@
-import 'package:voyager/src/repository/authentication-repository/supabase_auth_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:voyager/src/repository/authentication_repository_firebase/authentication_repository.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -12,7 +12,7 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
-    final auth = AuthenticationRepository();
+    final auth = FirebaseAuthenticationRepository();
     return Scaffold(
       body: Center(
           child: Column(
