@@ -39,7 +39,7 @@ class AdminMentorCard extends StatelessWidget {
               height: screenHeight * 0.09,
               width: screenWidth * 0.9,
               child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-                Container(
+                SizedBox(
                   width: screenWidth * 0.2,
                   child: Icon(
                     Icons.person,
