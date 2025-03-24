@@ -1,7 +1,7 @@
+import 'package:voyager/src/features/mentor/screens/profile/mentor_profile.dart';
 import 'package:voyager/src/features/mentor/screens/session/session.dart';
 import 'package:flutter/material.dart';
 import 'package:voyager/src/features/mentor/screens/home/mentor_home.dart';
-import 'package:voyager/src/features/mentor/screens/profile/profile.dart';
 import 'package:voyager/src/widgets/bottom_nav_bar_mentor.dart';
 import 'package:voyager/src/features/mentor/screens/post/post.dart';
 
@@ -19,7 +19,7 @@ class _MentorDashboardState extends State<MentorDashboard> {
     MentorHome(),
     Post(),
     Session(),
-    ProfileMentor(),
+    MentorProfile(),
   ];
 
   void _onItemTapped(int index) {

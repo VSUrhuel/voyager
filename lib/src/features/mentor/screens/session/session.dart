@@ -1,5 +1,5 @@
 import 'package:voyager/src/features/mentor/screens/post/create_post.dart';
-import 'package:voyager/src/features/mentor/screens/profile/profile.dart';
+import 'package:voyager/src/features/mentor/screens/session/calendar.dart';
 import 'package:voyager/src/features/mentor/widget/toggle_button.dart';
 import 'package:voyager/src/widgets/custom_page_route.dart';
 import 'package:flutter/material.dart';
@@ -60,7 +60,7 @@ class Session extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    CustomPageRoute(page: ProfileMentor()),
+                    CustomPageRoute(page: CalendarView()),
                   );
                   // Handle notification tap
                 },
