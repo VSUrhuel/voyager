@@ -234,6 +234,32 @@ class FirestoreInstance {
     }
   }
 
+  Future<List<MentorModel>> getMentorsThroughStatus(String status) async {
+    try {
+      final mentor = await _db
+          .collection('mentors')
+          .where('mentorStatus', isEqualTo: status)
+          .get();
+      return mentor.docs
+          .map((doc) => MentorModel.fromJson(doc.data()))
+          .toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<UserModel> getUserThroughAccId(String accId) async {
+    try {
+      final user = await _db
+          .collection('users')
+          .where('accountApiID', isEqualTo: accId)
+          .get();
+      return UserModel.fromJson(user.docs.first.data());
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<List<UserModel>> getMentees(String status) async {
     try {
       final menteeAllocations = await _db
