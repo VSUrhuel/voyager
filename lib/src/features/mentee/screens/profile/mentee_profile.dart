@@ -20,19 +20,25 @@ class MenteeProfile extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () {},
+          title: Padding(
+            padding: EdgeInsets.only(
+                top: screenHeight * 0.035,
+                left: screenHeight * 0.01), // Add padding to the left
+            child: Text(
+              'My Profile',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: screenHeight * 0.037, // Adjust font size as needed
+                fontWeight: FontWeight.bold, // Bold
+              ),
+            ),
           ),
-          title: const Text(
-            "My Profile",
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-          ),
-          centerTitle: true,
+          centerTitle: false,
         ),
         body: Container(
             child: Column(
           children: [
+            SizedBox(height: screenHeight * 0.025),
             Profile(role: 'mentee'),
             SizedBox(height: screenHeight * 0.03),
             Row(

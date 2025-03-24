@@ -1,6 +1,7 @@
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/screens/home/course_offered.dart';
 import 'package:voyager/src/features/mentee/screens/home/mentors_list.dart';
+import 'package:voyager/src/features/mentee/screens/home/notification.dart';
 import 'package:voyager/src/features/mentee/widgets/course_card.dart';
 import 'package:voyager/src/features/mentee/widgets/mentor_card.dart';
 import 'package:voyager/src/repository/authentication_repository_firebase/authentication_repository.dart';
@@ -76,12 +77,25 @@ class MenteeHome extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: CircleAvatar(
-              backgroundColor: Colors.grey[200],
-              child: IconButton(
-                icon: Icon(Icons.notifications_none, color: Colors.black),
-                onPressed: () {},
-              ),
-            ),
+                backgroundColor: Colors.grey[200],
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => NotificationScreen()));
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Colors.blue,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    textStyle: const TextStyle(fontSize: 16),
+                  ),
+                  child: Center(
+                    child: Icon(Icons.notifications_none, color: Colors.black),
+                  ),
+                )),
           ),
         ],
       ),
