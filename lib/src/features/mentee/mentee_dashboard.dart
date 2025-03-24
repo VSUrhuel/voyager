@@ -1,5 +1,7 @@
 import 'package:voyager/src/features/mentee/screens/home/mentee_home.dart';
+import 'package:voyager/src/features/mentee/screens/post/post.dart';
 import 'package:voyager/src/features/mentee/screens/profile/mentee_profile.dart';
+import 'package:voyager/src/features/mentee/screens/session/session.dart';
 import 'package:voyager/src/widgets/bottom_nav_bar_mentor.dart';
 import 'package:flutter/material.dart';
 
@@ -15,8 +17,8 @@ class _MenteeDashboardState extends State<MenteeDashboard> {
 
   final List<Widget> _screens = [
     MenteeHome(),
-    Scaffold(body: Center(child: Text('Post Page'))),
-    Scaffold(body: Center(child: Text('Session Page'))),
+    Post(),
+    Session(),
     MenteeProfile(),
   ];
 

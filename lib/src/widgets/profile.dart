@@ -21,10 +21,31 @@ class Profile extends StatelessWidget {
     }
   }
 
+  String formatName(String fullName) {
+    List<String> nameParts = fullName.split(" ");
+
+    if (nameParts.length < 2)
+      return fullName; // Return as is if there's no last name
+
+    // Get the last name and format it properly (capitalize first letter, rest lowercase)
+    String lastName = nameParts.last[0].toUpperCase() +
+        nameParts.last.substring(1).toLowerCase();
+
+    // Convert all given names (except last) to initials
+    String initials = nameParts
+        .sublist(0, nameParts.length - 1)
+        .map((name) =>
+            "${name[0].toUpperCase()}.") // Get first letter and add '.'
+        .join(" "); // Join initials with space
+
+    return "$initials $lastName"; // Combine initials and formatted last name
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     User? user = FirebaseAuth.instance.currentUser;
+    String formattedName = formatName(user?.displayName ?? '');
     String profileImageURL =
         user?.photoURL ?? 'assets/images/application_images/profile.png';
     return Container(
@@ -49,7 +70,7 @@ class Profile extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  '${user?.displayName}',
+                  formattedName,
                   style: TextStyle(
                     fontSize: screenWidth * 0.05,
                     fontWeight: FontWeight.bold,
