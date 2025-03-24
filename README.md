@@ -5,6 +5,16 @@ Development of a Mobile-based Mentorship Application using Flutter for Computer 
 | Internal Release Code | Date Released |
 | --------------------- | ------------- |
 | VG.010.001            | 2025-03-12    |
+| VG.010.002            | 2025-03-24    |
+
+## VG.010.002 Release Notes
+- Migrated back to Firebase for Authentication, Supabase for storage 
+- UI Updates for Admin, Mentor, and Mentee interfaces
+- Set up the authentication for users
+- **Commit Messages**
+- Add admin interface
+- Migrate from Supabase Auth to Firebase Auth
+- Ensure password-based authentication during user registration
 
 ## VG.010.001 Release Notes
 - Added assets and Supabase configuration  
@@ -16,7 +26,6 @@ Development of a Mobile-based Mentorship Application using Flutter for Computer 
 - Improve README.md formatting  
 - Set up Supabase and integrate with main.dart  
 - Simplify and standardize theme design  
-
 
 ## VG.010.000 Release Notes
 - [MD03] Update mockup image links to remove token dependency
