@@ -38,26 +38,6 @@ class MenteeList extends StatelessWidget {
                   bottom: screenHeight * 0.02,
                   right: screenWidth * 0.05),
               child: StatusToggleButton()),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.only(
-                    left: screenWidth * 0.05, right: screenWidth * 0.05),
-                child: Center(
-                  child: Column(children: [
-                    Text(
-                      'No more requests',
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: screenWidth * 0.03,
-                      ),
-                    ),
-                    SizedBox(height: screenHeight * 0.02),
-                  ]),
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );

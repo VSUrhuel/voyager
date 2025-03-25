@@ -58,7 +58,9 @@ class _StatusToggleButtonState extends State<StatusToggleButton> {
       selectedIndex == 0
           ? AcceptedList()
           : selectedIndex == 1
-              ? PendingList()
+              ? PendingList(
+                  isMentorHome: false,
+                )
               : RejectedList()
     ]);
   }

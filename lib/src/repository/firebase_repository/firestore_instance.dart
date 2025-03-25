@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -126,6 +127,18 @@ class FirestoreInstance {
     }
   }
 
+  Future<MentorModel> getMentorThroughAccId(String accId) async {
+    try {
+      final mentor = await _db
+          .collection('mentors')
+          .where('accountId', isEqualTo: accId)
+          .get();
+      return MentorModel.fromJson(mentor.docs.first.data());
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<String> getMentorID(String userId) async {
     try {
       final mentor = await _db
@@ -243,6 +256,63 @@ class FirestoreInstance {
       return mentor.docs
           .map((doc) => MentorModel.fromJson(doc.data()))
           .toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> updateMentorStatus(String mentorId, String status) async {
+    try {
+      await _db.collection('mentors').doc(mentorId).update({
+        'mentorStatus': status,
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<String> getMenteeId(String accountId) async {
+    try {
+      final mentee = await _db
+          .collection('mentee')
+          .where('accountId', isEqualTo: accountId)
+          .get();
+      if (mentee.docs.isNotEmpty) {
+        return mentee.docs.first.id;
+      } else {
+        throw Exception('Mentee not found');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> updateMennteeAlocStatus(
+      String courseAllocId, String menteeId, String status) async {
+    try {
+      await _db
+          .collection('menteeCourseAlloc')
+          .where('courseMentorId', isEqualTo: courseAllocId)
+          .where('menteeId', isEqualTo: menteeId)
+          .get()
+          .then((querySnapshot) {
+        for (var doc in querySnapshot.docs) {
+          doc.reference.update({'mcaAllocStatus': status});
+        }
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<String> getCourseMentorId(String mentorId) async {
+    try {
+      final courseMentor = await _db
+          .collection('courseMentor')
+          .where("mentorId", isEqualTo: mentorId)
+          .get();
+      return CourseMentorModel.fromJson(courseMentor.docs.first.data())
+          .courseMentorId;
     } catch (e) {
       rethrow;
     }
