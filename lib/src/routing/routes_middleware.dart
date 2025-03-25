@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:voyager/src/features/admin/screens/admin_home.dart';
+import 'package:voyager/src/features/admin/screens/admin_dashboard.dart';
+// import 'package:voyager/src/features/admin/screens/admin_home.dart';
 import 'package:voyager/src/features/authentication/screens/welcome/welcome.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -66,7 +67,7 @@ class MRouteMiddleware extends GetMiddleware {
         case UserRoleEnum.admin:
           if (Get.context != null) {
             Navigator.pushReplacement(Get.context!,
-                MaterialPageRoute(builder: (context) => AdminHome()));
+                MaterialPageRoute(builder: (context) => AdminDashboard()));
           }
           break;
         default:
