@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:voyager/src/features/mentor/screens/session/completed.dart';
+import 'package:voyager/src/features/mentor/screens/session/upcoming.dart';
 
 class ToggleButton extends StatefulWidget {
   const ToggleButton({super.key});
@@ -9,11 +11,13 @@ class ToggleButton extends StatefulWidget {
 
 class _ToggleButtonState extends State<ToggleButton> {
   int _selectedIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     return Center(
-      child: Container(
+        child: Column(children: [
+      Container(
         width: screenWidth * 0.9,
         padding: EdgeInsets.all(10),
         decoration: BoxDecoration(
@@ -57,6 +61,8 @@ class _ToggleButtonState extends State<ToggleButton> {
           ],
         ),
       ),
-    );
+      SizedBox(height: screenWidth * 0.04),
+      _selectedIndex == 0 ? CompletedSession() : UpcomingSession(),
+    ]));
   }
 }

@@ -48,7 +48,7 @@ class Task extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Container(
+                      SizedBox(
                           width: screenWidth * 0.62,
                           child: Text(
                             taskDescription,

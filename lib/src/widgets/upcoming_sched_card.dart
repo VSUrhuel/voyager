@@ -36,8 +36,9 @@ class UpcomingSchedCard extends StatelessWidget {
 String formatName(String fullName) {
   List<String> nameParts = fullName.split(" ");
 
-  if (nameParts.length < 2)
+  if (nameParts.length < 2) {
     return fullName; // Return as is if there's no last name
+  }
 
   // The last name is always the last word in the full name
   String lastName = nameParts.last;
@@ -45,7 +46,7 @@ String formatName(String fullName) {
   // Convert all given names (except last) to initials
   String initials = nameParts
       .sublist(0, nameParts.length - 1)
-      .map((name) => name[0] + ".") // Get first letter and add '.'
+      .map((name) => "${name[0]}.") // Get first letter and add '.'
       .join(" "); // Join initials with space
 
   return "$initials $lastName"; // Combine initials and last name

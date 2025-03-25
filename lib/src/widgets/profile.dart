@@ -24,8 +24,9 @@ class Profile extends StatelessWidget {
   String formatName(String fullName) {
     List<String> nameParts = fullName.split(" ");
 
-    if (nameParts.length < 2)
+    if (nameParts.length < 2) {
       return fullName; // Return as is if there's no last name
+    }
 
     // Get the last name and format it properly (capitalize first letter, rest lowercase)
     String lastName = nameParts.last[0].toUpperCase() +
