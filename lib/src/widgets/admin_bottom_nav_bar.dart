@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 
 class AdminBottomNavBar extends StatefulWidget {
-  const AdminBottomNavBar({super.key});
+  final int currentIndex;
+  final Function(int) onTabChange;
+
+  const AdminBottomNavBar({
+    super.key,
+    required this.currentIndex,
+    required this.onTabChange,
+    });
 
   @override
   State<AdminBottomNavBar> createState() => _AdminBottomNavBarState();
