@@ -1,6 +1,5 @@
 import 'package:voyager/src/features/mentee/widgets/normal_searchBar.dart';
 import 'package:voyager/src/features/mentee/widgets/small_mentor_card.dart';
-import 'package:voyager/src/widgets/bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 
 class MentorsList extends StatelessWidget {

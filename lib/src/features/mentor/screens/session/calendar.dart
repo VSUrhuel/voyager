@@ -4,9 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:voyager/src/features/mentor/widget/task.dart';
 import 'package:voyager/src/widgets/custom_text_field.dart';
+import 'package:voyager/src/widgets/time.dart';
 
 class CalendarView extends StatefulWidget {
-  CalendarView({super.key});
+  const CalendarView({super.key});
 
   @override
   State<CalendarView> createState() => _CalendarViewState();
@@ -21,7 +22,7 @@ class _CalendarViewState extends State<CalendarView> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    Future<void> _showMyDialog() async {
+    Future<void> showMyDialog() async {
       return showDialog<void>(
         context: context,
         barrierDismissible: false, // user must tap button!
@@ -44,6 +45,34 @@ class _CalendarViewState extends State<CalendarView> {
                     fieldWidth: screenWidth * 0.8,
                     fontSize: screenWidth * 0.04,
                   ),
+                  Padding(
+                    padding: EdgeInsets.only(top: screenHeight * 0.0),
+                    child: Text(
+                      'Time of the Day',
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        fontSize: screenWidth * 0.04,
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        TimePicker(
+                          titleLabel: "Start Time",
+                          controller: TextEditingController(),
+                        ),
+
+                        // Add spacing between the pickers
+                        TimePicker(
+                            titleLabel: "End Time",
+                            controller: TextEditingController()),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
                   TextFormField(
                     style: TextStyle(
                       fontSize: screenWidth * 0.04,
@@ -104,9 +133,27 @@ class _CalendarViewState extends State<CalendarView> {
     }
 
     return Scaffold(
+      appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        scrolledUnderElevation: 0,
+        foregroundColor: Colors.black,
+        backgroundColor: Colors.transparent,
+        automaticallyImplyLeading: false,
+        toolbarHeight: screenHeight * 0.04,
+        elevation: 0, // No shadow
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: Colors.black,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
       body: Column(
         children: [
-          SizedBox(height: screenHeight * 0.04),
+          SizedBox(height: screenHeight * 0.0),
           TableCalendar(
             firstDay: DateTime.utc(2020, 10, 16),
             lastDay: DateTime.utc(2030, 3, 14),
@@ -260,7 +307,7 @@ class _CalendarViewState extends State<CalendarView> {
                     right: 20,
                     child: GestureDetector(
                       onTap: () {
-                        _showMyDialog();
+                        showMyDialog();
                       },
                       child: Container(
                         padding: EdgeInsets.symmetric(

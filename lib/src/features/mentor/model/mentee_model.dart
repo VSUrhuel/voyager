@@ -1,6 +1,6 @@
 class MenteeModel {
   final String accountId;
-  final String menteeMcaId;
+  final List<String> menteeMcaId;
   final String menteeYearLvl;
 
   MenteeModel({
@@ -12,7 +12,9 @@ class MenteeModel {
   factory MenteeModel.fromJson(Map<String, dynamic> json) {
     return MenteeModel(
       accountId: json['accountId'] ?? '',
-      menteeMcaId: json['menteeMcaId'] ?? '',
+      menteeMcaId: json['menteeMcaId'] != null
+          ? List<String>.from(json['menteeMcaId'] as List)
+          : [], // Ensure it is always a List<String>
       menteeYearLvl: json['menteeYearLvl'] ?? '',
     );
   }

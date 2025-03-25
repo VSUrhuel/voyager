@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:voyager/src/features/mentee/screens/home/enroll_course.dart';
 
 class CourseCard extends StatelessWidget {
   const CourseCard({
@@ -141,7 +142,13 @@ class CourseCard extends StatelessWidget {
                       width: screenWidth * 0.03,
                     ),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        //Initialize enrollment page
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => EnrollCourse()));
+                      },
                       child: Text("Enroll Now"),
                     )
                   ],

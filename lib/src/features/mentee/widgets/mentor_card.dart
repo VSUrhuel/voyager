@@ -1,5 +1,7 @@
-import 'package:voyager/src/features/mentee/widgets/skills_display.dart';
 import 'package:flutter/material.dart';
+import 'package:voyager/src/features/mentee/screens/home/mentor_profile.dart';
+import 'package:voyager/src/features/mentee/widgets/skills_display.dart';
+// Import your MentorProfilePage
 
 class MentorCard extends StatelessWidget {
   const MentorCard({super.key});
@@ -8,152 +10,147 @@ class MentorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    return Card(
-      color: Colors.white,
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(
-          Radius.circular(10),
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const MentorProfilePage()),
+        );
+      },
+      child: Card(
+        color: Colors.white,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
         ),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(0.0),
-        child: Column(
-          children: [
-            Container(
-              //Upper Display
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  // Use DecorationImage
-                  image: AssetImage(
-                      'assets/images/application_images/profile.png'), // Use AssetImage
-                  fit: BoxFit
-                      .fitWidth, // Or BoxFit.contain, or other BoxFit options
+        child: Padding(
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              // Upper Display (Profile Image)
+              Container(
+                decoration: BoxDecoration(
+                  image: const DecorationImage(
+                    image: AssetImage(
+                        'assets/images/application_images/profile.png'),
+                    fit: BoxFit.fitWidth,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.black,
                 ),
-                borderRadius: BorderRadius.all(
-                  Radius.circular(10), // Bottom left corner
-                ),
-                color: Colors.black,
+                width: screenWidth * 0.6,
+                height: screenHeight * 0.22,
               ),
-              width: screenWidth * 0.6,
-              height: screenHeight * 0.22,
-            ),
-            //Container for details
-            SizedBox(
-              height: screenHeight * 0.01,
-            ),
-            SizedBox(
-              width: screenWidth * 0.5,
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: screenWidth * 0.18, // Adjust width as needed
-                        height: screenHeight * 0.035, // Adjust height as needed
-                        child: Container(
+
+              SizedBox(height: screenHeight * 0.01),
+
+              // Mentor Details
+              SizedBox(
+                width: screenWidth * 0.5,
+                child: Column(
+                  children: [
+                    // Year Badge
+                    Row(
+                      children: [
+                        Container(
+                          width: screenWidth * 0.18,
+                          height: screenHeight * 0.035,
                           decoration: BoxDecoration(
-                            color: Color(
-                                0xFF52CA82), // Light Green Color (adjust as needed)
-                            borderRadius: BorderRadius.circular(
-                                20), // Half of height for pill shape
-                            boxShadow: [
-                              // Add shadow for depth
-                            ],
+                            color: const Color(0xFF52CA82),
+                            borderRadius: BorderRadius.circular(20),
                           ),
                           child: Center(
-                            // Center the text within the container
                             child: Text(
                               "3rd Year",
                               style: TextStyle(
                                 fontSize: screenWidth * 0.03,
-                                color: Colors.white, // Text color
-                                fontWeight: FontWeight
-                                    .bold, // Adjust font weight as needed
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: screenHeight * 0.0,
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        "Francis Mark B.",
-                        style: TextStyle(
+                      ],
+                    ),
+
+                    SizedBox(height: screenHeight * 0.005),
+
+                    // Mentor Name
+                    Row(
+                      children: [
+                        Text(
+                          "Francis Mark B.",
+                          style: TextStyle(
                             fontSize: screenWidth * 0.055,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: screenHeight * 0.005,
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        "CS mentor since 2023",
-                        style: TextStyle(
-                          fontSize: screenWidth * 0.035,
-                          fontWeight: FontWeight.w300, // Make the font bold
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      )
-                    ],
-                  ),
-                  SizedBox(
-                    height: screenHeight * 0.005,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SkillsDisplay(
-                        color: Colors.blue.shade300,
-                        text: Text("Mentor"),
-                        width: 0.2,
-                        height: 0.035,
-                      ),
-                      SizedBox(
-                        width: screenWidth * 0.04,
-                      ),
-                      SkillsDisplay(
-                        color: Colors.grey.shade300,
-                        text: Text("Mentor"),
-                        width: 0.2,
-                        height: 0.035,
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SkillsDisplay(
-                        color: Colors.grey.shade300,
-                        text: Text("Mentor"),
-                        width: 0.2,
-                        height: 0.035,
-                      ),
-                      SizedBox(
-                        width: screenWidth * 0.04,
-                      ),
-                      SkillsDisplay(
-                        color: Colors.grey.shade300,
-                        text: Text("Mentor"),
-                        width: 0.2,
-                        height: 0.035,
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+
+                    SizedBox(height: screenHeight * 0.005),
+
+                    // Mentor Info
+                    Row(
+                      children: [
+                        Text(
+                          "CS mentor since 2023",
+                          style: TextStyle(
+                            fontSize: screenWidth * 0.035,
+                            fontWeight: FontWeight.w300,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: screenHeight * 0.005),
+
+                    // Skills Display
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        SkillsDisplay(
+                          color: Colors.blue.shade300,
+                          text: const Text("Mentor"),
+                          width: 0.2,
+                          height: 0.035,
+                        ),
+                        SizedBox(width: screenWidth * 0.04),
+                        SkillsDisplay(
+                          color: Colors.grey.shade300,
+                          text: const Text("Mentor"),
+                          width: 0.2,
+                          height: 0.035,
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: 10),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        SkillsDisplay(
+                          color: Colors.grey.shade300,
+                          text: const Text("Mentor"),
+                          width: 0.2,
+                          height: 0.035,
+                        ),
+                        SizedBox(width: screenWidth * 0.04),
+                        SkillsDisplay(
+                          color: Colors.grey.shade300,
+                          text: const Text("Mentor"),
+                          width: 0.2,
+                          height: 0.035,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

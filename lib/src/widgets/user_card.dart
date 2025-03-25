@@ -1,10 +1,53 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:flutter/material.dart';
+import 'package:voyager/src/features/mentor/model/mentor_model.dart';
+import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 
 class UserCard extends StatelessWidget {
-  const UserCard({super.key, required this.user});
+  UserCard(
+      {super.key,
+      required this.user,
+      required this.height,
+      required this.actions,
+      required this.onActionCompleted});
 
   final UserModel user;
+  final double height;
+  final List<String> actions;
+  final VoidCallback? onActionCompleted;
+
+  FirestoreInstance firestore = FirestoreInstance();
+
+  Future<void> updateStatus(UserModel user, String status) async {
+    MentorModel mentor = await firestore
+        .getMentorThroughAccId(FirebaseAuth.instance.currentUser!.uid);
+    String courseMentorId = await firestore.getCourseMentorId(mentor.mentorId);
+    String menteeId = await firestore.getMenteeId(user.accountApiID);
+    await firestore.updateMennteeAlocStatus(courseMentorId, menteeId, status);
+    Future.delayed(const Duration(seconds: 3));
+  }
+
+  Future<void> approveMentee(UserModel user) async {
+    //get ID sa mentor
+    //get courseAlloc of the mentor
+    //modify the menteeCourseAlloc status with the same courseAlloc and menteeID
+
+    MentorModel mentor = await firestore
+        .getMentorThroughAccId(FirebaseAuth.instance.currentUser!.uid);
+    print(mentor.mentorId);
+    String courseMentorId = await firestore.getCourseMentorId(mentor.mentorId);
+
+    String menteeId = await firestore.getMenteeId(user.accountApiID);
+    await firestore.updateMennteeAlocStatus(
+        courseMentorId, menteeId, 'approved');
+  }
+
+  Future<void> rejectMentee(UserModel user) async {}
+
+  Future<void> removeMentee(UserModel user) async {}
+
+  Future<void> blockMentee(UserModel user) async {}
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +92,7 @@ class UserCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  user.accountApiName ?? 'no-name-provided',
+                  user.accountApiName,
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: screenHeight * 0.02,
@@ -57,7 +100,7 @@ class UserCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  user.accountApiEmail ?? 'no-email-provided',
+                  user.accountApiEmail,
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: screenHeight * 0.016,
@@ -66,7 +109,7 @@ class UserCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  user.accountStudentId ?? 'no-student-id-provided',
+                  user.accountStudentId,
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: screenHeight * 0.015,
@@ -78,30 +121,35 @@ class UserCard extends StatelessWidget {
           ),
 
           // More options button
-          PopupMenuButton<String>(
-            icon: Icon(
-              Icons.more_vert,
-              color: Colors.black,
-              size: screenHeight * 0.035,
-            ),
-            onSelected: (value) {
-              if (value == 'accept') {
-                showMessage(context, 'Accepted');
-              } else if (value == 'reject') {
-                showMessage(context, 'Rejected');
-              }
-            },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              PopupMenuItem<String>(
-                value: 'accept',
-                child: Text('Accept'),
-              ),
-              PopupMenuItem<String>(
-                value: 'reject',
-                child: Text('Reject'),
-              ),
-            ],
-          ),
+          actions.isEmpty
+              ? const SizedBox()
+              : PopupMenuButton<String>(
+                  icon: Icon(
+                    Icons.more_vert,
+                    color: Colors.black,
+                    size: screenHeight * 0.035,
+                  ),
+                  onSelected: (value) async {
+                    if (value == 'Accept') {
+                      await updateStatus(user, 'accepted');
+
+                      showMessage(context, 'Accepted');
+                    } else if (value == 'Reject') {
+                      await updateStatus(user, 'rejected');
+                      showMessage(context, 'Rejected');
+                    } else if (value == 'Remove') {
+                      await updateStatus(user, 'removed');
+                      showMessage(context, 'Removed');
+                    }
+                    onActionCompleted!.call();
+                  },
+                  itemBuilder: (BuildContext context) => List.generate(
+                      actions.length,
+                      (index) => PopupMenuItem<String>(
+                            value: actions[index],
+                            child: Text(actions[index]),
+                          )) as List<PopupMenuEntry<String>>,
+                ),
         ],
       ),
     );
