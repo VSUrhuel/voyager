@@ -1,8 +1,7 @@
-import 'package:voyager/src/features/admin/screens/mentor_list.dart';
+import 'package:voyager/src/features/admin/screens/mentors/mentor_list.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/repository/authentication_repository_firebase/authentication_repository.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
-import 'package:voyager/src/widgets/admin_bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
@@ -161,6 +160,6 @@ class AdminHome extends StatelessWidget {
             ],
           ),
         ),
-        bottomNavigationBar: SafeArea(child: AdminBottomNavBar()));
+      );
   }
 }

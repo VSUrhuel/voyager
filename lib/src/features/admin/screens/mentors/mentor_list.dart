@@ -2,7 +2,6 @@ import 'package:voyager/src/features/admin/widgets/admin_mentor_card.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
-import 'package:voyager/src/widgets/admin_bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -144,7 +143,7 @@ class _MentorListState extends State<MentorList> {
             children: [
               SizedBox(
                 height: screenHeight * 0.05,
-                width: screenWidth * 0.9,
+                width: screenWidth * 0.95,
                 child: TextField(
                   onChanged: (value) {
                     setState(() {
@@ -170,7 +169,7 @@ class _MentorListState extends State<MentorList> {
                 children: [
                   SizedBox(
                       height: screenHeight * 0.030,
-                      width: screenWidth * 0.20,
+                      width: screenWidth * 0.18,
                       child: Builder(
                         builder: (context) {
                           String bg = '0xFFa6a2a2';
@@ -203,7 +202,7 @@ class _MentorListState extends State<MentorList> {
                   SizedBox(width: screenWidth * 0.03),
                   SizedBox(
                       height: screenHeight * 0.030,
-                      width: screenWidth * 0.22,
+                      width: screenWidth * 0.18,
                       child: Builder(
                         builder: (context) {
                           String bg = '0xFFa6a2a2';
@@ -236,7 +235,7 @@ class _MentorListState extends State<MentorList> {
                   SizedBox(width: screenWidth * 0.03),
                   SizedBox(
                       height: screenHeight * 0.030,
-                      width: screenWidth * 0.23,
+                      width: screenWidth * 0.19,
                       child: Builder(
                         builder: (context) {
                           String bg = '0xFFa6a2a2';
@@ -301,6 +300,6 @@ class _MentorListState extends State<MentorList> {
             ],
           ),
         ),
-        bottomNavigationBar: SafeArea(child: AdminBottomNavBar()));
+      );
   }
 }
