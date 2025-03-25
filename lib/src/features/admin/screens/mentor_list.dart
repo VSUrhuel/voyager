@@ -142,7 +142,7 @@ class _MentorListState extends State<MentorList> {
               EdgeInsets.only(top: screenHeight * 0.001, left: 30, right: 35),
           child: Column(
             children: [
-              Container(
+              SizedBox(
                 height: screenHeight * 0.05,
                 width: screenWidth * 0.9,
                 child: TextField(

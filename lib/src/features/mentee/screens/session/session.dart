@@ -1,10 +1,12 @@
 import 'package:voyager/src/features/mentor/screens/post/create_post.dart';
-import 'package:voyager/src/features/mentor/screens/session/calendar.dart';
+import 'package:voyager/src/features/mentor/screens/profile/profile.dart';
 import 'package:voyager/src/features/mentor/widget/toggle_button.dart';
+import 'package:voyager/src/widgets/completed_sched_card.dart';
 import 'package:voyager/src/widgets/custom_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:voyager/src/widgets/upcoming_sched_card.dart';
 
 class Session extends StatelessWidget {
   const Session({super.key});
@@ -60,29 +62,7 @@ class Session extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    CustomPageRoute(page: CalendarView()),
-                  );
-                  // Handle notification tap
-                },
-              ),
-            ),
-          ),
-          Padding(
-            padding:
-                const EdgeInsets.only(right: 16.0), // Add padding to the right
-            child: CircleAvatar(
-              // Adjust size as needed
-              radius: screenHeight * 0.03,
-              backgroundColor: Colors.grey[200], // Light grey background
-              child: IconButton(
-                icon: FaIcon(
-                  FontAwesomeIcons.plus,
-                  color: Colors.black,
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    CustomPageRoute(page: CreatePost()),
+                    CustomPageRoute(page: ProfileMentor()),
                   );
                   // Handle notification tap
                 },
@@ -100,6 +80,8 @@ class Session extends StatelessWidget {
                     top: screenHeight * 0.00),
                 child: Column(children: [
                   ToggleButton(),
+                  CompletedSchedCard(),
+                  UpcomingSchedCard()
                 ]))),
       ),
     );
