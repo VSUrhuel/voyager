@@ -4,6 +4,7 @@ import 'package:voyager/src/features/mentee/screens/home/mentors_list.dart';
 import 'package:voyager/src/features/mentee/screens/home/notification.dart';
 import 'package:voyager/src/features/mentee/widgets/course_card.dart';
 import 'package:voyager/src/features/mentee/widgets/mentor_card.dart';
+import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/repository/authentication_repository_firebase/authentication_repository.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/widgets/custom_button.dart';
@@ -14,30 +15,52 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class MenteeHome extends StatelessWidget {
+class MenteeHome extends StatefulWidget {
   const MenteeHome({super.key});
 
-  Future<UserModel?> getUserModel(String email) async {
+  @override
+  _MenteeHomeState createState() => _MenteeHomeState();
+}
+
+class _MenteeHomeState extends State<MenteeHome> {
+  final auth = Get.put(FirebaseAuthenticationRepository());
+  User? user = FirebaseAuth.instance.currentUser;
+  FirestoreInstance firestoreInstance = FirestoreInstance();
+
+  Future<List<MentorCard>> fetchMentorsWithDetails() async {
     try {
-      return await FirestoreInstance().getUserThroughEmail(email);
+      List<UserModel> users = await firestoreInstance.getMentors();
+
+      List<MentorModel> mentorDetails = await Future.wait(users.map((user) =>
+          firestoreInstance.getMentorThroughAccId(user.accountApiID)));
+
+      return List.generate(users.length, (index) {
+        return MentorCard(
+          mentorModel: mentorDetails[index],
+          user: users[index],
+        );
+      });
     } catch (e) {
-      return null;
+      print('Error fetching mentor details: $e');
+      return [];
     }
   }
 
   String getName(String? name) {
-    List names = name!.split(' ');
-    return names.sublist(0, names.length - 1).join(' ');
+    if (name == null || name.isEmpty) return "User";
+    List<String> names = name.split(' ');
+    return names.length > 1
+        ? names.sublist(0, names.length - 1).join(' ')
+        : name;
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final auth = Get.put(FirebaseAuthenticationRepository());
-    User? user = FirebaseAuth.instance.currentUser;
     String profileImageURL =
         user?.photoURL ?? 'assets/images/application_images/profile.png';
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -63,7 +86,7 @@ class MenteeHome extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Courses awaits you!',
+                  'Courses await you!',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 16,
@@ -78,145 +101,126 @@ class MenteeHome extends StatelessWidget {
             padding: const EdgeInsets.only(right: 16.0),
             child: CircleAvatar(
                 backgroundColor: Colors.grey[200],
-                child: TextButton(
+                child: IconButton(
+                  icon: Icon(Icons.notifications_none, color: Colors.black),
                   onPressed: () {
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => NotificationScreen()));
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => NotificationScreen()),
+                    );
                   },
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    foregroundColor: Colors.blue,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                    textStyle: const TextStyle(fontSize: 16),
-                  ),
-                  child: Center(
-                    child: Icon(Icons.notifications_none, color: Colors.black),
-                  ),
                 )),
           ),
         ],
       ),
       body: SingleChildScrollView(
         child: Padding(
-            padding: EdgeInsets.only(
-                left: screenWidth * 0.05, right: screenWidth * 0.05),
-            child: Center(
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+          child: Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Row(children: [
-                      Text(
-                        'Discover',
-                        style: TextStyle(
-                          fontSize: screenHeight * 0.04,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    Text(
+                      'Discover',
+                      style: TextStyle(
+                        fontSize: screenHeight * 0.04,
+                        fontWeight: FontWeight.bold,
                       ),
-                      SizedBox(
-                        width: screenWidth * 0.02,
+                    ),
+                    SizedBox(width: screenWidth * 0.02),
+                    Text(
+                      'Courses',
+                      style: TextStyle(
+                        fontSize: screenHeight * 0.04,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1877F2),
                       ),
-                      Text(
-                        'Courses',
-                        style: TextStyle(
-                          fontSize: screenHeight * 0.04,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF1877F2),
-                        ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: screenHeight * 0.01),
+                SearchBarWithDropdown(),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Featured Courses',
+                      style: TextStyle(
+                        fontSize: screenHeight * 0.02,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
-                    ]),
-                    SizedBox(height: screenHeight * 0.01),
-                    SearchBarWithDropdown(),
-                    SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Featured Courses',
-                          style: TextStyle(
-                            fontSize: screenHeight * 0.02,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => CourseOffered()));
-                          },
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            foregroundColor: Colors.blue,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            textStyle: const TextStyle(fontSize: 16),
-                          ),
-                          child: const Text('View All'),
-                        )
-                      ],
                     ),
-                    HorizontalWidgetSlider(
-                      widgets: [
-                        CourseCard(),
-                        CourseCard(),
-                        CourseCard(),
-                      ],
-                    ),
-                    SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Featured Mentors',
-                          style: TextStyle(
-                            fontSize: screenHeight * 0.02,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => MentorsList()));
-                          },
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            foregroundColor: Colors.blue,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            textStyle: const TextStyle(fontSize: 16),
-                          ),
-                          child: const Text('View All'),
-                        )
-                      ],
-                    ),
-                    HorizontalWidgetSliderMentor(
-                      widgets: [
-                        MentorCard(),
-                        MentorCard(),
-                        MentorCard(),
-                      ],
-                    ),
-                    SizedBox(height: 100),
-                    DefaultButton(
-                      buttonText: 'Logout',
-                      bgColor: Colors.red,
-                      textColor: Colors.white,
-                      isLoading: false,
-                      borderColor: Colors.transparent,
-                      onPressed: () async {
-                        await auth.logout();
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => CourseOffered()),
+                        );
                       },
+                      style: TextButton.styleFrom(foregroundColor: Colors.blue),
+                      child: const Text('View All'),
                     ),
-                  ]),
-            )),
+                  ],
+                ),
+                HorizontalWidgetSlider(
+                  widgets: [
+                    CourseCard(),
+                    CourseCard(),
+                    CourseCard(),
+                  ],
+                ),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Featured Mentors',
+                      style: TextStyle(
+                        fontSize: screenHeight * 0.02,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MentorsList()),
+                        );
+                      },
+                      style: TextButton.styleFrom(foregroundColor: Colors.blue),
+                      child: const Text('View All'),
+                    ),
+                  ],
+                ),
+                FutureBuilder<List<MentorCard>>(
+                  future: fetchMentorsWithDetails(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError ||
+                        !snapshot.hasData ||
+                        snapshot.data!.isEmpty) {
+                      return Center(child: Text("No mentors available"));
+                    }
+                    return HorizontalWidgetSliderMentor(
+                      widgets: snapshot.data!,
+                    );
+                  },
+                ),
+                SizedBox(height: 100),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
