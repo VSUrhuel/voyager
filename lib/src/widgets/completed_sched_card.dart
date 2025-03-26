@@ -36,20 +36,25 @@ class CompletedSchedCard extends StatelessWidget {
 String formatName(String fullName) {
   List<String> nameParts = fullName.split(" ");
 
-  if (nameParts.length < 2) {
-    return fullName; // Return as is if there's no last name
+  if (nameParts.isEmpty) return "";
+
+  if (nameParts.length == 1) {
+    // If there's only one name, capitalize the first letter and lowercase the rest
+    return nameParts[0][0].toUpperCase() +
+        nameParts[0].substring(1).toLowerCase();
   }
 
-  // The last name is always the last word in the full name
-  String lastName = nameParts.last;
+  // Extract last name and format it (capitalize first letter, lowercase the rest)
+  String lastName = nameParts.last[0].toUpperCase() +
+      nameParts.last.substring(1).toLowerCase();
 
   // Convert all given names (except last) to initials
   String initials = nameParts
       .sublist(0, nameParts.length - 1)
-      .map((name) => "${name[0]}.") // Get first letter and add '.'
-      .join(" "); // Join initials with space
+      .map((name) => name[0].toUpperCase()) // Get first letter as uppercase
+      .join(""); // Join initials
 
-  return "$initials $lastName"; // Combine initials and last name
+  return "$initials $lastName"; // Combine initials and formatted last name
 }
 
 class MeetingCard extends StatelessWidget {
