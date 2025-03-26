@@ -29,7 +29,7 @@ class _AcceptedListState extends State<AcceptedList> {
       return mentees;
     } catch (e) {
       print('Error fetching accepted mentees: $e');
-      throw e; // Re-throw to let FutureBuilder handle it
+      rethrow; // Re-throw to let FutureBuilder handle it
     }
   }
 
@@ -43,7 +43,7 @@ class _AcceptedListState extends State<AcceptedList> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    return Container(
+    return SizedBox(
         height: screenHeight * 0.6, // Limits to 25% of screen height
         child: SingleChildScrollView(
             child: Column(children: [

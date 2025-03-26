@@ -1,4 +1,3 @@
-import 'package:voyager/src/features/mentor/screens/post/create_post.dart';
 import 'package:voyager/src/features/mentor/screens/profile/mentor_profile.dart';
 import 'package:voyager/src/features/mentor/widget/toggle_button.dart';
 import 'package:voyager/src/widgets/completed_sched_card.dart';
