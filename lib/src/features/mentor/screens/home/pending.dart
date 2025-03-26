@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
-import 'package:voyager/src/features/mentor/screens/home/mentor_home.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/widgets/user_card.dart';
 
@@ -38,7 +37,7 @@ class _PendingListState extends State<PendingList> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    return Container(
+    return SizedBox(
       height: screenHeight * 0.6, // Limits to 25% of screen height
       child: SizedBox(
         height: screenHeight * 0.25, // Limits to 25% of screen height
