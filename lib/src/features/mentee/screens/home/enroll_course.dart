@@ -1,7 +1,4 @@
-import 'package:voyager/src/features/mentee/widgets/normal_searchBar.dart';
 import 'package:voyager/src/features/mentee/widgets/pick_mentor_card.dart';
-import 'package:voyager/src/features/mentee/widgets/small_course_card.dart';
-import 'package:voyager/src/widgets/bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 
 class EnrollCourse extends StatelessWidget {
