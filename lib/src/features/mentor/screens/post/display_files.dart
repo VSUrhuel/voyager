@@ -4,7 +4,7 @@ import 'package:file_picker/file_picker.dart';
 
 class DisplayFiles extends StatefulWidget {
   final List<PlatformFile> platformFiles;
-  DisplayFiles({super.key, required this.platformFiles});
+  const DisplayFiles({super.key, required this.platformFiles});
 
   @override
   State<DisplayFiles> createState() => _DisplayFilesState();
