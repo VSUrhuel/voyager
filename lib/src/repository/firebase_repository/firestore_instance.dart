@@ -352,4 +352,18 @@ class FirestoreInstance {
       rethrow;
     }
   }
+
+//Fmbags Changes
+  Future<List<UserModel>> getMentors() async {
+    try {
+      final mentors = await _db.collection('mentors').get();
+      List<UserModel> users = [];
+      for (var mentor in mentors.docs) {
+        users.add(await getUser(mentor.data()['accountId']));
+      }
+      return users;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
