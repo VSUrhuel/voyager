@@ -375,6 +375,10 @@ class FirestoreInstance {
         users.add(await getUser(mentor.data()['accountId']));
       }
       return users;
+    } catch (e) {
+      rethrow;
+    }
+  }
 
   Future<void> uploadPostContent(PostContentModel postContent) async {
     try {
@@ -391,7 +395,6 @@ class FirestoreInstance {
         'contentVideo': postContent.contentVideo,
         'courseMentorId': postContent.courseMentorId,
       });
-
     } catch (e) {
       rethrow;
     }
