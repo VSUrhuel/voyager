@@ -1,3 +1,4 @@
+import 'package:voyager/src/features/admin/screens/courses/course_list.dart';
 import 'package:voyager/src/features/admin/screens/mentors/mentor_list.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/repository/authentication_repository_firebase/authentication_repository.dart';
@@ -131,7 +132,10 @@ class AdminHome extends StatelessWidget {
                 width: screenWidth * 1,
                 height: screenHeight * 0.06,
                 child: OutlinedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => CourseList()));
+                  },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.black,
                     backgroundColor: Color.fromARGB(255, 226, 225, 225),
