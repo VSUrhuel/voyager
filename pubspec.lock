@@ -168,7 +168,7 @@ packages:
       sha256: a1ace0a119f20aabc852d165077c036cd864315bd99b7eaa10a60100341941bf
       url: "https://pub.dev"
     source: hosted
-    version: "1.19.0"
+    version: "1.19.1"
   cross_file:
     dependency: transitive
     description:
@@ -545,10 +545,10 @@ packages:
     dependency: "direct main"
     description:
       name: image_field
-      sha256: "5af91cecd360ba9d63a0f226d721a52893c33f76251d1af225b729e13d044ce0"
+      sha256: "0dd58a86deb4d06ae4473bf10c29894b49079b3235bd2153188ba2030f9ce5aa"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.10"
+    version: "0.0.12"
   image_picker:
     dependency: "direct main"
     description:
@@ -973,14 +973,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.1"
-  skeletons:
+  skeletonizer:
     dependency: transitive
     description:
-      name: skeletons
-      sha256: "5b2d08ae7f908ee1f7007ca99f8dcebb4bfc1d3cb2143dec8d112a5be5a45c8f"
+      name: skeletonizer
+      sha256: "0dcacc51c144af4edaf37672072156f49e47036becbc394d7c51850c5c1e884b"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.3"
+    version: "1.4.3"
   sky_engine:
     dependency: transitive
     description: flutter

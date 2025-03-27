@@ -1,9 +1,11 @@
 import 'package:voyager/src/features/admin/widgets/admin_mentor_card.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
+import 'package:voyager/src/features/mentee/widgets/normal_searchBar.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:voyager/src/features/admin/screens/mentors/add_mentor.dart';
 
 class MentorCardData {
   final String name;
@@ -90,84 +92,90 @@ class _MentorListState extends State<MentorList> {
 
   String search = '';
 
+  void filter(search) {
+    if (search != '' && search.isNotEmpty) {
+      setState(() {
+        mentorCards = mentorCards
+            .where((mentorCard) =>
+                mentorCard.name.toLowerCase().contains(search))
+            .toList();
+      });
+    } else if (search == '') {
+      setState(() {
+        getMentors(show);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    void filter(search) {
-      if (search != '' && search.isNotEmpty) {
-        setState(() {
-          mentorCards = mentorCards
-              .where((mentorCard) =>
-                  mentorCard.name.toLowerCase().contains(search))
-              .toList();
-        });
-      } else if (search == '') {
-        setState(() {
-          getMentors(show);
-        });
-      }
-    }
-
     return Scaffold(
-        appBar: AppBar(
-          systemOverlayStyle: SystemUiOverlayStyle.dark,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          toolbarHeight: screenHeight * 0.10,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pop(context),
-          ),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Mentor List',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: screenWidth * 0.06,
-                    fontWeight: FontWeight.bold,
-                  ))
-            ],
-          ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.all(15.0),
-            ),
-          ],
+      appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
         ),
-        body: Padding(
-          padding:
-              EdgeInsets.only(top: screenHeight * 0.001, left: 30, right: 35),
-          child: Column(
-            children: [
-              SizedBox(
-                height: screenHeight * 0.05,
-                width: screenWidth * 0.95,
-                child: TextField(
-                  onChanged: (value) {
-                    setState(() {
-                      search = value.toLowerCase();
-                      filter(search);
-                    });
-                  },
-                  decoration: InputDecoration(
-                    hintText: 'Search',
-                    hintStyle: TextStyle(
-                      color: Colors.grey,
-                    ),
-                    prefixIcon: Icon(Icons.search, color: Colors.grey),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                  ),
-                ),
+        title: Text(
+              'Mentor List',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: screenWidth * 0.05,
+                fontWeight: FontWeight.bold,
               ),
-              SizedBox(height: 7),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
+            ),
+        centerTitle: true,
+      ),
+      body: Column(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // NormalSearchbar widget
+              SizedBox(
+                height: screenHeight * 0.09,
+                child: NormalSearchbar(),
+              ),
+
+              // basin magamit pang seearch
+              // SizedBox(
+              //   height: screenHeight * 0.05,
+              //   width: screenWidth * 0.95,
+              //   child: TextField(
+              //     onChanged: (value) {
+              //       setState(() {
+              //         search = value.toLowerCase();
+              //         filter(search);
+              //       });
+              //     },
+              //     decoration: InputDecoration(
+              //       hintText: 'Search',
+              //       hintStyle: TextStyle(
+              //         color: Colors.grey,
+              //       ),
+              //       prefixIcon: Icon(Icons.search, color: Colors.grey),
+              //       border: OutlineInputBorder(
+              //         borderRadius: BorderRadius.circular(20.0),
+              //       ),
+              //     ),
+              //   ),
+              // ),
+              // SizedBox(height: 7),
+
+              // Buttons to filter mentors by status (active, archived, suspended)
+              Padding(
+                padding: EdgeInsets.only(
+                    left: screenWidth * 0.05, right: screenWidth * 0.05),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Active Button
+                    SizedBox(
                       height: screenHeight * 0.030,
                       width: screenWidth * 0.18,
                       child: Builder(
@@ -198,9 +206,12 @@ class _MentorListState extends State<MentorList> {
                             child: Text('Active'),
                           );
                         },
-                      )),
-                  SizedBox(width: screenWidth * 0.03),
-                  SizedBox(
+                      ),
+                    ),
+                    SizedBox(width: screenWidth * 0.03),
+
+                    // Archived Button
+                    SizedBox(
                       height: screenHeight * 0.030,
                       width: screenWidth * 0.18,
                       child: Builder(
@@ -231,9 +242,12 @@ class _MentorListState extends State<MentorList> {
                             child: Text('Archived'),
                           );
                         },
-                      )),
-                  SizedBox(width: screenWidth * 0.03),
-                  SizedBox(
+                      ),
+                    ),
+                    SizedBox(width: screenWidth * 0.03),
+
+                    // Suspended Button
+                    SizedBox(
                       height: screenHeight * 0.030,
                       width: screenWidth * 0.19,
                       child: Builder(
@@ -264,42 +278,72 @@ class _MentorListState extends State<MentorList> {
                             child: Text('Suspended'),
                           );
                         },
-                      )),
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.add),
-                  )
-                ],
+                      ),
+                    ),
+                    Spacer(),
+
+                    // Add Mentor Button
+                    SizedBox(
+                      height: screenHeight * 0.035,
+                      child: IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const AddMentor()),
+                          );
+                        },
+                        padding: EdgeInsets.all(0),
+                        icon: Icon(Icons.add),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               SizedBox(height: 10),
-              Column(
-                children: [
-                  if (isLoading)
-                    CircularProgressIndicator()
-                  else if (mentorCards.isNotEmpty)
-                    for (var mentorCard in mentorCards)
-                      AdminMentorCard(
-                        mentor: mentorCard.name,
-                        email: mentorCard.email,
-                        studentId: mentorCard.studentId,
-                        schedule: mentorCard.schedule,
-                        course: mentorCard.course,
-                      ),
-                  SizedBox(height: 10),
-                  Builder(builder: (context) {
-                    if (isLoading) {
-                      return Text('');
-                    }
-                    if (mentorCards.isEmpty) {
-                      return Text('No $show mentor');
-                    }
-                    return Text('Nothing follows');
-                  })
-                ],
+
+              // List of Mentor Cards in Scrollable View
+              SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: screenWidth * 0.05,
+                    right: screenWidth * 0.05,
+                  ),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        if (isLoading)
+                          CircularProgressIndicator(),
+                        if (mentorCards.isNotEmpty)
+                          for (var mentorCard in mentorCards)
+                            AdminMentorCard(
+                              mentor: mentorCard.name,
+                              email: mentorCard.email,
+                              studentId: mentorCard.studentId,
+                              schedule: mentorCard.schedule,
+                              course: mentorCard.course,
+                            ),
+                        SizedBox(height: 10),
+                        Builder(
+                          builder: (context) {
+                            if (isLoading) {
+                              return Text('');
+                            }
+                            if (mentorCards.isEmpty) {
+                              return Text('No $show mentor');
+                            }
+                            return Text('Nothing follows');
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
-        ),
-      );
+        ],
+      ),
+    );
   }
 }

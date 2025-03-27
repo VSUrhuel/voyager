@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:voyager/src/features/admin/screens/mentors/mentor_profile.dart';
 class AdminMentorCard extends StatelessWidget {
   final String mentor;
   final String email;
@@ -22,7 +22,9 @@ class AdminMentorCard extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return InkWell(
-      onTap: () {},
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => const MentorProfile() ));
+      },
       child: Card(
           color: Colors.white,
           elevation: 1,
@@ -63,8 +65,8 @@ class AdminMentorCard extends StatelessWidget {
                           builder: (context) {
                             email;
                             double baseFontSize = screenWidth * 0.027;
-                            double dynamicFontSize = email.length > 22
-                                ? baseFontSize * (22 / email.length)
+                            double dynamicFontSize = email.length > 20
+                                ? baseFontSize * (20 / email.length)
                                 : baseFontSize;
 
                             return Text(
