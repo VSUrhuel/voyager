@@ -65,7 +65,6 @@ class MeetingCard extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     String fullName = "John Rhuel Laurente";
-    List<String> nameParts = fullName.split(" ");
     String formattedName = formatName(fullName);
     User? user = FirebaseAuth.instance.currentUser;
     String profileImageURL =

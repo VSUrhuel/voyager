@@ -1,12 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:dio/dio.dart';
+import 'package:voyager/src/features/mentor/controller/post_controller.dart';
 
-class DisplayFilesLink extends StatelessWidget {
+class DisplayFilesLink extends StatefulWidget {
   final List<String> files;
   const DisplayFilesLink({super.key, required this.files});
 
   @override
+  State<DisplayFilesLink> createState() => _DisplayFilesLinkState();
+}
+
+class _DisplayFilesLinkState extends State<DisplayFilesLink> {
+  bool _isDownloading = false;
+  int? _currentDownloadIndex;
+  PostController postController = Get.put(PostController());
+  @override
   Widget build(BuildContext context) {
-    if (files.isEmpty) return const SizedBox.shrink();
+    if (widget.files.isEmpty) return const SizedBox.shrink();
 
     return Padding(
       padding: const EdgeInsets.only(top: 16.0),
@@ -16,9 +27,9 @@ class DisplayFilesLink extends StatelessWidget {
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: files.length,
+            itemCount: widget.files.length,
             itemBuilder: (context, index) {
-              return _buildAttachmentItem(files[index]);
+              return _buildAttachmentItem(widget.files[index], index);
             },
           ),
         ],
@@ -26,7 +37,7 @@ class DisplayFilesLink extends StatelessWidget {
     );
   }
 
-  Widget _buildAttachmentItem(String fileLink) {
+  Widget _buildAttachmentItem(String fileLink, int index) {
     try {
       final uri = Uri.parse(fileLink);
       final fileName = uri.pathSegments.last;
@@ -37,13 +48,15 @@ class DisplayFilesLink extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 4),
         child: ListTile(
           leading: _getFileIcon(fileExt),
-          title: Text(
-            fileName,
-            overflow: TextOverflow.ellipsis,
+          title: Text(fileName, overflow: TextOverflow.ellipsis),
+          subtitle: _currentDownloadIndex == index && _isDownloading
+              ? const LinearProgressIndicator()
+              : const Text('Click to download'),
+          trailing: IconButton(
+            icon: Icon(Icons.download_rounded, color: Colors.blue, size: 20),
+            onPressed: () => _downloadFile(fileLink, index),
           ),
-          subtitle: const Text(
-              'Click to view'), // Removed file size since we don't know it
-          onTap: () => _launchFile(fileLink),
+          onTap: () => _downloadFile(fileLink, index),
         ),
       );
     } catch (e) {
@@ -76,11 +89,47 @@ class DisplayFilesLink extends StatelessWidget {
     }
   }
 
-  Future<void> _launchFile(String url) async {
-    // Implement your file opening logic here
-    // For example, using url_launcher package:
-    // if (await canLaunchUrl(Uri.parse(url))) {
-    //   await launchUrl(Uri.parse(url));
-    // }
+  Future<void> _downloadFile(String url, int index) async {
+    try {
+      setState(() {
+        _isDownloading = true;
+        _currentDownloadIndex = index;
+      });
+
+      // 1. Request storage permissions
+      if (!await postController.requestStoragePermission()) {
+        throw Exception('Storage permission denied');
+      }
+
+      // 2. Get public Downloads path
+      final downloadsPath = await postController.getPublicDownloadsPath();
+      final fileName = url.split('/').last;
+      final savePath = '$downloadsPath/$fileName';
+
+      // 3. Download file with progress
+      await Dio().download(
+        url,
+        savePath,
+        onReceiveProgress: (received, total) {
+          if (total != -1) {
+            final progress = (received / total * 100).toInt();
+            debugPrint('Download progress: $progress%');
+          }
+        },
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('File saved to Downloads/$fileName')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Download failed: ${e.toString()}')),
+      );
+    } finally {
+      setState(() {
+        _isDownloading = false;
+        _currentDownloadIndex = null;
+      });
+    }
   }
 }

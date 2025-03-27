@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:voyager/src/features/mentor/screens/profile/personal_information_mentor.dart';
 import 'package:voyager/src/widgets/custom_page_route.dart';
@@ -12,9 +11,7 @@ class MentorProfile extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    User? user = FirebaseAuth.instance.currentUser;
-    String profileImageURL =
-        user?.photoURL ?? 'assets/images/application_images/profile.png';
+
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -30,8 +27,7 @@ class MentorProfile extends StatelessWidget {
           ),
           centerTitle: true,
         ),
-        body: Container(
-            child: Column(
+        body: Column(
           children: [
             Profile(role: 'mentee'),
             SizedBox(height: screenHeight * 0.03),
@@ -88,6 +84,6 @@ class MentorProfile extends StatelessWidget {
               },
             ),
           ],
-        )));
+        ));
   }
 }

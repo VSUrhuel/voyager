@@ -1,108 +1,203 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
+import 'package:get/get.dart';
+import 'package:voyager/src/features/mentor/controller/post_controller.dart';
 import 'package:voyager/src/features/mentor/model/content_model.dart';
-import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/features/mentor/screens/post/create_post.dart';
 import 'package:voyager/src/features/mentor/widget/post_content.dart';
-import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/widgets/custom_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class Post extends StatelessWidget {
+class Post extends StatefulWidget {
   const Post({super.key});
 
   @override
-  Widget build(BuildContext context)  {
+  State<Post> createState() => _PostState();
+}
+
+class _PostState extends State<Post> {
+  late PostController postController;
+  late Future<List<PostContentModel>> postsFuture;
+  bool _isRefreshing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializePosts();
+  }
+
+  void _initializePosts() {
+    postController = Get.put(PostController());
+    postsFuture = postController.getPosts();
+  }
+
+  Future<void> _refreshPosts() async {
+    setState(() => _isRefreshing = true);
+    try {
+      postsFuture = postController.getPosts();
+      await postsFuture;
+    } finally {
+      if (mounted) {
+        setState(() => _isRefreshing = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-     List<PostContentModel> posts = [];
-    Future<void> getPosts() async {
-      FirestoreInstance firestoreInstance = FirestoreInstance();
-      MentorModel mentor = await firestoreInstance.getMentorThroughAccId(FirebaseAuth.instance.currentUser!.uid);
-      CourseMentorModel courseMentor = await firestoreInstance.getCourseMentorThroughMentor(mentor.mentorId);
-      posts = await firestoreInstance.getPostContentThroughCourseMentor(courseMentor.courseId);
-      //return firestoreInstance.g(mentor.mentorId);
-    }
-    
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-        appBar: AppBar(
-          systemOverlayStyle: SystemUiOverlayStyle.dark,
-          scrolledUnderElevation: 0,
-          backgroundColor: Colors.transparent,
-          automaticallyImplyLeading: false,
-          toolbarHeight: screenHeight * 0.10,
-
-          titleTextStyle: TextStyle(
-            color: Colors.black,
-            fontSize: screenWidth * 0.06,
-            fontWeight: FontWeight.bold,
-          ),
-          elevation: 0, // No shadow
-          title: Row(
-            children: [
-              Padding(
-                padding: EdgeInsets.only(
-                    top: screenHeight * 0.013,
-                    left: screenHeight * 0.01), // Add padding to the left
-                child: Text(
-                  'Posts',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize:
-                        screenHeight * 0.037, // Adjust font size as needed
-                    fontWeight: FontWeight.bold, // Bold
-                  ),
-                ),
-              ),
-              SizedBox(width: 16),
-              // Spacing between image and text
-            ],
-          ),
-          actions: [
+      appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.transparent,
+        automaticallyImplyLeading: false,
+        toolbarHeight: screenHeight * 0.10,
+        titleTextStyle: textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.bold,
+        ),
+        elevation: 0,
+        title: Row(
+          children: [
             Padding(
-              padding: const EdgeInsets.only(
-                  right: 16.0), // Add padding to the right
-              child: CircleAvatar(
-                // Adjust size as needed
-                radius: screenHeight * 0.03,
-                backgroundColor: Colors.grey[200], // Light grey background
-                child: IconButton(
-                  icon: FaIcon(
-                    FontAwesomeIcons.pen,
-                    color: Colors.black,
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      CustomPageRoute(page: CreatePost()),
-                    );
-                    // Handle notification tap
-                  },
+              padding: EdgeInsets.only(
+                  top: screenHeight * 0.013, left: screenHeight * 0.01),
+              child: Text(
+                'Posts',
+                style: textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
           ],
         ),
-        body: SingleChildScrollView(
-          child: Center(
-              child: Padding(
-                  padding: EdgeInsets.only(
-                      left: screenWidth * 0.06,
-                      right: screenWidth * 0.05,
-                      top: screenHeight * 0.00),
-                  child: Column(children: [
-                    Divider(
-                      color: Colors.black,
-                      thickness: 1,
-                    ),
-                    SizedBox(
-                      height: screenHeight * 0.02,
-                    ),
-                    PostContent(),
-                  ]))),
-        ));
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: CircleAvatar(
+              radius: screenHeight * 0.03,
+              backgroundColor: Colors.grey[200],
+              child: IconButton(
+                icon: const FaIcon(FontAwesomeIcons.pen, color: Colors.black),
+                onPressed: () => Navigator.push(
+                  context,
+                  CustomPageRoute(page: CreatePost()),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: _refreshPosts,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: screenWidth * 0.05,
+              vertical: screenHeight * 0.02,
+            ),
+            child: Column(
+              children: [
+                const Divider(thickness: 1),
+                SizedBox(height: screenHeight * 0.02),
+                FutureBuilder<List<PostContentModel>>(
+                  future: postsFuture,
+                  builder: (context, snapshot) {
+                    if (_isRefreshing) {
+                      return const SizedBox.shrink();
+                    }
+
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return SizedBox(
+                        height: screenHeight * 0.5,
+                        child: const Center(child: CircularProgressIndicator()),
+                      );
+                    }
+
+                    if (snapshot.hasError) {
+                      debugPrint('Post loading error: ${snapshot.error}');
+                      debugPrintStack(stackTrace: snapshot.stackTrace);
+                      return _buildErrorState(context);
+                    }
+
+                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return _buildEmptyState(context);
+                    }
+
+                    return Column(
+                      children: snapshot.data!
+                          .map((post) => Column(
+                                children: [
+                                  PostContent(post: post),
+                                  SizedBox(height: screenHeight * 0.02),
+                                ],
+                              ))
+                          .toList(),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+        Icon(Icons.error_outline, size: 50, color: Colors.red[300]),
+        const SizedBox(height: 16),
+        Text(
+          'Failed to load posts',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Please check your connection and try again',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          onPressed: _refreshPosts,
+          child: const Text('Retry'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+        Icon(Icons.feed_outlined, size: 50, color: Colors.grey[400]),
+        const SizedBox(height: 16),
+        Text(
+          'No posts available',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Be the first to create a post',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          onPressed: () => Navigator.push(
+            context,
+            CustomPageRoute(page: CreatePost()),
+          ),
+          child: const Text('Create Post'),
+        ),
+      ],
+    );
   }
 }

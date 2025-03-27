@@ -1,12 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:get/get.dart';
+import 'package:voyager/src/features/mentor/controller/post_controller.dart';
+import 'package:voyager/src/features/mentor/model/content_model.dart';
 import 'package:voyager/src/features/mentor/screens/post/display_video_link.dart';
 import 'package:voyager/src/features/mentor/widget/display_files_link.dart';
+import 'package:voyager/src/features/mentor/widget/display_images.dart';
+import 'package:voyager/src/features/mentor/widget/display_links.dart';
 
-class PostContent extends StatelessWidget {
-  PostContent({super.key});
+class PostContent extends StatefulWidget {
+  final PostContentModel post;
+  const PostContent({super.key, required this.post});
 
-  final _links = ['link1', 'link2'];
+  @override
+  State<PostContent> createState() => _PostContentState();
+}
+
+class _PostContentState extends State<PostContent> {
+  PostController postController = Get.put(PostController());
+  PostContentModel get _post => widget.post;
+  late final List<Map<String, String>> links;
+  late final String contentCategory;
+  late final DateTime contentCreatedTimestamp;
+  late final String contentDescription;
+  late final List<String> contentFiles;
+  late final List<String> contentImage;
+  late final DateTime contentModifiedTimestamp;
+  late final bool contentSoftDelete;
+  late final String contentTitle;
+  late final List<String> contentVideo;
+
+  bool _showAttachments = false;
+  final bool _isDownloading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    links = _post.contentLinks;
+    contentCategory = _post.contentCategory;
+    contentCreatedTimestamp = _post.contentCreatedTimestamp;
+    contentDescription = _post.contentDescription;
+    contentFiles = _post.contentFiles;
+    contentImage = _post.contentImage;
+    contentModifiedTimestamp = _post.contentModifiedTimestamp;
+    contentSoftDelete = _post.contentSoftDelete;
+    contentTitle = _post.contentTitle;
+    contentVideo = _post.contentVideo;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,9 +58,9 @@ class PostContent extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.grey[500]!),
       ),
-      constraints: BoxConstraints(
-        minHeight: screenHeight * 0.7, // Set minimum height
-      ),
+      // constraints: BoxConstraints(
+      //   minHeight: screenHeight * 0.2, // Set minimum height
+      // ),
       child: Padding(
         padding: EdgeInsets.symmetric(
           vertical: screenHeight * 0.013,
@@ -64,7 +103,8 @@ class PostContent extends StatelessWidget {
                           ),
                           SizedBox(width: screenHeight * 0.01),
                           Text(
-                            '2 hours ago',
+                            postController
+                                .getTimePosted(contentCreatedTimestamp),
                             style: TextStyle(
                               color: Colors.grey,
                               fontSize: screenHeight * 0.015,
@@ -80,7 +120,7 @@ class PostContent extends StatelessWidget {
                           color: Color(0x501877F2),
                         ),
                         child: Text(
-                          'Announcement',
+                          contentCategory,
                           style: TextStyle(
                             color: Color(0xFF1877F2),
                             fontSize: screenHeight * 0.015,
@@ -108,7 +148,7 @@ class PostContent extends StatelessWidget {
               child: Align(
                 alignment: Alignment.topLeft,
                 child: Text(
-                  'Title',
+                  contentTitle,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
@@ -124,7 +164,7 @@ class PostContent extends StatelessWidget {
                 vertical: screenHeight * 0.01,
               ),
               child: Text(
-                'Hello, everyone! I am excited to announce that we will be having a webinar on the 30th of June. Please join us and learn more about the latest trends in the industry. See you there!',
+                contentDescription,
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: screenHeight * 0.019,
@@ -132,105 +172,88 @@ class PostContent extends StatelessWidget {
               ),
             ),
 
-            SizedBox(height: screenHeight * 0.01),
-
-            // Attachments
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: screenHeight * 0.01,
-                vertical: screenHeight * 0.01,
-              ),
-              child: Text(
-                'Attachments',
-                style: TextStyle(
-                  fontStyle: FontStyle.italic,
-                  fontWeight: FontWeight.w300,
-                  color: Colors.black,
-                  fontSize: screenHeight * 0.019,
+            Column(
+              children: [
+                // Attachment header with dropdown button
+                InkWell(
+                  onTap: () {
+                    setState(() {
+                      _showAttachments = !_showAttachments;
+                    });
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenHeight * 0.01,
+                      vertical: screenHeight * 0.01,
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Attachments',
+                          style: TextStyle(
+                            fontStyle: FontStyle.italic,
+                            fontWeight: FontWeight.w300,
+                            color: Colors.black,
+                            fontSize: screenHeight * 0.019,
+                          ),
+                        ),
+                        Spacer(),
+                        Icon(
+                          _showAttachments
+                              ? Icons.keyboard_arrow_up
+                              : Icons.keyboard_arrow_down,
+                          size: screenHeight * 0.025,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
 
-            // Image Attachment
-            Padding(
-              padding: EdgeInsets.only(right: screenHeight * 0.01),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/post-files/images/image_1743009700328.jpg',
-                  width: screenHeight * 0.18,
-                  height: screenHeight * 0.18,
-                  fit: BoxFit.cover,
+                // Collapsible attachments section
+                AnimatedSize(
+                  duration: Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  child: _showAttachments
+                      ? Column(
+                          children: [
+                            // Image Attachment
+                            DisplayImages(images: []),
+
+                            SizedBox(height: screenHeight * 0.01),
+
+                            // Video Attachment
+                            contentVideo.isEmpty == true
+                                ? SizedBox()
+                                : DisplayVideoLink(
+                                    videoLink: contentVideo.isNotEmpty
+                                        ? contentVideo[0]
+                                        : '',
+                                  ),
+
+                            SizedBox(height: screenHeight * 0.01),
+
+                            // File Attachment
+                            contentFiles.isEmpty == true
+                                ? SizedBox()
+                                : DisplayFilesLink(
+                                    files: contentFiles,
+                                  ),
+
+                            SizedBox(height: screenHeight * 0.01),
+
+                            links.isEmpty == true
+                                ? SizedBox.shrink()
+                                : DisplayLinks(
+                                    links: links,
+                                  ),
+                          ],
+                        )
+                      : SizedBox.shrink(),
                 ),
-              ),
-            ),
 
-            SizedBox(height: screenHeight * 0.01),
-
-            // Video Attachment
-            DisplayVideoLink(
-              videoLink:
-                  'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/post-files/videos/video_1743044074168.mp4',
-            ),
-
-            SizedBox(height: screenHeight * 0.01),
-
-            // File Attachment
-            DisplayFilesLink(
-              files: [
-                'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/post-files/files/file_1743010021703.pdf'
+                // Links section (unchanged)
               ],
             ),
-
-            SizedBox(height: screenHeight * 0.01),
-
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: screenHeight * 0.01,
-                vertical: screenHeight * 0.01,
-              ),
-              child: Text(
-                'Links',
-                style: TextStyle(
-                  fontStyle: FontStyle.italic,
-                  fontWeight: FontWeight.w300,
-                  color: Colors.black,
-                  fontSize: screenHeight * 0.019,
-                ),
-              ),
-            ),
-            if (_links.isNotEmpty)
-              Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: screenHeight * 0.01,
-                  ),
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        for (final link in _links)
-                          Padding(
-                            padding:
-                                EdgeInsets.only(bottom: screenHeight * 0.01),
-                            child: InkWell(
-                              onTap: () async {
-                                final uri = Uri.tryParse(link);
-                                if (uri != null && await canLaunchUrl(uri)) {
-                                  await launchUrl(uri);
-                                }
-                              },
-                              child: Text(
-                                "helllo",
-                                style: TextStyle(
-                                  color: Colors.blue,
-                                  fontSize: screenHeight * 0.019,
-                                  decoration: TextDecoration.underline,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            ),
-                          ),
-                      ]))
           ],
         ),
       ),

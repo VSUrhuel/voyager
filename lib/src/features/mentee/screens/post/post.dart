@@ -1,11 +1,9 @@
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/screens/home/notification.dart';
 import 'package:voyager/src/features/mentee/widgets/post_card.dart';
-import 'package:voyager/src/repository/authentication_repository_firebase/authentication_repository.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class Post extends StatelessWidget {
   const Post({super.key});
@@ -27,7 +25,6 @@ class Post extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final auth = Get.put(FirebaseAuthenticationRepository());
     User? user = FirebaseAuth.instance.currentUser;
     String profileImageURL =
         user?.photoURL ?? 'assets/images/application_images/profile.png';
