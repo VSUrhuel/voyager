@@ -31,6 +31,21 @@ class FirestoreInstance {
     }
   }
 
+  Future<List<PostContentModel>> getPostContentThroughCourseMentor(
+      String id) async {
+    try {
+      final postContent = await _db
+          .collection('postContent')
+          .where('courseMentorId', isEqualTo: id)
+          .get();
+      return postContent.docs
+          .map((doc) => PostContentModel.fromJson(doc.data()))
+          .toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> setUserFromGoogle(Rx<User>? user) async {
     try {
       if (user?.value == null) {
