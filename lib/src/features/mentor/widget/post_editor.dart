@@ -9,7 +9,7 @@ class PostEditor extends StatelessWidget {
   final TextEditingController titleController;
   final TextEditingController descriptionController;
 
-  PostEditor({
+  const PostEditor({
     super.key,
     required this.screenHeight,
     required this.onPickImage,

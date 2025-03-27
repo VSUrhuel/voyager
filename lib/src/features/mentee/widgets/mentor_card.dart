@@ -43,8 +43,7 @@ class MentorCard extends StatelessWidget {
         return mentorMotto; // Return as is if it's 6 words or less
       }
 
-      return words.sublist(0, 6).join(" ") +
-          "..."; // Take first 6 words and add "..."
+      return "${words.sublist(0, 6).join(" ")}..."; // Take first 6 words and add "..."
     }
 
     final screenWidth = MediaQuery.of(context).size.width;
