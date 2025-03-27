@@ -30,10 +30,11 @@ class PostContent extends StatelessWidget {
                       padding: EdgeInsets.only(left: screenHeight * 0.01),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Text(
                                 'rhuelxx',
@@ -90,6 +91,23 @@ class PostContent extends StatelessWidget {
               ),
               Padding(
                 padding: EdgeInsets.symmetric(
+                    vertical: screenHeight * 0.00,
+                    horizontal: screenHeight * 0.01), // Add padding to the left
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: Text(
+                    'Title',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                      fontSize:
+                          screenHeight * 0.019, // Adjust font size as needed
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(
                     horizontal: screenHeight * 0.01,
                     vertical: screenHeight * 0.01), // Add padding to the left
                 child: Text(
@@ -100,7 +118,20 @@ class PostContent extends StatelessWidget {
                         screenHeight * 0.019, // Adjust font size as needed
                   ),
                 ),
-              )
+              ),
+              SizedBox(height: screenHeight * 0.01),
+              Padding(
+                padding: EdgeInsets.only(right: screenHeight * 0.01),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/post-files/images/image_1743009700328.jpg',
+                    width: screenHeight * 0.18,
+                    height: screenHeight * 0.18,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
             ],
           ),
         ));
