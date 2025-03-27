@@ -41,7 +41,7 @@ class LoginController extends GetxController {
       isLoading.value = true;
       // If the user has a default password it will direct to the reset password page,wherein it will reset  the user password and re login the mentor to its input information page
       if (password == "mentor2025") {
-        final userCredential = await FirebaseAuth.instance
+        await FirebaseAuth.instance
             .signInWithEmailAndPassword(email: email, password: password);
 
         Navigator.push(

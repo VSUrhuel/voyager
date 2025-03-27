@@ -2,7 +2,6 @@ import 'package:voyager/src/features/mentor/screens/home/accepted.dart';
 import 'package:voyager/src/features/mentor/screens/home/mentee_list.dart';
 import 'package:voyager/src/features/mentor/screens/home/pending.dart';
 import 'package:voyager/src/features/mentor/screens/home/request_list.dart';
-import 'package:voyager/src/repository/authentication_repository_firebase/authentication_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -39,7 +38,6 @@ class _MentorHomeState extends State<MentorHome> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final auth = FirebaseAuthenticationRepository();
 
     return Scaffold(
       appBar: AppBar(

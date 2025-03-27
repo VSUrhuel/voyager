@@ -2,7 +2,6 @@ import 'package:voyager/src/features/mentee/screens/profile/personal_information
 import 'package:voyager/src/widgets/custom_page_route.dart';
 import 'package:voyager/src/widgets/profile.dart';
 import 'package:voyager/src/widgets/profile_list_tile.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class MenteeProfile extends StatelessWidget {
@@ -12,9 +11,7 @@ class MenteeProfile extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    User? user = FirebaseAuth.instance.currentUser;
-    String profileImageURL =
-        user?.photoURL ?? 'assets/images/application_images/profile.png';
+
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(

@@ -149,7 +149,12 @@ class FirestoreInstance {
       final courseMentor = await _db
           .collection('courseMentor')
           .where('mentorId', isEqualTo: mentorId)
+          .limit(1)
           .get();
+      if (courseMentor.docs.isEmpty) {
+        throw Exception('No mentor found with ID: $mentorId');
+      }
+
       return CourseMentorModel.fromJson(courseMentor.docs.first.data());
     } catch (e) {
       rethrow;

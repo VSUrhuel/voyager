@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class PostContentModel {
   final String contentCategory;
   final DateTime contentCreatedTimestamp;
@@ -28,8 +30,8 @@ class PostContentModel {
   factory PostContentModel.fromJson(Map<String, dynamic> json) {
     return PostContentModel(
       contentCategory: json['contentCategory'] ?? '',
-      contentCreatedTimestamp: json['contentCreatedTimestamp'] != null
-          ? DateTime.parse(json['contentCreatedTimestamp'])
+      contentCreatedTimestamp: json['contentCreatedTimestamp'] is Timestamp
+          ? (json['contentCreatedTimestamp'] as Timestamp).toDate()
           : DateTime.now(),
       contentDescription: json['contentDescription'] ?? '',
       contentFiles: json['contentFiles'] != null
@@ -38,8 +40,8 @@ class PostContentModel {
       contentImage: json['contentImage'] != null
           ? List<String>.from(json['contentImage'] as List)
           : [],
-      contentModifiedTimestamp: json['contentModifiedTimestamp'] != null
-          ? DateTime.parse(json['contentModifiedTimestamp'])
+      contentModifiedTimestamp: json['contentModifiedTimestamp'] is Timestamp
+          ? (json['contentModifiedTimestamp'] as Timestamp).toDate()
           : DateTime.now(),
       contentSoftDelete: json['contentSoftDelete'] ?? false,
       contentTitle: json['contentTitle'] ?? '',
