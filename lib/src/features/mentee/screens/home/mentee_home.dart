@@ -23,7 +23,6 @@ class MenteeHome extends StatefulWidget {
 }
 
 class _MenteeHomeState extends State<MenteeHome> {
-  final auth = Get.put(FirebaseAuthenticationRepository());
   User? user = FirebaseAuth.instance.currentUser;
   FirestoreInstance firestoreInstance = FirestoreInstance();
 

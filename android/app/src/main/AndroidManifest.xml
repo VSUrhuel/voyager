@@ -3,7 +3,7 @@
     <application
         android:label="eduvate"
         android:name="${applicationName}"
-        android:icon="@mipmap/eduvate-native-splash-logo">
+        android:icon="@mipmap/eduvate_native_splash_logo">
         <activity
             android:name=".MainActivity"
             android:exported="true"
