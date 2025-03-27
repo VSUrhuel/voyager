@@ -1,6 +1,6 @@
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:voyager/src/repository/authentication-repository/supabase_auth_repository.dart';
+import 'package:voyager/src/repository/authentication_repository_firebase/authentication_repository.dart';
 import 'package:voyager/src/routing/routes.dart';
 import 'package:get/get.dart';
 import 'dart:async';
@@ -18,7 +18,9 @@ class EmailVerificationController extends GetxController {
 
   Future<void> sendVerificationEmail() async {
     try {
-      await AuthenticationRepository.instance.sendEmailVerification();
+      FirebaseAuthenticationRepository auth =
+          Get.put(FirebaseAuthenticationRepository());
+      await auth.sendEmailVerification();
     } on Exception {
       rethrow;
     }

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
+import 'package:voyager/src/features/mentor/model/content_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
@@ -25,6 +26,21 @@ class FirestoreInstance {
       } else {
         return 'mentee';
       }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<PostContentModel>> getPostContentThroughCourseMentor(
+      String id) async {
+    try {
+      final postContent = await _db
+          .collection('postContent')
+          .where('courseMentorId', isEqualTo: id)
+          .get();
+      return postContent.docs
+          .map((doc) => PostContentModel.fromJson(doc.data()))
+          .toList();
     } catch (e) {
       rethrow;
     }
@@ -122,6 +138,19 @@ class FirestoreInstance {
     try {
       final mentor = await _db.collection('mentors').doc(id).get();
       return MentorModel.fromJson(mentor.data()!);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<CourseMentorModel> getCourseMentorThroughMentor(
+      String mentorId) async {
+    try {
+      final courseMentor = await _db
+          .collection('courseMentor')
+          .where('mentorId', isEqualTo: mentorId)
+          .get();
+      return CourseMentorModel.fromJson(courseMentor.docs.first.data());
     } catch (e) {
       rethrow;
     }
@@ -348,6 +377,39 @@ class FirestoreInstance {
         }
       }
       return users;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<UserModel>> getMentors() async {
+    try {
+      final mentors = await _db.collection('mentors').get();
+      List<UserModel> users = [];
+      for (var mentor in mentors.docs) {
+        users.add(await getUser(mentor.data()['accountId']));
+      }
+      return users;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> uploadPostContent(PostContentModel postContent) async {
+    try {
+      String uniqueID = generateUniqueId();
+      await _db.collection('postContent').doc(uniqueID).set({
+        'contentCategory': postContent.contentCategory,
+        'contentCreatedTimestamp': postContent.contentCreatedTimestamp,
+        'contentDescription': postContent.contentDescription,
+        'contentFiles': postContent.contentFiles,
+        'contentImage': postContent.contentImage,
+        'contentModifiedTimestamp': postContent.contentModifiedTimestamp,
+        'contentSoftDelete': postContent.contentSoftDelete,
+        'contentTitle': postContent.contentTitle,
+        'contentVideo': postContent.contentVideo,
+        'courseMentorId': postContent.courseMentorId,
+      });
     } catch (e) {
       rethrow;
     }

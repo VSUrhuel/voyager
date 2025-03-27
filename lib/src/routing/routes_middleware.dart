@@ -28,6 +28,7 @@ class MRouteMiddleware extends GetMiddleware {
     try {
       final auth = FirebaseAuth.instance;
       final user = auth.currentUser;
+
       if (user == null) {
         Navigator.pushReplacement(
             Get.context!, MaterialPageRoute(builder: (context) => Welcome()));

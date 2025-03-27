@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
 
 class ToggleButtonIcons extends StatefulWidget {
-  const ToggleButtonIcons({super.key});
+  final TextEditingController category;
+  const ToggleButtonIcons({super.key, required this.category});
 
   @override
   State<ToggleButtonIcons> createState() => _ToggleButtonIconsState();
 }
 
 class _ToggleButtonIconsState extends State<ToggleButtonIcons> {
-  int _selectedIndex = 0; // 0 for Announcement, 1 for Resources
+  int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.category.text =
+        _selectedIndex.toString(); // 0 for Announcement, 1 for Resources
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -28,6 +37,7 @@ class _ToggleButtonIconsState extends State<ToggleButtonIcons> {
             onTap: () {
               setState(() {
                 _selectedIndex = 0;
+                widget.category.text = _selectedIndex.toString();
               });
             },
             child: Container(
@@ -59,6 +69,7 @@ class _ToggleButtonIconsState extends State<ToggleButtonIcons> {
             onTap: () {
               setState(() {
                 _selectedIndex = 1;
+                widget.category.text = _selectedIndex.toString();
               });
             },
             child: Container(
