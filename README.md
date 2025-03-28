@@ -6,6 +6,25 @@ Development of a Mobile-based Mentorship Application using Flutter for Computer 
 | --------------------- | ------------- |
 | VG.010.001            | 2025-03-12    |
 | VG.010.002            | 2025-03-24    |
+| VG.010.003            | 2025-03-29    |
+
+## VG.010.003 Release Notes
+**Admin Panel**  
+- Added admin profile management screen  
+- Implemented course creation interface  
+- Developed course list view with filtering capabilities  
+- Built detailed course information view
+   
+**Mentor Features**  
+- Connected mentee list to Firebase backend  
+- Implemented post creation interface with file attachment support  
+- Integrated post functionality with Firebase/Supabase backend  
+- Added post display with downloadable attachments
+  
+**Mentee Features**  
+- Developed mentor profile viewing interface  
+- Implemented course enrollment interface  
+- Built backend for displaying mentor cards  
 
 ## VG.010.002 Release Notes
 - Migrated back to Firebase for Authentication, Supabase for storage 
