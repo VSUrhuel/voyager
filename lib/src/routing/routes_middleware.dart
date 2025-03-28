@@ -1,11 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:voyager/src/features/admin/screens/admin_home.dart';
+import 'package:voyager/src/features/admin/screens/admin_dashboard.dart';
+// import 'package:voyager/src/features/admin/screens/admin_home.dart';
 import 'package:voyager/src/features/authentication/screens/welcome/welcome.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:voyager/src/features/authentication/controllers/user_role_enum.dart';
 import 'package:voyager/src/features/authentication/screens/email_verification/email_verification.dart';
-import 'package:voyager/src/features/mentee/screens/mentee_home.dart';
+import 'package:voyager/src/features/mentee/mentee_dashboard.dart';
 import 'package:voyager/src/features/mentor/screens/input_information/mentor_info1.dart';
 import 'package:voyager/src/features/mentor/screens/mentor_dashboard.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
@@ -27,6 +28,7 @@ class MRouteMiddleware extends GetMiddleware {
     try {
       final auth = FirebaseAuth.instance;
       final user = auth.currentUser;
+
       if (user == null) {
         Navigator.pushReplacement(
             Get.context!, MaterialPageRoute(builder: (context) => Welcome()));
@@ -48,7 +50,7 @@ class MRouteMiddleware extends GetMiddleware {
         case UserRoleEnum.mentee:
           if (Get.context != null) {
             Navigator.pushReplacement(Get.context!,
-                MaterialPageRoute(builder: (context) => MenteeHome()));
+                MaterialPageRoute(builder: (context) => MenteeDashboard()));
           }
           break;
         case UserRoleEnum.mentor:
@@ -66,7 +68,7 @@ class MRouteMiddleware extends GetMiddleware {
         case UserRoleEnum.admin:
           if (Get.context != null) {
             Navigator.pushReplacement(Get.context!,
-                MaterialPageRoute(builder: (context) => AdminHome()));
+                MaterialPageRoute(builder: (context) => AdminDashboard()));
           }
           break;
         default:

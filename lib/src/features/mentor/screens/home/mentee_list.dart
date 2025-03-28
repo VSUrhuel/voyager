@@ -1,5 +1,6 @@
 import 'package:voyager/src/features/mentee/widgets/normal_searchBar.dart';
 import 'package:flutter/material.dart';
+import 'package:voyager/src/features/mentor/widget/status_toggle_button.dart';
 
 class MenteeList extends StatelessWidget {
   const MenteeList({super.key});
@@ -32,66 +33,11 @@ class MenteeList extends StatelessWidget {
         children: [
           NormalSearchbar(),
           Padding(
-            padding: EdgeInsets.only(
-                left: screenWidth * 0.05, bottom: screenHeight * 0.02),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                TextButton(
-                  onPressed: () {},
-                  style: TextButton.styleFrom(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: screenWidth * 0.04,
-                          vertical: screenHeight * 0.01),
-                      backgroundColor: Color(0x601877F2),
-                      foregroundColor: Color(0xFF1877F2)),
-                  child: Text('Accepted'),
-                ),
-                SizedBox(width: screenWidth * 0.02),
-                TextButton(
-                  onPressed: () {},
-                  style: TextButton.styleFrom(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: screenWidth * 0.04,
-                          vertical: screenHeight * 0.01),
-                      backgroundColor: Color(0x7F455A64),
-                      foregroundColor: Color(0xFF4A4A4A)),
-                  child: Text('Pending'),
-                ),
-                SizedBox(width: screenWidth * 0.02),
-                TextButton(
-                  onPressed: () {},
-                  style: TextButton.styleFrom(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: screenWidth * 0.04,
-                          vertical: screenHeight * 0.01),
-                      backgroundColor: Color(0x7F455A64),
-                      foregroundColor: Color(0xFF4A4A4A)),
-                  child: Text('Rejected'),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.only(
-                    left: screenWidth * 0.05, right: screenWidth * 0.05),
-                child: Center(
-                  child: Column(children: [
-                    Text(
-                      'No more requests',
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: screenWidth * 0.03,
-                      ),
-                    ),
-                    SizedBox(height: screenHeight * 0.02),
-                  ]),
-                ),
-              ),
-            ),
-          ),
+              padding: EdgeInsets.only(
+                  left: screenWidth * 0.05,
+                  bottom: screenHeight * 0.02,
+                  right: screenWidth * 0.05),
+              child: StatusToggleButton()),
         ],
       ),
     );

@@ -36,7 +36,7 @@ class _TimePickerState extends State<TimePicker> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.all(6.0),
             child: ElevatedButton(
               child: Text(widget.titleLabel),
               onPressed: () async {
