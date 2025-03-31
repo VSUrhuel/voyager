@@ -1,4 +1,3 @@
-
 import 'package:voyager/src/features/mentee/widgets/normal_searchBar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -22,7 +21,6 @@ class _CourseListState extends State<CourseList> {
     show = 'active';
   }
 
-
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -37,13 +35,13 @@ class _CourseListState extends State<CourseList> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-              'Course List',
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: screenWidth * 0.05,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+          'Course List',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: screenWidth * 0.05,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         centerTitle: true,
       ),
       body: Column(
@@ -156,30 +154,24 @@ class _CourseListState extends State<CourseList> {
               ),
               SizedBox(height: 10),
             ],
-            
           ),
-          if(show == 'active')
-          Container(
-            height: screenHeight * 0.70,
-            child: SingleChildScrollView(
-              padding: EdgeInsets.only(
-                left: screenWidth * 0.05, right: screenWidth * 0.05),
-              child: ActiveCourse(trialSize: 5),
-            )
-          ),
-
-          if(show == 'archived')
-          Container(
-            height: screenHeight * 0.70,
-            child: SingleChildScrollView(
-              padding: EdgeInsets.only(
-                left: screenWidth * 0.05, right: screenWidth * 0.05),
-              child: ArchivedCourse(trialSize: 2),
-            )
-          )  
-
+          if (show == 'active')
+            SizedBox(
+                height: screenHeight * 0.70,
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.only(
+                      left: screenWidth * 0.05, right: screenWidth * 0.05),
+                  child: ActiveCourse(trialSize: 5),
+                )),
+          if (show == 'archived')
+            SizedBox(
+                height: screenHeight * 0.70,
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.only(
+                      left: screenWidth * 0.05, right: screenWidth * 0.05),
+                  child: ArchivedCourse(trialSize: 2),
+                ))
         ],
-        
       ),
     );
   }

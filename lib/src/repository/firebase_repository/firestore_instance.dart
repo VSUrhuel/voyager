@@ -88,6 +88,32 @@ class FirestoreInstance {
     }
   }
 
+  Future<String> getUsername(String id) async {
+    try {
+      final user = await _db.collection('users').doc(id).get();
+      if (user.exists) {
+        return user.data()!['accountUsername'];
+      } else {
+        throw Exception('User not found');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<String> getAccountPhoto(String id) async {
+    try {
+      final user = await _db.collection('users').doc(id).get();
+      if (user.exists) {
+        return user.data()!['accountApiPhoto'];
+      } else {
+        throw Exception('User not found');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> updateUsername(String username, String uid) async {
     try {
       await _db.collection('users').doc(uid).update({
@@ -156,6 +182,40 @@ class FirestoreInstance {
       }
 
       return CourseMentorModel.fromJson(courseMentor.docs.first.data());
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<String> getCourseMentorDocId(String mentorId) async {
+    try {
+      final courseMentor = await _db
+          .collection('courseMentor')
+          .where('mentorId', isEqualTo: mentorId)
+          .limit(1)
+          .get();
+      if (courseMentor.docs.isEmpty) {
+        throw Exception('No mentor found with ID: $mentorId');
+      }
+
+      return courseMentor.docs.first.id;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<String> courseMentor(String mentorId) async {
+    try {
+      final courseMentor = await _db
+          .collection('courseMentor')
+          .where('mentorId', isEqualTo: mentorId)
+          .limit(1)
+          .get();
+      if (courseMentor.docs.isEmpty) {
+        throw Exception('No mentor found with ID: $mentorId');
+      }
+
+      return courseMentor.docs.first.id;
     } catch (e) {
       rethrow;
     }
@@ -414,6 +474,7 @@ class FirestoreInstance {
         'contentTitle': postContent.contentTitle,
         'contentVideo': postContent.contentVideo,
         'courseMentorId': postContent.courseMentorId,
+        'contentLinks': postContent.contentLinks,
       });
     } catch (e) {
       rethrow;

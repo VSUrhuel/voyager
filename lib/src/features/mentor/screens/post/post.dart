@@ -44,6 +44,12 @@ class _PostState extends State<Post> {
   }
 
   @override
+  void dispose() {
+    Get.delete<PostController>();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
@@ -108,12 +114,14 @@ class _PostState extends State<Post> {
                   future: postsFuture,
                   builder: (context, snapshot) {
                     if (_isRefreshing) {
-                      return const SizedBox.shrink();
+                      return const SizedBox(
+                        height: 100,
+                        child: Center(child: CircularProgressIndicator()),
+                      );
                     }
 
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return SizedBox(
-                        height: screenHeight * 0.5,
                         child: const Center(child: CircularProgressIndicator()),
                       );
                     }
@@ -194,7 +202,14 @@ class _PostState extends State<Post> {
           onPressed: () => Navigator.push(
             context,
             CustomPageRoute(page: CreatePost()),
-          ),
+          ).then((_) {
+            dispose();
+            if (mounted) {
+              setState(() {
+                postsFuture = postController.getPosts();
+              });
+            }
+          }),
           child: const Text('Create Post'),
         ),
       ],

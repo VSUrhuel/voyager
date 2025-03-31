@@ -1,4 +1,3 @@
-import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,5 +13,4 @@ class CourseController extends GetxController {
   final courseName = TextEditingController();
   final courseSoftDeleted = TextEditingController();
   final courseStatus = TextEditingController();
-  
 }

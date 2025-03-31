@@ -7,7 +7,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:voyager/src/features/mentor/model/content_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 
 class PostController {
@@ -32,14 +31,39 @@ class PostController {
 
     MentorModel mentor = await firestoreInstance
         .getMentorThroughAccId(FirebaseAuth.instance.currentUser!.uid);
-    print(mentor.mentorId);
-    CourseMentorModel courseMentor =
-        await firestoreInstance.getCourseMentorThroughMentor(mentor.mentorId);
-    print(courseMentor.courseId);
-    print(await firestoreInstance
-        .getPostContentThroughCourseMentor(courseMentor.courseId));
-    return await firestoreInstance
-        .getPostContentThroughCourseMentor('WiyXcT5S5pKPV5ZGXPLX');
+
+    String courseMentor =
+        await firestoreInstance.getCourseMentorDocId(mentor.mentorId);
+
+    List<PostContentModel> posts =
+        await firestoreInstance.getPostContentThroughCourseMentor(courseMentor);
+
+    for (int i = 0; i < posts.length; i++) {
+      for (int j = i + 1; j < posts.length; j++) {
+        if (posts[i]
+            .contentModifiedTimestamp
+            .isBefore(posts[j].contentModifiedTimestamp)) {
+          PostContentModel temp = posts[i];
+          posts[i] = posts[j];
+          posts[j] = temp;
+        }
+      }
+    }
+    return posts;
+  }
+
+  Future<String> getUsername() async {
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+    FirestoreInstance firestoreInstance = FirestoreInstance();
+    String username = await firestoreInstance.getUsername(uid);
+    return username;
+  }
+
+  Future<String> getApiPhoto() async {
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+    FirestoreInstance firestoreInstance = FirestoreInstance();
+    String apiPhoto = await firestoreInstance.getAccountPhoto(uid);
+    return apiPhoto;
   }
 
   Future<bool> requestStoragePermission() async {

@@ -18,6 +18,7 @@ class PostContent extends StatefulWidget {
 class _PostContentState extends State<PostContent> {
   PostController postController = Get.put(PostController());
   PostContentModel get _post => widget.post;
+
   late final List<Map<String, String>> links;
   late final String contentCategory;
   late final DateTime contentCreatedTimestamp;
@@ -28,9 +29,18 @@ class _PostContentState extends State<PostContent> {
   late final bool contentSoftDelete;
   late final String contentTitle;
   late final List<String> contentVideo;
+  late String username = '';
+  late String apiPhoto = '';
 
   bool _showAttachments = false;
   final bool _isDownloading = false;
+
+  @override
+  void dispose() {
+    Get.delete<PostController>();
+
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -45,6 +55,25 @@ class _PostContentState extends State<PostContent> {
     contentSoftDelete = _post.contentSoftDelete;
     contentTitle = _post.contentTitle;
     contentVideo = _post.contentVideo;
+    _initializeUserdetails();
+  }
+
+  Future<void> _initializeUserdetails() async {
+    username = await postController.getUsername();
+    apiPhoto = await postController.getApiPhoto();
+
+    setState(() {});
+  }
+
+  bool checkIfHasAttachements() {
+    if (contentImage.isNotEmpty ||
+        contentVideo.isNotEmpty ||
+        contentFiles.isNotEmpty ||
+        links.isNotEmpty) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @override
@@ -73,10 +102,15 @@ class _PostContentState extends State<PostContent> {
             // Profile Row
             Row(
               children: [
-                CircleAvatar(
-                  radius: screenHeight * 0.03,
-                  child: Image.asset(
-                      'assets/images/application_images/profile.png'),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(screenHeight * 0.027),
+                  child: CircleAvatar(
+                    radius: screenHeight * 0.027,
+                    backgroundImage: apiPhoto == ''
+                        ? AssetImage(
+                            'assets/images/application_images/profile.png')
+                        : NetworkImage(apiPhoto) as ImageProvider,
+                  ),
                 ),
                 Padding(
                   padding: EdgeInsets.only(left: screenHeight * 0.01),
@@ -86,7 +120,7 @@ class _PostContentState extends State<PostContent> {
                       Row(
                         children: [
                           Text(
-                            'rhuelxx',
+                            username,
                             style: TextStyle(
                               color: Colors.black,
                               fontSize: screenHeight * 0.019,
@@ -117,12 +151,16 @@ class _PostContentState extends State<PostContent> {
                         width: screenWidth * 0.3,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(5),
-                          color: Color(0x501877F2),
+                          color: contentCategory == 'Announcement'
+                              ? Color.fromARGB(80, 123, 222, 118)
+                              : Color(0x501877F2),
                         ),
                         child: Text(
                           contentCategory,
                           style: TextStyle(
-                            color: Color(0xFF1877F2),
+                            color: contentCategory == 'Announcement'
+                                ? Color.fromARGB(119, 0, 1, 0)
+                                : Color(0xFF1877F2),
                             fontSize: screenHeight * 0.015,
                             fontWeight: FontWeight.w500,
                           ),
@@ -202,7 +240,9 @@ class _PostContentState extends State<PostContent> {
                           _showAttachments
                               ? Icons.keyboard_arrow_up
                               : Icons.keyboard_arrow_down,
-                          size: screenHeight * 0.025,
+                          size: checkIfHasAttachements()
+                              ? screenHeight * 0.025
+                              : screenHeight * 0,
                         ),
                       ],
                     ),
@@ -217,13 +257,19 @@ class _PostContentState extends State<PostContent> {
                       ? Column(
                           children: [
                             // Image Attachment
-                            DisplayImages(images: []),
+                            contentImage.isEmpty == true
+                                ? SizedBox(
+                                    height: 0,
+                                  )
+                                : DisplayImages(images: contentImage),
 
                             SizedBox(height: screenHeight * 0.01),
 
                             // Video Attachment
                             contentVideo.isEmpty == true
-                                ? SizedBox()
+                                ? SizedBox(
+                                    height: 0,
+                                  )
                                 : DisplayVideoLink(
                                     videoLink: contentVideo.isNotEmpty
                                         ? contentVideo[0]
