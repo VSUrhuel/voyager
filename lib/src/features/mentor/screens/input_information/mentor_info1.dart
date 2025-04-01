@@ -1,6 +1,7 @@
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/controller/about_controller.dart';
 import 'package:voyager/src/features/mentor/controller/mentor_controller.dart';
+import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/features/mentor/screens/input_information/mentor_info2.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/widgets/custom_button.dart';
@@ -10,10 +11,20 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
-class MentorInfo1 extends StatelessWidget {
-  MentorInfo1({super.key});
+class MentorInfo1 extends StatefulWidget {
+  MentorInfo1({super.key, this.mentorModel, this.userModel});
+  final UserModel? userModel;
+  final MentorModel? mentorModel;
 
+  @override
+  State<MentorInfo1> createState() => _MentorInfo1State();
+}
+
+class _MentorInfo1State extends State<MentorInfo1> {
   final AboutController aboutController = AboutController();
+
+  final controller = Get.put(MentorController());
+
   Future<UserModel?> getUserModel(String email) async {
     try {
       return await FirestoreInstance().getUserThroughEmail(email);
@@ -28,8 +39,47 @@ class MentorInfo1 extends StatelessWidget {
   }
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.mentorModel != null) {
+      controller.mentorYearLvl.text = widget.mentorModel!.mentorYearLvl;
+      controller.mentorAbout.text = widget.mentorModel!.mentorAbout;
+      controller.mentorSessionCompleted.text =
+          widget.mentorModel!.mentorSessionCompleted.toString();
+      controller.mentorUserName.text = widget.userModel!.accountUsername;
+      controller.mentorMotto.text = widget.mentorModel!.mentorMotto;
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    controller.mentorYearLvl.clear();
+    controller.mentorAbout.clear();
+    controller.mentorUserName.clear();
+    controller.mentorSessionCompleted.clear();
+    controller.mentorMotto.clear();
+    controller.mentorLanguages.clear();
+    controller.mentorExpHeader.clear();
+    controller.mentorExpDesc.clear();
+    controller.mentorRegDay.clear();
+    controller.mentorRegStartTime.clear();
+    controller.mentorRegEndTime.clear();
+    controller.mentorFbUrl.clear();
+    controller.mentorGitUrl.clear();
+    controller.mentorStatus.clear();
+    controller.mentorExpertise.clear();
+    controller.mentorSoftDeleted.clear();
+    controller.selectedSkills.clear();
+    controller.selectedDays.clear();
+    controller.selectedExpHeader.clear();
+    controller.selectedExpDesc.clear();
+    controller.selectedLanguages.clear();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final controller = Get.put(MentorController());
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -41,6 +91,7 @@ class MentorInfo1 extends StatelessWidget {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
+            dispose();
             Navigator.pop(context);
           },
         ),
@@ -87,6 +138,15 @@ class MentorInfo1 extends StatelessWidget {
                   child: DropdownButtonFormField(
                     decoration: InputDecoration(
                       labelText: 'Year level',
+                      hintText: controller.mentorYearLvl.text.isEmpty
+                          ? null
+                          : controller.mentorYearLvl.text,
+                      hintStyle: TextStyle(
+                        fontSize: screenWidth * 0.04,
+                        height: 1,
+                        color: Colors.grey[600],
+                        fontStyle: FontStyle.italic,
+                      ),
                       labelStyle: TextStyle(
                         fontSize: screenWidth * 0.04,
                         height: 1,
@@ -137,6 +197,15 @@ class MentorInfo1 extends StatelessWidget {
                         maxLines: 6,
                         decoration: InputDecoration(
                           labelText: 'About information',
+                          hintText: controller.mentorAbout.text.isEmpty
+                              ? null
+                              : controller.mentorAbout.text,
+                          hintStyle: TextStyle(
+                            fontSize: screenWidth * 0.04,
+                            height: 1,
+                            color: Colors.grey[600],
+                            fontStyle: FontStyle.italic,
+                          ),
                           labelStyle: TextStyle(
                             fontSize: screenWidth * 0.04,
                             height: 1,
@@ -166,6 +235,15 @@ class MentorInfo1 extends StatelessWidget {
                       icon: Icon(Icons.person_2_rounded,
                           size: screenWidth * 0.08),
                       labelText: 'Username',
+                      hintText: controller.mentorUserName.text.isEmpty
+                          ? null
+                          : controller.mentorUserName.text,
+                      hintStyle: TextStyle(
+                        fontSize: screenWidth * 0.04,
+                        height: 1,
+                        color: Colors.grey[600],
+                        fontStyle: FontStyle.italic,
+                      ),
                       labelStyle: TextStyle(
                         fontSize: screenWidth * 0.04,
                         height: 1,
@@ -198,6 +276,15 @@ class MentorInfo1 extends StatelessWidget {
                         color: Colors.grey[600],
                         fontStyle: FontStyle.italic,
                       ),
+                      hintText: controller.mentorSessionCompleted.text.isEmpty
+                          ? null
+                          : controller.mentorSessionCompleted.text,
+                      hintStyle: TextStyle(
+                        fontSize: screenWidth * 0.04,
+                        height: 1,
+                        color: Colors.grey[600],
+                        fontStyle: FontStyle.italic,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -214,6 +301,15 @@ class MentorInfo1 extends StatelessWidget {
                       fontSize: screenWidth * 0.04,
                     ),
                     decoration: InputDecoration(
+                      hintText: controller.mentorMotto.text.isEmpty
+                          ? null
+                          : controller.mentorMotto.text,
+                      helperStyle: TextStyle(
+                        fontSize: screenWidth * 0.04,
+                        height: 1,
+                        color: Colors.grey[600],
+                        fontStyle: FontStyle.italic,
+                      ),
                       labelText: 'Motto or Quote',
                       labelStyle: TextStyle(
                         fontSize: screenWidth * 0.04,
@@ -246,7 +342,11 @@ class MentorInfo1 extends StatelessWidget {
                       Navigator.push(
                           context,
                           CustomPageRoute(
-                              page: MentorInfo2(),
+                              page: MentorInfo2(
+                                userModel: widget.userModel,
+                                mentorModel: widget.mentorModel,
+                                controller: controller,
+                              ),
                               direction: AxisDirection.left));
                     },
                   ),

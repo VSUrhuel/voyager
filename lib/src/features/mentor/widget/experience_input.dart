@@ -21,6 +21,56 @@ class _ExperienceInputState extends State<ExperienceInput> {
   List<String> selectedExpDesc = [];
   final List<TextEditingController> newHeaderController = [];
   final List<TextEditingController> newDescController = [];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.controller!.mentorExpHeader.text.isNotEmpty &&
+        widget.experienceDesc!.text.isNotEmpty) {
+      // Split the comma-separated strings into lists
+      final headers = widget.experienceHeader!.text.split(',');
+      final descriptions = widget.experienceDesc!.text.split(',');
+
+      // Ensure we have matching pairs
+
+      for (int i = 0; i < headers.length; i++) {
+        existingAddExperienceContainer(headers[i], descriptions[i]);
+      }
+    }
+  }
+
+  void existingAddExperienceContainer(
+      String expereienceHeader, String experienceDesc) {
+    setState(() {
+      var headerController = TextEditingController(text: expereienceHeader);
+      var descController = TextEditingController(text: experienceDesc);
+
+      // Add controllers to lists
+      newHeaderController.add(headerController);
+      newDescController.add(descController);
+
+      // Listen to text changes and update the list
+      headerController.addListener(() {
+        selectedExpHeader =
+            newHeaderController.map((controller) => controller.text).toList();
+        widget.experienceHeader!.text = selectedExpHeader.join(',');
+      });
+
+      descController.addListener(() {
+        selectedExpDesc =
+            newDescController.map((controller) => controller.text).toList();
+        widget.experienceDesc!.text = selectedExpDesc.join(',');
+      });
+
+      // Add new experience container
+      experienceContainers.add(ExperienceContainer(
+        index: experienceContainers.length + 1,
+        experienceHeader: headerController,
+        experienceDesc: descController,
+      ));
+    });
+  }
+
   void _addExperienceContainer() {
     setState(() {
       var headerController = TextEditingController();
@@ -34,13 +84,13 @@ class _ExperienceInputState extends State<ExperienceInput> {
       headerController.addListener(() {
         selectedExpHeader =
             newHeaderController.map((controller) => controller.text).toList();
-        widget.controller!.updateSelectedExpHeader(selectedExpHeader);
+        widget.experienceHeader!.text = selectedExpHeader.join(',');
       });
 
       descController.addListener(() {
         selectedExpDesc =
             newDescController.map((controller) => controller.text).toList();
-        widget.controller!.updateSelectedExpDesc(selectedExpDesc);
+        widget.experienceDesc!.text = selectedExpDesc.join(',');
       });
 
       // Add new experience container
