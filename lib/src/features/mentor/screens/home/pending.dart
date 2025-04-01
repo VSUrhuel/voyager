@@ -1,36 +1,76 @@
 import 'package:flutter/material.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
+import 'package:voyager/src/features/mentor/controller/mentee_list_controller.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/widgets/user_card.dart';
 
 class PendingList extends StatefulWidget {
   final bool isMentorHome;
-  const PendingList({super.key, required this.isMentorHome});
+  const PendingList(
+      {super.key,
+      required this.isMentorHome,
+      required this.menteeListController});
+  final MenteeListController menteeListController;
 
   @override
   State<PendingList> createState() => _PendingListState();
 }
 
 class _PendingListState extends State<PendingList> {
-  late Future<List<UserModel>> pendingMenteesFuture;
+  late Future<List<UserModel>> _pendingMenteesFuture;
+  final FirestoreInstance _firestore = FirestoreInstance();
+  bool _isMounted = false;
 
   @override
   void initState() {
     super.initState();
-    refreshPendingMentees();
+    _isMounted = true;
+    widget.menteeListController.searchMenteeController.addListener(loadNewData);
+    _pendingMenteesFuture = _fetchPendingMentees();
   }
 
-  void refreshPendingMentees() {
+  @override
+  void dispose() {
+    widget.menteeListController.searchMenteeController
+        .removeListener(loadNewData);
+    _isMounted = false;
+    super.dispose();
+  }
+
+  Future<void> refreshPendingMentees() async {
     setState(() {
-      pendingMenteesFuture = getPendingMentees();
+      if (!_isMounted) return;
+      _pendingMenteesFuture = _fetchPendingMentees();
     });
   }
 
-  FirestoreInstance firestore = FirestoreInstance();
+  void loadNewData() {
+    if (!_isMounted) return;
 
-  Future<List<UserModel>> getPendingMentees() async {
-    List<UserModel> mentee = await firestore.getMentees("pending");
-    return mentee;
+    setState(() {
+      _pendingMenteesFuture = _fetchPendingMentees().then((mentees) {
+        final searchText = widget
+            .menteeListController.searchMenteeController.text
+            .toLowerCase();
+        if (searchText.isEmpty) {
+          return mentees; // Return all if no search text
+        }
+        return mentees
+            .where((mentee) =>
+                mentee.accountApiName.toLowerCase().contains(searchText))
+            .toList();
+      });
+    });
+  }
+
+  Future<List<UserModel>> _fetchPendingMentees() async {
+    try {
+      final mentees = await _firestore.getMentees("pending");
+      return mentees;
+    } catch (e) {
+      if (!_isMounted) return [];
+      rethrow;
+    }
   }
 
   @override
@@ -45,7 +85,7 @@ class _PendingListState extends State<PendingList> {
           child: Column(
             children: [
               FutureBuilder<List<UserModel>>(
-                future: pendingMenteesFuture,
+                future: _pendingMenteesFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return FutureBuilder(
@@ -53,8 +93,10 @@ class _PendingListState extends State<PendingList> {
                       builder: (context, delaySnapshot) {
                         if (delaySnapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
+                          return SizedBox(
+                              height: screenHeight * 0.25,
+                              child: const Center(
+                                  child: CircularProgressIndicator()));
                         }
                         refreshPendingMentees(); // Refresh accepted mentees after loading
                         return const Center(
@@ -72,17 +114,19 @@ class _PendingListState extends State<PendingList> {
                       ),
                     );
                   } else {
-                    return Column(
-                      // Use Column to prevent overflow in ListView
-                      children: snapshot.data!
-                          .map((mentee) => UserCard(
-                                user: mentee,
-                                height: screenHeight * 0.80,
-                                actions: ['Accept', 'Reject'],
-                                onActionCompleted: refreshPendingMentees,
-                              ))
-                          .toList(),
-                    );
+                    return SizedBox(
+                        height: screenHeight * 0.6,
+                        child: Column(
+                          // Use Column to prevent overflow in ListView
+                          children: snapshot.data!
+                              .map((mentee) => UserCard(
+                                    user: mentee,
+                                    height: screenHeight * 0.80,
+                                    actions: ['Accept', 'Reject'],
+                                    onActionCompleted: refreshPendingMentees,
+                                  ))
+                              .toList(),
+                        ));
                   }
                 },
               ),

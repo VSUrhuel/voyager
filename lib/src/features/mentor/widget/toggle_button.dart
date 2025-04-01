@@ -15,8 +15,9 @@ class _ToggleButtonState extends State<ToggleButton> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    return Center(
-        child: Column(children: [
+    return SafeArea(
+        child: Center(
+            child: Column(children: [
       Container(
         width: screenWidth * 0.9,
         padding: EdgeInsets.all(10),
@@ -61,8 +62,17 @@ class _ToggleButtonState extends State<ToggleButton> {
           ],
         ),
       ),
-      SizedBox(height: screenWidth * 0.04),
-      _selectedIndex == 0 ? CompletedSession() : UpcomingSession(),
-    ]));
+      const SizedBox(height: 5),
+      Text(
+        'Regular schedule is not yet included in this list. To view your regular schedule, please check the calendar.',
+        style: TextStyle(
+          color: Colors.black,
+          fontSize: screenWidth * 0.025,
+        ),
+        textAlign: TextAlign.center,
+      ),
+      const SizedBox(height: 5),
+      _selectedIndex == 0 ? const CompletedSession() : const UpcomingSession(),
+    ])));
   }
 }

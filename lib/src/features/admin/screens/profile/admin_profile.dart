@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:voyager/src/widgets/profile.dart';
 import 'package:voyager/src/widgets/profile_list_tile.dart';
@@ -10,9 +9,7 @@ class AdminProfile extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    User? user = FirebaseAuth.instance.currentUser;
-    String profileImageURL =
-        user?.photoURL ?? 'assets/images/application_images/profile.png';
+
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -28,8 +25,7 @@ class AdminProfile extends StatelessWidget {
           ),
           centerTitle: true,
         ),
-        body: Container(
-            child: Column(
+        body: Column(
           children: [
             Profile(role: 'Admin'),
             SizedBox(height: screenHeight * 0.03),
@@ -54,7 +50,7 @@ class AdminProfile extends StatelessWidget {
               onTap: () {
                 // Navigator.push(
                 //   context,
-                  // CustomPageRoute(page: AdminPersonalInformation()),
+                // CustomPageRoute(page: AdminPersonalInformation()),
                 // );
               },
             ),
@@ -63,7 +59,7 @@ class AdminProfile extends StatelessWidget {
               onTap: () {
                 // Navigator.push(
                 //   context,
-                  // CustomPageRoute(page: AdminPersonalInformation()),
+                // CustomPageRoute(page: AdminPersonalInformation()),
                 // );
               },
             ),
@@ -72,7 +68,7 @@ class AdminProfile extends StatelessWidget {
               onTap: () {
                 // Navigator.push(
                 //   context,
-                  // CustomPageRoute(page: AdminPersonalInformation()),
+                // CustomPageRoute(page: AdminPersonalInformation()),
                 // );
               },
             ),
@@ -86,6 +82,6 @@ class AdminProfile extends StatelessWidget {
               },
             ),
           ],
-        )));
+        ));
   }
 }

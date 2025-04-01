@@ -1,34 +1,27 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:voyager/src/features/mentor/model/schedule_model.dart';
+import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class UpcomingSchedCard extends StatefulWidget {
+  const UpcomingSchedCard(
+      {super.key, required this.fullName, required this.scheduleModel});
+  final String fullName;
+  final ScheduleModel scheduleModel;
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: Center(
-          child: UpcomingSchedCard(),
-        ),
-      ),
-    );
-  }
+  State<UpcomingSchedCard> createState() => _UpcomingSchedCardState();
 }
 
-class UpcomingSchedCard extends StatelessWidget {
-  const UpcomingSchedCard({super.key});
-
+class _UpcomingSchedCardState extends State<UpcomingSchedCard> {
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: MeetingCard(),
+      child: MeetingCard(
+          scheduleModel: widget.scheduleModel, fullName: widget.fullName),
     );
   }
 }
@@ -57,15 +50,22 @@ String formatName(String fullName) {
   return "$initials $lastName"; // Combine initials and formatted last name
 }
 
-class MeetingCard extends StatelessWidget {
-  const MeetingCard({super.key});
+class MeetingCard extends StatefulWidget {
+  const MeetingCard(
+      {super.key, required this.scheduleModel, required this.fullName});
+  final ScheduleModel scheduleModel;
+  final String fullName;
 
+  @override
+  State<MeetingCard> createState() => _MeetingCardState();
+}
+
+class _MeetingCardState extends State<MeetingCard> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    String fullName = "John Rhuel Laurente";
-    List<String> nameParts = fullName.split(" ");
+    String fullName = widget.fullName;
     String formattedName = formatName(fullName);
     User? user = FirebaseAuth.instance.currentUser;
     String profileImageURL =
@@ -89,7 +89,7 @@ class MeetingCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Today 1:00 PM",
+            "${DateFormat('MMM d, y').format(widget.scheduleModel.scheduleDate)} | ${widget.scheduleModel.scheduleStartTime}",
             style: TextStyle(
               fontSize: screenHeight * 0.025,
               fontWeight: FontWeight.bold,
@@ -116,7 +116,7 @@ class MeetingCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "CS3 Mentor Since 2022",
+                      widget.scheduleModel.scheduleTitle,
                       style: TextStyle(
                         color: Colors.grey[700],
                       ),
@@ -131,12 +131,13 @@ class MeetingCard extends StatelessWidget {
           ),
           SizedBox(height: screenHeight * 0.02),
           Divider(),
-          SizedBox(height: screenHeight * 0.02),
+          SizedBox(height: screenHeight * 0.0),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "15 mins to go",
+                getRemainingTime(widget.scheduleModel.scheduleStartTime,
+                    widget.scheduleModel.scheduleDate),
                 style: TextStyle(color: Colors.blue),
               ),
               ElevatedButton(
@@ -157,5 +158,30 @@ class MeetingCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String getRemainingTime(String startTime, DateTime date) {
+    FirestoreInstance firestoreInstance = Get.put(FirestoreInstance());
+    final convertedTime = firestoreInstance.parseTimeString(startTime);
+    final now = DateTime.now();
+    DateTime newDate = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      convertedTime.hour,
+      convertedTime.minute,
+    );
+    final difference = newDate.difference(now);
+    if (difference.isNegative) {
+      return "Session has ended";
+    } else if (difference.inMinutes == 0) {
+      return "Session is starting now";
+    } else if (difference.inMinutes < 60) {
+      return "${difference.inMinutes} mins to go";
+    } else if (difference.inHours < 24) {
+      return "${(difference.inHours).toString()} hours to go";
+    } else {
+      return "${(difference.inDays).toString()} days to go";
+    }
   }
 }

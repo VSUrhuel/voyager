@@ -1,4 +1,4 @@
-import 'package:voyager/src/features/mentee/widgets/normal_searchBar.dart';
+import 'package:voyager/src/features/mentee/widgets/normal_search_bar.dart';
 import 'package:voyager/src/features/mentee/widgets/small_course_card.dart';
 import 'package:flutter/material.dart';
 

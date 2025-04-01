@@ -1,4 +1,8 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/controller/mentor_controller.dart';
+import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/features/mentor/widget/experience_input.dart';
 import 'package:voyager/src/features/mentor/widget/multiselect.dart';
 import 'package:voyager/src/routing/routes.dart';
@@ -9,13 +13,42 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
-class MentorInfo2 extends StatelessWidget {
-  const MentorInfo2({super.key});
+class MentorInfo2 extends StatefulWidget {
+  const MentorInfo2(
+      {super.key, this.mentorModel, this.userModel, this.controller});
+  final UserModel? userModel;
+  final MentorModel? mentorModel;
+  final MentorController? controller;
+  @override
+  State<MentorInfo2> createState() => _MentorInfo2State();
+}
+
+class _MentorInfo2State extends State<MentorInfo2> {
+  late final MentorController controller;
+  @override
+  void initState() {
+    super.initState();
+    controller = widget.controller ?? Get.put(MentorController());
+    if (widget.mentorModel != null) {
+      controller.selectedDays.value = widget.mentorModel!.mentorRegDay;
+      controller.mentorRegStartTime.text =
+          "${widget.mentorModel!.mentorRegStartTime.hour.toString()} : ${widget.mentorModel!.mentorRegStartTime.minute.toString()}";
+      controller.mentorRegEndTime.text =
+          "${widget.mentorModel!.mentorRegEndTime.hour.toString()} : ${widget.mentorModel!.mentorRegEndTime.minute.toString()}";
+      controller.mentorExpHeader.text =
+          widget.mentorModel!.mentorExpHeader.join(',');
+      controller.mentorExpDesc.text =
+          widget.mentorModel!.mentorExpDesc.join(',');
+      controller.mentorFbUrl.text = widget.mentorModel!.mentorFbUrl;
+      controller.mentorGitUrl.text = widget.mentorModel!.mentorGitUrl;
+      controller.mentorLanguages.text =
+          widget.mentorModel!.mentorLanguages.join(',');
+      controller.selectedSkills.value = widget.mentorModel!.mentorExpertise;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final MentorController controller = Get.put(MentorController());
-
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
@@ -162,6 +195,15 @@ class MentorInfo2 extends StatelessWidget {
                               fontSize: screenWidth * 0.04,
                             ),
                             decoration: InputDecoration(
+                              hintText: controller.mentorFbUrl.text.isEmpty
+                                  ? null
+                                  : controller.mentorFbUrl.text,
+                              hintStyle: TextStyle(
+                                fontSize: screenWidth * 0.04,
+                                height: 1,
+                                color: Colors.grey[600],
+                                fontStyle: FontStyle.italic,
+                              ),
                               labelText: 'Social link',
                               labelStyle: TextStyle(
                                 fontSize: screenWidth * 0.04,
@@ -197,6 +239,15 @@ class MentorInfo2 extends StatelessWidget {
                               fontSize: screenWidth * 0.04,
                             ),
                             decoration: InputDecoration(
+                              hintText: controller.mentorGitUrl.text.isEmpty
+                                  ? null
+                                  : controller.mentorGitUrl.text,
+                              hintStyle: TextStyle(
+                                fontSize: screenWidth * 0.04,
+                                height: 1,
+                                color: Colors.grey[600],
+                                fontStyle: FontStyle.italic,
+                              ),
                               labelText: 'Github link',
                               labelStyle: TextStyle(
                                 fontSize: screenWidth * 0.04,
@@ -217,7 +268,7 @@ class MentorInfo2 extends StatelessWidget {
                       experienceHeader:
                           MentorController.instance.mentorExpHeader,
                       experienceDesc: MentorController.instance.mentorExpDesc,
-                      controller: MentorController.instance),
+                      controller: controller),
                   DefaultButton(
                     buttonText: 'Proceed',
                     bgColor: Color(0xFF1877F2),

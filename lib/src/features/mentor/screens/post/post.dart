@@ -22,8 +22,8 @@ class _PostState extends State<Post> {
 
   @override
   void initState() {
-    super.initState();
     _initializePosts();
+    super.initState();
   }
 
   void _initializePosts() {
@@ -41,6 +41,12 @@ class _PostState extends State<Post> {
         setState(() => _isRefreshing = false);
       }
     }
+  }
+
+  @override
+  void dispose() {
+    Get.delete<PostController>();
+    super.dispose();
   }
 
   @override
@@ -84,7 +90,10 @@ class _PostState extends State<Post> {
                 icon: const FaIcon(FontAwesomeIcons.pen, color: Colors.black),
                 onPressed: () => Navigator.push(
                   context,
-                  CustomPageRoute(page: CreatePost()),
+                  CustomPageRoute(
+                      page: CreatePost(
+                    fromHome: true,
+                  )),
                 ),
               ),
             ),
@@ -108,12 +117,14 @@ class _PostState extends State<Post> {
                   future: postsFuture,
                   builder: (context, snapshot) {
                     if (_isRefreshing) {
-                      return const SizedBox.shrink();
+                      return SizedBox(
+                        height: screenHeight * 0.5,
+                        child: Center(child: CircularProgressIndicator()),
+                      );
                     }
 
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return SizedBox(
-                        height: screenHeight * 0.5,
                         child: const Center(child: CircularProgressIndicator()),
                       );
                     }
@@ -193,8 +204,17 @@ class _PostState extends State<Post> {
         ElevatedButton(
           onPressed: () => Navigator.push(
             context,
-            CustomPageRoute(page: CreatePost()),
-          ),
+            MaterialPageRoute(
+              builder: (context) => const CreatePost(),
+            ),
+          ).then((_) {
+            dispose();
+            if (mounted) {
+              setState(() {
+                postsFuture = postController.getPosts();
+              });
+            }
+          }),
           child: const Text('Create Post'),
         ),
       ],

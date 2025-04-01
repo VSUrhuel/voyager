@@ -1,11 +1,9 @@
 import 'package:voyager/src/features/mentor/screens/profile/mentor_profile.dart';
 import 'package:voyager/src/features/mentor/widget/toggle_button.dart';
-import 'package:voyager/src/widgets/completed_sched_card.dart';
 import 'package:voyager/src/widgets/custom_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:voyager/src/widgets/upcoming_sched_card.dart';
 
 class Session extends StatelessWidget {
   const Session({super.key});
@@ -79,8 +77,8 @@ class Session extends StatelessWidget {
                     top: screenHeight * 0.00),
                 child: Column(children: [
                   ToggleButton(),
-                  CompletedSchedCard(),
-                  UpcomingSchedCard()
+                  //CompletedSchedCard(),
+                  //UpcomingSchedCard()
                 ]))),
       ),
     );

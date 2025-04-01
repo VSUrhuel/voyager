@@ -1,10 +1,11 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/mentor/model/content_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/features/mentor/screens/mentor_dashboard.dart';
@@ -21,7 +22,8 @@ import 'package:voyager/src/repository/supabase_repository/supabase_instance.dar
 import 'package:voyager/src/widgets/custom_page_route.dart';
 
 class CreatePost extends StatefulWidget {
-  const CreatePost({super.key});
+  const CreatePost({super.key, this.fromHome = false});
+  final bool fromHome;
 
   @override
   State<CreatePost> createState() => _CreatePostState();
@@ -38,6 +40,11 @@ class _CreatePostState extends State<CreatePost> {
   final List<File> _images = [];
   File? _video;
   final List<PlatformFile> _platformFiles = [];
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  // }
 
   Future<void> _pickImage() async {
     final pickedImage = await ImagePicker().pickImage(
@@ -72,13 +79,11 @@ class _CreatePostState extends State<CreatePost> {
   }
 
   Future<void> postContent() async {
-    print("called");
     SupabaseInstance supabase = SupabaseInstance(Supabase.instance.client);
     FirestoreInstance firestore = FirestoreInstance();
     MentorModel mentor = await firestore
         .getMentorThroughAccId(FirebaseAuth.instance.currentUser!.uid);
-    CourseMentorModel courseMentor =
-        await firestore.getCourseMentorThroughMentor(mentor.mentorId);
+    String courseMentor = await firestore.getCourseMentorDocId(mentor.mentorId);
     // Upload images
     final imageUrls = await supabase.uploadImages(_images);
 
@@ -109,16 +114,11 @@ class _CreatePostState extends State<CreatePost> {
       contentSoftDelete: false,
       contentTitle: _titlePostController.text,
       contentVideo: videoUrl != null ? [videoUrl] : [],
-      courseMentorId: courseMentor.courseMentorId,
-      contentLinks: _links,
+      courseMentorId: courseMentor,
+      contentLinks: List<Map<String, String>>.from(_links),
     );
 
     await firestore.uploadPostContent(postContent);
-
-    print("Post content uploaded");
-
-    // Save post content to database
-    // await _supabase.savePostContent(postContent);
   }
 
   void _removeImage(File image) => setState(() => _images.remove(image));
@@ -172,6 +172,19 @@ class _CreatePostState extends State<CreatePost> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.of(context).push(
+              CustomPageRoute(
+                page: widget.fromHome
+                    ? MentorDashboard(index: 1)
+                    : MentorDashboard(),
+                direction: AxisDirection.right,
+              ),
+            );
+          },
+          icon: const Icon(Icons.arrow_back),
+        ),
         actions: [
           Padding(
             padding: EdgeInsets.only(right: screenSize.height * 0.02),

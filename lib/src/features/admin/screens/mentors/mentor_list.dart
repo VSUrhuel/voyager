@@ -1,6 +1,6 @@
 import 'package:voyager/src/features/admin/widgets/admin_mentor_card.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
-import 'package:voyager/src/features/mentee/widgets/normal_searchBar.dart';
+import 'package:voyager/src/features/mentee/widgets/normal_search_bar.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +49,7 @@ class _MentorListState extends State<MentorList> {
     try {
       mentors = await firestore.getMentorsThroughStatus(show);
     } catch (e) {
-      print(e);
+      throw Exception('Failed to fetch mentors: $e');
     }
 
     List<MentorCardData> mCards = [];
@@ -81,7 +81,7 @@ class _MentorListState extends State<MentorList> {
         ));
       }
     } catch (e) {
-      print(e);
+      throw Exception('Failed to fetch user data: $e');
     }
 
     setState(() {
@@ -96,8 +96,8 @@ class _MentorListState extends State<MentorList> {
     if (search != '' && search.isNotEmpty) {
       setState(() {
         mentorCards = mentorCards
-            .where((mentorCard) =>
-                mentorCard.name.toLowerCase().contains(search))
+            .where(
+                (mentorCard) => mentorCard.name.toLowerCase().contains(search))
             .toList();
       });
     } else if (search == '') {
@@ -121,13 +121,13 @@ class _MentorListState extends State<MentorList> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-              'Mentor List',
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: screenWidth * 0.05,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+          'Mentor List',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: screenWidth * 0.05,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         centerTitle: true,
       ),
       body: Column(
@@ -312,8 +312,7 @@ class _MentorListState extends State<MentorList> {
                   child: Center(
                     child: Column(
                       children: [
-                        if (isLoading)
-                          CircularProgressIndicator(),
+                        if (isLoading) CircularProgressIndicator(),
                         if (mentorCards.isNotEmpty)
                           for (var mentorCard in mentorCards)
                             AdminMentorCard(
