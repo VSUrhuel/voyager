@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:voyager/src/features/mentor/screens/home/accepted.dart';
 import 'package:voyager/src/features/mentor/screens/home/mentee_list.dart';
 import 'package:voyager/src/features/mentor/screens/home/pending.dart';

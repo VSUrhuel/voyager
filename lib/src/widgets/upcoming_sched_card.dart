@@ -51,7 +51,8 @@ String formatName(String fullName) {
 }
 
 class MeetingCard extends StatefulWidget {
-  MeetingCard({super.key, required this.scheduleModel, required this.fullName});
+  const MeetingCard(
+      {super.key, required this.scheduleModel, required this.fullName});
   final ScheduleModel scheduleModel;
   final String fullName;
 
@@ -135,7 +136,8 @@ class _MeetingCardState extends State<MeetingCard> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "${getRemainingTime(widget.scheduleModel.scheduleStartTime, widget.scheduleModel.scheduleDate)}",
+                getRemainingTime(widget.scheduleModel.scheduleStartTime,
+                    widget.scheduleModel.scheduleDate),
                 style: TextStyle(color: Colors.blue),
               ),
               ElevatedButton(

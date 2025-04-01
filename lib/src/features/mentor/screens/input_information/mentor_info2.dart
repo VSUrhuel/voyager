@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:voyager/src/features/mentor/controller/mentor_controller.dart';
 import 'package:voyager/src/features/mentor/widget/experience_input.dart';
 import 'package:voyager/src/features/mentor/widget/multiselect.dart';

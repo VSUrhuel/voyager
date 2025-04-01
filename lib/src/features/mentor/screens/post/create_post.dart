@@ -1,10 +1,11 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/mentor/model/content_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/features/mentor/screens/mentor_dashboard.dart';
@@ -72,7 +73,6 @@ class _CreatePostState extends State<CreatePost> {
   }
 
   Future<void> postContent() async {
-    print("called");
     SupabaseInstance supabase = SupabaseInstance(Supabase.instance.client);
     FirestoreInstance firestore = FirestoreInstance();
     MentorModel mentor = await firestore
@@ -113,11 +113,6 @@ class _CreatePostState extends State<CreatePost> {
     );
 
     await firestore.uploadPostContent(postContent);
-
-    print("Post content uploaded");
-
-    // Save post content to database
-    // await _supabase.savePostContent(postContent);
   }
 
   void _removeImage(File image) => setState(() => _images.remove(image));

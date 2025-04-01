@@ -25,10 +25,8 @@ class _AcceptedListState extends State<AcceptedList> {
   Future<List<UserModel>> _fetchAcceptedMentees() async {
     try {
       final mentees = await _firestore.getMentees("accepted");
-      print('Fetched ${mentees.length} accepted mentees');
       return mentees;
     } catch (e) {
-      print('Error fetching accepted mentees: $e');
       rethrow; // Re-throw to let FutureBuilder handle it
     }
   }

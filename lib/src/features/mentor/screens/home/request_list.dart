@@ -1,4 +1,4 @@
-import 'package:voyager/src/features/mentee/widgets/normal_searchBar.dart';
+import 'package:voyager/src/features/mentee/widgets/normal_search_bar.dart';
 import 'package:flutter/material.dart';
 
 class RequestList extends StatelessWidget {

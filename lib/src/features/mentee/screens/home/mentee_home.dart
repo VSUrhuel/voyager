@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/screens/home/course_offered.dart';
 import 'package:voyager/src/features/mentee/screens/home/mentors_list.dart';
@@ -40,7 +42,6 @@ class _MenteeHomeState extends State<MenteeHome> {
         );
       });
     } catch (e) {
-      print('Error fetching mentor details: $e');
       return [];
     }
   }

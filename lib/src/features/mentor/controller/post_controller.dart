@@ -71,8 +71,6 @@ class PostController {
       // Add this critical line first
       WidgetsFlutterBinding.ensureInitialized();
 
-      print('Requesting storage permission');
-
       // Check Android version
       if (Platform.isAndroid) {
         final androidInfo = await DeviceInfoPlugin().androidInfo;
@@ -117,7 +115,6 @@ class PostController {
 
       return false;
     } catch (e) {
-      print('Permission error: $e');
       return false;
     }
   }
