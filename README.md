@@ -7,6 +7,21 @@ Development of a Mobile-based Mentorship Application using Flutter for Computer 
 | VG.010.001            | 2025-03-12    |
 | VG.010.002            | 2025-03-24    |
 | VG.010.003            | 2025-03-29    |
+| VG.010.004            | 2025-04-02    |
+
+
+## VG.010.004 Release Notes
+**Mentor Features**  
+- Enabled mentor profile update functionality
+- Implemented screen refresh on navigation transitions
+- Integrated search functionality with refresh support
+- Resolved code warnings and errors for improved debugging
+- Updated mentor schedule view with real-time updates
+  
+**System Improvements**
+- Enhanced backend query performance
+- Implemented data sorting capabilities
+
 
 ## VG.010.003 Release Notes
 **Admin Panel**  
