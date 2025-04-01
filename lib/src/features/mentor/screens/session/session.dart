@@ -67,41 +67,17 @@ class Session extends StatelessWidget {
               ),
             ),
           ),
-          Padding(
-            padding:
-                const EdgeInsets.only(right: 16.0), // Add padding to the right
-            child: CircleAvatar(
-              // Adjust size as needed
-              radius: screenHeight * 0.03,
-              backgroundColor: Colors.grey[200], // Light grey background
-              child: IconButton(
-                icon: FaIcon(
-                  FontAwesomeIcons.plus,
-                  color: Colors.black,
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    CustomPageRoute(page: CreatePost()),
-                  );
-                  // Handle notification tap
-                },
-              ),
-            ),
-          ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Center(
-            child: Padding(
-                padding: EdgeInsets.only(
-                    left: screenWidth * 0.06,
-                    right: screenWidth * 0.05,
-                    top: screenHeight * 0.00),
-                child: Column(children: [
-                  ToggleButton(),
-                ]))),
-      ),
+      body: Center(
+          child: Padding(
+              padding: EdgeInsets.only(
+                  left: screenWidth * 0.06,
+                  right: screenWidth * 0.05,
+                  top: screenHeight * 0.00),
+              child: Column(children: [
+                ToggleButton(),
+              ]))),
     );
   }
 }

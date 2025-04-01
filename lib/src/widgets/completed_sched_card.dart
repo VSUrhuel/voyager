@@ -1,34 +1,44 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:voyager/src/features/mentor/model/schedule_model.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+// void main() {
+//   runApp(const MyApp());
+// }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+// class MyApp extends StatelessWidget {
+//   const MyApp({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       debugShowCheckedModeBanner: false,
+//       home: Scaffold(
+//         body: Center(
+//           child: CompletedSchedCard(),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+class CompletedSchedCard extends StatefulWidget {
+  const CompletedSchedCard(
+      {super.key, required this.scheduleModel, required this.fullName});
+  final ScheduleModel scheduleModel;
+  final String fullName;
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: Center(
-          child: CompletedSchedCard(),
-        ),
-      ),
-    );
-  }
+  State<CompletedSchedCard> createState() => _CompletedSchedCardState();
 }
 
-class CompletedSchedCard extends StatelessWidget {
-  const CompletedSchedCard({super.key});
-
+class _CompletedSchedCardState extends State<CompletedSchedCard> {
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: MeetingCard(),
+      child: MeetingCard(
+          scheduleModel: widget.scheduleModel, name: widget.fullName),
     );
   }
 }
@@ -58,13 +68,15 @@ String formatName(String fullName) {
 }
 
 class MeetingCard extends StatelessWidget {
-  const MeetingCard({super.key});
-
+  const MeetingCard(
+      {super.key, required this.scheduleModel, required this.name});
+  final ScheduleModel scheduleModel;
+  final String name;
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    String fullName = "John Rhuel Laurente";
+    String fullName = name; // Replace with actual full name
     String formattedName = formatName(fullName);
     User? user = FirebaseAuth.instance.currentUser;
     String profileImageURL =
@@ -87,13 +99,13 @@ class MeetingCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min, // Prevent infinite height issue
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Today 1:00 PM",
-            style: TextStyle(
-              fontSize: screenHeight * 0.025,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          // Text(
+          //   "Today 1:00 PM",
+          //   style: TextStyle(
+          //     fontSize: screenHeight * 0.025,
+          //     fontWeight: FontWeight.bold,
+          //   ),
+          // ),
           SizedBox(height: screenWidth * 0.04),
           Row(
             children: [
@@ -115,7 +127,7 @@ class MeetingCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "CS3 Mentor Since 2022",
+                      scheduleModel.scheduleTitle,
                       style: TextStyle(
                         color: Colors.grey[700],
                       ),
@@ -135,7 +147,7 @@ class MeetingCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Jan 12, 2024 - 4:00 PM",
+                "${getMonth(scheduleModel.scheduleDate.month)} ${scheduleModel.scheduleDate.day.toString().padLeft(2, '0')}, ${scheduleModel.scheduleDate.year} -  ${scheduleModel.scheduleStartTime}",
                 style: TextStyle(
                   color: Colors.black,
                 ),
@@ -145,5 +157,36 @@ class MeetingCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String getMonth(int ind) {
+    switch (ind) {
+      case 1:
+        return "Jan";
+      case 2:
+        return "Feb";
+      case 3:
+        return "Mar";
+      case 4:
+        return "Apr";
+      case 5:
+        return "May";
+      case 6:
+        return "Jun";
+      case 7:
+        return "Jul";
+      case 8:
+        return "Aug";
+      case 9:
+        return "Sep";
+      case 10:
+        return "Oct";
+      case 11:
+        return "Nov";
+      case 12:
+        return "Dec";
+      default:
+        return "";
+    }
   }
 }
