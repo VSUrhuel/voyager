@@ -33,12 +33,10 @@ class _PostContentState extends State<PostContent> {
   late String apiPhoto = '';
 
   bool _showAttachments = false;
-  final bool _isDownloading = false;
 
   @override
   void dispose() {
     Get.delete<PostController>();
-
     super.dispose();
   }
 

@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/model/content_model.dart';
@@ -84,7 +83,6 @@ class FirestoreInstance {
         'accountModifiedTimestamp': DateTime.now(),
         'accountSoftDeleted': false,
       });
-      print("doneee");
     } catch (e) {
       Get.snackbar('Error', e.toString());
       rethrow;
@@ -267,8 +265,6 @@ class FirestoreInstance {
           .get();
 
       if (schedule.docs.isNotEmpty) {
-        print("Schedule found for date: $dateOnly");
-        print("Schedule found for date: ${schedule.docs.length}");
         return schedule.docs
             .map((doc) => ScheduleModel.fromJson(doc.data()))
             .toList();
@@ -380,8 +376,6 @@ class FirestoreInstance {
           .replaceAll(RegExp(r'[^\w\s:]'), '')
           .replaceAll(RegExp(r'\s+'), ' '); // Normalize spaces
 
-      // 2. Create a custom format that uses normal space
-      final format = DateFormat('h:mm a'); // Note: normal space;
       if (cleanedTime.contains('PM') || cleanedTime.contains('pm')) {
         final timeWithoutSuffix =
             cleanedTime.replaceAll(RegExp(r'[APMapm]'), '').trim();
@@ -407,7 +401,6 @@ class FirestoreInstance {
         );
       }
     } catch (e) {
-      print('Error parsing "$timeString": $e');
       return const TimeOfDay(hour: 0, minute: 0); // Return midnight as fallback
     }
   }
@@ -577,6 +570,9 @@ class FirestoreInstance {
   Future<void> updateMennteeAlocStatus(
       String courseAllocId, String menteeId, String status) async {
     try {
+      if (status == 'removed') {
+        status = 'rejected';
+      }
       await _db
           .collection('menteeCourseAlloc')
           .where('courseMentorId', isEqualTo: courseAllocId)
@@ -619,9 +615,13 @@ class FirestoreInstance {
 
   Future<List<UserModel>> getMentees(String status) async {
     try {
+      final MentorModel mentor =
+          await getMentorThroughAccId(FirebaseAuth.instance.currentUser!.uid);
+      final String courseMentor = await getCourseMentorDocId(mentor.mentorId);
       final menteeAllocations = await _db
           .collection('menteeCourseAlloc')
           .where('mcaAllocStatus', isEqualTo: status)
+          .where('courseMentorId', isEqualTo: courseMentor)
           .get();
 
       List<UserModel> users = [];
@@ -629,7 +629,6 @@ class FirestoreInstance {
         final menteeId = allocation.data()['menteeId'];
 
         final menteeDoc = await _db.collection('mentee').doc(menteeId).get();
-        print(menteeId);
         if (menteeDoc.exists) {
           users.add(await getUser(menteeDoc.data()!['accountId']));
         }

@@ -1,11 +1,10 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:voyager/src/features/mentor/controller/post_controller.dart';
 import 'package:voyager/src/widgets/horizontal_slider.dart';
 
@@ -44,88 +43,11 @@ class _DisplayImagesState extends State<DisplayImages> {
     );
   }
 
-  Future<bool> _requestStoragePermission() async {
-    try {
-      // Add this critical line first
-      WidgetsFlutterBinding.ensureInitialized();
-
-      print('Requesting storage permission');
-
-      // Check Android version
-      if (Platform.isAndroid) {
-        final androidInfo = await DeviceInfoPlugin().androidInfo;
-
-        // For Android 13+ (API 33+)
-        if (androidInfo.version.sdkInt >= 33) {
-          final photosStatus = await Permission.photos.status;
-          if (!photosStatus.isGranted) {
-            final result = await Permission.photos.request();
-            return result.isGranted;
-          }
-          return true;
-        }
-        // For Android 10-12
-        else if (androidInfo.version.sdkInt >= 29) {
-          final status = await Permission.storage.status;
-          if (!status.isGranted) {
-            final result = await Permission.storage.request();
-            return result.isGranted;
-          }
-          return true;
-        }
-        // For Android <10
-        else {
-          final status = await Permission.storage.status;
-          if (!status.isGranted) {
-            final result = await Permission.storage.request();
-            return result.isGranted;
-          }
-          return true;
-        }
-      }
-      // For iOS
-      else if (Platform.isIOS) {
-        final status = await Permission.photos.status;
-        if (!status.isGranted) {
-          final result = await Permission.photos.request();
-          return result.isGranted;
-        }
-        return true;
-      }
-
-      return false;
-    } catch (e) {
-      print('Permission error: $e');
-      return false;
-    }
-  }
-
-  Future<String> _getDownloadsPath() async {
-    if (Platform.isAndroid) {
-      const downloadsDir = '/storage/emulated/0/Download';
-      if (await Directory(downloadsDir).exists()) {
-        return downloadsDir;
-      }
-
-      // Method 2: Alternative path for some devices
-      const altDownloadsDir = '/sdcard/Download';
-      if (await Directory(altDownloadsDir).exists()) {
-        return altDownloadsDir;
-      }
-    }
-
-    // Fallback to getDownloadsDirectory() if direct paths fail
-    final dir = await getDownloadsDirectory();
-    return dir?.path ??
-        (throw Exception('Could not access downloads directory'));
-  }
-
   Future<void> _downloadImage(String url) async {
     if (_isDownloading) return;
     setState(() {
       _isDownloading = true;
     });
-    print('Downloading image');
     if (!await postController.requestStoragePermission()) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -137,27 +59,20 @@ class _DisplayImagesState extends State<DisplayImages> {
       });
       return;
     }
-    print('Permission granted');
-    final dio = Dio();
     final fileName = url.split('/').last;
-    // 3. Get the Downloads directory
     final String downloadsDir = await postController.getPublicDownloadsPath();
     if (downloadsDir == '') {
       throw Exception('Could not access downloads directory');
     }
 
-    // 4. Create the target file path
     final savePath = '$downloadsDir/$fileName';
-    print('Save path: $savePath');
     final file = File(savePath);
 
-    // 5. Download the file
     final response = await Dio().get(
       url,
       options: Options(responseType: ResponseType.bytes),
     );
 
-    // 6. Save the file
     await file.writeAsBytes(response.data);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

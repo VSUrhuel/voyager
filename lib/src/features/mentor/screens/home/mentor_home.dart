@@ -1,3 +1,6 @@
+// ignore_for_file: library_private_types_in_public_api
+
+import 'package:voyager/src/features/mentor/controller/mentee_list_controller.dart';
 import 'package:voyager/src/features/mentor/screens/home/accepted.dart';
 import 'package:voyager/src/features/mentor/screens/home/mentee_list.dart';
 import 'package:voyager/src/features/mentor/screens/home/pending.dart';
@@ -5,6 +8,8 @@ import 'package:voyager/src/features/mentor/screens/home/request_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:voyager/src/features/mentor/screens/post/create_post.dart';
+import 'package:voyager/src/widgets/custom_page_route.dart';
 
 class MentorHome extends StatefulWidget {
   const MentorHome({super.key});
@@ -14,6 +19,7 @@ class MentorHome extends StatefulWidget {
 }
 
 class _MentorHomeState extends State<MentorHome> {
+  MenteeListController menteeListController = MenteeListController();
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
   final isChanged = false;
@@ -23,15 +29,18 @@ class _MentorHomeState extends State<MentorHome> {
   final GlobalKey _acceptedListKey = GlobalKey();
 
   Future<void> _handleRefresh() async {
-    // Refresh both lists
+    final refreshOp = <Future>[];
     if (_pendingListKey.currentState != null) {
+      //   menteeListController.searchMenteeController.addListener(
+      //      await (_pendingListKey.currentState as dynamic).loadNewData());
+
       (_pendingListKey.currentState as dynamic).refreshPendingMentees();
     }
     if (_acceptedListKey.currentState != null) {
       (_acceptedListKey.currentState as dynamic).refreshAcceptedMentees();
     }
-    await Future.delayed(
-        const Duration(milliseconds: 500)); // Small delay for visual feedback
+    await Future.wait(refreshOp);
+    await Future.delayed(const Duration(milliseconds: 500));
   }
 
   @override
@@ -94,7 +103,14 @@ class _MentorHomeState extends State<MentorHome> {
                   color: Colors.black,
                 ),
                 onPressed: () {
-                  // Handle notification tap
+                  // Handle the button press here
+                  Navigator.push(
+                    context,
+                    CustomPageRoute(
+                      page: CreatePost(),
+                      direction: AxisDirection.left,
+                    ),
+                  ).then((_) => _refreshIndicatorKey.currentState?.show());
                 },
               ),
             ),
@@ -133,8 +149,9 @@ class _MentorHomeState extends State<MentorHome> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => RequestList(),
+                            CustomPageRoute(
+                              page: const RequestList(),
+                              direction: AxisDirection.left,
                             ),
                           ).then(
                               (_) => _refreshIndicatorKey.currentState?.show());
@@ -153,6 +170,7 @@ class _MentorHomeState extends State<MentorHome> {
                   SizedBox(
                     height: screenHeight * 0.26,
                     child: PendingList(
+                      menteeListController: menteeListController,
                       key: _pendingListKey,
                       isMentorHome: true,
                     ),
@@ -173,8 +191,9 @@ class _MentorHomeState extends State<MentorHome> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => MenteeList(),
+                            CustomPageRoute(
+                              page: MenteeList(),
+                              direction: AxisDirection.left,
                             ),
                           ).then(
                               (_) => _refreshIndicatorKey.currentState?.show());
@@ -193,6 +212,7 @@ class _MentorHomeState extends State<MentorHome> {
                   SizedBox(
                     height: screenHeight * 0.3,
                     child: AcceptedList(
+                      menteeListController: menteeListController,
                       key: _acceptedListKey,
                     ),
                   ),

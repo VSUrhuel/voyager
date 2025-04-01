@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -32,7 +34,6 @@ class _DisplayVideoLinkState extends State<DisplayVideoLink> {
 
   PostController postController = Get.put(PostController());
   Future<void> _downloadVideo() async {
-    // Implement video download logic here
     try {
       setState(() {
         _isDownloading = true;
@@ -88,7 +89,6 @@ class _DisplayVideoLinkState extends State<DisplayVideoLink> {
 
   Future<void> _initializeController() async {
     try {
-      // Use network constructor for internet URLs
       _controller = VideoPlayerController.network(widget.videoLink)
         ..addListener(() {
           if (mounted) setState(() {});
@@ -230,6 +230,8 @@ class _DisplayVideoLinkState extends State<DisplayVideoLink> {
   void dispose() {
     _controller.dispose();
     _chewieController?.dispose();
+    _isLoading = false;
+    _chewieController = null;
     super.dispose();
   }
 }

@@ -1,9 +1,10 @@
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:voyager/src/features/mentor/controller/mentor_controller.dart';
 import 'package:voyager/src/features/mentor/controller/schedule_conrtoller.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/features/mentor/model/schedule_model.dart';
@@ -55,9 +56,17 @@ class _CalendarViewState extends State<CalendarView> {
         setState(() => _isLoading = false);
       }
       // Optionally show error to user
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load schedules: ${e.toString()}')));
     }
+  }
+
+  @override
+  void dispose() {
+    scheduleConrtoller.scheduleTitle.text = "";
+    scheduleConrtoller.scheduleDescription.text = "";
+    scheduleConrtoller.scheduleStartTime.text = "";
+    scheduleConrtoller.scheduleEndTime.text = "";
+    scheduleConrtoller.scheduleRoomName.text = "";
+    super.dispose();
   }
 
   @override
@@ -439,38 +448,6 @@ class _CalendarViewState extends State<CalendarView> {
                                         iconColor: Colors.blue,
                                       )
                                     : SizedBox(),
-
-                                // Task(
-                                //   taskName: 'Task 2',
-                                //   taskDescription:
-                                //       'Sessddddddddion with student at 11:00 AM',
-                                //   icon: CupertinoIcons.clock_fill,
-                                //   iconColor: Colors.orange,
-                                // ),
-                                // SizedBox(height: screenHeight * 0.02),
-                                // Task(
-                                //   taskName: 'Task 2',
-                                //   taskDescription:
-                                //       'Session with student at 11:00 AM',
-                                //   icon: CupertinoIcons.clock_fill,
-                                //   iconColor: Colors.orange,
-                                // ),
-                                // SizedBox(height: screenHeight * 0.02),
-                                // Task(
-                                //   taskName: 'Task 2',
-                                //   taskDescription:
-                                //       'Session with student at 11:00 AM',
-                                //   icon: CupertinoIcons.clock_fill,
-                                //   iconColor: Colors.orange,
-                                // ),
-                                // SizedBox(height: screenHeight * 0.02),
-                                // Task(
-                                //   taskName: 'Task 2',
-                                //   taskDescription:
-                                //       'Session with student at 11:00 AM',
-                                //   icon: CupertinoIcons.clock_fill,
-                                //   iconColor: Colors.orange,
-                                // ),
                               ],
                             ),
                           ],

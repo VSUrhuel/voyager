@@ -32,8 +32,7 @@ class MenteeProfile extends StatelessWidget {
           ),
           centerTitle: false,
         ),
-        body: Container(
-            child: Column(
+        body: Column(
           children: [
             SizedBox(height: screenHeight * 0.025),
             Profile(role: 'mentee'),
@@ -91,6 +90,6 @@ class MenteeProfile extends StatelessWidget {
               },
             ),
           ],
-        )));
+        ));
   }
 }

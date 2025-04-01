@@ -1,9 +1,12 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 
+// ignore: must_be_immutable
 class UserCard extends StatelessWidget {
   UserCard(
       {super.key,
@@ -35,7 +38,7 @@ class UserCard extends StatelessWidget {
 
     MentorModel mentor = await firestore
         .getMentorThroughAccId(FirebaseAuth.instance.currentUser!.uid);
-    print(mentor.mentorId);
+
     String courseMentorId = await firestore.getCourseMentorId(mentor.mentorId);
 
     String menteeId = await firestore.getMenteeId(user.accountApiID);

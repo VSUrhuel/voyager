@@ -1,4 +1,4 @@
-
+// ignore_for_file: depend_on_referenced_packages
 
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
@@ -7,7 +7,7 @@ import 'package:image_picker/image_picker.dart';
 // import 'dart:io';
 // import 'package:voyager/src/widgets/custom_button.dart';
 
-class CoverPhotoPicker extends StatefulWidget{
+class CoverPhotoPicker extends StatefulWidget {
   const CoverPhotoPicker({super.key});
 
   @override
@@ -19,10 +19,11 @@ class CoverPhotoPickerState extends State<CoverPhotoPicker> {
   final picker = ImagePicker();
 
   Future<void> _pickImage() async {
-    final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedFile =
+        await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-      setState((){
+      setState(() {
         _image = pickedFile;
       });
     }
@@ -32,20 +33,19 @@ class CoverPhotoPickerState extends State<CoverPhotoPicker> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
-    String fileName = _image != null
-    ? basename(_image!.path)
-    :'Choose Course Cover Photo';
+    String fileName =
+        _image != null ? basename(_image!.path) : 'Choose Course Cover Photo';
     return TextButton(
-          onPressed: _pickImage,
-           child: Text(fileName,
-           style: TextStyle(
-              fontSize: screenWidth * 0.04,
-              height: 1,
-              color: Colors.grey[600],
-              fontStyle: FontStyle.italic,
-            ),
-            
-           ),
-        );
+      onPressed: _pickImage,
+      child: Text(
+        fileName,
+        style: TextStyle(
+          fontSize: screenWidth * 0.04,
+          height: 1,
+          color: Colors.grey[600],
+          fontStyle: FontStyle.italic,
+        ),
+      ),
+    );
   }
 }
