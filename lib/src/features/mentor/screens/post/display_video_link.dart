@@ -144,7 +144,11 @@ class _DisplayVideoLinkState extends State<DisplayVideoLink> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 10),
-        _buildVideoContent(),
+        widget.videoLink == ''
+            ? SizedBox(
+                height: 0,
+              )
+            : _buildVideoContent(),
         if (_isDownloading) ...[
           const SizedBox(height: 8),
           LinearProgressIndicator(value: _downloadProgress),

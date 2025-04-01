@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:voyager/src/features/mentor/controller/post_controller.dart';
+import 'package:voyager/src/widgets/horizontal_slider.dart';
 
 class DisplayImages extends StatefulWidget {
   final List<String> images;
@@ -19,7 +20,7 @@ class DisplayImages extends StatefulWidget {
 class _DisplayImagesState extends State<DisplayImages> {
   bool _isDownloading = false;
   PostController postController = Get.put(PostController());
-  void _showFullScreenImage(BuildContext context) {
+  void _showFullScreenImage(BuildContext context, String imageUrl) {
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -34,7 +35,7 @@ class _DisplayImagesState extends State<DisplayImages> {
             minScale: 0.5,
             maxScale: 4.0,
             child: Image.network(
-              'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/post-files/images/image_1743009700328.jpg',
+              imageUrl,
               fit: BoxFit.contain,
             ),
           ),
@@ -173,69 +174,83 @@ class _DisplayImagesState extends State<DisplayImages> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    return Padding(
-        padding: EdgeInsets.only(right: screenWidth * 0.01),
-        child: Stack(
-          children: [
-            GestureDetector(
-                onTap: () => _showFullScreenImage(context),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/post-files/images/image_1743009700328.jpg',
-                    width: screenHeight * 0.18,
-                    height: screenHeight * 0.18,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Container(
-                          width: screenHeight * 0.18,
-                          height: screenHeight * 0.18,
-                          color: Colors.grey[200],
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!
-                                  : null,
-                            ),
-                          ));
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: screenHeight * 0.18,
-                        height: screenHeight * 0.18,
-                        color: Colors.grey[200],
-                        child: Center(
-                          child:
-                              Icon(Icons.broken_image, color: Colors.grey[400]),
+    return widget.images.isNotEmpty == true
+        ? HorizontalWidgetSlider(widgets: [
+            for (int i = 0; i < widget.images.length; i++)
+              Padding(
+                padding: EdgeInsets.only(right: screenWidth * 0.01),
+                child: Stack(
+                  children: [
+                    GestureDetector(
+                      onTap: () =>
+                          _showFullScreenImage(context, widget.images[i]),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.network(
+                          widget.images[i],
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              width: screenHeight * 0.18,
+                              height: screenHeight * 0.18,
+                              color: Colors.grey[200],
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  value: loadingProgress.expectedTotalBytes !=
+                                          null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
+                                      : null,
+                                ),
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              width: screenHeight * 0.18,
+                              height: screenHeight * 0.18,
+                              color: Colors.grey[200],
+                              child: Center(
+                                child: Icon(Icons.broken_image,
+                                    color: Colors.grey[400]),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
-                )),
-            Positioned(
-                bottom: 4,
-                right: 4,
-                height: screenHeight * 0.037,
-                width: screenHeight * 0.04,
-                child: FloatingActionButton(
-                  mini: true,
-                  backgroundColor: Colors.white,
-                  onPressed: () => _downloadImage(
-                      'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/post-files/images/image_1743009700328.jpg'),
-                  child: _isDownloading
-                      ? SizedBox(
-                          height: screenHeight * 0.02,
-                          width: screenHeight * 0.02,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation(Colors.blue),
-                          ))
-                      : Icon(Icons.download_rounded,
-                          color: Colors.blue, size: screenHeight * 0.02),
-                ))
-          ],
-        ));
+                      ),
+                    ),
+                    Positioned(
+                      top: 4,
+                      right: 4,
+                      child: FloatingActionButton(
+                        mini: true,
+                        backgroundColor: Colors.white,
+                        onPressed: () => _downloadImage(
+                            widget.images[i]), // Use current image URL
+                        child: _isDownloading
+                            ? SizedBox(
+                                height: screenHeight * 0.02,
+                                width: screenHeight * 0.02,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor:
+                                      AlwaysStoppedAnimation(Colors.blue),
+                                ),
+                              )
+                            : Icon(
+                                Icons.download_rounded,
+                                color: Colors.blue,
+                                size: screenHeight * 0.02,
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ])
+        : SizedBox(
+            height: 0,
+          );
   }
 }

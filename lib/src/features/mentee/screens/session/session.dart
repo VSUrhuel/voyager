@@ -79,8 +79,8 @@ class Session extends StatelessWidget {
                     top: screenHeight * 0.00),
                 child: Column(children: [
                   ToggleButton(),
-                  CompletedSchedCard(),
-                  UpcomingSchedCard()
+                  //CompletedSchedCard(),
+                  //UpcomingSchedCard()
                 ]))),
       ),
     );

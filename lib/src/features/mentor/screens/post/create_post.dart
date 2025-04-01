@@ -77,8 +77,7 @@ class _CreatePostState extends State<CreatePost> {
     FirestoreInstance firestore = FirestoreInstance();
     MentorModel mentor = await firestore
         .getMentorThroughAccId(FirebaseAuth.instance.currentUser!.uid);
-    CourseMentorModel courseMentor =
-        await firestore.getCourseMentorThroughMentor(mentor.mentorId);
+    String courseMentor = await firestore.getCourseMentorDocId(mentor.mentorId);
     // Upload images
     final imageUrls = await supabase.uploadImages(_images);
 
@@ -109,8 +108,8 @@ class _CreatePostState extends State<CreatePost> {
       contentSoftDelete: false,
       contentTitle: _titlePostController.text,
       contentVideo: videoUrl != null ? [videoUrl] : [],
-      courseMentorId: courseMentor.courseMentorId,
-      contentLinks: _links,
+      courseMentorId: courseMentor,
+      contentLinks: List<Map<String, String>>.from(_links),
     );
 
     await firestore.uploadPostContent(postContent);
