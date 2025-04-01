@@ -66,6 +66,12 @@ class _MultiselectState extends State<Multiselect> {
       padding: EdgeInsets.only(top: screenWidth * 0.01),
       child: Center(
         child: DropDownMultiSelect(
+          hint: selectedItems.isEmpty ? null : Text(selectedItems.join(', ')),
+          hintStyle: TextStyle(
+            fontSize: screenWidth * 0.04,
+            fontWeight: FontWeight.w500, // Slightly bold
+            color: Colors.grey[600],
+          ),
           onChanged: _updateSelection,
           options: items,
           selectedValues: selectedItems,
