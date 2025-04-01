@@ -570,6 +570,9 @@ class FirestoreInstance {
   Future<void> updateMennteeAlocStatus(
       String courseAllocId, String menteeId, String status) async {
     try {
+      if (status == 'removed') {
+        status = 'rejected';
+      }
       await _db
           .collection('menteeCourseAlloc')
           .where('courseMentorId', isEqualTo: courseAllocId)
@@ -612,9 +615,13 @@ class FirestoreInstance {
 
   Future<List<UserModel>> getMentees(String status) async {
     try {
+      final MentorModel mentor =
+          await getMentorThroughAccId(FirebaseAuth.instance.currentUser!.uid);
+      final String courseMentor = await getCourseMentorDocId(mentor.mentorId);
       final menteeAllocations = await _db
           .collection('menteeCourseAlloc')
           .where('mcaAllocStatus', isEqualTo: status)
+          .where('courseMentorId', isEqualTo: courseMentor)
           .get();
 
       List<UserModel> users = [];

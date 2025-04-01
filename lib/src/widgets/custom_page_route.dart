@@ -6,14 +6,19 @@ class CustomPageRoute extends PageRouteBuilder {
 
   CustomPageRoute({required this.page, this.direction = AxisDirection.left})
       : super(
-          transitionDuration: Duration(milliseconds: 500),
-          reverseTransitionDuration: Duration(milliseconds: 500),
+          transitionDuration: const Duration(milliseconds: 500),
+          reverseTransitionDuration: const Duration(milliseconds: 500),
           pageBuilder: (context, animation, secondaryAnimation) => page,
+          maintainState: false,
         );
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation, Widget child) {
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
     return SlideTransition(
       position: Tween<Offset>(
         begin: getBeginOffset(direction),
@@ -22,6 +27,18 @@ class CustomPageRoute extends PageRouteBuilder {
       child: child,
     );
   }
+
+  @override
+  bool get opaque => false; // Allows seeing the previous page during transition
+
+  @override
+  bool get barrierDismissible => false;
+
+  @override
+  Color? get barrierColor => null;
+
+  @override
+  String? get barrierLabel => null;
 
   Offset getBeginOffset(AxisDirection direction) {
     switch (direction) {

@@ -60,6 +60,16 @@ class _CalendarViewState extends State<CalendarView> {
   }
 
   @override
+  void dispose() {
+    scheduleConrtoller.scheduleTitle.text = "";
+    scheduleConrtoller.scheduleDescription.text = "";
+    scheduleConrtoller.scheduleStartTime.text = "";
+    scheduleConrtoller.scheduleEndTime.text = "";
+    scheduleConrtoller.scheduleRoomName.text = "";
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -438,38 +448,6 @@ class _CalendarViewState extends State<CalendarView> {
                                         iconColor: Colors.blue,
                                       )
                                     : SizedBox(),
-
-                                // Task(
-                                //   taskName: 'Task 2',
-                                //   taskDescription:
-                                //       'Sessddddddddion with student at 11:00 AM',
-                                //   icon: CupertinoIcons.clock_fill,
-                                //   iconColor: Colors.orange,
-                                // ),
-                                // SizedBox(height: screenHeight * 0.02),
-                                // Task(
-                                //   taskName: 'Task 2',
-                                //   taskDescription:
-                                //       'Session with student at 11:00 AM',
-                                //   icon: CupertinoIcons.clock_fill,
-                                //   iconColor: Colors.orange,
-                                // ),
-                                // SizedBox(height: screenHeight * 0.02),
-                                // Task(
-                                //   taskName: 'Task 2',
-                                //   taskDescription:
-                                //       'Session with student at 11:00 AM',
-                                //   icon: CupertinoIcons.clock_fill,
-                                //   iconColor: Colors.orange,
-                                // ),
-                                // SizedBox(height: screenHeight * 0.02),
-                                // Task(
-                                //   taskName: 'Task 2',
-                                //   taskDescription:
-                                //       'Session with student at 11:00 AM',
-                                //   icon: CupertinoIcons.clock_fill,
-                                //   iconColor: Colors.orange,
-                                // ),
                               ],
                             ),
                           ],

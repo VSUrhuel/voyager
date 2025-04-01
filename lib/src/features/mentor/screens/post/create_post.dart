@@ -22,7 +22,8 @@ import 'package:voyager/src/repository/supabase_repository/supabase_instance.dar
 import 'package:voyager/src/widgets/custom_page_route.dart';
 
 class CreatePost extends StatefulWidget {
-  const CreatePost({super.key});
+  const CreatePost({super.key, this.fromHome = false});
+  final bool fromHome;
 
   @override
   State<CreatePost> createState() => _CreatePostState();
@@ -39,6 +40,11 @@ class _CreatePostState extends State<CreatePost> {
   final List<File> _images = [];
   File? _video;
   final List<PlatformFile> _platformFiles = [];
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  // }
 
   Future<void> _pickImage() async {
     final pickedImage = await ImagePicker().pickImage(
@@ -166,6 +172,19 @@ class _CreatePostState extends State<CreatePost> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.of(context).push(
+              CustomPageRoute(
+                page: widget.fromHome
+                    ? MentorDashboard(index: 1)
+                    : MentorDashboard(),
+                direction: AxisDirection.right,
+              ),
+            );
+          },
+          icon: const Icon(Icons.arrow_back),
+        ),
         actions: [
           Padding(
             padding: EdgeInsets.only(right: screenSize.height * 0.02),

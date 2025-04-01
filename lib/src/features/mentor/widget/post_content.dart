@@ -37,7 +37,6 @@ class _PostContentState extends State<PostContent> {
   @override
   void dispose() {
     Get.delete<PostController>();
-
     super.dispose();
   }
 

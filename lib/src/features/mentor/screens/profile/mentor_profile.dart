@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:voyager/src/features/mentor/screens/mentor_dashboard.dart';
 import 'package:voyager/src/features/mentor/screens/profile/personal_information_mentor.dart';
 import 'package:voyager/src/widgets/custom_page_route.dart';
 import 'package:voyager/src/widgets/profile.dart';
@@ -19,7 +20,14 @@ class MentorProfile extends StatelessWidget {
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).push(
+                CustomPageRoute(
+                  page: MentorDashboard(index: 0),
+                  direction: AxisDirection.right,
+                ),
+              );
+            },
           ),
           title: const Text(
             "My Profile",

@@ -22,8 +22,8 @@ class _PostState extends State<Post> {
 
   @override
   void initState() {
-    super.initState();
     _initializePosts();
+    super.initState();
   }
 
   void _initializePosts() {
@@ -90,7 +90,10 @@ class _PostState extends State<Post> {
                 icon: const FaIcon(FontAwesomeIcons.pen, color: Colors.black),
                 onPressed: () => Navigator.push(
                   context,
-                  CustomPageRoute(page: CreatePost()),
+                  CustomPageRoute(
+                      page: CreatePost(
+                    fromHome: true,
+                  )),
                 ),
               ),
             ),
@@ -114,8 +117,8 @@ class _PostState extends State<Post> {
                   future: postsFuture,
                   builder: (context, snapshot) {
                     if (_isRefreshing) {
-                      return const SizedBox(
-                        height: 100,
+                      return SizedBox(
+                        height: screenHeight * 0.5,
                         child: Center(child: CircularProgressIndicator()),
                       );
                     }
@@ -201,7 +204,9 @@ class _PostState extends State<Post> {
         ElevatedButton(
           onPressed: () => Navigator.push(
             context,
-            CustomPageRoute(page: CreatePost()),
+            MaterialPageRoute(
+              builder: (context) => const CreatePost(),
+            ),
           ).then((_) {
             dispose();
             if (mounted) {
