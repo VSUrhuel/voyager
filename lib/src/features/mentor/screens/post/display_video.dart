@@ -36,7 +36,6 @@ class _DisplayVideoState extends State<DisplayVideo> {
         if (mounted) {
           setState(() => _isLoading = false);
         }
-        print("Error initializing video: $error");
       });
   }
 

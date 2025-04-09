@@ -1,4 +1,4 @@
-import 'package:voyager/src/features/mentee/widgets/normal_searchBar.dart';
+import 'package:voyager/src/features/mentee/widgets/normal_search_bar.dart';
 import 'package:voyager/src/features/mentee/widgets/small_mentor_card.dart';
 import 'package:flutter/material.dart';
 
@@ -8,7 +8,7 @@ class MentorsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+
     int itemCount = 6; // Number of SmallMentorCards
     List<Widget> rows = [];
 

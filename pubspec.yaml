@@ -41,6 +41,11 @@ dependencies:
   open_filex: ^4.7.0
   path_provider: ^2.1.5
   url_launcher: ^6.3.1
+  chewie: ^1.11.0
+  dio: ^5.8.0+1
+  permission_handler: ^11.4.0
+  device_info_plus: ^11.3.0
+
 
 dev_dependencies:
   flutter_test:
@@ -49,10 +54,10 @@ dev_dependencies:
 
 flutter_native_splash:
   color: "#ffffff"
-  image: assets/images/application_images/eduvate_cover.png
+  image: assets/images/application_images/eduvate_native_splash_logo.png
   android_12:
     icon_background_color: "#ffffff"
-    image: assets/images/application_images/eduvate_cover.png
+    image: assets/images/application_images/eduvate_native_splash_logo.png
 
 flutter:
   uses-material-design: true

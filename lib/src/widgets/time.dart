@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'dart:ui' as ui show TextDirection;
+
+import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 
 class TimePicker extends StatefulWidget {
   final String titleLabel;
@@ -19,11 +23,17 @@ class _TimePickerState extends State<TimePicker> {
   void initState() {
     super.initState();
     controller = widget.controller;
+    if (controller.text.isNotEmpty) {
+      selectedTime = FirestoreInstance().parseTimeString(controller.text);
+      //selectedTime = TimeOfDay.fromDateTime(DateTime.parse(controller.text));
+    } else {
+      selectedTime = null;
+    }
   }
 
   TimePickerEntryMode entryMode = TimePickerEntryMode.dial;
   Orientation? orientation;
-  TextDirection textDirection = TextDirection.ltr;
+  ui.TextDirection textDirection = ui.TextDirection.ltr;
   MaterialTapTargetSize tapTargetSize = MaterialTapTargetSize.padded;
   bool use24HourTime = false;
 

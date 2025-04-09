@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:file_picker/file_picker.dart';
 
@@ -19,10 +20,8 @@ class SupabaseInstance {
           _supabase.storage.from('post-files').getPublicUrl('images/$fileName');
       return url;
     } on StorageException catch (e) {
-      print('Supabase storage error: ${e.message}');
-      return null;
+      throw Exception('Supabase storage error: ${e.message}');
     } catch (e) {
-      print('Error uploading image: $e');
       return null;
     }
   }
@@ -50,10 +49,10 @@ class SupabaseInstance {
           .getPublicUrl('videos/$videoName');
       return url;
     } on StorageException catch (e) {
-      print('Supabase storage error: ${e.message}');
+      debugPrint('Supabase storage error: ${e.message}');
       return '';
     } catch (e) {
-      print('Error uploading video: $e');
+      debugPrint('Error uploading video: $e');
       return '';
     }
   }
@@ -71,10 +70,10 @@ class SupabaseInstance {
           _supabase.storage.from('post-files').getPublicUrl('files/$fileName');
       return url;
     } on StorageException catch (e) {
-      print('Supabase storage error: ${e.message}');
+      debugPrint('Supabase storage error: ${e.message}');
       return '';
     } catch (e) {
-      print('Error uploading file: $e');
+      debugPrint('Error uploading file: $e');
       return '';
     }
   }
