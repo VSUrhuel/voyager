@@ -1,6 +1,7 @@
 // ignore_for_file: library_private_types_in_public_api
 
 import 'package:voyager/src/features/authentication/models/user_model.dart';
+import 'package:voyager/src/features/mentee/model/course_model.dart';
 import 'package:voyager/src/features/mentee/screens/home/course_offered.dart';
 import 'package:voyager/src/features/mentee/screens/home/mentors_list.dart';
 import 'package:voyager/src/features/mentee/screens/home/notification.dart';
@@ -24,10 +25,10 @@ class MenteeHome extends StatefulWidget {
 }
 
 class _MenteeHomeState extends State<MenteeHome> {
-  final auth = Get.put(FirebaseAuthenticationRepository());
   User? user = FirebaseAuth.instance.currentUser;
   FirestoreInstance firestoreInstance = FirestoreInstance();
 
+  // Fetch mentors with details
   Future<List<MentorCard>> fetchMentorsWithDetails() async {
     try {
       List<UserModel> users = await firestoreInstance.getMentors();
@@ -39,6 +40,21 @@ class _MenteeHomeState extends State<MenteeHome> {
         return MentorCard(
           mentorModel: mentorDetails[index],
           user: users[index],
+        );
+      });
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // Fetch courses with details (similar to fetching mentors)
+  Future<List<CourseCard>> fetchCoursesWithDetails() async {
+    try {
+      List<CourseModel> courses = await firestoreInstance.getCourses();
+
+      return List.generate(courses.length, (index) {
+        return CourseCard(
+          courseModel: courses[index],
         );
       });
     } catch (e) {
@@ -168,12 +184,22 @@ class _MenteeHomeState extends State<MenteeHome> {
                     ),
                   ],
                 ),
-                HorizontalWidgetSlider(
-                  widgets: [
-                    CourseCard(),
-                    CourseCard(),
-                    CourseCard(),
-                  ],
+                // Updated HorizontalWidgetSlider for Courses
+                FutureBuilder<List<CourseCard>>(
+                  future: fetchCoursesWithDetails(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError ||
+                        !snapshot.hasData ||
+                        snapshot.data!.isEmpty) {
+                      return Center(child: Text("No courses available"));
+                    }
+                    return HorizontalWidgetSlider(
+                      widgets: snapshot.data!,
+                    );
+                  },
                 ),
                 SizedBox(height: 20),
                 Row(
@@ -200,6 +226,7 @@ class _MenteeHomeState extends State<MenteeHome> {
                     ),
                   ],
                 ),
+                // HorizontalWidgetSliderMentor for Mentors
                 FutureBuilder<List<MentorCard>>(
                   future: fetchMentorsWithDetails(),
                   builder: (context, snapshot) {

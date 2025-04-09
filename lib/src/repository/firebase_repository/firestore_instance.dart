@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
+import 'package:voyager/src/features/mentee/model/course_model.dart';
 import 'package:voyager/src/features/mentor/model/content_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -670,6 +671,39 @@ class FirestoreInstance {
       });
     } catch (e) {
       rethrow;
+    }
+  }
+
+  Future<List<CourseModel>> getCourses() async {
+    try {
+      final courses = await _db
+          .collection('course')
+          .where('courseSoftDelete', isEqualTo: false)
+          .get();
+      List<CourseModel> courseList = [];
+      for (var course in courses.docs) {
+        courseList.add(
+            CourseModel.fromJson(course.data(), course.id)); //l Pass doc.id
+      }
+      return courseList;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<int> getTotalMentorsForCourse(String docId) async {
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('courseMentor')
+          .where('courseMentorId', isEqualTo: docId)
+          .where('courseMentorSoftDelete', isEqualTo: false)
+          .get();
+      print(querySnapshot.docs.length);
+
+      return querySnapshot.docs.length; // Return the count
+    } catch (e) {
+      print('Error fetching course mentors: $e');
+      return 0;
     }
   }
 }
