@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CourseModel {
-  final String docId; // <-- Add this
+  final String docId;
   final String courseCode;
   final String courseName;
   final String courseDescription;
@@ -13,7 +13,7 @@ class CourseModel {
   final DateTime courseModifiedTimestamp;
 
   CourseModel({
-    required this.docId, // <-- Add this
+    required this.docId,
     required this.courseCode,
     required this.courseName,
     required this.courseDescription,
