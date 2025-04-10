@@ -66,6 +66,7 @@ class FirestoreInstance {
       if ((await getAPIId()).contains(auth.firebaseUser.value?.uid)) {
         return;
       }
+
       await _db.collection('users').doc(userUid).set({
         'accountApiID':
             auth.firebaseUser.value?.uid ?? "", // Use empty string if null
@@ -73,8 +74,8 @@ class FirestoreInstance {
             auth.firebaseUser.value?.email ?? "", // Provide a default
         'accountApiName': auth.firebaseUser.value?.displayName ??
             "Unknown", // Provide default name
-        'accountApiPhoto':
-            auth.firebaseUser.value?.photoURL ?? "", // Handle null safely
+        'accountApiPhoto': auth.firebaseUser.value?.photoURL ??
+            "https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/profile-picture//profile.png", // Handle null safely
         'accountPassword': '',
         'accountUsername': auth.firebaseUser.value?.displayName ??
             "Unknown", // Provide default username
@@ -126,6 +127,16 @@ class FirestoreInstance {
     }
   }
 
+  Future<void> updateProfileImage(String url, String uid) async {
+    try {
+      await _db.collection('users').doc(uid).update({
+        'accountApiPhoto': url,
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> updateStudentID(String studentID, String uid) async {
     try {
       await _db.collection('users').doc(uid).update({
@@ -154,6 +165,7 @@ class FirestoreInstance {
             .collection('mentors')
             .doc(mentor.mentorId)
             .update(mentor.toJson());
+
         return;
       }
       await _db.collection('mentors').doc(mentor.mentorId).set(mentor.toJson());

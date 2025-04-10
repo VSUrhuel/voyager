@@ -112,29 +112,25 @@ class _AcceptedListState extends State<AcceptedList> {
                       }
 
                       if (snapshot.hasError) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text('Failed to load mentees'),
-                              const SizedBox(height: 16),
-                              ElevatedButton(
-                                onPressed: refreshAcceptedMentees,
-                                child: const Text('Retry'),
-                              ),
-                            ],
-                          ),
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text('Failed to load mentees'),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: refreshAcceptedMentees,
+                              child: const Text('Retry'),
+                            ),
+                          ],
                         );
                       }
 
                       if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return Center(
-                          child: Text(
-                            'No accepted mentees found',
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: screenWidth * 0.033,
-                            ),
+                        return Text(
+                          'No accepted mentees found',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: screenWidth * 0.033,
                           ),
                         );
                       }

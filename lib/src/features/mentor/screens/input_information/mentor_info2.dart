@@ -1,5 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:io';
+
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/controller/mentor_controller.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
@@ -15,10 +17,15 @@ import 'package:get/get.dart';
 
 class MentorInfo2 extends StatefulWidget {
   const MentorInfo2(
-      {super.key, this.mentorModel, this.userModel, this.controller});
+      {super.key,
+      this.mentorModel,
+      this.userModel,
+      this.controller,
+      this.image});
   final UserModel? userModel;
   final MentorModel? mentorModel;
   final MentorController? controller;
+  final File? image;
   @override
   State<MentorInfo2> createState() => _MentorInfo2State();
 }
@@ -276,13 +283,14 @@ class _MentorInfo2State extends State<MentorInfo2> {
                     isLoading: false,
                     borderColor: Colors.transparent,
                     onPressed: () async {
-                      await controller.generateMentor();
-                      await controller.updateUsername();
+                      await controller.updateMentorInformation();
+                      await controller.updateUsername(widget.image);
+
                       Navigator.pushNamed(
                         context,
                         MRoutes.splash,
                       );
-                      controller.dispose();
+                      //controller.dispose();
                     },
                   ),
                   SizedBox(

@@ -26,6 +26,24 @@ class SupabaseInstance {
     }
   }
 
+  Future<String> uploadProfileImage(File imageFile) async {
+    final fileName = 'profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    try {
+      await _supabase.storage
+          .from('profile-picture')
+          .upload(fileName, imageFile);
+
+      final url =
+          _supabase.storage.from('profile-picture').getPublicUrl(fileName);
+      print('Uploaded profile image URL: $url');
+      return url;
+    } on StorageException catch (e) {
+      throw Exception('Supabase storage error: ${e.message}');
+    } catch (e) {
+      return '';
+    }
+  }
+
   Future<List<String?>> uploadImages(List<File> imageFiles) async {
     List<String?> imageUrls = [];
 

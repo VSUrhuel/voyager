@@ -1,12 +1,40 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:voyager/src/features/authentication/models/user_model.dart';
+import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/features/mentor/screens/input_information/mentor_info1.dart';
+import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/widgets/custom_page_route.dart';
 
-class MentorPersonalInformation extends StatelessWidget {
+class MentorPersonalInformation extends StatefulWidget {
   const MentorPersonalInformation({super.key});
+
+  @override
+  State<MentorPersonalInformation> createState() =>
+      _MentorPersonalInformationState();
+}
+
+class _MentorPersonalInformationState extends State<MentorPersonalInformation> {
+  FirestoreInstance firestore = FirestoreInstance();
+  late MentorModel mentorModel;
+  late UserModel userModel;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  void fetchData() async {
+    mentorModel = await firestore.getMentorThroughAccId(FirebaseAuth.instance
+        .currentUser!.uid); // Replace 'mentorId' with the actual argument
+    userModel = await firestore.getUser(FirebaseAuth.instance.currentUser!
+        .uid); // Replace 'userId' with the actual argument
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +121,10 @@ class MentorPersonalInformation extends StatelessWidget {
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                CustomPageRoute(page: MentorInfo1()),
+                                CustomPageRoute(
+                                    page: MentorInfo1(
+                                        mentorModel: mentorModel,
+                                        userModel: userModel)),
                               );
                             },
                           ),
