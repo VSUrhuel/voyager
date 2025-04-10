@@ -27,6 +27,17 @@ class MentorProfilePage extends StatelessWidget {
                 .getPublicUrl(user.accountApiPhoto))
         : 'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/profile-picture/profile.png';
 
+    String toTitleCase(String name) {
+      return name
+          .toLowerCase()
+          .split(' ')
+          .map((word) => word.isNotEmpty
+              ? '${word[0].toUpperCase()}${word.substring(1)}'
+              : '')
+          .join(' ');
+    }
+
+    final formattedName = toTitleCase(user.accountApiName);
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
         statusBarColor: Colors.white,
@@ -110,7 +121,7 @@ class MentorProfilePage extends StatelessWidget {
                                 left: screenWidth * 0.02,
                                 top: screenHeight * 0.01),
                             child: Text(
-                              user.accountApiName,
+                              formattedName,
                               style: TextStyle(
                                   fontSize: screenHeight * 0.03,
                                   fontWeight: FontWeight.bold),
@@ -249,7 +260,11 @@ class MentorProfilePage extends StatelessWidget {
           if (isExperienceEmpty)
             const Text(
               "No Experience",
-              style: TextStyle(fontSize: 14, color: Colors.black87),
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.black87,
+                fontStyle: FontStyle.italic,
+              ),
             )
           else
             for (int i = 0; i < mentorModel.mentorExpHeader.length; i++)
