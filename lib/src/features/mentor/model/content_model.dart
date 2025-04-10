@@ -71,4 +71,32 @@ class PostContentModel {
       'contentLinks': contentLinks,
     };
   }
+
+  factory PostContentModel.fromFirestore(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    return PostContentModel(
+      contentCategory: data['contentCategory'] ?? '',
+      contentCreatedTimestamp:
+          data['contentCreatedTimestamp']?.toDate() ?? DateTime.now(),
+      contentDescription: data['contentDescription'] ?? '',
+      contentFiles: data['contentFiles'] != null
+          ? List<String>.from(data['contentFiles'])
+          : [],
+      contentImage: data['contentImage'] != null
+          ? List<String>.from(data['contentImage'])
+          : [],
+      contentModifiedTimestamp:
+          data['contentModifiedTimestamp']?.toDate() ?? DateTime.now(),
+      contentSoftDelete: data['contentSoftDelete'] ?? false,
+      contentTitle: data['contentTitle'] ?? '',
+      contentVideo: data['contentVideo'] != null
+          ? List<String>.from(data['contentVideo'])
+          : [],
+      courseMentorId: data['courseMentorId'] ?? '',
+      contentLinks: data['contentLinks'] != null
+          ? List<Map<String, String>>.from(data['contentLinks']
+              .map((link) => Map<String, String>.from(link)))
+          : [],
+    );
+  }
 }
