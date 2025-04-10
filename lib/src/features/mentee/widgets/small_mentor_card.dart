@@ -49,7 +49,11 @@ class SmallMentorCard extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const MentorProfilePage()),
+          MaterialPageRoute(
+              builder: (context) => MentorProfilePage(
+                    mentorModel: mentorModel,
+                    user: user,
+                  )),
         );
       },
       child: Card(
