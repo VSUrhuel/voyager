@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:voyager/src/features/mentee/screens/post/post.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
@@ -26,30 +28,154 @@ class PostController {
     }
   }
 
-  Future<List<PostContentModel>> getPosts() async {
-    FirestoreInstance firestoreInstance = FirestoreInstance();
+  final posts = <PostContentModel>[].obs;
+  final isLoading = false.obs;
+  final error = ''.obs;
+  final int _limit = 10;
+  DateTime? lastTimesTamp = DateTime.now();
+  bool _hasMore = true;
 
-    MentorModel mentor = await firestoreInstance
-        .getMentorThroughAccId(FirebaseAuth.instance.currentUser!.uid);
+  // Future<PostsResult> getPosts(
+  //     {required int limit, DocumentSnapshot? lastDocument}) async {
+  //   FirestoreInstance firestoreInstance = FirestoreInstance();
 
-    String courseMentor =
-        await firestoreInstance.getCourseMentorDocId(mentor.mentorId);
+  //   MentorModel mentor = await firestoreInstance
+  //       .getMentorThroughAccId(FirebaseAuth.instance.currentUser!.uid);
 
-    List<PostContentModel> posts =
-        await firestoreInstance.getPostContentThroughCourseMentor(courseMentor);
+  //   String courseMentor =
+  //       await firestoreInstance.getCourseMentorDocId(mentor.mentorId);
 
-    for (int i = 0; i < posts.length; i++) {
-      for (int j = i + 1; j < posts.length; j++) {
-        if (posts[i]
-            .contentModifiedTimestamp
-            .isBefore(posts[j].contentModifiedTimestamp)) {
-          PostContentModel temp = posts[i];
-          posts[i] = posts[j];
-          posts[j] = temp;
-        }
+  //   List<PostContentModel> posts =
+  //       await firestoreInstance.getPostContentThroughCourseMentor(courseMentor);
+
+  //     Query query = FirebaseFirestore.instance
+  //       .collection('posts') // Replace with your actual collection name
+  //       .where('courseMentorId', isEqualTo: courseMentor)
+  //       .orderBy('contentModifiedTimestamp', descending: true)
+  //       .limit(limit);
+
+  //   // Apply pagination if lastDocument is provided
+  //   if (lastDocument != null) {
+  //     query = query.startAfterDocument(lastDocument);
+  //   }
+
+  //   // Execute query
+  //   QuerySnapshot querySnapshot = await query.get();
+
+  //   // Convert documents to PostContentModel
+  //   List<PostContentModel> postsList = querySnapshot.docs.map((doc) {
+  //     return PostContentModel.fromFirestore(doc); // Ensure you have this method
+  //   }).toList();
+
+  //   // Get the last document for pagination
+  //   DocumentSnapshot? newLastDocument =
+  //       querySnapshot.docs.isNotEmpty ? querySnapshot.docs.last : null;
+
+  //   return PostsResult(
+  //     posts: postsList,
+  //     lastDocument: newLastDocument,
+  //     hasMore: postsList.length == limit,
+  //   );
+  // }
+  Future<PostsResult> getPosts({
+    required int limit,
+    DateTime? lastPostTimestamp, // Use timestamp instead of DocumentSnapshot
+  }) async {
+    try {
+      FirestoreInstance firestoreInstance = FirestoreInstance();
+
+      MentorModel mentor = await firestoreInstance
+          .getMentorThroughAccId(FirebaseAuth.instance.currentUser!.uid);
+
+      String courseMentor =
+          await firestoreInstance.getCourseMentorDocId(mentor.mentorId);
+
+      List<PostContentModel> allPosts = await firestoreInstance
+          .getPostContentThroughCourseMentor(courseMentor);
+
+      // Filter and sort
+      allPosts = allPosts.where((post) => !post.contentSoftDelete).toList()
+        ..sort((a, b) =>
+            b.contentModifiedTimestamp.compareTo(a.contentModifiedTimestamp));
+
+      // Find starting index
+      int startIndex = 0;
+      if (lastPostTimestamp != null) {
+        startIndex = allPosts.indexWhere(
+                (post) => post.contentModifiedTimestamp == lastPostTimestamp) +
+            1;
+        if (startIndex < 0) startIndex = 0;
       }
+
+      // Get paginated results
+      int endIndex = startIndex + limit;
+      if (endIndex > allPosts.length) endIndex = allPosts.length;
+
+      List<PostContentModel> paginatedPosts =
+          allPosts.sublist(startIndex, endIndex);
+
+      // Get last post's timestamp for next page
+      DateTime? newLastTimestamp = paginatedPosts.isNotEmpty
+          ? paginatedPosts.last.contentModifiedTimestamp
+          : null;
+
+      return PostsResult(
+        posts: paginatedPosts,
+        lastTimestamp: newLastTimestamp, // Return timestamp instead
+        hasMore: endIndex < allPosts.length,
+      );
+    } catch (e) {
+      debugPrint('Error getting posts: $e');
+      rethrow;
     }
-    return posts;
+  }
+
+  Future<void> loadPosts() async {
+    try {
+      isLoading.value = true;
+      error.value = '';
+      PostsResult postsResult = await getPosts(
+        limit: _limit,
+      );
+      posts.assignAll(postsResult.posts);
+      lastTimesTamp = postsResult.lastTimestamp;
+      _hasMore = postsResult.hasMore;
+    } catch (e) {
+      error.value = e.toString();
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> refreshPosts() async {
+    resetPagination();
+    await loadPosts();
+  }
+
+  Future<bool> loadMorePosts() async {
+    if (!_hasMore || isLoading.value) return false;
+
+    try {
+      isLoading.value = true;
+      final result = await getPosts(
+        limit: _limit,
+        lastPostTimestamp: lastTimesTamp, // Use timestamp for pagination
+      );
+      posts.addAll(result.posts);
+      lastTimesTamp = result.lastTimestamp;
+      _hasMore = result.hasMore;
+      return _hasMore;
+    } catch (e) {
+      error.value = e.toString();
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void resetPagination() {
+    lastTimesTamp = DateTime.now();
+    _hasMore = true;
   }
 
   Future<String> getUsername() async {
@@ -135,4 +261,16 @@ class PostController {
     return dir?.path ??
         (throw Exception('Could not access downloads directory'));
   }
+}
+
+class PostsResult {
+  final List<PostContentModel> posts;
+  final DateTime? lastTimestamp; // Changed from DocumentSnapshot
+  final bool hasMore;
+
+  PostsResult({
+    required this.posts,
+    this.lastTimestamp,
+    required this.hasMore,
+  });
 }

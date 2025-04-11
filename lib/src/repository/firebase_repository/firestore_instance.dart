@@ -66,6 +66,7 @@ class FirestoreInstance {
       if ((await getAPIId()).contains(auth.firebaseUser.value?.uid)) {
         return;
       }
+
       await _db.collection('users').doc(userUid).set({
         'accountApiID':
             auth.firebaseUser.value?.uid ?? "", // Use empty string if null
@@ -73,8 +74,8 @@ class FirestoreInstance {
             auth.firebaseUser.value?.email ?? "", // Provide a default
         'accountApiName': auth.firebaseUser.value?.displayName ??
             "Unknown", // Provide default name
-        'accountApiPhoto':
-            auth.firebaseUser.value?.photoURL ?? "", // Handle null safely
+        'accountApiPhoto': auth.firebaseUser.value?.photoURL ??
+            "https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/profile-picture//profile.png", // Handle null safely
         'accountPassword': '',
         'accountUsername': auth.firebaseUser.value?.displayName ??
             "Unknown", // Provide default username
@@ -126,6 +127,16 @@ class FirestoreInstance {
     }
   }
 
+  Future<void> updateProfileImage(String url, String uid) async {
+    try {
+      await _db.collection('users').doc(uid).update({
+        'accountApiPhoto': url,
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> updateStudentID(String studentID, String uid) async {
     try {
       await _db.collection('users').doc(uid).update({
@@ -154,6 +165,7 @@ class FirestoreInstance {
             .collection('mentors')
             .doc(mentor.mentorId)
             .update(mentor.toJson());
+
         return;
       }
       await _db.collection('mentors').doc(mentor.mentorId).set(mentor.toJson());
@@ -690,6 +702,93 @@ class FirestoreInstance {
       rethrow;
     }
   }
+
+   Future<List<CourseModel>> getActiveCourses() async {
+    try {
+      final courses = await _db
+          .collection('course')
+          .where('courseSoftDelete', isEqualTo: false)
+          .where('courseStatus', isEqualTo: 'active')
+          .get();
+      List<CourseModel> courseList = [];
+      for (var course in courses.docs) {
+        courseList.add(
+            CourseModel.fromJson(course.data(), course.id)); //l Pass doc.id
+      }
+      return courseList;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+   Future<List<CourseModel>> getArchivedCourses() async {
+    try {
+      final courses = await _db
+          .collection('course')
+          .where('courseSoftDelete', isEqualTo: false)
+          .where('courseStatus', isEqualTo: 'archived')
+          .get();
+      List<CourseModel> courseList = [];
+      for (var course in courses.docs) {
+        courseList.add(
+            CourseModel.fromJson(course.data(), course.id)); //l Pass doc.id
+      }
+      return courseList;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> setCourse(CourseModel course) async {
+  try {
+    String uniqueID = generateUniqueId();
+    await _db.collection('course').doc(uniqueID).set(course.toJson());
+  } catch (e) {
+    rethrow;
+  }
+}
+
+Future<void> setCourseMentor(String courseId, String mentorId) async {
+  try {
+    String uniqueID = generateUniqueId();
+    final cm = CourseMentorModel(
+      courseMentorId: uniqueID,
+      courseId: courseId,
+      mentorId: mentorId,
+      courseMentorCreatedTimestamp: DateTime.now(),
+      courseMentorSoftDeleted: false,
+    );
+    await _db
+        .collection('courseMentor')
+        .doc(uniqueID)
+        .set(cm.toJson());
+  } catch (e) {
+    rethrow;
+  }
+}
+
+Future<void> updateInitialCourseMentor(String email, String newMentorId) async{
+  try {
+    CourseMentorModel courseMentor = await getCourseMentorThroughMentor(email);
+    await _db.collection('courseMentor').doc(courseMentor.courseMentorId).update({
+      'mentorId': newMentorId,
+    });
+  } catch (e) {
+    rethrow;
+  }
+}
+
+Future<void> updateCourseMentor(
+    String courseMentorId, String courseId, String mentorId) async {
+  try {
+    await _db.collection('courseMentor').doc(courseMentorId).update({
+      'courseId': courseId,
+      'mentorId': mentorId,
+    });
+  } catch (e) {
+    rethrow;
+  }
+}
 
   Future<int> getTotalMentorsForCourse(String docId) async {
     try {

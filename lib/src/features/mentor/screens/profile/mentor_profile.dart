@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:voyager/src/features/mentor/screens/mentor_dashboard.dart';
+import 'package:voyager/src/features/mentor/screens/profile/about.dart';
 import 'package:voyager/src/features/mentor/screens/profile/personal_information_mentor.dart';
+import 'package:voyager/src/features/mentor/screens/profile/security_password.dart';
+import 'package:voyager/src/features/mentor/screens/profile/user_agreement.dart';
 import 'package:voyager/src/widgets/custom_page_route.dart';
 import 'package:voyager/src/widgets/profile.dart';
 import 'package:voyager/src/widgets/profile_list_tile.dart';
@@ -69,7 +72,7 @@ class MentorProfile extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  CustomPageRoute(page: MentorPersonalInformation()),
+                  CustomPageRoute(page: SecuritySettingsScreen()),
                 );
               },
             ),
@@ -78,7 +81,7 @@ class MentorProfile extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  CustomPageRoute(page: MentorPersonalInformation()),
+                  CustomPageRoute(page: UserAgreement()),
                 );
               },
             ),
@@ -87,7 +90,7 @@ class MentorProfile extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  CustomPageRoute(page: MentorPersonalInformation()),
+                  CustomPageRoute(page: AboutScreen()),
                 );
               },
             ),

@@ -1,11 +1,61 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/repository/authentication_repository_firebase/authentication_repository.dart';
+import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
-class Profile extends StatelessWidget {
+class Profile extends StatefulWidget {
   final String role;
 
   const Profile({super.key, required this.role});
+
+  @override
+  State<Profile> createState() => _ProfileState();
+}
+
+class _ProfileState extends State<Profile> {
+  String? profileImage;
+  late String fullNmae;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchImage();
+  }
+
+  Future<void> fetchImage() async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        FirestoreInstance firestoreInstance = Get.put(FirestoreInstance());
+        UserModel userData = await firestoreInstance.getUser(user.uid);
+        if (mounted) {
+          setState(() {
+            profileImage = _validateImageUrl(userData.accountApiPhoto);
+            _isLoading = false;
+            fullNmae = userData.accountApiName;
+           
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          profileImage = null;
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  String? _validateImageUrl(String? url) {
+    if (url == null || url.isEmpty) return null;
+    if (!url.startsWith('http') && !url.startsWith('https')) return null;
+    return url;
+  }
 
   Color getRoleColor(String role) {
     switch (role.toLowerCase()) {
@@ -22,6 +72,7 @@ class Profile extends StatelessWidget {
   }
 
   String formatName(String fullName) {
+    if (fullName.isEmpty) return "John Doe";
     List<String> nameParts = fullName.split(" ");
 
     if (nameParts.isEmpty) return "";
@@ -45,13 +96,20 @@ class Profile extends StatelessWidget {
     return "$initials $lastName"; // Combine initials and formatted last name
   }
 
+  String toCapitalize(String text) {
+    String capitalizedText =
+        text[0].toUpperCase() + text.substring(1).toLowerCase();
+    return capitalizedText;
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     User? user = FirebaseAuth.instance.currentUser;
-    String formattedName = formatName(user?.displayName ?? '');
-    String profileImageURL =
-        user?.photoURL ?? 'assets/images/application_images/profile.png';
+    String formattedName = formatName(fullNmae);
+
     return Container(
       margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
       padding: EdgeInsets.all(screenWidth * 0.02),
@@ -61,12 +119,7 @@ class Profile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 30,
-            backgroundImage: user?.photoURL != null
-                ? NetworkImage(profileImageURL)
-                : AssetImage(profileImageURL) as ImageProvider,
-          ),
+          _buildProfileImage(screenWidth),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -83,21 +136,22 @@ class Profile extends StatelessWidget {
                 Text(
                   '${user?.email}',
                   style: TextStyle(
-                    fontSize: screenWidth * 0.04,
+                    fontSize: screenWidth * 0.037,
                     color: Colors.grey,
                   ),
                 ),
                 Container(
                   padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.05,
-                      vertical: screenWidth * 0.005),
+                      horizontal: screenWidth * 0.06,
+                      vertical: screenWidth * 0.006),
                   decoration: BoxDecoration(
-                    color: getRoleColor(role),
+                    color: getRoleColor(widget.role),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    role,
-                    style: TextStyle(color: Colors.black),
+                    toCapitalize(widget.role),
+                    style: TextStyle(
+                        color: Colors.black, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -117,6 +171,48 @@ class Profile extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildProfileImage(double screenWidth) {
+    if (_isLoading) {
+      return _buildPlaceholderAvatar(isLoading: true);
+    }
+
+    if (profileImage == null) {
+      return _buildPlaceholderAvatar();
+    }
+
+    return CachedNetworkImage(
+      imageUrl: profileImage!,
+      imageBuilder: (context, imageProvider) => CircleAvatar(
+        radius: 30,
+        backgroundImage: imageProvider,
+      ),
+      placeholder: (context, url) => _buildPlaceholderAvatar(isLoading: true),
+      errorWidget: (context, url, error) => _buildPlaceholderAvatar(),
+    );
+  }
+
+  Widget _buildPlaceholderAvatar({bool isLoading = false}) {
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.grey[300],
+      ),
+      child: isLoading
+          ? Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.grey[600],
+              ),
+            )
+          : Image.asset(
+              'assets/images/application_images/profile.png', // Placeholder image path
+              fit: BoxFit.cover,
+            ),
     );
   }
 }

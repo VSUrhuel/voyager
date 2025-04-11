@@ -1,7 +1,11 @@
+import 'dart:io';
+
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:voyager/src/repository/supabase_repository/supabase_instance.dart';
 
 class MentorController extends GetxController {
   static MentorController get instance => Get.find();
@@ -49,12 +53,23 @@ class MentorController extends GetxController {
     selectedExpDesc.value = newExpDesc;
   }
 
-  Future<bool> updateUsername() async {
+  final SupabaseInstance supabase = SupabaseInstance(Supabase.instance.client);
+  Future<bool> updateUsername(File? image) async {
     final firestore = FirestoreInstance();
+    if (image != null) {
+      final String imageUrl = await supabase.uploadProfileImage(image);
+      await firestore.updateProfileImage(
+          imageUrl, firestore.getFirebaseUser().uid);
+    }
     await firestore.updateUsername(
         mentorUserName.text, firestore.getFirebaseUser().uid);
 
     return Future<bool>.value(true);
+  }
+
+  Future<String> uploadImage(File image) async {
+    final String imageUrl = await supabase.uploadProfileImage(image);
+    return imageUrl;
   }
 
   Future<bool> generateMentor() async {
@@ -63,7 +78,9 @@ class MentorController extends GetxController {
       final List<String> mentorIDs = await FirestoreInstance().getMentorIDs();
       final List<String> accountIDs =
           await FirestoreInstance().getAccountIDInMentor();
+      print("here");
       if (accountIDs.contains(firebaseID)) {
+        print("out");
         return Future<bool>.value(false);
       }
       String mentorID = "";
@@ -104,10 +121,62 @@ class MentorController extends GetxController {
       final firestore = FirestoreInstance();
 
       firestore.setMentor(mentor);
+      firestore.updateInitialCourseMentor(FirestoreInstance().getFirebaseUser().email.toString(), mentor.mentorId);
       return Future<bool>.value(true);
     } catch (e) {
       Get.snackbar("Error", e.toString());
       return Future<bool>.value(false);
     }
+  }
+
+    Future<bool> updateMentorInformation() async {
+    try {
+      final firebaseID = FirestoreInstance().getFirebaseUser().uid;
+
+      String mentorID = await FirestoreInstance().getMentorID(firebaseID);
+
+      final mentor = MentorModel(
+        mentorId: mentorID,
+        accountId: FirestoreInstance().getFirebaseUser().uid,
+        mentorYearLvl: mentorYearLvl.text,
+        mentorAbout: mentorAbout.text,
+        mentorSessionCompleted: int.parse(mentorSessionCompleted.text),
+        mentorLanguages: selectedLanguages,
+        mentorFbUrl: mentorFbUrl.text,
+        mentorGitUrl: mentorGitUrl.text,
+        mentorExpHeader: selectedExpHeader,
+        mentorMotto: mentorMotto.text,
+        mentorExpertise: selectedSkills,
+        mentorExpDesc: selectedExpDesc,
+        mentorRegDay: selectedDays,
+        mentorRegStartTime: parseTime(mentorRegStartTime.text),
+        mentorRegEndTime: parseTime(mentorRegEndTime.text),
+        mentorStatus: "active",
+        mentorSoftDeleted: false,
+      );
+
+      final firestore = FirestoreInstance();
+
+      firestore.setMentor(mentor);
+
+      return Future<bool>.value(true);
+    } catch (e) {
+      Get.snackbar("Error", e.toString());
+      return Future<bool>.value(false);
+    }
+  }
+
+  TimeOfDay parseTime(String time) {
+    final timeString = time.trim().toLowerCase().replaceAll(' ', '');
+    final isPM = timeString.contains('pm');
+    final parts = timeString.replaceAll(RegExp(r'[^\d:]'), '').split(':');
+
+    int hour = int.parse(parts[0]);
+    int minute = int.parse(parts[1]);
+
+    if (isPM && hour < 12) hour += 12;
+    if (!isPM && hour == 12) hour = 0;
+
+    return TimeOfDay(hour: hour, minute: minute);
   }
 }

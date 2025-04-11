@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -61,15 +62,45 @@ class MeetingCard extends StatefulWidget {
 }
 
 class _MeetingCardState extends State<MeetingCard> {
+  var profileImageURL = '';
+  bool _isLoading = true;
+  bool _hasError = false;
+  @override
+  void initState() {
+    super.initState();
+    fetchImage();
+  }
+
+  void fetchImage() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final firestoreInstance = Get.put(FirestoreInstance());
+        final userData = await firestoreInstance.getUser(user.uid);
+        if (mounted) {
+          setState(() {
+            profileImageURL = userData.accountApiPhoto;
+            _isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _hasError = true;
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     String fullName = widget.fullName;
     String formattedName = formatName(fullName);
-    User? user = FirebaseAuth.instance.currentUser;
-    String profileImageURL =
-        user?.photoURL ?? 'assets/images/application_images/profile.png';
+
     return Container(
       width: screenWidth * 0.9,
       padding: EdgeInsets.all(screenWidth * 0.04),
@@ -98,11 +129,7 @@ class _MeetingCardState extends State<MeetingCard> {
           SizedBox(height: screenWidth * 0.04),
           Row(
             children: [
-              CircleAvatar(
-                radius: 22,
-                backgroundImage:
-                    NetworkImage(profileImageURL), // Replace with actual image
-              ),
+              _buildProfileImage(screenWidth),
               SizedBox(width: screenWidth * 0.04),
               Expanded(
                 child: Column(
@@ -157,6 +184,48 @@ class _MeetingCardState extends State<MeetingCard> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildProfileImage(double screenWidth) {
+    if (_isLoading) {
+      return _buildPlaceholderAvatar(isLoading: true);
+    }
+
+    if (profileImageURL == '' || _hasError) {
+      return _buildPlaceholderAvatar();
+    }
+
+    return CachedNetworkImage(
+      imageUrl: profileImageURL,
+      imageBuilder: (context, imageProvider) => CircleAvatar(
+        radius: 30,
+        backgroundImage: imageProvider,
+      ),
+      placeholder: (context, url) => _buildPlaceholderAvatar(isLoading: true),
+      errorWidget: (context, url, error) => _buildPlaceholderAvatar(),
+    );
+  }
+
+  Widget _buildPlaceholderAvatar({bool isLoading = false}) {
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.grey[300],
+      ),
+      child: isLoading
+          ? Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.grey[600],
+              ),
+            )
+          : Image.asset(
+              'assets/images/application_images/profile.png',
+              fit: BoxFit.cover,
+            ),
     );
   }
 
