@@ -1,157 +1,167 @@
+import 'package:flutter/material.dart';
 import 'package:voyager/src/features/mentor/controller/mentor_controller.dart';
 import 'package:voyager/src/features/mentor/widget/experience_container.dart';
-import 'package:flutter/material.dart';
 
 class ExperienceInput extends StatefulWidget {
-  const ExperienceInput(
-      {super.key, this.experienceHeader, this.experienceDesc, this.controller});
+  const ExperienceInput({
+    super.key,
+    required this.controller,
+  });
 
-  final TextEditingController? experienceHeader;
-  final TextEditingController? experienceDesc;
-  final MentorController? controller;
+  final MentorController controller;
 
   @override
   State<ExperienceInput> createState() => _ExperienceInputState();
 }
 
 class _ExperienceInputState extends State<ExperienceInput> {
-  List<Widget> experienceContainers = [];
-  late final double screenWidth;
-  List<String> selectedExpHeader = [];
-  List<String> selectedExpDesc = [];
-  final List<TextEditingController> newHeaderController = [];
-  final List<TextEditingController> newDescController = [];
+  late List<ExperienceEntry> _experiences = [];
+  final List<TextEditingController> _headerControllers = [];
+  final List<TextEditingController> _descControllers = [];
 
   @override
   void initState() {
     super.initState();
-    if (widget.controller!.mentorExpHeader.text.isNotEmpty &&
-        widget.experienceDesc!.text.isNotEmpty) {
-      // Split the comma-separated strings into lists
-      final headers = widget.experienceHeader!.text.split(',');
-      final descriptions = widget.experienceDesc!.text.split(',');
+    _initializeExistingExperiences();
+  }
 
-      // Ensure we have matching pairs
+  void _initializeExistingExperiences() {
+    final controller = widget.controller;
+    if (controller.selectedExpHeader.isNotEmpty &&
+        controller.selectedExpDesc.isNotEmpty) {
+      final headers = controller.selectedExpHeader;
+      final descriptions = controller.selectedExpDesc;
 
       for (int i = 0; i < headers.length; i++) {
-        existingAddExperienceContainer(headers[i], descriptions[i]);
+        _addExperience(
+          header: i < headers.length ? headers[i] : '',
+          description: i < descriptions.length ? descriptions[i] : '',
+          updateController: false,
+        );
       }
+    } else {
+      // Start with one empty experience by default
+      _addExperience();
     }
   }
 
-  void existingAddExperienceContainer(
-      String expereienceHeader, String experienceDesc) {
+  void _addExperience({
+    String header = '',
+    String description = '',
+    bool updateController = true,
+  }) {
+    final headerController = TextEditingController(text: header);
+    final descController = TextEditingController(text: description);
+
     setState(() {
-      var headerController = TextEditingController(text: expereienceHeader);
-      var descController = TextEditingController(text: experienceDesc);
-
-      // Add controllers to lists
-      newHeaderController.add(headerController);
-      newDescController.add(descController);
-
-      // Listen to text changes and update the list
-      headerController.addListener(() {
-        selectedExpHeader =
-            newHeaderController.map((controller) => controller.text).toList();
-        widget.experienceHeader!.text = selectedExpHeader.join(',');
-      });
-
-      descController.addListener(() {
-        selectedExpDesc =
-            newDescController.map((controller) => controller.text).toList();
-        widget.experienceDesc!.text = selectedExpDesc.join(',');
-      });
-
-      // Add new experience container
-      experienceContainers.add(ExperienceContainer(
-        index: experienceContainers.length + 1,
-        experienceHeader: headerController,
-        experienceDesc: descController,
+      _headerControllers.add(headerController);
+      _descControllers.add(descController);
+      _experiences.add(ExperienceEntry(
+        index: _experiences.length + 1,
+        headerController: headerController,
+        descController: descController,
       ));
     });
+
+    headerController.addListener(_updateControllerLists);
+    descController.addListener(_updateControllerLists);
+
+    if (updateController) {
+      _updateControllerLists();
+    }
   }
 
-  void _addExperienceContainer() {
-    setState(() {
-      var headerController = TextEditingController();
-      var descController = TextEditingController();
+  void _removeExperience(int index) {
+    if (index >= 0 && index < _experiences.length) {
+      setState(() {
+        _headerControllers[index].dispose();
+        _descControllers[index].dispose();
+        _headerControllers.removeAt(index);
+        _descControllers.removeAt(index);
+        _experiences.removeAt(index);
 
-      // Add controllers to lists
-      newHeaderController.add(headerController);
-      newDescController.add(descController);
-
-      // Listen to text changes and update the list
-      headerController.addListener(() {
-        selectedExpHeader =
-            newHeaderController.map((controller) => controller.text).toList();
-        widget.experienceHeader!.text = selectedExpHeader.join(',');
+        // Update indexes
+        for (int i = 0; i < _experiences.length; i++) {
+          _experiences[i] = _experiences[i].copyWith(index: i + 1);
+        }
       });
-
-      descController.addListener(() {
-        selectedExpDesc =
-            newDescController.map((controller) => controller.text).toList();
-        widget.experienceDesc!.text = selectedExpDesc.join(',');
-      });
-
-      // Add new experience container
-      experienceContainers.add(ExperienceContainer(
-        index: experienceContainers.length + 1,
-        experienceHeader: headerController,
-        experienceDesc: descController,
-      ));
-    });
+      _updateControllerLists();
+    }
   }
 
-  void _removeExperienceContainer() {
-    setState(() {
-      if (experienceContainers.isNotEmpty) {
-        experienceContainers.removeLast();
-        selectedExpDesc.removeLast();
-        selectedExpHeader.removeLast();
-        widget.controller!.updateSelectedExpHeader(selectedExpHeader);
-        widget.controller!.updateSelectedExpDesc(selectedExpDesc);
-        newHeaderController.removeLast().dispose();
-        newDescController.removeLast().dispose();
-      }
-    });
+  void _updateControllerLists() {
+    final headers = _headerControllers.map((c) => c.text).toList();
+    final descriptions = _descControllers.map((c) => c.text).toList();
+
+    widget.controller.updateSelectedExpHeader(headers);
+    widget.controller.updateSelectedExpDesc(descriptions);
+  }
+
+  @override
+  void dispose() {
+    for (final controller in _headerControllers) {
+      controller.dispose();
+    }
+    for (final controller in _descControllers) {
+      controller.dispose();
+    }
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
           Align(
             alignment: Alignment.topLeft,
             child: TextButton.icon(
-              onPressed: _addExperienceContainer,
-              icon: Icon(Icons.add),
-              label: Text('Add Experience'),
+              onPressed: () => _addExperience(),
+              icon: const Icon(Icons.add),
+              label: const Text('Add Experience'),
               style: TextButton.styleFrom(
                 alignment: Alignment.centerLeft,
               ),
             ),
           ),
-          ...experienceContainers,
-          if (experienceContainers.isNotEmpty)
-            Align(
-              alignment: Alignment.topLeft,
-              child: TextButton.icon(
-                onPressed: _removeExperienceContainer,
-                icon: Icon(Icons.remove),
-                label: Text(
-                  'Remove Experience',
-                  style: TextStyle(color: Colors.red),
-                ),
-                style: TextButton.styleFrom(
-                  alignment: Alignment.centerLeft,
-                  iconColor: Colors.red,
-                ),
-              ),
-            )
+          ..._experiences.map((entry) => Column(
+                children: [
+                  ExperienceContainer(
+                    index: entry.index,
+                    experienceHeader: entry.headerController,
+                    experienceDesc: entry.descController,
+                    onRemove: () => _removeExperience(entry.index - 1),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              )),
         ],
       ),
+    );
+  }
+}
+
+class ExperienceEntry {
+  final int index;
+  final TextEditingController headerController;
+  final TextEditingController descController;
+
+  ExperienceEntry({
+    required this.index,
+    required this.headerController,
+    required this.descController,
+  });
+
+  ExperienceEntry copyWith({
+    int? index,
+    TextEditingController? headerController,
+    TextEditingController? descController,
+  }) {
+    return ExperienceEntry(
+      index: index ?? this.index,
+      headerController: headerController ?? this.headerController,
+      descController: descController ?? this.descController,
     );
   }
 }

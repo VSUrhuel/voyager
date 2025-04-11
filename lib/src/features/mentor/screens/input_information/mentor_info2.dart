@@ -50,6 +50,7 @@ class _MentorInfo2State extends State<MentorInfo2> {
       controller.mentorGitUrl.text = widget.mentorModel!.mentorGitUrl;
       controller.mentorLanguages.text =
           widget.mentorModel!.mentorLanguages.join(',');
+
       controller.selectedSkills.value = widget.mentorModel!.mentorExpertise;
     }
   }
@@ -94,7 +95,7 @@ class _MentorInfo2State extends State<MentorInfo2> {
                     child: Text(
                       'Regular Mentorship Session',
                       style: TextStyle(
-                        fontSize: screenWidth * 0.04,
+                        fontSize: screenWidth * 0.05,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -109,7 +110,7 @@ class _MentorInfo2State extends State<MentorInfo2> {
                       ),
                     ),
                   ),
-                  Multiselect(
+                  MultiSelectChips(
                     items: [
                       "Monday",
                       "Tuesday",
@@ -118,7 +119,10 @@ class _MentorInfo2State extends State<MentorInfo2> {
                       "Friday"
                     ],
                     label: "Select Days",
-                    controller: MentorController.instance,
+                    initialSelection: MentorController.instance.selectedDays,
+                    onSelectionChanged: (selected) {
+                      MentorController.instance.updateSelectedDays(selected);
+                    },
                   ),
                   Padding(
                     padding: EdgeInsets.only(top: screenHeight * 0.015),
@@ -153,16 +157,22 @@ class _MentorInfo2State extends State<MentorInfo2> {
                     child: Text(
                       'Language and Skills',
                       style: TextStyle(
-                        fontSize: screenWidth * 0.04,
+                        fontSize: screenWidth * 0.05,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                  Multiselect(
-                      items: ['English', 'Filipino', 'Cebuano', 'Waray-Waray'],
-                      label: 'Language Known',
-                      controller: MentorController.instance),
-                  Multiselect(
+                  MultiSelectChips(
+                    items: ['English', 'Filipino', 'Cebuano', 'Waray-Waray'],
+                    label: 'Language Known',
+                    initialSelection:
+                        MentorController.instance.selectedLanguages,
+                    onSelectionChanged: (selected) {
+                      MentorController.instance
+                          .updateselectedLanguages(selected);
+                    },
+                  ),
+                  MultiSelectChips(
                     items: [
                       'Web Development',
                       'Mobile Development',
@@ -170,7 +180,10 @@ class _MentorInfo2State extends State<MentorInfo2> {
                       'Data Science'
                     ],
                     label: 'Skills',
-                    controller: MentorController.instance,
+                    initialSelection: MentorController.instance.selectedSkills,
+                    onSelectionChanged: (selected) {
+                      MentorController.instance.updateSelectedSkills(selected);
+                    },
                   ),
                   Padding(
                     padding:
@@ -178,7 +191,7 @@ class _MentorInfo2State extends State<MentorInfo2> {
                     child: Text(
                       'Social Media Links',
                       style: TextStyle(
-                        fontSize: screenWidth * 0.04,
+                        fontSize: screenWidth * 0.05,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -271,11 +284,7 @@ class _MentorInfo2State extends State<MentorInfo2> {
                       ],
                     ),
                   ),
-                  ExperienceInput(
-                      experienceHeader:
-                          MentorController.instance.mentorExpHeader,
-                      experienceDesc: MentorController.instance.mentorExpDesc,
-                      controller: controller),
+                  ExperienceInput(controller: controller),
                   DefaultButton(
                     buttonText: 'Proceed',
                     bgColor: Color(0xFF1877F2),
@@ -284,8 +293,13 @@ class _MentorInfo2State extends State<MentorInfo2> {
                     borderColor: Colors.transparent,
                     onPressed: () async {
                       await controller.generateMentor();
+
                       await controller.updateUsername(widget.image);
 
+                      if (widget.userModel != null &&
+                          widget.mentorModel != null) {
+                        await controller.updateMentorInformation();
+                      }
                       Navigator.pushNamed(
                         context,
                         MRoutes.splash,
