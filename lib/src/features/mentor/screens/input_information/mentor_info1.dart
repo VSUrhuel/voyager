@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:voyager/src/features/admin/widgets/profile_picker.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
@@ -28,6 +29,7 @@ class MentorInfo1 extends StatefulWidget {
 class _MentorInfo1State extends State<MentorInfo1> {
   final AboutController aboutController = AboutController();
   File _image = File('');
+  String imageUrl = '';
   final controller = Get.put(MentorController());
 
   Future<UserModel?> getUserModel(String email) async {
@@ -75,6 +77,8 @@ class _MentorInfo1State extends State<MentorInfo1> {
           widget.mentorModel!.mentorSessionCompleted.toString();
       controller.mentorUserName.text = widget.userModel!.accountUsername;
       controller.mentorMotto.text = widget.mentorModel!.mentorMotto;
+      controller.selectedLanguages = widget.mentorModel!.mentorLanguages.obs;
+      imageUrl = widget.userModel!.accountApiPhoto;
     }
   }
 
@@ -369,20 +373,7 @@ class _MentorInfo1State extends State<MentorInfo1> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(
-                          height: screenHeight * 0.02,
-                        ),
-                        DefaultButton(
-                          buttonText: 'Change Profile Picture',
-                          bgColor: Colors.grey[300]!,
-                          textColor: Colors.black,
-                          isLoading: false,
-                          borderColor: Colors.transparent,
-                          onPressed: () async {
-                            await _pickImage();
-                          },
-                        ),
-                        if (_image.path.isNotEmpty)
+                        if (imageUrl.isNotEmpty && _image.path.isEmpty)
                           Center(
                               child: Padding(
                             padding: EdgeInsets.only(top: screenHeight * 0.02),
@@ -390,16 +381,68 @@ class _MentorInfo1State extends State<MentorInfo1> {
                               padding:
                                   EdgeInsets.only(right: screenHeight * 0.01),
                               child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.file(
-                                  _image,
-                                  width: screenHeight * 0.30,
-                                  height: screenHeight * 0.30,
-                                  fit: BoxFit.cover,
+                                borderRadius: BorderRadius.circular(5),
+                                child: GestureDetector(
+                                  onTap: _pickImage,
+                                  child: CachedNetworkImage(
+                                    imageUrl: imageUrl,
+                                    imageBuilder: (context, imageProvider) =>
+                                        SizedBox(
+                                      height: screenWidth * 0.4,
+                                      width: screenWidth * 0.4,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          image: DecorationImage(
+                                            image: imageProvider,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    placeholder: (context, url) =>
+                                        _buildPlaceholderAvatar(
+                                            isLoading: true),
+                                    errorWidget: (context, url, error) =>
+                                        _buildPlaceholderAvatar(),
+                                  ),
                                 ),
                               ),
                             ),
-                          ))
+                          )),
+                        if (_image.path.isNotEmpty)
+                          Center(
+                            child: Padding(
+                              padding:
+                                  EdgeInsets.only(top: screenHeight * 0.02),
+                              child: Padding(
+                                padding:
+                                    EdgeInsets.only(right: screenHeight * 0.01),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(5),
+                                  child: GestureDetector(
+                                    onTap: _pickImage,
+                                    child: Image.file(
+                                      _image,
+                                      width: screenWidth * 0.4,
+                                      height: screenWidth * 0.4,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        if (imageUrl.isEmpty && _image.path.isEmpty)
+                          DefaultButton(
+                            buttonText: 'Choose a Profile Picture',
+                            bgColor: Colors.grey[300]!,
+                            textColor: Colors.black,
+                            isLoading: false,
+                            borderColor: Colors.transparent,
+                            onPressed: () async {
+                              await _pickImage();
+                            },
+                          ),
                       ]),
                 SizedBox(
                   height: screenHeight * 0.02,
@@ -433,5 +476,29 @@ class _MentorInfo1State extends State<MentorInfo1> {
         ),
       )),
     );
+  }
+
+  Widget _buildPlaceholderAvatar({bool isLoading = false}) {
+    return GestureDetector(
+        onTap: _pickImage,
+        child: Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.grey[300],
+          ),
+          child: isLoading
+              ? Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.grey[600],
+                  ),
+                )
+              : Image.asset(
+                  'assets/images/application_images/profile.png', // Placeholder image path
+                  fit: BoxFit.cover,
+                ),
+        ));
   }
 }

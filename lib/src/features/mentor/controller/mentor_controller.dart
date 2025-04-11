@@ -79,9 +79,8 @@ class MentorController extends GetxController {
       final List<String> mentorIDs = await FirestoreInstance().getMentorIDs();
       final List<String> accountIDs =
           await FirestoreInstance().getAccountIDInMentor();
-      print("here");
+
       if (accountIDs.contains(firebaseID)) {
-        print("out");
         return Future<bool>.value(false);
       }
       String mentorID = "";
@@ -122,7 +121,9 @@ class MentorController extends GetxController {
       final firestore = FirestoreInstance();
 
       firestore.setMentor(mentor);
-      firestore.updateInitialCourseMentor(FirestoreInstance().getFirebaseUser().email.toString(), mentor.mentorId);
+      firestore.updateInitialCourseMentor(
+          FirestoreInstance().getFirebaseUser().email.toString(),
+          mentor.mentorId);
       return Future<bool>.value(true);
     } catch (e) {
       Get.snackbar("Error", e.toString());
@@ -130,7 +131,7 @@ class MentorController extends GetxController {
     }
   }
 
-    Future<bool> updateMentorInformation() async {
+  Future<bool> updateMentorInformation() async {
     try {
       final firebaseID = FirestoreInstance().getFirebaseUser().uid;
 
@@ -155,7 +156,8 @@ class MentorController extends GetxController {
         mentorStatus: mentorStatus.text,
         mentorSoftDeleted: false,
       );
-
+      print(mentor.toJson());
+      print(selectedExpHeader);
       final firestore = FirestoreInstance();
 
       firestore.setMentor(mentor);

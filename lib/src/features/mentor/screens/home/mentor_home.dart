@@ -3,6 +3,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
+import 'package:voyager/src/features/mentor/screens/profile/mentor_profile.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/controller/mentee_list_controller.dart';
 import 'package:voyager/src/features/mentor/screens/home/accepted.dart';
@@ -254,36 +255,55 @@ class _MentorHomeState extends State<MentorHome> {
   }
 
   Widget _buildProfileImage(double screenWidth) {
-    return CachedNetworkImage(
-      imageUrl: profilePicUrl,
-      imageBuilder: (context, imageProvider) => CircleAvatar(
-        radius: 30,
-        backgroundImage: imageProvider,
-      ),
-      placeholder: (context, url) => _buildPlaceholderAvatar(isLoading: true),
-      errorWidget: (context, url, error) => _buildPlaceholderAvatar(),
-    );
+    return GestureDetector(
+        onTap: () {
+          Navigator.of(context).push(
+            CustomPageRoute(
+              page: MentorProfile(),
+              direction: AxisDirection.left,
+            ),
+          );
+        },
+        child: CachedNetworkImage(
+          imageUrl: profilePicUrl,
+          imageBuilder: (context, imageProvider) => CircleAvatar(
+            radius: 30,
+            backgroundImage: imageProvider,
+          ),
+          placeholder: (context, url) =>
+              _buildPlaceholderAvatar(isLoading: true),
+          errorWidget: (context, url, error) => _buildPlaceholderAvatar(),
+        ));
   }
 
   Widget _buildPlaceholderAvatar({bool isLoading = false}) {
-    return Container(
-      width: 60,
-      height: 60,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.grey[300],
-      ),
-      child: isLoading
-          ? Center(
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.grey[600],
-              ),
-            )
-          : Image.asset(
-              'assets/images/application_images/profile.png', // Placeholder image path
-              fit: BoxFit.cover,
+    return GestureDetector(
+        onTap: () {
+          Navigator.of(context).push(
+            CustomPageRoute(
+              page: MentorProfile(),
+              direction: AxisDirection.right,
             ),
-    );
+          );
+        },
+        child: Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.grey[300],
+          ),
+          child: isLoading
+              ? Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.grey[600],
+                  ),
+                )
+              : Image.asset(
+                  'assets/images/application_images/profile.png', // Placeholder image path
+                  fit: BoxFit.cover,
+                ),
+        ));
   }
 }
