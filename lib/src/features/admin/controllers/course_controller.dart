@@ -1,15 +1,21 @@
 //coursecontroller
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:googleapis/classroom/v1.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
+import 'package:voyager/src/repository/supabase_repository/supabase_instance.dart';
 
 class CourseController extends GetxController {
   static CourseController get instance => Get.find();
   List<CourseModel> courses = [];
   bool isLoading = false;
+  XFile? courseImage;
 
 
   final courseCode = TextEditingController();
@@ -36,14 +42,21 @@ void removeCourseDeliverable(String deliverable) {
 }
 
   Future<void> createCourse() async {
+    String? url = '';
     FirestoreInstance firestoreInstance = FirestoreInstance();
+    if(courseImage != null){
+    final File file = File(courseImage!.path);
+    SupabaseInstance supabase = SupabaseInstance(Supabase.instance.client);
+     url = await supabase.uploadCourseImage(file);
+    }
+
     CourseModel course = CourseModel(
       docId: '',
       courseCode: courseCode.text,
       courseCreatedTimestamp: DateTime.now(),
       courseDeliverables: courseDeliverables.toList(),
       courseDescription: courseDescription.text,
-      courseImgUrl: courseImgUrl.text,
+      courseImgUrl: url?? '',
       courseModifiedTimestamp: DateTime.now(),
       courseName: courseName.text,
       courseSoftDelete: false,

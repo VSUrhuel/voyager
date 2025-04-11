@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:flutter/material.dart';
@@ -56,7 +57,7 @@ class MentorController extends GetxController {
   final SupabaseInstance supabase = SupabaseInstance(Supabase.instance.client);
   Future<bool> updateUsername(File? image) async {
     final firestore = FirestoreInstance();
-    if (image != null) {
+    if (image != null && image.path.isNotEmpty) {
       final String imageUrl = await supabase.uploadProfileImage(image);
       await firestore.updateProfileImage(
           imageUrl, firestore.getFirebaseUser().uid);
@@ -114,7 +115,7 @@ class MentorController extends GetxController {
               (mentorRegEndTime.text.toLowerCase().contains('pm') ? 12 : 0),
           minute: int.parse(mentorRegEndTime.text.split(':')[1].split(' ')[0]),
         ),
-        mentorStatus: mentorStatus.text,
+        mentorStatus: "active",
         mentorSoftDeleted: false,
       );
 
@@ -151,7 +152,7 @@ class MentorController extends GetxController {
         mentorRegDay: selectedDays,
         mentorRegStartTime: parseTime(mentorRegStartTime.text),
         mentorRegEndTime: parseTime(mentorRegEndTime.text),
-        mentorStatus: "active",
+        mentorStatus: mentorStatus.text,
         mentorSoftDeleted: false,
       );
 

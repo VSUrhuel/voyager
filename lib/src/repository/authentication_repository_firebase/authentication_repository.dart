@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:voyager/src/features/authentication/controllers/user_role_enum.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
@@ -363,6 +365,7 @@ Future<UserCredential?> createUserWithoutSignIn(
   String password,
   String studentID,
   String fullName,
+  String profileImage
 ) async {
   try {
     final firestore = FirestoreInstance();
@@ -386,7 +389,7 @@ Future<UserCredential?> createUserWithoutSignIn(
       accountApiID: newUserCredential.user!.uid,
       accountApiEmail: newUserCredential.user!.email ?? "",
       accountApiName: fullName,
-      accountApiPhoto: newUserCredential.user!.photoURL ?? "",
+      accountApiPhoto: profileImage,
       accountPassword: password,
       accountUsername: newUserCredential.user?.displayName ?? "Unknown",
       accountRole: UserRoleEnum.mentor,
