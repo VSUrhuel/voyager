@@ -1,18 +1,65 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:voyager/src/features/authentication/models/user_model.dart';
+import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/features/mentor/screens/input_information/mentor_info1.dart';
+import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/widgets/custom_page_route.dart';
 
-class MentorPersonalInformation extends StatelessWidget {
-  const MentorPersonalInformation({super.key});
+class MentorPersonalInformation extends StatefulWidget {
+  const MentorPersonalInformation(
+      {super.key, required this.mentorModel, required this.userModel});
+  final MentorModel mentorModel;
+  final UserModel userModel;
+
+  @override
+  State<MentorPersonalInformation> createState() =>
+      _MentorPersonalInformationState();
+}
+
+class _MentorPersonalInformationState extends State<MentorPersonalInformation> {
+  FirestoreInstance firestore = FirestoreInstance();
+  late MentorModel mentorModel;
+  late UserModel userModel;
+
+  @override
+  void initState() {
+    super.initState();
+    mentorModel = widget.mentorModel;
+    userModel = widget.userModel;
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final supabase = Supabase.instance.client;
+    final imageUrl = (userModel.accountApiPhoto.isNotEmpty)
+        ? (userModel.accountApiPhoto.startsWith('http')
+            ? userModel.accountApiPhoto
+            : supabase.storage
+                .from('profile-picture')
+                .getPublicUrl(userModel.accountApiPhoto))
+        : 'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/profile-picture/profile.png';
 
+    String toTitleCase(String name) {
+      if (name.isEmpty) return name;
+      if (name.length == 1) return name.toUpperCase();
+      return name
+          .toLowerCase()
+          .split(' ')
+          .map((word) => word.isNotEmpty
+              ? '${word[0].toUpperCase()}${word.substring(1)}'
+              : '')
+          .join(' ');
+    }
+
+    final formattedName = toTitleCase(userModel.accountApiName);
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
         statusBarColor: Colors.white,
@@ -32,10 +79,9 @@ class MentorPersonalInformation extends StatelessWidget {
                     Container(
                       height: screenHeight * 0.4,
                       width: double.infinity,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         image: DecorationImage(
-                          image: AssetImage(
-                              'assets/images/application_images/profile.png'),
+                          image: NetworkImage(imageUrl),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -81,8 +127,8 @@ class MentorPersonalInformation extends StatelessWidget {
                               color: Colors.green.shade100,
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Text(
-                              "3rd Year",
+                            child: Text(
+                              mentorModel.mentorYearLvl,
                               style: TextStyle(
                                   color: Colors.green,
                                   fontWeight: FontWeight.bold),
@@ -93,7 +139,10 @@ class MentorPersonalInformation extends StatelessWidget {
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                CustomPageRoute(page: MentorInfo1()),
+                                CustomPageRoute(
+                                    page: MentorInfo1(
+                                        mentorModel: mentorModel,
+                                        userModel: userModel)),
                               );
                             },
                           ),
@@ -107,7 +156,7 @@ class MentorPersonalInformation extends StatelessWidget {
                                 left: screenWidth * 0.02,
                                 top: screenHeight * 0.0),
                             child: Text(
-                              "John Rhuel Laurente",
+                              formattedName,
                               style: TextStyle(
                                   fontSize: screenHeight * 0.03,
                                   fontWeight: FontWeight.bold),
@@ -118,8 +167,8 @@ class MentorPersonalInformation extends StatelessWidget {
                       Padding(
                         padding: EdgeInsets.symmetric(
                             horizontal: screenWidth * 0.03),
-                        child: const Text(
-                          "johnrhuell@gmail.com",
+                        child: Text(
+                          userModel.accountApiEmail,
                           style: TextStyle(color: Colors.black54, fontSize: 14),
                         ),
                       ),
@@ -129,8 +178,7 @@ class MentorPersonalInformation extends StatelessWidget {
                         children: [],
                       ),
                       // About Section (Title Inside Border)
-                      _infoCardWithTitle("About",
-                          "Lorem ipsum dolor sit amet consectetur. Cras neque pulvinar vivamus commodo dui varius nulla venenatis faucibus."),
+                      _infoCardWithTitle("About", mentorModel.mentorAbout),
 
                       const SizedBox(height: 20),
                       Row(
@@ -146,8 +194,10 @@ class MentorPersonalInformation extends StatelessWidget {
                           // Mentorship Sessions (40% width)
                           Expanded(
                             flex: 3,
-                            child: _mentorshipCard("10",
-                                "Mentorship Sessions Completed", screenHeight),
+                            child: _mentorshipCard(
+                                mentorModel.mentorSessionCompleted.toString(),
+                                "Mentorship Sessions Completed",
+                                screenHeight),
                           ),
                         ],
                       ),
@@ -161,10 +211,10 @@ class MentorPersonalInformation extends StatelessWidget {
                       Wrap(
                         spacing: 8,
                         children: [
-                          _languageChip("Waray-waray"),
-                          _languageChip("Cebuano"),
-                          _languageChip("Filipino"),
-                          _languageChip("English"),
+                          for (int i = 0;
+                              i < mentorModel.mentorLanguages.length;
+                              i++)
+                            _languageChip(mentorModel.mentorLanguages[i]),
                         ],
                       ),
 
@@ -174,9 +224,11 @@ class MentorPersonalInformation extends StatelessWidget {
                       _sectionTitle("Social Links"),
                       Row(
                         children: [
-                          _socialIcon(Icons.facebook, Colors.blue),
+                          _socialIcon(Icons.facebook, Colors.blue,
+                              mentorModel.mentorFbUrl, context),
                           const SizedBox(width: 20),
-                          _socialIcon(Icons.link, Colors.blue.shade800),
+                          _socialIcon(Icons.link, Colors.blue.shade800,
+                              mentorModel.mentorGitUrl, context),
                         ],
                       ),
 
@@ -192,9 +244,10 @@ class MentorPersonalInformation extends StatelessWidget {
     );
   }
 
-  // Section Title Inside Border
+// Section Title Inside Border
   Widget _infoCardWithTitle(String title, String text) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.only(top: 5),
       decoration: BoxDecoration(
@@ -221,6 +274,9 @@ class MentorPersonalInformation extends StatelessWidget {
 
   // Experience Section with Improved UI
   Widget _experienceSection(double screenHeight) {
+    final isExperienceEmpty = mentorModel.mentorExpHeader.isEmpty ||
+        mentorModel.mentorExpDesc.isEmpty;
+
     return Container(
       height: screenHeight * 0.4,
       padding: const EdgeInsets.all(12),
@@ -236,16 +292,25 @@ class MentorPersonalInformation extends StatelessWidget {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
-          _experienceItem("Product Designer at Google"),
-          _experienceItem("Product Designer at Google"),
-          _experienceItem("Product Designer at Google"),
+          if (isExperienceEmpty)
+            const Text(
+              "No Experience",
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.black87,
+                fontStyle: FontStyle.italic,
+              ),
+            )
+          else
+            for (int i = 0; i < mentorModel.mentorExpHeader.length; i++)
+              _experienceItem(mentorModel.mentorExpHeader[i], i),
         ],
       ),
     );
   }
 
   // Individual Experience Item
-  Widget _experienceItem(String title) {
+  Widget _experienceItem(String title, int index) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Column(
@@ -256,8 +321,8 @@ class MentorPersonalInformation extends StatelessWidget {
             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
-          const Text(
-            "Lorem ipsum dolor sit amet consectetur.",
+          Text(
+            mentorModel.mentorExpDesc[index],
             style: TextStyle(fontSize: 14, color: Colors.black87),
           ),
         ],
@@ -327,14 +392,47 @@ class MentorPersonalInformation extends StatelessWidget {
   }
 
   // Social Icon Widget
-  Widget _socialIcon(IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        shape: BoxShape.circle,
+  Widget _socialIcon(
+      IconData icon, Color color, String url, BuildContext context) {
+    return Padding(
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).size.height * 0.01),
+      child: InkWell(
+        onTap: () async {
+          // Try parsing the URL to avoid errors with invalid URLs
+          final uri = Uri.tryParse(url);
+
+          // Check if the URL is valid
+          if (uri != null) {
+            // Try to launch the URL
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            } else {
+              // Show a Snackbar if the URL can't be launched
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Could not open $url'),
+                ),
+              );
+            }
+          } else {
+            // Handle invalid URL case
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Invalid URL: $url'),
+              ),
+            );
+          }
+        },
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, size: 30, color: color),
+        ),
       ),
-      child: Icon(icon, size: 30, color: color),
     );
   }
 }

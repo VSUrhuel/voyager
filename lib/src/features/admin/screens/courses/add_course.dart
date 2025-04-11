@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:get/route_manager.dart';
+import 'package:voyager/src/features/admin/controllers/course_controller.dart';
 import 'package:voyager/src/features/admin/screens/admin_dashboard.dart';
+import 'package:voyager/src/features/admin/screens/courses/course_list.dart';
 import 'package:voyager/src/features/admin/widgets/cover_photo_picker.dart';
 import 'package:voyager/src/widgets/custom_button.dart';
 
@@ -13,7 +17,8 @@ class AddCourse extends StatefulWidget {
 
 class _AddCourseState extends State<AddCourse> {
   final TextEditingController _textController = TextEditingController();
-  final List<String> _deliverables = [];
+  final CourseController _courseController = Get.put(CourseController());
+  // final List<String> _deliverables = [];
   final FocusNode _focusNode = FocusNode();
   double height = 0;
 
@@ -31,7 +36,7 @@ class _AddCourseState extends State<AddCourse> {
     if (_textController.text.trim().isEmpty) return;
 
     setState(() {
-      _deliverables.add(_textController.text);
+      _courseController.courseDeliverables.add(_textController.text);
       height = height + 0.07;
       _textController.clear();
     });
@@ -49,9 +54,12 @@ class _AddCourseState extends State<AddCourse> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final GlobalKey<CoverPhotoPickerState> _pickerKey =
+        GlobalKey();
 
     return SafeArea(
         child: Scaffold(
+          resizeToAvoidBottomInset: false,
             appBar: AppBar(
               systemOverlayStyle: SystemUiOverlayStyle.dark,
               backgroundColor: Colors.transparent,
@@ -77,11 +85,12 @@ class _AddCourseState extends State<AddCourse> {
                 ),
                 child: Column(
                   children: [
-                    Container(
-                      height: screenHeight * 0.83,
-                      padding: EdgeInsets.only(
-                        bottom: screenHeight * 0.04,
-                      ),
+                    Expanded(
+                      
+                      // height: screenHeight * 0.70,
+                      // padding: EdgeInsets.only(
+                      //   bottom: screenHeight * 0.04,
+                      // ),
                       child: SingleChildScrollView(
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,7 +115,7 @@ class _AddCourseState extends State<AddCourse> {
                                 padding:
                                     EdgeInsets.only(top: screenHeight * 0.02),
                                 child: TextFormField(
-                                  // controller later
+                                  controller: _courseController.courseCode,
 
                                   style: TextStyle(
                                     fontSize: screenWidth * 0.04,
@@ -133,7 +142,7 @@ class _AddCourseState extends State<AddCourse> {
                                 padding:
                                     EdgeInsets.only(top: screenHeight * 0.02),
                                 child: TextFormField(
-                                  // controller later
+                                  controller: _courseController.courseName,
                                   style: TextStyle(
                                     fontSize: screenWidth * 0.04,
                                   ),
@@ -159,7 +168,7 @@ class _AddCourseState extends State<AddCourse> {
                                 padding:
                                     EdgeInsets.only(top: screenHeight * 0.02),
                                 child: TextFormField(
-                                  // controller later
+                                  controller: _courseController.courseDescription,
                                   style: TextStyle(
                                     fontSize: screenWidth * 0.04,
                                   ),
@@ -226,16 +235,16 @@ class _AddCourseState extends State<AddCourse> {
                                 height: screenHeight * height,
                                 child: Expanded(
                                   child: ListView.builder(
-                                      itemCount: _deliverables.length,
+                                      itemCount: _courseController.courseDeliverables.length,
                                       itemBuilder: (context, index) {
                                         return Card(
                                           child: ListTile(
-                                            title: Text(_deliverables[index]),
+                                            title: Text(_courseController.courseDeliverables[index]),
                                             trailing: IconButton(
                                               icon: Icon(Icons.delete),
                                               onPressed: () {
                                                 setState(() {
-                                                  _deliverables.removeAt(index);
+                                                  _courseController.courseDeliverables.removeAt(index);
                                                   height = height - 0.07;
                                                 });
                                               },
@@ -245,9 +254,13 @@ class _AddCourseState extends State<AddCourse> {
                                       }),
                                 ),
                               ),
+                              SizedBox(
+                                height: screenHeight * 0.01,
+                              ),
                               Container(
+                                alignment: Alignment.center,
                                 padding:
-                                    EdgeInsets.only(top: screenHeight * 0.02),
+                                    EdgeInsets.only(bottom: screenHeight * 0.05),
                                 child: Container(
                                   decoration: BoxDecoration(
                                     border: Border.all(
@@ -255,15 +268,23 @@ class _AddCourseState extends State<AddCourse> {
                                     ),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  height: screenHeight * 0.06,
-                                  width: screenWidth * 0.9,
-                                  child: CoverPhotoPicker(),
+                                  height: screenHeight * 0.2,
+                                  width: screenWidth * 0.5,
+                                  child: CoverPhotoPicker(
+                                    key: _pickerKey,
+                                    onImagePicked: (image){
+                                      _courseController.courseImage = image;
+                                    },
+                                  ),
                                 ),
                               ),
                             ]),
                       ),
                     ),
-                    Spacer(),
+                    // Spacer(),
+                    SizedBox(
+                      height: screenHeight * 0.00001,
+                    ),
                     DefaultButton(
                       buttonText: 'Proceed',
                       bgColor: Color(0xFF1877F2),
@@ -271,12 +292,40 @@ class _AddCourseState extends State<AddCourse> {
                       isLoading: false,
                       borderColor: Colors.transparent,
                       onPressed: () async {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AdminDashboard(),
-                          ),
+                        final currentContext = context;
+                        final messenger = ScaffoldMessenger.of(currentContext);
+                        final navigator = Navigator.of(currentContext);
+                        try{
+                           showDialog(
+                              context: currentContext,
+                              barrierDismissible: false,
+                              builder: (_) => const Center(child: CircularProgressIndicator()),
+                            );
+                          await _courseController.createCourse();
+                          _courseController.courseCode.clear();
+                          _courseController.courseName.clear();
+                          _courseController.courseDescription.clear();
+                          _courseController.courseDeliverables.clear();
+                        _pickerKey.currentState?.resetImage();
+                        
+                        if (currentContext.mounted) {
+                        messenger.showSnackBar(
+                          SnackBar(content: Text('Course added successfully')),
                         );
+                        Navigator.of(currentContext).pop();
+                        Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => CourseList()));
+                      }
+
+                        }catch(e){
+                          messenger.showSnackBar(
+                            SnackBar(
+                              content: Text('Error: $e'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        } 
+                        
                       },
                     ),
                   ],

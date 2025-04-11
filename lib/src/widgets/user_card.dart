@@ -75,17 +75,16 @@ class UserCard extends StatelessWidget {
         children: [
           // Profile Image
           ClipRRect(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(9),
-              bottomLeft: Radius.circular(9),
-            ),
-            child: Image.asset(
-              'assets/images/application_images/code.jpg',
-              width: screenWidth * 0.15,
-              height: screenHeight * 0.09,
-              fit: BoxFit.cover,
-            ),
-          ),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(9),
+                bottomLeft: Radius.circular(9),
+              ),
+              child: Image.network(
+                user.accountApiPhoto,
+                width: screenWidth * 0.20,
+                height: screenHeight * 0.09,
+                fit: BoxFit.cover,
+              )),
           const SizedBox(width: 10), // Spacing
 
           // User Details

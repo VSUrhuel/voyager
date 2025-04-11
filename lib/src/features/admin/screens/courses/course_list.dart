@@ -1,3 +1,8 @@
+import 'package:get/get_core/get_core.dart';
+import 'package:get/get_instance/get_instance.dart';
+import 'package:voyager/src/features/admin/controllers/course_controller.dart';
+import 'package:voyager/src/features/admin/widgets/admin_search_bar.dart';
+import 'package:voyager/src/features/mentee/model/course_model.dart';
 import 'package:voyager/src/features/mentee/widgets/normal_search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,18 +19,43 @@ class CourseList extends StatefulWidget {
 
 class _CourseListState extends State<CourseList> {
   String show = '';
+  String searchQuery = '';
+  late Future<List<CourseModel>> activeCoursesFuture;
+  late Future<List<CourseModel>> archivedCoursesFuture;
+  final CourseController courseController = Get.put(CourseController());
 
   @override
   void initState() {
     super.initState();
+    activeCoursesFuture = courseController.fetchActiveCourses();
+    archivedCoursesFuture = courseController.fetchArchivedCourses();
     show = 'active';
+    refreshCourses();
+    searchQuery = '';
+  }
+
+  void refreshCourses() {
+    setState(() {
+      activeCoursesFuture = courseController.fetchActiveCourses();
+      archivedCoursesFuture = courseController.fetchArchivedCourses();
+    });
+  }
+
+    List<CourseModel> _filterCourses(List<CourseModel> courses) {
+    if (searchQuery.isEmpty) return courses;
+    return courses.where((course) => 
+      course.courseName.toLowerCase().contains(searchQuery.toLowerCase()) ||
+      (course.courseDescription.toLowerCase().contains(searchQuery.toLowerCase()))
+    ).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         backgroundColor: Colors.transparent,
@@ -52,7 +82,13 @@ class _CourseListState extends State<CourseList> {
               // NormalSearchbar widget
               SizedBox(
                 height: screenHeight * 0.09,
-                child: NormalSearchbar(),
+                child: AdminSearchbar(
+                  onSearchChanged: (query){
+                    setState(() {
+                      searchQuery = query;
+                    });
+                  },
+                ),
               ),
 
               Padding(
@@ -88,6 +124,7 @@ class _CourseListState extends State<CourseList> {
                                 fontSize: screenWidth * 0.03,
                                 fontWeight: FontWeight.w600,
                               ),
+                              side: BorderSide.none,
                               foregroundColor: Color(int.parse(txt)),
                             ),
                             child: Text('Active'),
@@ -123,6 +160,7 @@ class _CourseListState extends State<CourseList> {
                                 fontSize: screenWidth * 0.03,
                                 fontWeight: FontWeight.w600,
                               ),
+                              side: BorderSide.none,
                               foregroundColor: Color(int.parse(txt)),
                             ),
                             child: Text('Archived'),
@@ -158,19 +196,45 @@ class _CourseListState extends State<CourseList> {
           if (show == 'active')
             SizedBox(
                 height: screenHeight * 0.70,
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.only(
-                      left: screenWidth * 0.05, right: screenWidth * 0.05),
-                  child: ActiveCourse(trialSize: 5),
-                )),
+                child: FutureBuilder<List<CourseModel>>(
+                  future: activeCoursesFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else {
+                      final filteredCourses = _filterCourses(snapshot.data ?? []);
+                      return SingleChildScrollView(
+                        padding: EdgeInsets.only(
+                            left: screenWidth * 0.05, right: screenWidth * 0.05),
+                        child: ActiveCourse(courses: filteredCourses),
+                      );
+                    }
+                  },
+                ),
+            ),
           if (show == 'archived')
             SizedBox(
                 height: screenHeight * 0.70,
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.only(
-                      left: screenWidth * 0.05, right: screenWidth * 0.05),
-                  child: ArchivedCourse(trialSize: 2),
-                ))
+                child: FutureBuilder<List<CourseModel>>(
+                  future: archivedCoursesFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else {
+                      final filteredCourses = _filterCourses(snapshot.data ?? []);
+                      return SingleChildScrollView(
+                        padding: EdgeInsets.only(
+                            left: screenWidth * 0.05, right: screenWidth * 0.05),
+                        child: ArchivedCourse(courses: filteredCourses),
+                      );
+                    }
+                  },
+                ),
+              )
         ],
       ),
     );

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/screens/home/mentor_profile.dart';
 import 'package:voyager/src/features/mentee/widgets/skills_display.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
-// Import your MentorProfilePage
 
 class MentorCard extends StatelessWidget {
   final MentorModel mentorModel;
@@ -18,23 +18,29 @@ class MentorCard extends StatelessWidget {
       if (nameParts.isEmpty) return "";
 
       if (nameParts.length == 1) {
-        // If there's only one name, capitalize the first letter and lowercase the rest
         return nameParts[0][0].toUpperCase() +
             nameParts[0].substring(1).toLowerCase();
       }
 
-      // Extract last name and format it (capitalize first letter, lowercase the rest)
       String lastName = nameParts.last[0].toUpperCase() +
           nameParts.last.substring(1).toLowerCase();
 
-      // Convert all given names (except last) to initials
       String initials = nameParts
           .sublist(0, nameParts.length - 1)
-          .map((name) => name[0].toUpperCase()) // Get first letter as uppercase
-          .join(""); // Join initials
+          .map((name) => name[0].toUpperCase())
+          .join("");
 
-      return "$initials $lastName"; // Combine initials and formatted last name
+      return "$initials $lastName";
     }
+
+    final supabase = Supabase.instance.client;
+    final imageUrl = (user.accountApiPhoto.isNotEmpty)
+        ? (user.accountApiPhoto.startsWith('http')
+            ? user.accountApiPhoto
+            : supabase.storage
+                .from('profile-picture')
+                .getPublicUrl(user.accountApiPhoto))
+        : 'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/profile-picture/profile.png';
 
     String shortenMotto(String mentorMotto) {
       List<String> words = mentorMotto.split(" ");
@@ -55,7 +61,11 @@ class MentorCard extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const MentorProfilePage()),
+          MaterialPageRoute(
+              builder: (context) => MentorProfilePage(
+                    mentorModel: mentorModel,
+                    user: user,
+                  )),
         );
       },
       child: Card(
@@ -71,10 +81,9 @@ class MentorCard extends StatelessWidget {
               // Upper Display (Profile Image)
               Container(
                 decoration: BoxDecoration(
-                  image: const DecorationImage(
-                    image: AssetImage(
-                        'assets/images/application_images/profile.png'),
-                    fit: BoxFit.fitWidth,
+                  image: DecorationImage(
+                    image: NetworkImage(imageUrl),
+                    fit: BoxFit.cover,
                   ),
                   borderRadius: BorderRadius.circular(10),
                   color: Colors.black,

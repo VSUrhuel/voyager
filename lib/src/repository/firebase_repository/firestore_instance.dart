@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
+import 'package:voyager/src/features/mentee/model/course_model.dart';
 import 'package:voyager/src/features/mentor/model/content_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -65,6 +66,7 @@ class FirestoreInstance {
       if ((await getAPIId()).contains(auth.firebaseUser.value?.uid)) {
         return;
       }
+
       await _db.collection('users').doc(userUid).set({
         'accountApiID':
             auth.firebaseUser.value?.uid ?? "", // Use empty string if null
@@ -72,8 +74,8 @@ class FirestoreInstance {
             auth.firebaseUser.value?.email ?? "", // Provide a default
         'accountApiName': auth.firebaseUser.value?.displayName ??
             "Unknown", // Provide default name
-        'accountApiPhoto':
-            auth.firebaseUser.value?.photoURL ?? "", // Handle null safely
+        'accountApiPhoto': auth.firebaseUser.value?.photoURL ??
+            "https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/profile-picture//profile.png", // Handle null safely
         'accountPassword': '',
         'accountUsername': auth.firebaseUser.value?.displayName ??
             "Unknown", // Provide default username
@@ -125,6 +127,16 @@ class FirestoreInstance {
     }
   }
 
+  Future<void> updateProfileImage(String url, String uid) async {
+    try {
+      await _db.collection('users').doc(uid).update({
+        'accountApiPhoto': url,
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> updateStudentID(String studentID, String uid) async {
     try {
       await _db.collection('users').doc(uid).update({
@@ -153,6 +165,7 @@ class FirestoreInstance {
             .collection('mentors')
             .doc(mentor.mentorId)
             .update(mentor.toJson());
+
         return;
       }
       await _db.collection('mentors').doc(mentor.mentorId).set(mentor.toJson());
@@ -237,6 +250,18 @@ class FirestoreInstance {
       }
 
       return courseMentor.docs.first.id;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<MentorModel> getMentorThroughStudentId(String studentId) async {
+    try {
+      final mentor = await _db
+          .collection('mentors')
+          .where('accountStudentId', isEqualTo: studentId)
+          .get();
+      return MentorModel.fromJson(mentor.docs.first.data());
     } catch (e) {
       rethrow;
     }
@@ -527,6 +552,8 @@ class FirestoreInstance {
     }
   }
 
+  
+
   Future<List<MentorModel>> getMentorsThroughStatus(String status) async {
     try {
       final mentor = await _db
@@ -670,6 +697,199 @@ class FirestoreInstance {
       });
     } catch (e) {
       rethrow;
+    }
+  }
+
+  Future<List<CourseModel>> getCourses() async {
+    try {
+      final courses = await _db
+          .collection('course')
+          .where('courseSoftDelete', isEqualTo: false)
+          .get();
+      List<CourseModel> courseList = [];
+      for (var course in courses.docs) {
+        courseList.add(
+            CourseModel.fromJson(course.data(), course.id)); //l Pass doc.id
+      }
+      return courseList;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+   Future<List<CourseModel>> getActiveCourses() async {
+    try {
+      final courses = await _db
+          .collection('course')
+          .where('courseSoftDelete', isEqualTo: false)
+          .where('courseStatus', isEqualTo: 'active')
+          .get();
+      List<CourseModel> courseList = [];
+      for (var course in courses.docs) {
+        courseList.add(
+            CourseModel.fromJson(course.data(), course.id)); //l Pass doc.id
+      }
+      return courseList;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+   Future<List<CourseModel>> getArchivedCourses() async {
+    try {
+      final courses = await _db
+          .collection('course')
+          .where('courseSoftDelete', isEqualTo: false)
+          .where('courseStatus', isEqualTo: 'archived')
+          .get();
+      List<CourseModel> courseList = [];
+      for (var course in courses.docs) {
+        courseList.add(
+            CourseModel.fromJson(course.data(), course.id)); //l Pass doc.id
+      }
+      return courseList;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> setCourse(CourseModel course) async {
+  try {
+    String uniqueID = generateUniqueId();
+    await _db.collection('course').doc(uniqueID).set(course.toJson());
+  } catch (e) {
+    rethrow;
+  }
+}
+
+Future<void> setCourseMentor(String courseId, String mentorId) async {
+  try {
+    String uniqueID = generateUniqueId();
+    final cm = CourseMentorModel(
+      courseMentorId: uniqueID,
+      courseId: courseId,
+      mentorId: mentorId,
+      courseMentorCreatedTimestamp: DateTime.now(),
+      courseMentorSoftDeleted: false,
+    );
+    await _db
+        .collection('courseMentor')
+        .doc(uniqueID)
+        .set(cm.toJson());
+  } catch (e) {
+    rethrow;
+  }
+}
+
+Future<void> updateInitialCourseMentor(String email, String newMentorId) async{
+  try {
+    CourseMentorModel courseMentor = await getCourseMentorThroughMentor(email);
+    await _db.collection('courseMentor').doc(courseMentor.courseMentorId).update({
+      'mentorId': newMentorId,
+    });
+  } catch (e) {
+    rethrow;
+  }
+}
+
+Future<void> updateCourseMentor(
+    String courseMentorId, String courseId, String mentorId) async {
+  try {
+    await _db.collection('courseMentor').doc(courseMentorId).update({
+      'courseId': courseId,
+      'mentorId': mentorId,
+    });
+  } catch (e) {
+    rethrow;
+  }
+}
+
+  Future<int> getTotalMentorsForCourse(String docId) async {
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('courseMentor')
+          .where('courseMentorId', isEqualTo: docId)
+          .where('courseMentorSoftDelete', isEqualTo: false)
+          .get();
+      //print(querySnapshot.docs.length);
+
+      return querySnapshot.docs.length; // Return the count
+    } catch (e) {
+      print('Error fetching course mentors: $e');
+      return 0;
+    }
+  }
+
+  Future<int> getTotalMenteeForCourse(String docId) async {
+    try {
+      // Step 1: Get the list of courseMentors that match the provided course ID
+      final courseMentorQuerySnapshot = await FirebaseFirestore.instance
+          .collection('courseMentor')
+          .where('courseId', isEqualTo: docId)
+          .where('courseMentorSoftDelete', isEqualTo: false)
+          .get();
+
+      // Initialize mentee count
+      int menteeCount = 0;
+      print(courseMentorQuerySnapshot.docs.length);
+
+      // Step 2: For each courseMentor, get the matching menteeCourseAllocID
+      for (var courseMentorDoc in courseMentorQuerySnapshot.docs) {
+        final courseMentorId = courseMentorDoc.id;
+
+        // Step 3: Get the mentees for this courseMentorId by matching menteeCourseAllocID
+        final menteeQuerySnapshot = await FirebaseFirestore.instance
+            .collection('menteeCourseAlloc')
+            .where('courseMentorId', isEqualTo: courseMentorId)
+            .where('mcaSoftDeleted', isEqualTo: false)
+            .get();
+
+        // Increment the mentee count based on the number of matching mentees
+        menteeCount += menteeQuerySnapshot.docs.length;
+      }
+
+      print("Total Mentees for Course $docId: $menteeCount");
+
+      return menteeCount;
+    } catch (e) {
+      print('Error fetching course mentees: $e');
+      return 0;
+    }
+  }
+
+  Future<void> enrollThisCourse(
+      String mentorId, String userId, String courseId) async {
+    try {
+      final firestore = FirebaseFirestore.instance;
+      final Timestamp createdTimestamp = Timestamp.now();
+
+      // Step 1: Query courseMentor collection where courseId matches
+      final courseMentorQuery = firestore
+          .collection('courseMentor')
+          .where('courseId', isEqualTo: courseId);
+
+      final courseMentorSnapshot = await courseMentorQuery.get();
+
+      if (courseMentorSnapshot.docs.isEmpty) {
+        print("CourseMentor does not exist. Cannot enroll.");
+        return;
+      }
+
+      // Step 2: Get the courseMentorId from the first matching document
+      final courseMentorId = courseMentorSnapshot.docs.first.id;
+
+      // Step 3: Add record to menteeCourseAlloc
+      await firestore.collection('menteeCourseAlloc').add({
+        'courseMentorId': courseMentorId,
+        'mcaAllocStatus': 'accepted',
+        'mcaCreatedTimestamp': createdTimestamp,
+        'mcaSoftDeleted': false,
+        'menteeId': userId,
+      });
+
+      print("Successfully enrolled in the course!");
+    } catch (e) {
+      print("Error enrolling in the course: $e");
     }
   }
 }

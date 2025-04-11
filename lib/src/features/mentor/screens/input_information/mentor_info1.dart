@@ -1,8 +1,14 @@
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:voyager/src/features/admin/widgets/profile_picker.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/controller/about_controller.dart';
 import 'package:voyager/src/features/mentor/controller/mentor_controller.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/features/mentor/screens/input_information/mentor_info2.dart';
+import 'package:voyager/src/features/mentor/widget/image_preview_dialog.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/widgets/custom_button.dart';
 import 'package:voyager/src/widgets/custom_page_route.dart';
@@ -12,7 +18,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
 class MentorInfo1 extends StatefulWidget {
-  MentorInfo1({super.key, this.mentorModel, this.userModel});
+  const MentorInfo1({super.key, this.mentorModel, this.userModel});
   final UserModel? userModel;
   final MentorModel? mentorModel;
 
@@ -22,7 +28,8 @@ class MentorInfo1 extends StatefulWidget {
 
 class _MentorInfo1State extends State<MentorInfo1> {
   final AboutController aboutController = AboutController();
-
+  File _image = File('');
+  String imageUrl = '';
   final controller = Get.put(MentorController());
 
   Future<UserModel?> getUserModel(String email) async {
@@ -33,21 +40,45 @@ class _MentorInfo1State extends State<MentorInfo1> {
     }
   }
 
+  void _showImagePreview(File imageFile) {
+    showDialog(
+      context: context,
+      builder: (context) => ImagePreviewDialog(imageFile: imageFile),
+    );
+  }
+
+  Future<void> _pickImage() async {
+    final pickedImage = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+    );
+    if (pickedImage == null) return;
+    final pickedImageFile = File(pickedImage.path);
+    setState(() {
+      _image = pickedImageFile;
+    });
+    _showImagePreview(pickedImageFile);
+  }
+
   String getName(String? name) {
     List names = name!.split(' ');
     return names.sublist(0, names.length - 1).join(' ');
   }
 
+  bool hasParam = false;
+
   @override
   void initState() {
     super.initState();
-    if (widget.mentorModel != null) {
+    hasParam = widget.mentorModel != null;
+    if (hasParam) {
       controller.mentorYearLvl.text = widget.mentorModel!.mentorYearLvl;
       controller.mentorAbout.text = widget.mentorModel!.mentorAbout;
       controller.mentorSessionCompleted.text =
           widget.mentorModel!.mentorSessionCompleted.toString();
       controller.mentorUserName.text = widget.userModel!.accountUsername;
       controller.mentorMotto.text = widget.mentorModel!.mentorMotto;
+      controller.selectedLanguages = widget.mentorModel!.mentorLanguages.obs;
+      imageUrl = widget.userModel!.accountApiPhoto;
     }
   }
 
@@ -55,27 +86,27 @@ class _MentorInfo1State extends State<MentorInfo1> {
   void dispose() {
     super.dispose();
 
-    controller.mentorYearLvl.clear();
-    controller.mentorAbout.clear();
-    controller.mentorUserName.clear();
-    controller.mentorSessionCompleted.clear();
-    controller.mentorMotto.clear();
-    controller.mentorLanguages.clear();
-    controller.mentorExpHeader.clear();
-    controller.mentorExpDesc.clear();
-    controller.mentorRegDay.clear();
-    controller.mentorRegStartTime.clear();
-    controller.mentorRegEndTime.clear();
-    controller.mentorFbUrl.clear();
-    controller.mentorGitUrl.clear();
-    controller.mentorStatus.clear();
-    controller.mentorExpertise.clear();
-    controller.mentorSoftDeleted.clear();
-    controller.selectedSkills.clear();
-    controller.selectedDays.clear();
-    controller.selectedExpHeader.clear();
-    controller.selectedExpDesc.clear();
-    controller.selectedLanguages.clear();
+    // controller.mentorYearLvl.clear();
+    // controller.mentorAbout.clear();
+    // controller.mentorUserName.clear();
+    // controller.mentorSessionCompleted.clear();
+    // controller.mentorMotto.clear();
+    // controller.mentorLanguages.clear();
+    // controller.mentorExpHeader.clear();
+    // controller.mentorExpDesc.clear();
+    // controller.mentorRegDay.clear();
+    // controller.mentorRegStartTime.clear();
+    // controller.mentorRegEndTime.clear();
+    // controller.mentorFbUrl.clear();
+    // controller.mentorGitUrl.clear();
+    // controller.mentorStatus.clear();
+    // controller.mentorExpertise.clear();
+    // controller.mentorSoftDeleted.clear();
+    // controller.selectedSkills.clear();
+    // controller.selectedDays.clear();
+    // controller.selectedExpHeader.clear();
+    // controller.selectedExpDesc.clear();
+    // controller.selectedLanguages.clear();
   }
 
   @override
@@ -330,6 +361,92 @@ class _MentorInfo1State extends State<MentorInfo1> {
                 SizedBox(
                   height: screenHeight * 0.02,
                 ),
+                if (hasParam)
+                  Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Profile Picture',
+                          style: TextStyle(
+                            fontSize: screenWidth * 0.04,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (imageUrl.isNotEmpty && _image.path.isEmpty)
+                          Center(
+                              child: Padding(
+                            padding: EdgeInsets.only(top: screenHeight * 0.02),
+                            child: Padding(
+                              padding:
+                                  EdgeInsets.only(right: screenHeight * 0.01),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(5),
+                                child: GestureDetector(
+                                  onTap: _pickImage,
+                                  child: CachedNetworkImage(
+                                    imageUrl: imageUrl,
+                                    imageBuilder: (context, imageProvider) =>
+                                        SizedBox(
+                                      height: screenWidth * 0.4,
+                                      width: screenWidth * 0.4,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          image: DecorationImage(
+                                            image: imageProvider,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    placeholder: (context, url) =>
+                                        _buildPlaceholderAvatar(
+                                            isLoading: true),
+                                    errorWidget: (context, url, error) =>
+                                        _buildPlaceholderAvatar(),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )),
+                        if (_image.path.isNotEmpty)
+                          Center(
+                            child: Padding(
+                              padding:
+                                  EdgeInsets.only(top: screenHeight * 0.02),
+                              child: Padding(
+                                padding:
+                                    EdgeInsets.only(right: screenHeight * 0.01),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(5),
+                                  child: GestureDetector(
+                                    onTap: _pickImage,
+                                    child: Image.file(
+                                      _image,
+                                      width: screenWidth * 0.4,
+                                      height: screenWidth * 0.4,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        if (imageUrl.isEmpty && _image.path.isEmpty)
+                          DefaultButton(
+                            buttonText: 'Choose a Profile Picture',
+                            bgColor: Colors.grey[300]!,
+                            textColor: Colors.black,
+                            isLoading: false,
+                            borderColor: Colors.transparent,
+                            onPressed: () async {
+                              await _pickImage();
+                            },
+                          ),
+                      ]),
+                SizedBox(
+                  height: screenHeight * 0.02,
+                ),
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: DefaultButton(
@@ -346,6 +463,7 @@ class _MentorInfo1State extends State<MentorInfo1> {
                                 userModel: widget.userModel,
                                 mentorModel: widget.mentorModel,
                                 controller: controller,
+                                image: _image,
                               ),
                               direction: AxisDirection.left));
                     },
@@ -358,5 +476,29 @@ class _MentorInfo1State extends State<MentorInfo1> {
         ),
       )),
     );
+  }
+
+  Widget _buildPlaceholderAvatar({bool isLoading = false}) {
+    return GestureDetector(
+        onTap: _pickImage,
+        child: Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.grey[300],
+          ),
+          child: isLoading
+              ? Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.grey[600],
+                  ),
+                )
+              : Image.asset(
+                  'assets/images/application_images/profile.png', // Placeholder image path
+                  fit: BoxFit.cover,
+                ),
+        ));
   }
 }

@@ -1,12 +1,41 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:voyager/src/features/authentication/models/user_model.dart';
+import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/features/mentor/screens/mentor_dashboard.dart';
+import 'package:voyager/src/features/mentor/screens/profile/about.dart';
 import 'package:voyager/src/features/mentor/screens/profile/personal_information_mentor.dart';
+import 'package:voyager/src/features/mentor/screens/profile/security_password.dart';
+import 'package:voyager/src/features/mentor/screens/profile/user_agreement.dart';
+import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/widgets/custom_page_route.dart';
 import 'package:voyager/src/widgets/profile.dart';
 import 'package:voyager/src/widgets/profile_list_tile.dart';
 
-class MentorProfile extends StatelessWidget {
+class MentorProfile extends StatefulWidget {
   const MentorProfile({super.key});
+
+  @override
+  State<MentorProfile> createState() => _MentorProfileState();
+}
+
+class _MentorProfileState extends State<MentorProfile> {
+  FirestoreInstance firestore = FirestoreInstance();
+  late MentorModel mentorModel;
+  late UserModel userModel;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  void fetchData() async {
+    mentorModel = await firestore.getMentorThroughAccId(FirebaseAuth.instance
+        .currentUser!.uid); // Replace 'mentorId' with the actual argument
+    userModel = await firestore.getUser(FirebaseAuth.instance.currentUser!
+        .uid); // Replace 'userId' with the actual argument
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +89,9 @@ class MentorProfile extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  CustomPageRoute(page: MentorPersonalInformation()),
+                  CustomPageRoute(
+                      page: MentorPersonalInformation(
+                          mentorModel: mentorModel, userModel: userModel)),
                 );
               },
             ),
@@ -69,7 +100,7 @@ class MentorProfile extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  CustomPageRoute(page: MentorPersonalInformation()),
+                  CustomPageRoute(page: SecuritySettingsScreen()),
                 );
               },
             ),
@@ -78,7 +109,7 @@ class MentorProfile extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  CustomPageRoute(page: MentorPersonalInformation()),
+                  CustomPageRoute(page: UserAgreement()),
                 );
               },
             ),
@@ -87,7 +118,7 @@ class MentorProfile extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  CustomPageRoute(page: MentorPersonalInformation()),
+                  CustomPageRoute(page: AboutScreen()),
                 );
               },
             ),

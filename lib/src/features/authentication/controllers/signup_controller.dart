@@ -74,7 +74,7 @@ class SignupController extends GetxController {
             auth.firebaseUser.value?.email ?? "", // Provide a default
         accountApiName: fullName.text,
         accountApiPhoto:
-            auth.firebaseUser.value?.photoURL ?? "", // Handle null safely
+            "https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/profile-picture//profile.png", // Handle null safely
         accountPassword: '',
         accountUsername: auth.firebaseUser.value?.displayName ??
             "Unknown", // Provide default username

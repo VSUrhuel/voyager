@@ -1,69 +1,116 @@
+import 'package:voyager/src/features/mentee/widgets/mentor_card.dart';
 import 'package:voyager/src/features/mentee/widgets/normal_search_bar.dart';
 import 'package:voyager/src/features/mentee/widgets/small_mentor_card.dart';
 import 'package:flutter/material.dart';
+import 'package:voyager/src/features/mentor/model/mentor_model.dart';
+import 'package:voyager/src/features/authentication/models/user_model.dart';
+import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 
 class MentorsList extends StatelessWidget {
   const MentorsList({super.key});
+
+  Future<List<MentorCard>> fetchMentorsWithDetails() async {
+    FirestoreInstance firestoreInstance = FirestoreInstance();
+    try {
+      // Fetching list of users (mentors)
+      List<UserModel> users = await firestoreInstance.getMentors();
+
+      // Fetch mentor details for each user
+      List<MentorModel> mentorDetails = await Future.wait(users.map((user) =>
+          firestoreInstance.getMentorThroughAccId(user.accountApiID)));
+
+      // Return list of MentorCard widgets with fetched data
+      return List.generate(users.length, (index) {
+        return MentorCard(
+          mentorModel: mentorDetails[index],
+          user: users[index],
+        );
+      });
+    } catch (e) {
+      print("Error fetching mentors: $e");
+      return []; // Return an empty list in case of an error
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
-    int itemCount = 6; // Number of SmallMentorCards
-    List<Widget> rows = [];
-
-    for (int i = 0; i < itemCount; i += 2) {
-      if (i + 1 < itemCount) {
-        rows.add(
-          Row(
-            children: [
-              Expanded(child: SmallMentorCard()),
-              SizedBox(width: 8.0), // Add spacing between cards
-              Expanded(child: SmallMentorCard()),
-            ],
-          ),
-        );
-      } else {
-        rows.add(
-          Row(
-            children: [
-              Expanded(child: SmallMentorCard()),
-            ],
-          ),
-        );
-      }
-      rows.add(SizedBox(height: 8.0));
-    }
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white, // Assuming a white background
-        elevation: 1.0, // Optional: Add a subtle shadow
+        backgroundColor: Colors.white,
+        elevation: 1.0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black), // Black arrow back
+          icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            Navigator.pop(context); // Go back when pressed
+            Navigator.pop(context);
           },
         ),
         title: Text(
           'Mentors List',
           style: TextStyle(
-            color: Colors.black, // Black text
-            fontWeight: FontWeight.normal, // Normal font weight
-            fontSize: 18.0, // Adjust font size as needed
+            color: Colors.black,
+            fontWeight: FontWeight.normal,
+            fontSize: 18.0,
           ),
         ),
-        centerTitle: true, // Align title to the left
+        centerTitle: true,
       ),
       body: Column(
         children: [
-          NormalSearchbar(), // Add the NormalSearchbar widget
+          NormalSearchbar(),
           Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.only(
-                    left: screenWidth * 0.05, right: screenWidth * 0.05),
-                child: Column(children: rows),
-              ),
+            child: FutureBuilder<List<MentorCard>>(
+              future: fetchMentorsWithDetails(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError ||
+                    !snapshot.hasData ||
+                    snapshot.data!.isEmpty) {
+                  return Center(child: Text("No mentors available"));
+                }
+
+                List<Widget> rows = [];
+                int itemCount = snapshot.data!.length;
+
+                // Build the rows of mentor cards
+                for (int i = 0; i < itemCount; i += 2) {
+                  var mentorCard = snapshot.data![i];
+
+                  if (i + 1 < itemCount) {
+                    var mentorCard2 = snapshot.data![i + 1];
+
+                    rows.add(
+                      Row(
+                        children: [
+                          Expanded(child: mentorCard),
+                          SizedBox(width: 8.0),
+                          Expanded(child: mentorCard2),
+                        ],
+                      ),
+                    );
+                  } else {
+                    rows.add(
+                      Row(
+                        children: [
+                          Expanded(child: mentorCard),
+                        ],
+                      ),
+                    );
+                  }
+                  rows.add(SizedBox(height: 8.0));
+                }
+
+                return SingleChildScrollView(
+                  child: Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+                    child: Column(children: rows),
+                  ),
+                );
+              },
             ),
           ),
         ],

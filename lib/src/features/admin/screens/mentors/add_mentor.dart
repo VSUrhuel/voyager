@@ -1,10 +1,17 @@
+//addmentor
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/route_manager.dart';
+import 'package:voyager/src/features/admin/controllers/course_controller.dart';
+import 'package:voyager/src/features/admin/controllers/course_mentor_controller.dart';
+import 'package:voyager/src/features/admin/controllers/create_mentor_controller.dart';
+import 'package:voyager/src/features/mentee/model/course_model.dart';
 import 'package:voyager/src/features/admin/screens/admin_dashboard.dart';
 import 'package:voyager/src/features/admin/widgets/profile_picker.dart';
+import 'package:voyager/src/features/authentication/controllers/signup_controller.dart';
 import 'package:voyager/src/features/mentor/controller/mentor_controller.dart';
 import 'package:voyager/src/widgets/custom_button.dart';
 
@@ -13,14 +20,22 @@ import 'package:voyager/src/widgets/custom_button.dart';
 class AddMentor extends StatelessWidget {
   const AddMentor({super.key});
 
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final MentorController controller = Get.put(MentorController());
+    // final MentorController controller = Get.put(MentorController());
+    final CourseController courseController = Get.put(CourseController());
+    final CreateMentorController createMentorController = Get.put(CreateMentorController());
+    final CourseMentorController courseMentorController = Get.put(CourseMentorController());
+    final GlobalKey<ProfilePickerState> _profilePickerKey = GlobalKey();
+
+
 
     return SafeArea(
     child: Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         backgroundColor: Colors.transparent,
@@ -69,50 +84,58 @@ class AddMentor extends StatelessWidget {
 
                     Container(
                       padding: EdgeInsets.only(top: screenHeight * 0.02),
-                      child: DropdownButtonFormField(
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.only(left: screenWidth * 0.05, top: screenHeight * 0.016, bottom: screenHeight * 0.016),
-                          labelText: 'Course to Mentor',
-                          labelStyle: TextStyle(
-                            fontSize: screenWidth * 0.04,
-                            height: 1,
-                            color: Colors.grey[600],
-                            fontStyle: FontStyle.italic,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        items: <String>[
-                          'Object-Oriented Programming',
-                          'Discrete Mathematics',
-                          'Data Structures and Algorithms',
-                          'Graphics and Visual Computing',
-                          'Web Systems and Technologies',
-                        ].map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(
-                              value,
-                              style: TextStyle(
-                                  fontSize: screenWidth * 0.04,
-                                  fontWeight: FontWeight.normal,
-                                  fontStyle: FontStyle.normal,
-                                  color: Colors.black),
+                      child: FutureBuilder<List<CourseModel>>(
+                        future: courseController.fetchActiveCourses(),
+                        builder: (context, snapshot) {
+                          if (courseController.isLoading) {
+                            return const CircularProgressIndicator();
+                          }
+                          
+                          if (courseController.courses.isEmpty) {
+                            return Text("No courses available", 
+                              style: TextStyle(fontSize: screenWidth * 0.04));
+                          }
+                          
+                          // final courses = snapshot.data!;
+                          return DropdownButtonFormField<CourseModel>(
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.only(left: screenWidth * 0.05, top: screenHeight * 0.016, bottom: screenHeight * 0.016),
+                              labelText: 'Course to Mentor',
+                              labelStyle: TextStyle(
+                                fontSize: screenWidth * 0.04,
+                                height: 1,
+                                color: Colors.grey[600],
+                                fontStyle: FontStyle.italic,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
+                            items: courseController.courses.map((course) {
+                              return DropdownMenuItem<CourseModel>(
+                                value: course,
+                                child: Text(
+                                  course.courseName,
+                                  style: TextStyle(
+                                      fontSize: screenWidth * 0.04,
+                                      fontWeight: FontWeight.normal,
+                                      fontStyle: FontStyle.normal,
+                                      color: Colors.black),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                            courseMentorController.courseId.text = value!.docId;
+                            },
                           );
-                        }).toList(),
-                        onChanged: (value) {
-                        //controller later
-                        },
-                      ),
+                        })
+                      
                     ),
 
                     Container(
                       padding: EdgeInsets.only(top: screenHeight * 0.02),
                       child: TextFormField(
-                        // controller later
-                    
+                        controller: createMentorController.studentID,
                         style: TextStyle(
                           fontSize: screenWidth * 0.04,
                         ),
@@ -135,7 +158,7 @@ class AddMentor extends StatelessWidget {
                     Container(
                       padding: EdgeInsets.only(top: screenHeight * 0.02),
                       child: TextFormField(
-                        // controller later
+                        controller: createMentorController.fullName,
                         style: TextStyle(
                           fontSize: screenWidth * 0.04,
                         ),
@@ -158,7 +181,7 @@ class AddMentor extends StatelessWidget {
                     Container(
                       padding: EdgeInsets.only(top: screenHeight * 0.02),
                       child: TextFormField(
-                        // controller later
+                        controller: createMentorController.email,
                         style: TextStyle(
                           fontSize: screenWidth * 0.04,
                         ),
@@ -181,7 +204,7 @@ class AddMentor extends StatelessWidget {
                     Container(
                       padding: EdgeInsets.only(top: screenHeight * 0.02),
                       child: TextFormField(
-                        // controller later
+                        controller: createMentorController.password,
                         style: TextStyle(
                           fontSize: screenWidth * 0.04,
                         ),
@@ -204,7 +227,7 @@ class AddMentor extends StatelessWidget {
                     Container(
               
                       // color: Colors.black,
-                    
+                    alignment: Alignment.center,
                      
                       padding: EdgeInsets.only(top: screenHeight * 0.02),
                       child: Container(
@@ -215,9 +238,15 @@ class AddMentor extends StatelessWidget {
                           ),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        height: screenHeight * 0.06,
-                        width: screenWidth * 0.9,
-                        child: ProfilePicker(),
+                        height: screenHeight * 0.2,
+                        width: screenWidth * 0.5,
+                        child: ProfilePicker(
+                          key: _profilePickerKey,
+                          onImagePicked: (image) {
+                            createMentorController.profileImage = image; 
+                          },
+
+                        ),
                       ),
                     ),
 
@@ -231,17 +260,61 @@ class AddMentor extends StatelessWidget {
                     isLoading: false,
                     borderColor: Colors.transparent,
                     onPressed: () async {
-                      // create new default mentor
-                      // await controller.generateMentor();
-                      // await controller.updateUsername();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => AdminDashboard(),
-                        ),
+                    // Capture context and other needed references at the start
+                    final currentContext = context;
+                    final messenger = ScaffoldMessenger.of(currentContext);
+                    final navigator = Navigator.of(currentContext);
+                    
+                    try {
+                    
+                      showDialog(
+                        context: currentContext,
+                        barrierDismissible: false,
+                        builder: (_) => const Center(child: CircularProgressIndicator()),
                       );
-                      controller.dispose();
-                    },
+
+                    
+                      if(await createMentorController.registerUser()){
+                      courseMentorController.mentorId.text = createMentorController.email.text;
+
+                   
+                      await courseMentorController.createInitialCourseMentor();
+                      courseController.courses.clear();
+                      courseMentorController.courseId.clear();
+                        courseMentorController.mentorId.clear();
+                        createMentorController.studentID.clear();
+                        createMentorController.fullName.clear();
+                        createMentorController.email.clear();
+                        createMentorController.password.clear();
+                        _profilePickerKey.currentState?.resetImage();
+
+                      if (currentContext.mounted) {
+                        messenger.showSnackBar(
+                          SnackBar(content: Text('Mentor added successfully')),
+                        );
+                        
+
+                        Navigator.of(currentContext).pop();
+                      }
+                      }
+
+                      
+                      
+                      // navigator.pushAndRemoveUntil(
+                      //   MaterialPageRoute(builder: (_) => AdminDashboard()),
+                      //   (route) => false,
+                      // );
+                      
+
+                    } catch (e) {
+                      messenger.showSnackBar(
+                        SnackBar(content: Text('Error: ${e.toString()}')),
+                      );
+                    } finally {
+                      // Safely pop dialog if context is still valid
+                     
+                    }
+                  },
                   ),
                   ]
                 ),
