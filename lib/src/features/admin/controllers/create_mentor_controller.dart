@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:voyager/src/features/admin/screens/admin_dashboard.dart';
 
 import 'package:voyager/src/features/authentication/controllers/user_role_enum.dart';
@@ -11,6 +14,7 @@ import 'package:voyager/src/repository/firebase_repository/firestore_instance.da
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:voyager/src/repository/supabase_repository/supabase_instance.dart';
 
 
 class CreateMentorController extends GetxController {
@@ -52,9 +56,18 @@ class CreateMentorController extends GetxController {
       }
       isLoading.value = true;
       // final firestore = FirestoreInstance();
+      if(profileImage!=null){
+        final File file = File(profileImage!.path);
+        SupabaseInstance supabase = SupabaseInstance(Supabase.instance.client);
+        final url = await supabase.uploadProfileImage(file);
+        await auth.createUserWithoutSignIn(email.text, password.text, studentID.text, fullName.text, url);
+        profileImage = null;
+      }else{
+        await auth.createUserWithoutSignIn(email.text, password.text, studentID.text, fullName.text, '');
+      }
       
-      await auth.createUserWithoutSignIn(email.text, password.text, studentID.text, fullName.text);
 
+     
       // if (auth.firebaseUser.value == null) {
       //   isLoading.value = false;
       //   ScaffoldMessenger.of(Get.context!).showSnackBar(

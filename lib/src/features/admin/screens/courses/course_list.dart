@@ -30,6 +30,7 @@ class _CourseListState extends State<CourseList> {
     activeCoursesFuture = courseController.fetchActiveCourses();
     archivedCoursesFuture = courseController.fetchArchivedCourses();
     show = 'active';
+    refreshCourses();
     searchQuery = '';
   }
 
@@ -123,6 +124,7 @@ class _CourseListState extends State<CourseList> {
                                 fontSize: screenWidth * 0.03,
                                 fontWeight: FontWeight.w600,
                               ),
+                              side: BorderSide.none,
                               foregroundColor: Color(int.parse(txt)),
                             ),
                             child: Text('Active'),
@@ -158,6 +160,7 @@ class _CourseListState extends State<CourseList> {
                                 fontSize: screenWidth * 0.03,
                                 fontWeight: FontWeight.w600,
                               ),
+                              side: BorderSide.none,
                               foregroundColor: Color(int.parse(txt)),
                             ),
                             child: Text('Archived'),

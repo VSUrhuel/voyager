@@ -29,7 +29,7 @@ class AddMentor extends StatelessWidget {
     final CourseController courseController = Get.put(CourseController());
     final CreateMentorController createMentorController = Get.put(CreateMentorController());
     final CourseMentorController courseMentorController = Get.put(CourseMentorController());
-
+    final GlobalKey<ProfilePickerState> _profilePickerKey = GlobalKey();
 
 
 
@@ -241,9 +241,11 @@ class AddMentor extends StatelessWidget {
                         height: screenHeight * 0.2,
                         width: screenWidth * 0.5,
                         child: ProfilePicker(
+                          key: _profilePickerKey,
                           onImagePicked: (image) {
                             createMentorController.profileImage = image; 
                           },
+
                         ),
                       ),
                     ),
@@ -284,6 +286,7 @@ class AddMentor extends StatelessWidget {
                         createMentorController.fullName.clear();
                         createMentorController.email.clear();
                         createMentorController.password.clear();
+                        _profilePickerKey.currentState?.resetImage();
 
                       if (currentContext.mounted) {
                         messenger.showSnackBar(

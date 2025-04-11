@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:voyager/src/features/admin/screens/mentors/mentor_profile.dart';
+import 'package:voyager/src/features/authentication/models/user_model.dart';
+import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 class AdminMentorCard extends StatelessWidget {
+  final MentorModel mentorModel;
+  final UserModel userModel;
   final String mentor;
   final String email;
   final String studentId;
@@ -9,6 +13,8 @@ class AdminMentorCard extends StatelessWidget {
 
   const AdminMentorCard({
     super.key,
+    required this.userModel,
+    required this.mentorModel,
     required this.mentor,
     required this.email,
     required this.studentId,
@@ -23,7 +29,7 @@ class AdminMentorCard extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => const MentorProfile() ));
+        Navigator.push(context, MaterialPageRoute(builder: (context) => MentorProfile(mentorModel: mentorModel, user: userModel,) ));
       },
       child: Card(
           color: Colors.white,
