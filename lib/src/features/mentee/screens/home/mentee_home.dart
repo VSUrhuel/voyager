@@ -8,14 +8,12 @@ import 'package:voyager/src/features/mentee/screens/home/notification.dart';
 import 'package:voyager/src/features/mentee/widgets/course_card.dart';
 import 'package:voyager/src/features/mentee/widgets/mentor_card.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
-import 'package:voyager/src/repository/authentication_repository_firebase/authentication_repository.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/widgets/horizontal_slider.dart';
 import 'package:voyager/src/widgets/horizontal_slider_mentor.dart';
 import 'package:voyager/src/widgets/search_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class MenteeHome extends StatefulWidget {
   const MenteeHome({super.key});

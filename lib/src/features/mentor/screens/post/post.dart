@@ -240,15 +240,17 @@ class _PostState extends State<Post> {
 
   Widget _buildErrorState(BuildContext context, String error) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(height: MediaQuery.of(context).size.height * 0.2),
         Icon(Icons.error_outline, size: 50, color: Colors.red[300]),
         const SizedBox(height: 16),
-        Text(
+        Center(
+            child: Text(
           'Failed to load posts',
           style: Theme.of(context).textTheme.titleMedium,
-        ),
+        )),
         const SizedBox(height: 8),
         Text(
           error,

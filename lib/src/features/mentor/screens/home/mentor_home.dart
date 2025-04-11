@@ -1,5 +1,9 @@
 // ignore_for_file: library_private_types_in_public_api
 
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
+import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/controller/mentee_list_controller.dart';
 import 'package:voyager/src/features/mentor/screens/home/accepted.dart';
 import 'package:voyager/src/features/mentor/screens/home/mentee_list.dart';
@@ -9,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:voyager/src/features/mentor/screens/post/create_post.dart';
+import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/widgets/custom_page_route.dart';
 
 class MentorHome extends StatefulWidget {
@@ -43,6 +48,33 @@ class _MentorHomeState extends State<MentorHome> {
     await Future.delayed(const Duration(milliseconds: 500));
   }
 
+  late String profileUserName = '';
+  late String profilePicUrl = '';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  void fetchData() async {
+    FirestoreInstance firestore = Get.put(FirestoreInstance());
+
+    UserModel user =
+        await firestore.getUser(FirebaseAuth.instance.currentUser!.uid);
+    setState(() {
+      profilePicUrl = user.accountApiPhoto;
+      profileUserName = user.accountUsername;
+      if (profilePicUrl == '') {
+        profilePicUrl =
+            'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/profile-picture//profile.png';
+      }
+      if (profileUserName == '') {
+        profileUserName = 'User';
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -63,17 +95,13 @@ class _MentorHomeState extends State<MentorHome> {
         elevation: 0,
         title: Row(
           children: [
-            CircleAvatar(
-              radius: screenHeight * 0.035,
-              child:
-                  Image.asset('assets/images/application_images/profile.png'),
-            ),
+            _buildProfileImage(screenWidth),
             const SizedBox(width: 16),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Hello, Rhuel',
+                  'Hello, $profileUserName',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 18,
@@ -222,6 +250,40 @@ class _MentorHomeState extends State<MentorHome> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildProfileImage(double screenWidth) {
+    return CachedNetworkImage(
+      imageUrl: profilePicUrl,
+      imageBuilder: (context, imageProvider) => CircleAvatar(
+        radius: 30,
+        backgroundImage: imageProvider,
+      ),
+      placeholder: (context, url) => _buildPlaceholderAvatar(isLoading: true),
+      errorWidget: (context, url, error) => _buildPlaceholderAvatar(),
+    );
+  }
+
+  Widget _buildPlaceholderAvatar({bool isLoading = false}) {
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.grey[300],
+      ),
+      child: isLoading
+          ? Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.grey[600],
+              ),
+            )
+          : Image.asset(
+              'assets/images/application_images/profile.png', // Placeholder image path
+              fit: BoxFit.cover,
+            ),
     );
   }
 }
