@@ -104,6 +104,7 @@ class MentorController extends GetxController {
       final firestore = FirestoreInstance();
 
       firestore.setMentor(mentor);
+      firestore.updateInitialCourseMentor(FirestoreInstance().getFirebaseUser().email.toString(), mentor.mentorId);
       return Future<bool>.value(true);
     } catch (e) {
       Get.snackbar("Error", e.toString());
