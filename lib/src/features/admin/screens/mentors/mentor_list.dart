@@ -1,4 +1,5 @@
 import 'package:voyager/src/features/admin/widgets/admin_mentor_card.dart';
+import 'package:voyager/src/features/admin/widgets/admin_search_bar.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/widgets/normal_search_bar.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
@@ -7,21 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:voyager/src/features/admin/screens/mentors/add_mentor.dart';
 
-class MentorCardData {
-  final String name;
-  final String email;
-  final String studentId;
-  final String schedule;
-  final List<String> course;
 
-  MentorCardData({
-    required this.name,
-    required this.email,
-    required this.studentId,
-    required this.schedule,
-    required this.course,
-  });
-}
 
 class MentorList extends StatefulWidget {
   const MentorList({super.key});
@@ -32,7 +19,8 @@ class MentorList extends StatefulWidget {
 
 class _MentorListState extends State<MentorList> {
   final firestore = FirestoreInstance();
-  List<MentorCardData> mentorCards = [];
+  List<AdminMentorCard> mentorCards = [];
+  List<AdminMentorCard> filteredMentorCards = [];
   bool isLoading = false;
   String show = '';
 
@@ -52,7 +40,7 @@ class _MentorListState extends State<MentorList> {
       throw Exception('Failed to fetch mentors: $e');
     }
 
-    List<MentorCardData> mCards = [];
+    List<AdminMentorCard> mCards = [];
     try {
       List<Future<UserModel>> userFutures = mentors.map((mentor) {
         return firestore.getUserThroughAccId(mentor.accountId);
@@ -71,8 +59,8 @@ class _MentorListState extends State<MentorList> {
           }
           regDay += day[0];
         }
-        mCards.add(MentorCardData(
-          name: user.accountApiName,
+        mCards.add(AdminMentorCard(
+          mentor: user.accountApiName,
           email: user.accountApiEmail,
           studentId: user.accountStudentId,
           schedule:
@@ -86,25 +74,22 @@ class _MentorListState extends State<MentorList> {
 
     setState(() {
       mentorCards = mCards;
+      filteredMentorCards = mCards;
       isLoading = false;
     });
   }
 
   String search = '';
 
-  void filter(search) {
-    if (search != '' && search.isNotEmpty) {
-      setState(() {
-        mentorCards = mentorCards
-            .where(
-                (mentorCard) => mentorCard.name.toLowerCase().contains(search))
-            .toList();
-      });
-    } else if (search == '') {
-      setState(() {
-        getMentors(show);
-      });
+
+  List<AdminMentorCard> filter(List<AdminMentorCard> mentorCards) {
+    if (search.isNotEmpty) {
+      return filteredMentorCards =  mentorCards
+          .where((mentorCard) =>
+              mentorCard.mentor.toLowerCase().contains(search.toLowerCase()))
+          .toList();
     }
+    return mentorCards;
   }
 
   @override
@@ -112,6 +97,7 @@ class _MentorListState extends State<MentorList> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         backgroundColor: Colors.transparent,
@@ -138,33 +124,19 @@ class _MentorListState extends State<MentorList> {
               // NormalSearchbar widget
               SizedBox(
                 height: screenHeight * 0.09,
-                child: NormalSearchbar(),
+                child: AdminSearchbar(
+                  onSearchChanged: (query) {
+                    setState(() {
+                      if (query.isNotEmpty) {
+                       search = query;
+                      filteredMentorCards = filter(mentorCards);
+                      }
+                      
+                    });
+                  },
+                ),
               ),
 
-              // basin magamit pang seearch
-              // SizedBox(
-              //   height: screenHeight * 0.05,
-              //   width: screenWidth * 0.95,
-              //   child: TextField(
-              //     onChanged: (value) {
-              //       setState(() {
-              //         search = value.toLowerCase();
-              //         filter(search);
-              //       });
-              //     },
-              //     decoration: InputDecoration(
-              //       hintText: 'Search',
-              //       hintStyle: TextStyle(
-              //         color: Colors.grey,
-              //       ),
-              //       prefixIcon: Icon(Icons.search, color: Colors.grey),
-              //       border: OutlineInputBorder(
-              //         borderRadius: BorderRadius.circular(20.0),
-              //       ),
-              //     ),
-              //   ),
-              // ),
-              // SizedBox(height: 7),
 
               // Buttons to filter mentors by status (active, archived, suspended)
               Padding(
@@ -314,9 +286,9 @@ class _MentorListState extends State<MentorList> {
                       children: [
                         if (isLoading) CircularProgressIndicator(),
                         if (mentorCards.isNotEmpty)
-                          for (var mentorCard in mentorCards)
+                          for (var mentorCard in filteredMentorCards)
                             AdminMentorCard(
-                              mentor: mentorCard.name,
+                              mentor: mentorCard.mentor,
                               email: mentorCard.email,
                               studentId: mentorCard.studentId,
                               schedule: mentorCard.schedule,

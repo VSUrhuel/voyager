@@ -283,7 +283,7 @@ class _MentorInfo2State extends State<MentorInfo2> {
                     isLoading: false,
                     borderColor: Colors.transparent,
                     onPressed: () async {
-                      await controller.updateMentorInformation();
+                      await controller.generateMentor();
                       await controller.updateUsername(widget.image);
 
                       Navigator.pushNamed(

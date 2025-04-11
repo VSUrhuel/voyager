@@ -129,6 +129,43 @@ class MentorController extends GetxController {
     }
   }
 
+    Future<bool> updateMentorInformation() async {
+    try {
+      final firebaseID = FirestoreInstance().getFirebaseUser().uid;
+
+      String mentorID = await FirestoreInstance().getMentorID(firebaseID);
+
+      final mentor = MentorModel(
+        mentorId: mentorID,
+        accountId: FirestoreInstance().getFirebaseUser().uid,
+        mentorYearLvl: mentorYearLvl.text,
+        mentorAbout: mentorAbout.text,
+        mentorSessionCompleted: int.parse(mentorSessionCompleted.text),
+        mentorLanguages: selectedLanguages,
+        mentorFbUrl: mentorFbUrl.text,
+        mentorGitUrl: mentorGitUrl.text,
+        mentorExpHeader: selectedExpHeader,
+        mentorMotto: mentorMotto.text,
+        mentorExpertise: selectedSkills,
+        mentorExpDesc: selectedExpDesc,
+        mentorRegDay: selectedDays,
+        mentorRegStartTime: parseTime(mentorRegStartTime.text),
+        mentorRegEndTime: parseTime(mentorRegEndTime.text),
+        mentorStatus: "active",
+        mentorSoftDeleted: false,
+      );
+
+      final firestore = FirestoreInstance();
+
+      firestore.setMentor(mentor);
+
+      return Future<bool>.value(true);
+    } catch (e) {
+      Get.snackbar("Error", e.toString());
+      return Future<bool>.value(false);
+    }
+  }
+
   TimeOfDay parseTime(String time) {
     final timeString = time.trim().toLowerCase().replaceAll(' ', '');
     final isPM = timeString.contains('pm');
