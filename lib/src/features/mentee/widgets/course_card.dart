@@ -1,41 +1,75 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
 import 'package:voyager/src/features/mentee/screens/home/enroll_course.dart';
 import 'package:intl/intl.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class CourseCard extends StatelessWidget {
+class CourseCard extends StatefulWidget {
   final CourseModel courseModel;
-  final FirestoreInstance firestoreInstance = FirestoreInstance();
 
-  CourseCard({super.key, required this.courseModel});
+  const CourseCard({super.key, required this.courseModel});
+
+  @override
+  State<CourseCard> createState() => _CourseCardState();
+}
+
+class _CourseCardState extends State<CourseCard> {
+  final FirestoreInstance firestoreInstance = FirestoreInstance();
+  late Future<int> totalMentorsFuture;
+  late Future<String> userIdFuture;
+  late String imageUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    totalMentorsFuture = fetchTotalMentors();
+    userIdFuture = getUserId();
+
+    final supabase = Supabase.instance.client;
+    imageUrl = (widget.courseModel.courseImgUrl.isNotEmpty)
+        ? (widget.courseModel.courseImgUrl.startsWith('http')
+            ? widget.courseModel.courseImgUrl
+            : supabase.storage
+                .from('course-picture')
+                .getPublicUrl(widget.courseModel.courseImgUrl))
+        : 'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/course-picture/linear-algebra.png';
+  }
+
+  Future<int> fetchTotalMentors() async {
+    try {
+      List<UserModel> users =
+          await firestoreInstance.getCourseMentors(widget.courseModel.docId);
+      return users.length;
+    } catch (e) {
+      print("Error fetching mentors: $e");
+      return 0;
+    }
+  }
+
+  Future<String> getUserId() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    final userEmail = currentUser?.email ?? '';
+    return await firestoreInstance.getUserDocIdThroughEmail(userEmail);
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final currentUser = FirebaseAuth.instance.currentUser;
-    final userEmail = currentUser?.email ?? '';
-    final userId = firestoreInstance.getUserDocIdThroughEmail(userEmail);
+
+    final startDate =
+        DateFormat('MMM dd').format(widget.courseModel.courseCreatedTimestamp);
+    final endDate =
+        DateFormat('MMM dd').format(widget.courseModel.courseModifiedTimestamp);
 
     return FutureBuilder<int>(
-      future: firestoreInstance.getTotalMentorsForCourse(courseModel.docId),
+      future: totalMentorsFuture,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-
         final totalMentor = snapshot.data ?? 0;
-
-        // Format dates
-        final startDate =
-            DateFormat('MMM dd').format(courseModel.courseCreatedTimestamp);
-        final endDate =
-            DateFormat('MMM dd').format(courseModel.courseModifiedTimestamp);
 
         return Card(
           color: Colors.white,
@@ -47,17 +81,12 @@ class CourseCard extends StatelessWidget {
             padding: EdgeInsets.all(4.0),
             child: Column(
               children: [
-                // Image and course info
+                // Top: image + course info
                 Row(
                   children: [
-                    // Image side
+                    // Image
                     Container(
                       decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage(
-                              'assets/images/application_images/code.jpg'),
-                          fit: BoxFit.fitHeight,
-                        ),
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(10),
                           bottomLeft: Radius.circular(10),
@@ -66,8 +95,21 @@ class CourseCard extends StatelessWidget {
                       ),
                       width: screenWidth * 0.3,
                       height: screenHeight * 0.25,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                          bottomLeft: Radius.circular(10),
+                        ),
+                        child: Image.network(
+                          imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Icon(Icons.broken_image, color: Colors.white),
+                        ),
+                      ),
                     ),
-                    // Course info side
+
+                    // Info
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.only(
@@ -80,14 +122,14 @@ class CourseCard extends StatelessWidget {
                       height: screenHeight * 0.25,
                       child: Column(
                         children: [
-                          // Course name
+                          // Course title
                           Row(
                             children: [
                               Expanded(
                                 child: Padding(
                                   padding: const EdgeInsets.all(16.0),
                                   child: Text(
-                                    '${courseModel.courseCode} - ${courseModel.courseName}',
+                                    '${widget.courseModel.courseCode} - ${widget.courseModel.courseName}',
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 15,
@@ -97,7 +139,7 @@ class CourseCard extends StatelessWidget {
                               ),
                             ],
                           ),
-                          // Mentor and semester details
+                          // Mentor and semester
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Row(
@@ -144,8 +186,10 @@ class CourseCard extends StatelessWidget {
                     ),
                   ],
                 ),
+
                 SizedBox(height: screenHeight * 0.01),
-                // Bottom section: start-end date and enroll button
+
+                // Bottom row: dates + enroll
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -157,7 +201,8 @@ class CourseCard extends StatelessWidget {
                       padding: EdgeInsets.only(right: 12.0),
                       child: ElevatedButton(
                         onPressed: () {
-                          if (userEmail.isEmpty) {
+                          final user = FirebaseAuth.instance.currentUser;
+                          if (user == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                   content: Text('Please sign in to enroll')),
@@ -165,12 +210,12 @@ class CourseCard extends StatelessWidget {
                             return;
                           }
 
-                          userId.then((resolvedUserId) {
+                          userIdFuture.then((resolvedUserId) {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => EnrollCourse(
-                                  courseModel: courseModel,
+                                  courseModel: widget.courseModel,
                                   userId: resolvedUserId,
                                 ),
                               ),

@@ -12,186 +12,140 @@ class MentorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Format name to show initials + last name
     String formatName(String fullName) {
-      List<String> nameParts = fullName.split(" ");
-
+      final nameParts = fullName.split(" ");
       if (nameParts.isEmpty) return "";
-
-      if (nameParts.length == 1) {
-        return nameParts[0][0].toUpperCase() +
-            nameParts[0].substring(1).toLowerCase();
-      }
-
-      String lastName = nameParts.last[0].toUpperCase() +
-          nameParts.last.substring(1).toLowerCase();
-
-      String initials = nameParts
-          .sublist(0, nameParts.length - 1)
-          .map((name) => name[0].toUpperCase())
-          .join("");
-
-      return "$initials $lastName";
+      if (nameParts.length == 1) return nameParts[0];
+      return "${nameParts[0][0]}. ${nameParts.last}";
     }
 
-    final supabase = Supabase.instance.client;
-    final imageUrl = (user.accountApiPhoto.isNotEmpty)
-        ? (user.accountApiPhoto.startsWith('http')
-            ? user.accountApiPhoto
-            : supabase.storage
-                .from('profile-picture')
-                .getPublicUrl(user.accountApiPhoto))
-        : 'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/profile-picture/profile.png';
+    // Get profile image URL
+    String getProfileImageUrl() {
+      if (user.accountApiPhoto.isEmpty) {
+        return 'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/profile-picture/profile.png';
+      }
+      return user.accountApiPhoto.startsWith('http')
+          ? user.accountApiPhoto
+          : Supabase.instance.client.storage
+              .from('profile-picture')
+              .getPublicUrl(user.accountApiPhoto);
+    }
 
+    // Shorten motto to max 6 words
     String shortenMotto(String mentorMotto) {
-      List<String> words = mentorMotto.split(" ");
-
-      if (words.length <= 6) {
-        return mentorMotto; // Return as is if it's 6 words or less
-      }
-
-      return "${words.sublist(0, 6).join(" ")}..."; // Take first 6 words and add "..."
+      final words = mentorMotto.split(" ");
+      return words.length <= 6
+          ? mentorMotto
+          : "${words.sublist(0, 6).join(" ")}...";
     }
 
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenSize = MediaQuery.of(context).size;
     final mentorName = formatName(user.accountApiName);
     final motto = shortenMotto(mentorModel.mentorMotto);
-    final List<String> skills = mentorModel.mentorExpertise;
+    final skills = mentorModel.mentorExpertise;
+    final imageUrl = getProfileImageUrl();
+
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => MentorProfilePage(
-                    mentorModel: mentorModel,
-                    user: user,
-                  )),
-        );
-      },
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MentorProfilePage(
+            mentorModel: mentorModel,
+            user: user,
+          ),
+        ),
+      ),
       child: Card(
-        color: Colors.white,
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Padding(
-          padding: EdgeInsets.zero,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minWidth: screenSize.width * 0.6,
+            maxWidth: screenSize.width * 0.6,
+          ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Upper Display (Profile Image)
+              // Profile Image
               Container(
+                height: screenSize.height * 0.22,
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: NetworkImage(imageUrl),
                     fit: BoxFit.cover,
                   ),
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.black,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(10),
+                  ),
                 ),
-                width: screenWidth * 0.6,
-                height: screenHeight * 0.22,
               ),
-
-              SizedBox(height: screenHeight * 0.01),
-
-              // Mentor Details
-              SizedBox(
-                width: screenWidth * 0.5,
+              Padding(
+                padding: const EdgeInsets.all(12),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Year Badge
-                    Row(
-                      children: [
-                        Container(
-                          width: screenWidth * 0.18,
-                          height: screenHeight * 0.035,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF52CA82),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Center(
-                            child: Text(
-                              mentorModel.mentorYearLvl,
-                              style: TextStyle(
-                                fontSize: screenWidth * 0.03,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF52CA82),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        mentorModel.mentorYearLvl,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
                         ),
-                      ],
+                      ),
                     ),
-
-                    SizedBox(height: screenHeight * 0.005),
-
+                    const SizedBox(height: 8),
                     // Mentor Name
-                    Row(
-                      children: [
-                        Text(
-                          mentorName,
-                          style: TextStyle(
-                            fontSize: screenWidth * 0.055,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      mentorName,
+                      style: TextStyle(
+                        fontSize: screenSize.width * 0.045,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: screenHeight * 0.005),
-
-                    // Mentor Info
-                    Row(
-                      children: [
-                        Text(
-                          motto,
-                          style: TextStyle(
-                            fontSize: screenWidth * 0.035,
-                            fontWeight: FontWeight.w300,
-                          ),
-                        ),
-                      ],
+                    const SizedBox(height: 4),
+                    // Mentor Motto
+                    Text(
+                      motto,
+                      style: TextStyle(
+                        fontSize: screenSize.width * 0.035,
+                        fontWeight: FontWeight.w300,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-
-                    SizedBox(height: screenHeight * 0.005),
-
-                    Column(
-                      children: [
-                        for (int i = 0;
-                            i < skills.length;
-                            i += 2) // Iterate in pairs
-                          Padding(
-                            padding: const EdgeInsets.only(
-                                bottom: 10), // Spacing between rows
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                SkillsDisplay(
-                                  color: i == 0
-                                      ? Colors.blue.shade300
-                                      : Colors.grey.shade300,
-                                  text: Text(skills[i]
-                                      .split(" ")
-                                      .first), // Show only the first word
-                                  width: 0.23,
-                                  height: 0.035,
-                                ),
-                                SizedBox(width: screenWidth * 0.04),
-                                if (i + 1 <
-                                    skills
-                                        .length) // Ensure the second skill exists
-                                  SkillsDisplay(
-                                    color: Colors.grey.shade300,
-                                    text: Text(skills[i + 1]
-                                        .split(" ")
-                                        .first), // Show only the first word
-                                    width: 0.23,
-                                    height: 0.035,
-                                  ),
-                              ],
+                    const SizedBox(height: 12),
+                    // Skills Display - Show only first 2 skills max
+                    if (skills.isNotEmpty)
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          for (int i = 0; i < skills.length && i < 2; i++)
+                            SkillsDisplay(
+                              color: i == 0
+                                  ? Colors.blue[300]!
+                                  : Colors.grey[300]!,
+                              text: skills[i].split(" ").first,
+                              widthFactor: 0.25,
+                              heightFactor: 0.035,
                             ),
-                          ),
-                      ],
-                    ),
+                        ],
+                      ),
                   ],
                 ),
               ),
