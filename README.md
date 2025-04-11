@@ -8,8 +8,34 @@ Development of a Mobile-based Mentorship Application using Flutter for Computer 
 | VG.010.002            | 2025-03-24    |
 | VG.010.003            | 2025-03-29    |
 | VG.010.004            | 2025-04-02    |
+| VG.010.005            | 2025-04-12    |
 
 
+## VG.010.005 Release Notes
+**Admin Features**  
+- Fixed admin profile rendering issues across devices
+- Resolved avatar loading errors in the admin dashboard
+- Fixed responsive layout for admin panels on mobile devices
+- Fixed filter persistence across pagination
+- Integrated Supabase Storage for profile pictures 
+- Automated Firebase Firestore document generation
+- Added comprehensive mentor detail modals
+- Multi-select interface for mentor assignment
+
+**Mentor Features**
+- Improve mentor info update experience and multiselect UI
+- Correctly update and fetch user pic and username from Firebase and Supabase
+- Improve user image loading performance
+- Ensure profile picture and info update correctly
+- Update Mentor Information and saves it to firebase and supabase
+
+ **Mentee Features**
+- Add Enroll Course Function
+- Add Database Connection to Mentor Profile
+- View and get courses from database
+- Populate data for courses from firebase
+  
+  
 ## VG.010.004 Release Notes
 **Mentor Features**  
 - Enabled mentor profile update functionality
