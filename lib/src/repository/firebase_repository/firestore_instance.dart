@@ -255,6 +255,18 @@ class FirestoreInstance {
     }
   }
 
+  Future<MentorModel> getMentorThroughStudentId(String studentId) async {
+    try {
+      final mentor = await _db
+          .collection('mentors')
+          .where('accountStudentId', isEqualTo: studentId)
+          .get();
+      return MentorModel.fromJson(mentor.docs.first.data());
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<MentorModel> getMentorThroughAccId(String accId) async {
     try {
       final mentor = await _db
@@ -539,6 +551,8 @@ class FirestoreInstance {
       rethrow;
     }
   }
+
+  
 
   Future<List<MentorModel>> getMentorsThroughStatus(String status) async {
     try {

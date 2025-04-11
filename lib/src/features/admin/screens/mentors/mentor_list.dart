@@ -60,6 +60,8 @@ class _MentorListState extends State<MentorList> {
           regDay += day[0];
         }
         mCards.add(AdminMentorCard(
+          userModel: user,
+          mentorModel: mentor,
           mentor: user.accountApiName,
           email: user.accountApiEmail,
           studentId: user.accountStudentId,
@@ -173,6 +175,7 @@ class _MentorListState extends State<MentorList> {
                                 fontSize: screenWidth * 0.03,
                                 fontWeight: FontWeight.w600,
                               ),
+                              side: BorderSide.none,
                               foregroundColor: Color(int.parse(txt)),
                             ),
                             child: Text('Active'),
@@ -209,6 +212,7 @@ class _MentorListState extends State<MentorList> {
                                 fontSize: screenWidth * 0.03,
                                 fontWeight: FontWeight.w600,
                               ),
+                              side: BorderSide.none,
                               foregroundColor: Color(int.parse(txt)),
                             ),
                             child: Text('Archived'),
@@ -245,6 +249,7 @@ class _MentorListState extends State<MentorList> {
                                 fontSize: screenWidth * 0.03,
                                 fontWeight: FontWeight.w600,
                               ),
+                              side: BorderSide.none,
                               foregroundColor: Color(int.parse(txt)),
                             ),
                             child: Text('Suspended'),
@@ -288,6 +293,8 @@ class _MentorListState extends State<MentorList> {
                         if (mentorCards.isNotEmpty)
                           for (var mentorCard in filteredMentorCards)
                             AdminMentorCard(
+                              mentorModel: mentorCard.mentorModel,
+                              userModel: mentorCard.userModel,
                               mentor: mentorCard.mentor,
                               email: mentorCard.email,
                               studentId: mentorCard.studentId,
