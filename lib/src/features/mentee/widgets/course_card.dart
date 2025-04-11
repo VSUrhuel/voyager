@@ -18,6 +18,7 @@ class CourseCard extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
     final currentUser = FirebaseAuth.instance.currentUser;
     final userEmail = currentUser?.email ?? '';
+    final userId = firestoreInstance.getUserDocIdThroughEmail(userEmail);
 
     return FutureBuilder<int>(
       future: firestoreInstance.getTotalMentorsForCourse(courseModel.docId),
@@ -164,15 +165,21 @@ class CourseCard extends StatelessWidget {
                             return;
                           }
 
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EnrollCourse(
-                                courseModel: courseModel,
-                                userId: "1ohQj18vPfbqY71DGhLvtn1bbTm1",
+                          userId.then((resolvedUserId) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EnrollCourse(
+                                  courseModel: courseModel,
+                                  userId: resolvedUserId,
+                                ),
                               ),
-                            ),
-                          );
+                            );
+                          }).catchError((error) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error: $error')),
+                            );
+                          });
                         },
                         child: Text("Enroll Now"),
                       ),
