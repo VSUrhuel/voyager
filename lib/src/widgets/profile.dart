@@ -17,7 +17,7 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   String? profileImage;
-  late String fullNmae;
+  late String fullNmae = '';
   bool _isLoading = true;
 
   @override
@@ -37,7 +37,6 @@ class _ProfileState extends State<Profile> {
             profileImage = _validateImageUrl(userData.accountApiPhoto);
             _isLoading = false;
             fullNmae = userData.accountApiName;
-           
           });
         }
       }
@@ -101,8 +100,6 @@ class _ProfileState extends State<Profile> {
         text[0].toUpperCase() + text.substring(1).toLowerCase();
     return capitalizedText;
   }
-
-
 
   @override
   Widget build(BuildContext context) {

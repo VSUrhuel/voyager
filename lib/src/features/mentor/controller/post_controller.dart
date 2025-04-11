@@ -1,7 +1,5 @@
 import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:voyager/src/features/mentee/screens/post/post.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
@@ -132,14 +130,17 @@ class PostController {
 
   Future<void> loadPosts() async {
     try {
+      if (isLoading.value) return;
       isLoading.value = true;
       error.value = '';
       PostsResult postsResult = await getPosts(
         limit: _limit,
       );
-      posts.assignAll(postsResult.posts);
-      lastTimesTamp = postsResult.lastTimestamp;
-      _hasMore = postsResult.hasMore;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        posts.assignAll(postsResult.posts);
+        lastTimesTamp = postsResult.lastTimestamp;
+        _hasMore = postsResult.hasMore;
+      });
     } catch (e) {
       error.value = e.toString();
     } finally {

@@ -17,7 +17,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
 class MentorInfo1 extends StatefulWidget {
-  MentorInfo1({super.key, this.mentorModel, this.userModel});
+  const MentorInfo1({super.key, this.mentorModel, this.userModel});
   final UserModel? userModel;
   final MentorModel? mentorModel;
 
