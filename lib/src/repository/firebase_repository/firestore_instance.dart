@@ -797,12 +797,85 @@ Future<void> updateCourseMentor(
           .where('courseMentorId', isEqualTo: docId)
           .where('courseMentorSoftDelete', isEqualTo: false)
           .get();
-      print(querySnapshot.docs.length);
+      //print(querySnapshot.docs.length);
 
       return querySnapshot.docs.length; // Return the count
     } catch (e) {
       print('Error fetching course mentors: $e');
       return 0;
+    }
+  }
+
+  Future<int> getTotalMenteeForCourse(String docId) async {
+    try {
+      // Step 1: Get the list of courseMentors that match the provided course ID
+      final courseMentorQuerySnapshot = await FirebaseFirestore.instance
+          .collection('courseMentor')
+          .where('courseId', isEqualTo: docId)
+          .where('courseMentorSoftDelete', isEqualTo: false)
+          .get();
+
+      // Initialize mentee count
+      int menteeCount = 0;
+      print(courseMentorQuerySnapshot.docs.length);
+
+      // Step 2: For each courseMentor, get the matching menteeCourseAllocID
+      for (var courseMentorDoc in courseMentorQuerySnapshot.docs) {
+        final courseMentorId = courseMentorDoc.id;
+
+        // Step 3: Get the mentees for this courseMentorId by matching menteeCourseAllocID
+        final menteeQuerySnapshot = await FirebaseFirestore.instance
+            .collection('menteeCourseAlloc')
+            .where('courseMentorId', isEqualTo: courseMentorId)
+            .where('mcaSoftDeleted', isEqualTo: false)
+            .get();
+
+        // Increment the mentee count based on the number of matching mentees
+        menteeCount += menteeQuerySnapshot.docs.length;
+      }
+
+      print("Total Mentees for Course $docId: $menteeCount");
+
+      return menteeCount;
+    } catch (e) {
+      print('Error fetching course mentees: $e');
+      return 0;
+    }
+  }
+
+  Future<void> enrollThisCourse(
+      String mentorId, String userId, String courseId) async {
+    try {
+      final firestore = FirebaseFirestore.instance;
+      final Timestamp createdTimestamp = Timestamp.now();
+
+      // Step 1: Query courseMentor collection where courseId matches
+      final courseMentorQuery = firestore
+          .collection('courseMentor')
+          .where('courseId', isEqualTo: courseId);
+
+      final courseMentorSnapshot = await courseMentorQuery.get();
+
+      if (courseMentorSnapshot.docs.isEmpty) {
+        print("CourseMentor does not exist. Cannot enroll.");
+        return;
+      }
+
+      // Step 2: Get the courseMentorId from the first matching document
+      final courseMentorId = courseMentorSnapshot.docs.first.id;
+
+      // Step 3: Add record to menteeCourseAlloc
+      await firestore.collection('menteeCourseAlloc').add({
+        'courseMentorId': courseMentorId,
+        'mcaAllocStatus': 'accepted',
+        'mcaCreatedTimestamp': createdTimestamp,
+        'mcaSoftDeleted': false,
+        'menteeId': userId,
+      });
+
+      print("Successfully enrolled in the course!");
+    } catch (e) {
+      print("Error enrolling in the course: $e");
     }
   }
 }

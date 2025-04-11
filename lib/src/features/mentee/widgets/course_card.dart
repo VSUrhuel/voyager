@@ -4,6 +4,7 @@ import 'package:voyager/src/features/mentee/model/course_model.dart';
 import 'package:voyager/src/features/mentee/screens/home/enroll_course.dart';
 import 'package:intl/intl.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CourseCard extends StatelessWidget {
   final CourseModel courseModel;
@@ -15,6 +16,8 @@ class CourseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final currentUser = FirebaseAuth.instance.currentUser;
+    final userEmail = currentUser?.email ?? '';
 
     return FutureBuilder<int>(
       future: firestoreInstance.getTotalMentorsForCourse(courseModel.docId),
@@ -153,10 +156,21 @@ class CourseCard extends StatelessWidget {
                       padding: EdgeInsets.only(right: 12.0),
                       child: ElevatedButton(
                         onPressed: () {
+                          if (userEmail.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text('Please sign in to enroll')),
+                            );
+                            return;
+                          }
+
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => EnrollCourse(),
+                              builder: (context) => EnrollCourse(
+                                courseModel: courseModel,
+                                userId: "1ohQj18vPfbqY71DGhLvtn1bbTm1",
+                              ),
                             ),
                           );
                         },
