@@ -82,6 +82,7 @@ class AdminProfile extends StatelessWidget {
               },
             ),
           ],
-        ));
+        )
+        );
   }
 }

@@ -17,6 +17,7 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   String? profileImage;
+  late String fullNmae;
   bool _isLoading = true;
 
   @override
@@ -35,6 +36,8 @@ class _ProfileState extends State<Profile> {
           setState(() {
             profileImage = _validateImageUrl(userData.accountApiPhoto);
             _isLoading = false;
+            fullNmae = userData.accountApiName;
+           
           });
         }
       }
@@ -69,6 +72,7 @@ class _ProfileState extends State<Profile> {
   }
 
   String formatName(String fullName) {
+    if (fullName.isEmpty) return "John Doe";
     List<String> nameParts = fullName.split(" ");
 
     if (nameParts.isEmpty) return "";
@@ -98,11 +102,13 @@ class _ProfileState extends State<Profile> {
     return capitalizedText;
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     User? user = FirebaseAuth.instance.currentUser;
-    String formattedName = formatName(user?.displayName ?? '');
+    String formattedName = formatName(fullNmae);
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
