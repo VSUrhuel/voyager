@@ -11,6 +11,7 @@ class CourseController extends GetxController {
   List<CourseModel> courses = [];
   bool isLoading = false;
 
+
   final courseCode = TextEditingController();
   // final courseCreatedTimestamp = TextEditingController();
   final courseDeliverables = <String>[].obs;
@@ -66,21 +67,27 @@ void removeCourseDeliverable(String deliverable) {
 
     Future<List<CourseModel>> fetchArchivedCourses() async {
     FirestoreInstance firestoreInstance = FirestoreInstance();
-    List<CourseModel> courses = await firestoreInstance.getArchivedCourses();
+  
     if(courses.isNotEmpty){
       return courses;
     }else{
-    return [];
+      isLoading = true;
+      courses = await firestoreInstance.getArchivedCourses();
+      isLoading = false;
+      return courses;
     }
   }
 
     Future<List<CourseModel>> fetchAllCourses() async {
     FirestoreInstance firestoreInstance = FirestoreInstance();
-    List<CourseModel> courses = await firestoreInstance.getCourses();
+  
     if(courses.isNotEmpty){
       return courses;
     }else{
-    return [];
+      isLoading=true;
+     courses = await firestoreInstance.getCourses();
+     isLoading=false;
+     return courses;
     }
   }
 

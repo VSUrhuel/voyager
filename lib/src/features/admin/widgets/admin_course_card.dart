@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:voyager/src/features/mentee/model/course_model.dart';
 
 class AdminCourseCard extends StatelessWidget {
+  final CourseModel course;
   const AdminCourseCard({
     super.key,
+    required this.course,
   });
 
   @override
@@ -67,7 +70,7 @@ class AdminCourseCard extends StatelessWidget {
                               padding: const EdgeInsets.all(
                                   16.0), // Adjust padding values as needed
                               child: Text(
-                                "CSci 14 - Intermediate Programming",
+                                course.courseName,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 15,
