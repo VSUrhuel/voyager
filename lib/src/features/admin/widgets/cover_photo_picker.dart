@@ -1,14 +1,12 @@
-// ignore_for_file: depend_on_referenced_packages
-
 import 'package:flutter/material.dart';
-import 'package:path/path.dart';
 import 'package:image_picker/image_picker.dart';
-// import 'package:googleapis/androidpublisher/v3.dart' as google_api;
-// import 'dart:io';
-// import 'package:voyager/src/widgets/custom_button.dart';
+import 'dart:io'; 
+
 
 class CoverPhotoPicker extends StatefulWidget {
-  const CoverPhotoPicker({super.key});
+    final Function(XFile?)? onImagePicked;
+  const CoverPhotoPicker({super.key, this.onImagePicked});
+  
 
   @override
   CoverPhotoPickerState createState() => CoverPhotoPickerState();
@@ -16,36 +14,74 @@ class CoverPhotoPicker extends StatefulWidget {
 
 class CoverPhotoPickerState extends State<CoverPhotoPicker> {
   XFile? _image;
-  final picker = ImagePicker();
+  final ImagePicker _picker = ImagePicker();
 
   Future<void> _pickImage() async {
-    final XFile? pickedFile =
-        await picker.pickImage(source: ImageSource.gallery);
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85, 
+      );
 
-    if (pickedFile != null) {
-      setState(() {
-        _image = pickedFile;
-      });
+      if (pickedFile != null) {
+        setState(() {
+          _image = pickedFile;
+        });
+        
+        if (widget.onImagePicked != null) {
+          widget.onImagePicked!(_image);
+        }
+      }
+    } catch (e) {
+      debugPrint("Image picker error: $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
-    String fileName =
-        _image != null ? basename(_image!.path) : 'Choose Course Cover Photo';
-    return TextButton(
-      onPressed: _pickImage,
-      child: Text(
-        fileName,
-        style: TextStyle(
-          fontSize: screenWidth * 0.04,
-          height: 1,
-          color: Colors.grey[600],
-          fontStyle: FontStyle.italic,
-        ),
-      ),
-    );
-  }
-}
+        return GestureDetector(
+          onTap: _pickImage,
+          child: Container(
+            width: screenWidth * 0.9,
+            height: screenHeight * 0.2,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade400),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: _image == null
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.camera_alt,
+                        size: screenWidth * 0.08,
+                        color: Colors.grey[600],
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Tap to upload cover photo',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.04,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  )
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.file(
+                      File(_image!.path), // Display the selected image
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover, // Ensure the image covers the container
+                    ),
+                  ),
+          ),
+        );
+      }
+    }
+  // class CoverPhotoPicker extends StatefulWidget {
