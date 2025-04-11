@@ -1,30 +1,17 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:voyager/src/features/mentor/model/schedule_model.dart';
-
-// void main() {
-//   runApp(const MyApp());
-// }
-
-// class MyApp extends StatelessWidget {
-//   const MyApp({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       debugShowCheckedModeBanner: false,
-//       home: Scaffold(
-//         body: Center(
-//           child: CompletedSchedCard(),
-//         ),
-//       ),
-//     );
-//   }
-// }
+import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 
 class CompletedSchedCard extends StatefulWidget {
-  const CompletedSchedCard(
-      {super.key, required this.scheduleModel, required this.fullName});
+  const CompletedSchedCard({
+    super.key,
+    required this.scheduleModel,
+    required this.fullName,
+  });
+
   final ScheduleModel scheduleModel;
   final String fullName;
 
@@ -33,160 +20,194 @@ class CompletedSchedCard extends StatefulWidget {
 }
 
 class _CompletedSchedCardState extends State<CompletedSchedCard> {
+  String? _profileImageUrl;
+  bool _isLoading = true;
+  bool _hasError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchProfileImage();
+  }
+
+  Future<void> _fetchProfileImage() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final firestoreInstance = Get.put(FirestoreInstance());
+        final userData = await firestoreInstance.getUser(user.uid);
+        if (mounted) {
+          setState(() {
+            _profileImageUrl = _validateImageUrl(userData.accountApiPhoto);
+            _isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _hasError = true;
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  String? _validateImageUrl(String? url) {
+    if (url == null || url.isEmpty) return null;
+    if (!url.startsWith('http') && !url.startsWith('https')) return null;
+    return url;
+  }
+
+  String _formatName(String fullName) {
+    final nameParts =
+        fullName.split(" ").where((part) => part.isNotEmpty).toList();
+    if (nameParts.isEmpty) return "";
+
+    if (nameParts.length == 1) {
+      return nameParts[0][0].toUpperCase() +
+          nameParts[0].substring(1).toLowerCase();
+    }
+
+    final lastName = nameParts.last[0].toUpperCase() +
+        nameParts.last.substring(1).toLowerCase();
+    final initials = nameParts
+        .sublist(0, nameParts.length - 1)
+        .map((name) => name.isNotEmpty ? name[0].toUpperCase() : "")
+        .join("");
+
+    return "$initials $lastName";
+  }
+
+  String _getMonth(int monthIndex) {
+    const months = [
+      "",
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ];
+    return (monthIndex >= 1 && monthIndex <= 12) ? months[monthIndex] : "";
+  }
+
+  Widget _buildProfileImage() {
+    if (_isLoading) {
+      return _buildPlaceholderAvatar(isLoading: true);
+    }
+
+    if (_profileImageUrl == null || _hasError) {
+      return _buildPlaceholderAvatar();
+    }
+
+    return CachedNetworkImage(
+      imageUrl: _profileImageUrl!,
+      imageBuilder: (context, imageProvider) => CircleAvatar(
+        radius: 30,
+        backgroundImage: imageProvider,
+      ),
+      placeholder: (context, url) => _buildPlaceholderAvatar(isLoading: true),
+      errorWidget: (context, url, error) => _buildPlaceholderAvatar(),
+    );
+  }
+
+  Widget _buildPlaceholderAvatar({bool isLoading = false}) {
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.grey[300],
+      ),
+      child: isLoading
+          ? Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.grey[600],
+              ),
+            )
+          : Image.asset(
+              'assets/images/application_images/profile.png',
+              fit: BoxFit.cover,
+            ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final formattedName = _formatName(widget.fullName);
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: MeetingCard(
-          scheduleModel: widget.scheduleModel, name: widget.fullName),
-    );
-  }
-}
-
-String formatName(String fullName) {
-  List<String> nameParts = fullName.split(" ");
-
-  if (nameParts.isEmpty) return "";
-
-  if (nameParts.length == 1) {
-    // If there's only one name, capitalize the first letter and lowercase the rest
-    return nameParts[0][0].toUpperCase() +
-        nameParts[0].substring(1).toLowerCase();
-  }
-
-  // Extract last name and format it (capitalize first letter, lowercase the rest)
-  String lastName = nameParts.last[0].toUpperCase() +
-      nameParts.last.substring(1).toLowerCase();
-
-  // Convert all given names (except last) to initials
-  String initials = nameParts
-      .sublist(0, nameParts.length - 1)
-      .map((name) => name[0].toUpperCase()) // Get first letter as uppercase
-      .join(""); // Join initials
-
-  return "$initials $lastName"; // Combine initials and formatted last name
-}
-
-class MeetingCard extends StatelessWidget {
-  const MeetingCard(
-      {super.key, required this.scheduleModel, required this.name});
-  final ScheduleModel scheduleModel;
-  final String name;
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    String fullName = name; // Replace with actual full name
-    String formattedName = formatName(fullName);
-    User? user = FirebaseAuth.instance.currentUser;
-    String profileImageURL =
-        user?.photoURL ?? 'assets/images/application_images/profile.png';
-    return Container(
-      width: screenWidth * 0.9,
-      padding: EdgeInsets.all(screenWidth * 0.04),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(screenWidth * 0.04),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 5,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min, // Prevent infinite height issue
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Text(
-          //   "Today 1:00 PM",
-          //   style: TextStyle(
-          //     fontSize: screenHeight * 0.025,
-          //     fontWeight: FontWeight.bold,
-          //   ),
-          // ),
-          SizedBox(height: screenWidth * 0.04),
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 22,
-                backgroundImage:
-                    NetworkImage(profileImageURL), // Replace with actual image
-              ),
-              SizedBox(width: screenWidth * 0.04),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      formattedName,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: screenHeight * 0.02,
+      child: Container(
+        width: screenSize.width * 0.9,
+        padding: EdgeInsets.all(screenSize.width * 0.04),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(screenSize.width * 0.04),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 5,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: screenSize.width * 0.04),
+            Row(
+              children: [
+                _buildProfileImage(),
+                SizedBox(width: screenSize.width * 0.04),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        formattedName,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: screenSize.height * 0.02,
+                        ),
                       ),
-                    ),
-                    Text(
-                      scheduleModel.scheduleTitle,
-                      style: TextStyle(
-                        color: Colors.grey[700],
+                      Text(
+                        widget.scheduleModel.scheduleTitle,
+                        style: TextStyle(color: Colors.grey[700]),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Column(
-                children: [],
-              )
-            ],
-          ),
-          SizedBox(height: screenHeight * 0.02),
-          Divider(),
-          SizedBox(height: screenHeight * 0.02),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "${getMonth(scheduleModel.scheduleDate.month)} ${scheduleModel.scheduleDate.day.toString().padLeft(2, '0')}, ${scheduleModel.scheduleDate.year} -  ${scheduleModel.scheduleStartTime}",
-                style: TextStyle(
-                  color: Colors.black,
+              ],
+            ),
+            SizedBox(height: screenSize.height * 0.02),
+            const Divider(),
+            SizedBox(height: screenSize.height * 0.02),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "${_getMonth(widget.scheduleModel.scheduleDate.month)} "
+                  "${widget.scheduleModel.scheduleDate.day.toString().padLeft(2, '0')}, "
+                  "${widget.scheduleModel.scheduleDate.year} - "
+                  "${widget.scheduleModel.scheduleStartTime}",
+                  style: const TextStyle(color: Colors.black),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
-  }
-
-  String getMonth(int ind) {
-    switch (ind) {
-      case 1:
-        return "Jan";
-      case 2:
-        return "Feb";
-      case 3:
-        return "Mar";
-      case 4:
-        return "Apr";
-      case 5:
-        return "May";
-      case 6:
-        return "Jun";
-      case 7:
-        return "Jul";
-      case 8:
-        return "Aug";
-      case 9:
-        return "Sep";
-      case 10:
-        return "Oct";
-      case 11:
-        return "Nov";
-      case 12:
-        return "Dec";
-      default:
-        return "";
-    }
   }
 }

@@ -1,8 +1,13 @@
+import 'dart:io';
+
+import 'package:image_picker/image_picker.dart';
+import 'package:voyager/src/features/admin/widgets/profile_picker.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/controller/about_controller.dart';
 import 'package:voyager/src/features/mentor/controller/mentor_controller.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/features/mentor/screens/input_information/mentor_info2.dart';
+import 'package:voyager/src/features/mentor/widget/image_preview_dialog.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/widgets/custom_button.dart';
 import 'package:voyager/src/widgets/custom_page_route.dart';
@@ -22,7 +27,7 @@ class MentorInfo1 extends StatefulWidget {
 
 class _MentorInfo1State extends State<MentorInfo1> {
   final AboutController aboutController = AboutController();
-
+  File _image = File('');
   final controller = Get.put(MentorController());
 
   Future<UserModel?> getUserModel(String email) async {
@@ -33,15 +38,37 @@ class _MentorInfo1State extends State<MentorInfo1> {
     }
   }
 
+  void _showImagePreview(File imageFile) {
+    showDialog(
+      context: context,
+      builder: (context) => ImagePreviewDialog(imageFile: imageFile),
+    );
+  }
+
+  Future<void> _pickImage() async {
+    final pickedImage = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+    );
+    if (pickedImage == null) return;
+    final pickedImageFile = File(pickedImage.path);
+    setState(() {
+      _image = pickedImageFile;
+    });
+    _showImagePreview(pickedImageFile);
+  }
+
   String getName(String? name) {
     List names = name!.split(' ');
     return names.sublist(0, names.length - 1).join(' ');
   }
 
+  bool hasParam = false;
+
   @override
   void initState() {
     super.initState();
-    if (widget.mentorModel != null) {
+    hasParam = widget.mentorModel != null;
+    if (hasParam) {
       controller.mentorYearLvl.text = widget.mentorModel!.mentorYearLvl;
       controller.mentorAbout.text = widget.mentorModel!.mentorAbout;
       controller.mentorSessionCompleted.text =
@@ -55,27 +82,27 @@ class _MentorInfo1State extends State<MentorInfo1> {
   void dispose() {
     super.dispose();
 
-    controller.mentorYearLvl.clear();
-    controller.mentorAbout.clear();
-    controller.mentorUserName.clear();
-    controller.mentorSessionCompleted.clear();
-    controller.mentorMotto.clear();
-    controller.mentorLanguages.clear();
-    controller.mentorExpHeader.clear();
-    controller.mentorExpDesc.clear();
-    controller.mentorRegDay.clear();
-    controller.mentorRegStartTime.clear();
-    controller.mentorRegEndTime.clear();
-    controller.mentorFbUrl.clear();
-    controller.mentorGitUrl.clear();
-    controller.mentorStatus.clear();
-    controller.mentorExpertise.clear();
-    controller.mentorSoftDeleted.clear();
-    controller.selectedSkills.clear();
-    controller.selectedDays.clear();
-    controller.selectedExpHeader.clear();
-    controller.selectedExpDesc.clear();
-    controller.selectedLanguages.clear();
+    // controller.mentorYearLvl.clear();
+    // controller.mentorAbout.clear();
+    // controller.mentorUserName.clear();
+    // controller.mentorSessionCompleted.clear();
+    // controller.mentorMotto.clear();
+    // controller.mentorLanguages.clear();
+    // controller.mentorExpHeader.clear();
+    // controller.mentorExpDesc.clear();
+    // controller.mentorRegDay.clear();
+    // controller.mentorRegStartTime.clear();
+    // controller.mentorRegEndTime.clear();
+    // controller.mentorFbUrl.clear();
+    // controller.mentorGitUrl.clear();
+    // controller.mentorStatus.clear();
+    // controller.mentorExpertise.clear();
+    // controller.mentorSoftDeleted.clear();
+    // controller.selectedSkills.clear();
+    // controller.selectedDays.clear();
+    // controller.selectedExpHeader.clear();
+    // controller.selectedExpDesc.clear();
+    // controller.selectedLanguages.clear();
   }
 
   @override
@@ -330,6 +357,53 @@ class _MentorInfo1State extends State<MentorInfo1> {
                 SizedBox(
                   height: screenHeight * 0.02,
                 ),
+                if (hasParam)
+                  Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Profile Picture',
+                          style: TextStyle(
+                            fontSize: screenWidth * 0.04,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(
+                          height: screenHeight * 0.02,
+                        ),
+                        DefaultButton(
+                          buttonText: 'Change Profile Picture',
+                          bgColor: Colors.grey[300]!,
+                          textColor: Colors.black,
+                          isLoading: false,
+                          borderColor: Colors.transparent,
+                          onPressed: () async {
+                            await _pickImage();
+                          },
+                        ),
+                        if (_image.path.isNotEmpty)
+                          Center(
+                              child: Padding(
+                            padding: EdgeInsets.only(top: screenHeight * 0.02),
+                            child: Padding(
+                              padding:
+                                  EdgeInsets.only(right: screenHeight * 0.01),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.file(
+                                  _image,
+                                  width: screenHeight * 0.30,
+                                  height: screenHeight * 0.30,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          ))
+                      ]),
+                SizedBox(
+                  height: screenHeight * 0.02,
+                ),
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: DefaultButton(
@@ -346,6 +420,7 @@ class _MentorInfo1State extends State<MentorInfo1> {
                                 userModel: widget.userModel,
                                 mentorModel: widget.mentorModel,
                                 controller: controller,
+                                image: _image,
                               ),
                               direction: AxisDirection.left));
                     },

@@ -66,7 +66,7 @@ class _UpcomingSessionState extends State<UpcomingSession> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text("No completed sessions"),
+            const Text("No upcoming sessions."),
             ElevatedButton(
               onPressed: _loadData,
               child: const Text("Refresh"),

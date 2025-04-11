@@ -104,7 +104,12 @@ class _PendingListState extends State<PendingList> {
                       },
                     );
                   } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
+                    return Text(
+                        'Error retrieving pending mentees: ${snapshot.error}',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: screenWidth * 0.033,
+                        ));
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return Text(
                       'No pending mentees',
