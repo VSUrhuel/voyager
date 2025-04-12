@@ -18,7 +18,6 @@ class PostContent extends StatefulWidget {
 class _PostContentState extends State<PostContent> {
   PostController postController = Get.put(PostController());
   PostContentModel get _post => widget.post;
-
   late final List<Map<String, String>> links;
   late final String contentCategory;
   late final DateTime contentCreatedTimestamp;
@@ -37,6 +36,7 @@ class _PostContentState extends State<PostContent> {
   @override
   void dispose() {
     Get.delete<PostController>();
+    _showAttachments = false;
     super.dispose();
   }
 

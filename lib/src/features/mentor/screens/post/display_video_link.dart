@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
-import 'package:voyager/src/features/mentor/controller/post_controller.dart'; // For better controls
+import 'package:voyager/src/features/mentor/controller/post_controller.dart';
+import 'package:voyager/src/features/mentor/controller/video_controller.dart'; // For better controls
 
 class DisplayVideoLink extends StatefulWidget {
   final String videoLink;
@@ -20,8 +21,9 @@ class DisplayVideoLink extends StatefulWidget {
 }
 
 class _DisplayVideoLinkState extends State<DisplayVideoLink> {
-  late VideoPlayerController _controller;
   ChewieController? _chewieController;
+  VideoPlaybackController videoPlaybackController =
+      Get.put(VideoPlaybackController());
   bool _isLoading = true;
   bool _hasError = false;
   bool _isDownloading = false;
@@ -89,18 +91,13 @@ class _DisplayVideoLinkState extends State<DisplayVideoLink> {
 
   Future<void> _initializeController() async {
     try {
-      _controller = VideoPlayerController.network(widget.videoLink)
-        ..addListener(() {
-          if (mounted) setState(() {});
-        });
-
-      await _controller.initialize();
+      videoPlaybackController.initialize(widget.videoLink);
 
       if (mounted) {
         setState(() {
           _isLoading = false;
           _chewieController = ChewieController(
-            videoPlayerController: _controller,
+            videoPlayerController: videoPlaybackController.videoController,
             autoPlay: false,
             looping: false,
             allowFullScreen: true,
@@ -130,7 +127,7 @@ class _DisplayVideoLinkState extends State<DisplayVideoLink> {
   void didUpdateWidget(DisplayVideoLink oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.videoLink != widget.videoLink) {
-      _controller.dispose();
+      videoPlaybackController.dispose();
       _chewieController?.dispose();
       _isLoading = true;
       _hasError = false;
@@ -191,7 +188,8 @@ class _DisplayVideoLinkState extends State<DisplayVideoLink> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final aspectRatio = _controller.value.aspectRatio;
+        final aspectRatio =
+            videoPlaybackController.videoController.value.aspectRatio;
         final maxHeight = constraints.maxWidth / aspectRatio;
 
         return SizedBox(
@@ -228,10 +226,26 @@ class _DisplayVideoLinkState extends State<DisplayVideoLink> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    videoPlaybackController.videoController
+        .pause(); // <-- Explicitly pause the video
+    videoPlaybackController.videoController.dispose();
     _chewieController?.dispose();
     _isLoading = false;
     _chewieController = null;
     super.dispose();
+  }
+
+  @override
+  void deactivate() {
+    if (videoPlaybackController.videoController.value.isPlaying) {
+      videoPlaybackController.videoController.pause();
+    }
+    super.deactivate();
+  }
+
+  void pauseVideo() {
+    if (videoPlaybackController.videoController.value.isPlaying) {
+      videoPlaybackController.videoController.pause();
+    }
   }
 }

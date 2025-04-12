@@ -7,7 +7,6 @@ import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/admin/screens/courses/add_course.dart';
 import 'package:voyager/src/features/admin/widgets/admin_course_card.dart';
 import 'package:voyager/src/features/admin/widgets/admin_search_bar.dart';
-// import 'package:voyager/src/features/admin/widgets/archived_course.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
 
 class CourseList extends StatefulWidget {
@@ -39,10 +38,15 @@ class _CourseListState extends State<CourseList> {
 
   List<CourseModel> _filterCourses(List<CourseModel> courses) {
     if (searchQuery.isEmpty) return courses;
-    return courses.where((course) => 
-      course.courseName.toLowerCase().contains(searchQuery.toLowerCase()) ||
-      course.courseDescription.toLowerCase().contains(searchQuery.toLowerCase())
-    ).toList();
+    return courses
+        .where((course) =>
+            course.courseName
+                .toLowerCase()
+                .contains(searchQuery.toLowerCase()) ||
+            course.courseDescription
+                .toLowerCase()
+                .contains(searchQuery.toLowerCase()))
+        .toList();
   }
 
   @override
@@ -103,8 +107,8 @@ class _CourseListState extends State<CourseList> {
                           });
                         },
                         style: OutlinedButton.styleFrom(
-                          backgroundColor: show == 'active' 
-                              ? const Color(0xFF7eb3f7) 
+                          backgroundColor: show == 'active'
+                              ? const Color(0xFF7eb3f7)
                               : const Color(0xFFa6a2a2),
                           padding: const EdgeInsets.symmetric(vertical: 5),
                           textStyle: TextStyle(
@@ -112,8 +116,8 @@ class _CourseListState extends State<CourseList> {
                             fontWeight: FontWeight.w600,
                           ),
                           side: BorderSide.none,
-                          foregroundColor: show == 'active' 
-                              ? const Color(0xFF0765e0) 
+                          foregroundColor: show == 'active'
+                              ? const Color(0xFF0765e0)
                               : const Color(0xFF4A4A4A),
                         ),
                         child: const Text('Active'),
@@ -132,8 +136,8 @@ class _CourseListState extends State<CourseList> {
                           });
                         },
                         style: OutlinedButton.styleFrom(
-                          backgroundColor: show == 'archived' 
-                              ? const Color(0xFF7eb3f7) 
+                          backgroundColor: show == 'archived'
+                              ? const Color(0xFF7eb3f7)
                               : const Color(0xFFa6a2a2),
                           padding: const EdgeInsets.symmetric(vertical: 5),
                           textStyle: TextStyle(
@@ -141,8 +145,8 @@ class _CourseListState extends State<CourseList> {
                             fontWeight: FontWeight.w600,
                           ),
                           side: BorderSide.none,
-                          foregroundColor: show == 'archived' 
-                              ? const Color(0xFF0765e0) 
+                          foregroundColor: show == 'archived'
+                              ? const Color(0xFF0765e0)
                               : const Color(0xFF4A4A4A),
                         ),
                         child: const Text('Archived'),
@@ -181,72 +185,73 @@ class _CourseListState extends State<CourseList> {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              final courses = show == 'active' 
-                  ? courseController.activeCourses 
+              final courses = show == 'active'
+                  ? courseController.activeCourses
                   : courseController.archivedCourses;
-              
+
               final filteredCourses = _filterCourses(courses);
 
               return RefreshIndicator(
                 onRefresh: () async => refreshCourses(),
                 child: filteredCourses.isEmpty
-                  ? SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      child: SizedBox(
-                        height: screenHeight * 0.8,
-                        child: Center(
-                          child: Text('No ${show} courses found')
-                          ),
-                      ),
-                    )
+                    ? SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: SizedBox(
+                          height: screenHeight * 0.8,
+                          child: Center(child: Text('No $show courses found')),
+                        ),
+                      )
+                    : SingleChildScrollView(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: screenWidth * 0.05,
+                        ),
+                        child: Column(
+                          children: [
+                            if (show == 'active')
+                              ...filteredCourses.map((course) =>
+                                  FutureBuilder<List<CourseMentorModel>>(
+                                    future: CourseMentorController()
+                                        .getCourseMentors(course.docId),
+                                    builder: (context, snapshot) {
+                                      // if (snapshot.connectionState == ConnectionState.waiting) {
+                                      //   return const CircularProgressIndicator();
+                                      // }
+                                      if (snapshot.hasError) {
+                                        return Text('Error: ${snapshot.error}');
+                                      }
+                                      final mentors = snapshot.data ?? [];
 
-                 :SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: screenWidth * 0.05,
-                  ),
-                  child: Column(
-                    children: [
-                      if (show == 'active')
-                        ...filteredCourses.map((course) => FutureBuilder<List<CourseMentorModel>>(
-                              future: CourseMentorController().getCourseMentors(course.docId),
-                              builder: (context, snapshot) {
-                                // if (snapshot.connectionState == ConnectionState.waiting) {
-                                //   return const CircularProgressIndicator();
-                                // }
-                                if (snapshot.hasError) {
-                                  return Text('Error: ${snapshot.error}');
-                                }
-                                final mentors = snapshot.data ?? [];
-                                
-                                return AdminCourseCard(
-                                  course: course,
-                                  onUpdate: refreshCourses,
-                                  courseMentors: mentors, 
-                                );
-                              },
-                            )),
-                      if (show == 'archived')
-                        ...filteredCourses.map((course) => FutureBuilder<List<CourseMentorModel>>(
-                              future: CourseMentorController().getCourseMentors(course.docId),
-                              builder: (context, snapshot) {
-                                // if (snapshot.connectionState == ConnectionState.waiting) {
-                                //   return const CircularProgressIndicator();
-                                // }
-                                if (snapshot.hasError) {
-                                  return Text('Error: ${snapshot.error}');
-                                }
-                                final mentors = snapshot.data ?? [];
-                                
-                                return AdminCourseCard(
-                                  course: course,
-                                  onUpdate: refreshCourses,
-                                  courseMentors: mentors, 
-                                );
-                              },
-                            )),
-                    ],
-                  ),
-                ),
+                                      return AdminCourseCard(
+                                        course: course,
+                                        onUpdate: refreshCourses,
+                                        courseMentors: mentors,
+                                      );
+                                    },
+                                  )),
+                            if (show == 'archived')
+                              ...filteredCourses.map((course) =>
+                                  FutureBuilder<List<CourseMentorModel>>(
+                                    future: CourseMentorController()
+                                        .getCourseMentors(course.docId),
+                                    builder: (context, snapshot) {
+                                      // if (snapshot.connectionState == ConnectionState.waiting) {
+                                      //   return const CircularProgressIndicator();
+                                      // }
+                                      if (snapshot.hasError) {
+                                        return Text('Error: ${snapshot.error}');
+                                      }
+                                      final mentors = snapshot.data ?? [];
+
+                                      return AdminCourseCard(
+                                        course: course,
+                                        onUpdate: refreshCourses,
+                                        courseMentors: mentors,
+                                      );
+                                    },
+                                  )),
+                          ],
+                        ),
+                      ),
               );
             }),
           ),

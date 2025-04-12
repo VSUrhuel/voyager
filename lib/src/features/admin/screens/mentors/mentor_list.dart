@@ -1,14 +1,11 @@
 import 'package:voyager/src/features/admin/widgets/admin_mentor_card.dart';
 import 'package:voyager/src/features/admin/widgets/admin_search_bar.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
-import 'package:voyager/src/features/mentee/widgets/normal_search_bar.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:voyager/src/features/admin/screens/mentors/add_mentor.dart';
-
-
 
 class MentorList extends StatefulWidget {
   const MentorList({super.key});
@@ -84,10 +81,9 @@ class _MentorListState extends State<MentorList> {
 
   String search = '';
 
-
   List<AdminMentorCard> filter(List<AdminMentorCard> mentorCards) {
     if (search.isNotEmpty) {
-      return filteredMentorCards =  mentorCards
+      return filteredMentorCards = mentorCards
           .where((mentorCard) =>
               mentorCard.mentor.toLowerCase().contains(search.toLowerCase()))
           .toList();
@@ -131,15 +127,13 @@ class _MentorListState extends State<MentorList> {
                   onSearchChanged: (query) {
                     setState(() {
                       if (query.isNotEmpty) {
-                       search = query;
-                      filteredMentorCards = filter(mentorCards);
+                        search = query;
+                        filteredMentorCards = filter(mentorCards);
                       }
-                      
                     });
                   },
                 ),
               ),
-
 
               // Buttons to filter mentors by status (active, archived, suspended)
               Padding(

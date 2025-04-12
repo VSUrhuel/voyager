@@ -2,21 +2,17 @@ import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/admin/widgets/admin_mentor_card.dart';
 import 'package:voyager/src/features/admin/widgets/admin_search_bar.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
-import 'package:voyager/src/features/mentee/widgets/normal_search_bar.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:voyager/src/features/admin/screens/mentors/add_mentor.dart';
-
-
 
 class MentorPopup extends StatefulWidget {
   final String course;
   const MentorPopup({
     super.key,
     required this.course,
-    });
+  });
 
   @override
   State<MentorPopup> createState() => _MentorPopupState();
@@ -41,10 +37,13 @@ class _MentorPopupState extends State<MentorPopup> {
     List<CourseMentorModel> courseMentors = [];
     isLoading = true;
     try {
-      courseMentors = await firestore.getCourseMentorsThroughCourseId(widget.course);
+      courseMentors =
+          await firestore.getCourseMentorsThroughCourseId(widget.course);
       mentors = await firestore.getMentorsThroughStatus(show);
-       final assignedMentorIds = courseMentors.map((cm) => cm.mentorId).toSet();
-      mentors = mentors.where((mentor) => !assignedMentorIds.contains(mentor.mentorId)).toList();
+      final assignedMentorIds = courseMentors.map((cm) => cm.mentorId).toSet();
+      mentors = mentors
+          .where((mentor) => !assignedMentorIds.contains(mentor.mentorId))
+          .toList();
     } catch (e) {
       throw Exception('Failed to fetch mentors: $e');
     }
@@ -92,10 +91,9 @@ class _MentorPopupState extends State<MentorPopup> {
 
   String search = '';
 
-
   List<AdminMentorCard> filter(List<AdminMentorCard> mentorCards) {
     if (search.isNotEmpty) {
-      return filteredMentorCards =  mentorCards
+      return filteredMentorCards = mentorCards
           .where((mentorCard) =>
               mentorCard.mentor.toLowerCase().contains(search.toLowerCase()))
           .toList();
@@ -139,10 +137,9 @@ class _MentorPopupState extends State<MentorPopup> {
                   onSearchChanged: (query) {
                     setState(() {
                       if (query.isNotEmpty) {
-                       search = query;
-                      filteredMentorCards = filter(mentorCards);
+                        search = query;
+                        filteredMentorCards = filter(mentorCards);
                       }
-                      
                     });
                   },
                 ),

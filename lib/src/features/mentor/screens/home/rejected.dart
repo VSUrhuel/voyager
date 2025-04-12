@@ -65,58 +65,61 @@ class _RejectedListState extends State<RejectedList> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    return SizedBox(
-      height: screenHeight * 0.6, // Limits to 25% of screen height
-      child: Column(
-        children: [
-          FutureBuilder<List<UserModel>>(
-            future: rejectedMenteesFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return FutureBuilder(
-                  future: Future.delayed(const Duration(seconds: 3)),
-                  builder: (context, delaySnapshot) {
-                    if (delaySnapshot.connectionState ==
-                        ConnectionState.waiting) {
-                      return SizedBox(
-                          height: screenHeight * 0.25,
-                          child:
-                              const Center(child: CircularProgressIndicator()));
-                    }
-                    refreshRejectedMentees(); // Refresh accepted mentees after loading
-                    return const Center(
-                        child: Text('Still loading, please wait...'));
-                  },
-                );
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return Text(
-                  'No rejected mentees',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: screenWidth * 0.033,
-                  ),
-                );
-              } else {
-                return SizedBox(
-                    height:
-                        screenHeight * 0.6, // Limits to 25% of screen height
-                    child: VerticalWidgetSlider(
-                      widgets: snapshot.data!
-                          .map((mentee) => UserCard(
-                                user: mentee,
-                                height: screenHeight * 0.80,
-                                actions: ['Accept'],
-                                onActionCompleted: refreshRejectedMentees,
-                              ))
-                          .toList(),
-                    ));
-              }
-            },
+    return SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        // Limits to 25% of screen height
+        child: SizedBox(
+          height: screenHeight * 0.6,
+          child: Column(
+            children: [
+              FutureBuilder<List<UserModel>>(
+                future: rejectedMenteesFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return FutureBuilder(
+                      future: Future.delayed(const Duration(seconds: 3)),
+                      builder: (context, delaySnapshot) {
+                        if (delaySnapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return SizedBox(
+                              height: screenHeight * 0.25,
+                              child: const Center(
+                                  child: CircularProgressIndicator()));
+                        }
+                        refreshRejectedMentees(); // Refresh accepted mentees after loading
+                        return const Center(
+                            child: Text('Still loading, please wait...'));
+                      },
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Text(
+                      'No rejected mentees',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: screenWidth * 0.033,
+                      ),
+                    );
+                  } else {
+                    return SizedBox(
+                        height: screenHeight *
+                            0.6, // Limits to 25% of screen height
+                        child: VerticalWidgetSlider(
+                          widgets: snapshot.data!
+                              .map((mentee) => UserCard(
+                                    user: mentee,
+                                    height: screenHeight * 0.80,
+                                    actions: ['Accept'],
+                                    onActionCompleted: refreshRejectedMentees,
+                                  ))
+                              .toList(),
+                        ));
+                  }
+                },
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        ));
   }
 }
