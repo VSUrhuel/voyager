@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:voyager/src/features/admin/screens/profile/admin_security_password.dart';
-import 'package:voyager/src/features/admin/screens/profile/personal_information_mentor.dart';
+import 'package:voyager/src/features/admin/screens/profile/personal_information_admin.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/screens/profile/about.dart';
 import 'package:voyager/src/features/mentor/screens/profile/user_agreement.dart';

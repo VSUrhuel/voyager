@@ -9,6 +9,7 @@ import 'package:voyager/src/repository/authentication_repository_firebase/except
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/repository/supabase_repository/supabase_instance.dart';
 
 class CreateMentorController extends GetxController {
