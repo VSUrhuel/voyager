@@ -41,8 +41,13 @@ class _CalendarViewState extends State<CalendarView> {
           await scheduleConrtoller.getDayOfTheWeek(selectedDay);
       final schedules = await scheduleConrtoller.getScheduleByDay(formatDate);
       final mentorData = await scheduleConrtoller.getMentorDetails();
-      final hasSchedule =
-          await scheduleConrtoller.hasRegScheduleToday(dayOfTheWeek);
+      final hasSchedule;
+      if (selectedDay.month > 5) {
+        hasSchedule = false;
+      } else {
+        hasSchedule =
+            await scheduleConrtoller.hasRegScheduleToday(dayOfTheWeek);
+      }
       if (mounted) {
         setState(() {
           _isLoading = false;

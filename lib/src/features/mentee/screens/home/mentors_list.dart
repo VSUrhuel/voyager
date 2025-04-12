@@ -1,6 +1,5 @@
 import 'package:voyager/src/features/mentee/widgets/mentor_card.dart';
 import 'package:voyager/src/features/mentee/widgets/normal_search_bar.dart';
-import 'package:voyager/src/features/mentee/widgets/small_mentor_card.dart';
 import 'package:flutter/material.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';

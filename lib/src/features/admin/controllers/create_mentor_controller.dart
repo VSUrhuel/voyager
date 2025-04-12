@@ -3,19 +3,13 @@ import 'dart:io';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:voyager/src/features/admin/screens/admin_dashboard.dart';
 
-import 'package:voyager/src/features/authentication/controllers/user_role_enum.dart';
-import 'package:voyager/src/features/authentication/models/user_model.dart';
-import 'package:voyager/src/features/authentication/screens/email_verification/email_verification.dart';
 import 'package:voyager/src/repository/authentication_repository_firebase/authentication_repository.dart';
 import 'package:voyager/src/repository/authentication_repository_firebase/exceptions/authentication_exceptions.dart';
-import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:voyager/src/repository/supabase_repository/supabase_instance.dart';
-
 
 class CreateMentorController extends GetxController {
   static CreateMentorController get instance => Get.find();
@@ -29,8 +23,6 @@ class CreateMentorController extends GetxController {
   final auth = Get.put(FirebaseAuthenticationRepository());
 
   final isLoading = false.obs;
-
-
 
   Future<bool> registerUser() async {
     try {
@@ -56,18 +48,18 @@ class CreateMentorController extends GetxController {
       }
       isLoading.value = true;
       // final firestore = FirestoreInstance();
-      if(profileImage!=null){
+      if (profileImage != null) {
         final File file = File(profileImage!.path);
         SupabaseInstance supabase = SupabaseInstance(Supabase.instance.client);
         final url = await supabase.uploadProfileImage(file);
-        await auth.createUserWithoutSignIn(email.text, password.text, studentID.text, fullName.text, url);
+        await auth.createUserWithoutSignIn(
+            email.text, password.text, studentID.text, fullName.text, url);
         profileImage = null;
-      }else{
-        await auth.createUserWithoutSignIn(email.text, password.text, studentID.text, fullName.text, '');
+      } else {
+        await auth.createUserWithoutSignIn(
+            email.text, password.text, studentID.text, fullName.text, '');
       }
-      
 
-     
       // if (auth.firebaseUser.value == null) {
       //   isLoading.value = false;
       //   ScaffoldMessenger.of(Get.context!).showSnackBar(
@@ -131,7 +123,6 @@ class CreateMentorController extends GetxController {
       return false;
     } finally {
       isLoading.value = false;
-
     }
   }
 }
