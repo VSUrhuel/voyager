@@ -735,6 +735,28 @@ class FirestoreInstance {
     }
   }
 
+  Future<bool> archiveCourse(String courseId) async {
+    try {
+      await _db.collection('course').doc(courseId).update({
+        'courseStatus': 'archived',
+      });
+      return true;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> unarchiveCourse(String courseId) async {
+    try {
+      await _db.collection('course').doc(courseId).update({
+        'courseStatus': 'active',
+      });
+      return true;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
    Future<List<CourseModel>> getArchivedCourses() async {
     try {
       final courses = await _db
@@ -757,6 +779,17 @@ class FirestoreInstance {
   try {
     String uniqueID = generateUniqueId();
     await _db.collection('course').doc(uniqueID).set(course.toJson());
+  } catch (e) {
+    rethrow;
+  }
+}
+
+Future<bool> deleteCourse(String courseId) async {
+  try {
+    await _db.collection('course').doc(courseId).update({
+      'courseSoftDelete': true,
+    });
+    return true;
   } catch (e) {
     rethrow;
   }
@@ -787,6 +820,20 @@ Future<void> updateInitialCourseMentor(String email, String newMentorId) async{
     await _db.collection('courseMentor').doc(courseMentor.courseMentorId).update({
       'mentorId': newMentorId,
     });
+  } catch (e) {
+    rethrow;
+  }
+}
+
+Future<List<CourseMentorModel>> getCourseMentorsThroughCourseId(String courseId) async {
+  try {
+    final courseMentors = await _db
+        .collection('courseMentor')
+        .where('courseId', isEqualTo: courseId)
+        .get();
+    return courseMentors.docs
+        .map((doc) => CourseMentorModel.fromJson(doc.data()))
+        .toList();
   } catch (e) {
     rethrow;
   }

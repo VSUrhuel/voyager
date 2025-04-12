@@ -17,6 +17,11 @@ Future<void> createInitialCourseMentor() async {
   mentorId.clear();
 }
 
+Future<void> createCourseMentor(String courseId, String mentorId) async {
+  FirestoreInstance firestoreInstance = FirestoreInstance();
+ await firestoreInstance.setCourseMentor(courseId, mentorId);
+}
+
 Future<void> updateCourseMentor(String courseMentorId) async {
   FirestoreInstance firestoreInstance = FirestoreInstance();
   await firestoreInstance.updateCourseMentor(courseMentorId, courseId.text, mentorId.text);
@@ -30,4 +35,9 @@ Future<CourseMentorModel> findCourseMentorByMentorId(String mentorId) async {
   return courseMentor;
 }
 
+Future<List<CourseMentorModel>> getCourseMentors(String courseId) async {
+  FirestoreInstance firestoreInstance = FirestoreInstance();
+  List<CourseMentorModel> courseMentors = await firestoreInstance.getCourseMentorsThroughCourseId(courseId);
+  return courseMentors;
+}
 }

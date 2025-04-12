@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/route_manager.dart';
@@ -84,52 +85,57 @@ class AddMentor extends StatelessWidget {
 
                     Container(
                       padding: EdgeInsets.only(top: screenHeight * 0.02),
-                      child: FutureBuilder<List<CourseModel>>(
-                        future: courseController.fetchActiveCourses(),
-                        builder: (context, snapshot) {
-                          if (courseController.isLoading) {
-                            return const CircularProgressIndicator();
-                          }
-                          
-                          if (courseController.courses.isEmpty) {
-                            return Text("No courses available", 
-                              style: TextStyle(fontSize: screenWidth * 0.04));
-                          }
-                          
-                          // final courses = snapshot.data!;
-                          return DropdownButtonFormField<CourseModel>(
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsets.only(left: screenWidth * 0.05, top: screenHeight * 0.016, bottom: screenHeight * 0.016),
-                              labelText: 'Course to Mentor',
-                              labelStyle: TextStyle(
-                                fontSize: screenWidth * 0.04,
-                                height: 1,
-                                color: Colors.grey[600],
-                                fontStyle: FontStyle.italic,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            items: courseController.courses.map((course) {
-                              return DropdownMenuItem<CourseModel>(
-                                value: course,
-                                child: Text(
-                                  course.courseName,
-                                  style: TextStyle(
-                                      fontSize: screenWidth * 0.04,
-                                      fontWeight: FontWeight.normal,
-                                      fontStyle: FontStyle.normal,
-                                      color: Colors.black),
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                            courseMentorController.courseId.text = value!.docId;
-                            },
+                      child: Obx(() {
+                        if (courseController.isLoading.value) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+                        
+                        if (courseController.activeCourses.isEmpty) {
+                          return Text(
+                            "No courses available", 
+                            style: TextStyle(fontSize: screenWidth * 0.04)
                           );
-                        })
-                      
+                        }
+                        
+                        return DropdownButtonFormField<CourseModel>(
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.only(
+                              left: screenWidth * 0.05, 
+                              top: screenHeight * 0.016, 
+                              bottom: screenHeight * 0.016
+                            ),
+                            labelText: 'Course to Mentor',
+                            labelStyle: TextStyle(
+                              fontSize: screenWidth * 0.04,
+                              height: 1,
+                              color: Colors.grey[600],
+                              fontStyle: FontStyle.italic,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          items: courseController.activeCourses.map((course) {
+                            return DropdownMenuItem<CourseModel>(
+                              value: course,
+                              child: Text(
+                                course.courseName,
+                                style: TextStyle(
+                                  fontSize: screenWidth * 0.04,
+                                  fontWeight: FontWeight.normal,
+                                  fontStyle: FontStyle.normal,
+                                  color: Colors.black
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              courseMentorController.courseId.text = value.docId;
+                            }
+                          },
+                        );
+                      }),
                     ),
 
                     Container(
@@ -279,7 +285,7 @@ class AddMentor extends StatelessWidget {
 
                    
                       await courseMentorController.createInitialCourseMentor();
-                      courseController.courses.clear();
+                      courseController.allCourses.clear();
                       courseMentorController.courseId.clear();
                         courseMentorController.mentorId.clear();
                         createMentorController.studentID.clear();
