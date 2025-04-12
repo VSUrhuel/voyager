@@ -7,7 +7,7 @@ import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/admin/screens/courses/add_course.dart';
 import 'package:voyager/src/features/admin/widgets/admin_course_card.dart';
 import 'package:voyager/src/features/admin/widgets/admin_search_bar.dart';
-import 'package:voyager/src/features/admin/widgets/archived_course.dart';
+// import 'package:voyager/src/features/admin/widgets/archived_course.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
 
 class CourseList extends StatefulWidget {

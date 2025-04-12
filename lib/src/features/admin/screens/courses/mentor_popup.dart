@@ -171,6 +171,7 @@ class _MentorPopupState extends State<MentorPopup> {
                               schedule: mentorCard.schedule,
                               course: mentorCard.course,
                               courseId: widget.course,
+                              
                             ),
                         SizedBox(height: 10),
                         Builder(

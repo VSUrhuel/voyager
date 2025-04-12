@@ -568,6 +568,16 @@ class FirestoreInstance {
     }
   }
 
+  Future<void> deleteMentor(String mentorId) async {
+    try {
+      await _db.collection('mentors').doc(mentorId).update({
+        'mentorSoftDeleted': true,
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> updateMentorStatus(String mentorId, String status) async {
     try {
       await _db.collection('mentors').doc(mentorId).update({

@@ -4,7 +4,7 @@ import 'package:voyager/src/features/admin/controllers/course_controller.dart';
 import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/admin/screens/courses/mentor_popup.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
-import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
+
 
 class AdminCourseCard extends StatelessWidget {
   final CourseModel course;
@@ -162,7 +162,6 @@ class AdminCourseCard extends StatelessWidget {
                           onUpdate();
                           break;
                         case 'archive':
-                          // Example: Archive the course
                           if(course.courseStatus == 'archived'){
                             await CourseController().restoreCourse(course.docId);
                           }else{
