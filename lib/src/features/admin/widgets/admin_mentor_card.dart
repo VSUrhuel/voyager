@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:voyager/src/features/admin/controllers/course_mentor_controller.dart';
 import 'package:voyager/src/features/admin/screens/mentors/mentor_profile.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
@@ -10,6 +11,7 @@ class AdminMentorCard extends StatelessWidget {
   final String studentId;
   final String schedule;
   final List<String> course;
+  final String? courseId;
 
   const AdminMentorCard({
     super.key,
@@ -20,6 +22,7 @@ class AdminMentorCard extends StatelessWidget {
     required this.studentId,
     required this.schedule,
     required this.course,
+    this.courseId,
   });
 
   @override
@@ -28,9 +31,39 @@ class AdminMentorCard extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return InkWell(
-      onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => MentorProfile(mentorModel: mentorModel, user: userModel,) ));
+      onTap: () async {
+        if (courseId != null) {
+        // Show confirmation dialog
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Confirm Assignment'),
+            content: const Text('Are you sure you want to assign this mentor to the course?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => 
+                Navigator.pop(context, true),
+                child: const Text('Confirm'),
+              ),
+            ],
+          ),
+        );
+
+        if (confirmed == true) {
+          await CourseMentorController().createCourseMentor(courseId!, mentorModel.mentorId);
+          Navigator.pop(context);
+        }
+        else{
+          Navigator.push(context, MaterialPageRoute(builder: (context) => MentorProfile(mentorModel: mentorModel, user: userModel,) ));
+        }
+        
+      }
       },
+    
       child: Card(
           color: Colors.white,
           elevation: 1,
@@ -144,7 +177,8 @@ class AdminMentorCard extends StatelessWidget {
                           ]),
                     ]),
                 Spacer(),
-                IconButton(onPressed: () {}, icon: Icon(Icons.more_vert))
+                if(courseId == null)
+                  IconButton(onPressed: () {}, icon: Icon(Icons.more_vert))
               ]))),
     );
   }

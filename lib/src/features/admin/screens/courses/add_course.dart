@@ -294,7 +294,7 @@ class _AddCourseState extends State<AddCourse> {
                       onPressed: () async {
                         final currentContext = context;
                         final messenger = ScaffoldMessenger.of(currentContext);
-                        final navigator = Navigator.of(currentContext);
+                        // final navigator = Navigator.of(currentContext);
                         try{
                            showDialog(
                               context: currentContext,
@@ -313,8 +313,8 @@ class _AddCourseState extends State<AddCourse> {
                           SnackBar(content: Text('Course added successfully')),
                         );
                         Navigator.of(currentContext).pop();
-                        Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => CourseList()));
+                        // Navigator.push(context,
+                        // MaterialPageRoute(builder: (context) => CourseList()));
                       }
 
                         }catch(e){

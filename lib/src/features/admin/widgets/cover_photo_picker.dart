@@ -20,29 +20,41 @@ class CoverPhotoPickerState extends State<CoverPhotoPicker> {
     setState(() {
       _image = null;
     });
-    // widget.onImagePicked(null); // Notify parent
   }
 
   Future<void> _pickImage() async {
-    try {
-      final XFile? pickedFile = await _picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 85, 
-      );
+  try {
+    final XFile? pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
 
-      if (pickedFile != null) {
+    if (pickedFile != null) {
+
+      final file = File(pickedFile.path);
+      if (await file.exists()) {
         setState(() {
           _image = pickedFile;
         });
         
+
+        await Future.delayed(Duration(milliseconds: 50));
+        
         if (widget.onImagePicked != null) {
-          widget.onImagePicked!(_image);
+          widget.onImagePicked!(pickedFile);
         }
+      } else {
+        debugPrint("Selected file doesn't exist at path: ${pickedFile.path}");
       }
-    } catch (e) {
-      debugPrint("Image picker error: $e");
     }
+  } catch (e) {
+    debugPrint("Image picker error: $e");
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Failed to load image: ${e.toString()}")),
+    );
   }
+}
 
   @override
   Widget build(BuildContext context) {
