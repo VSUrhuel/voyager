@@ -189,6 +189,7 @@ class FirestoreInstance {
       final courseMentor = await _db
           .collection('courseMentor')
           .where('mentorId', isEqualTo: mentorId)
+          .where('courseMentorSoftDeleted', isEqualTo: false)
           .limit(1)
           .get();
       if (courseMentor.docs.isEmpty) {
@@ -206,6 +207,7 @@ class FirestoreInstance {
       final courseMentor = await _db
           .collection('courseMentor')
           .where('mentorId', isEqualTo: mentorId)
+          .where('courseMentorSoftDeleted', isEqualTo: false)
           .limit(1)
           .get();
       if (courseMentor.docs.isEmpty) {
@@ -243,6 +245,7 @@ class FirestoreInstance {
       final courseMentor = await _db
           .collection('courseMentor')
           .where('mentorId', isEqualTo: mentorId)
+          .where('courseMentorSoftDeleted', isEqualTo: false)
           .limit(1)
           .get();
       if (courseMentor.docs.isEmpty) {
@@ -260,6 +263,7 @@ class FirestoreInstance {
       final mentor = await _db
           .collection('mentors')
           .where('accountStudentId', isEqualTo: studentId)
+          .where('mentorSoftDeleted', isEqualTo: false)
           .get();
       return MentorModel.fromJson(mentor.docs.first.data());
     } catch (e) {
@@ -272,6 +276,7 @@ class FirestoreInstance {
       final mentor = await _db
           .collection('mentors')
           .where('accountId', isEqualTo: accId)
+          .where('mentorSoftDeleted', isEqualTo: false)
           .get();
       return MentorModel.fromJson(mentor.docs.first.data());
     } catch (e) {
@@ -559,6 +564,7 @@ class FirestoreInstance {
       final mentor = await _db
           .collection('mentors')
           .where('mentorStatus', isEqualTo: status)
+          .where('mentorSoftDeleted', isEqualTo: false)
           .get();
       return mentor.docs
           .map((doc) => MentorModel.fromJson(doc.data()))

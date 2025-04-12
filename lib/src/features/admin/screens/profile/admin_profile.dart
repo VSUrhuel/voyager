@@ -1,9 +1,35 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:voyager/src/features/admin/screens/profile/admin_security_password.dart';
+import 'package:voyager/src/features/admin/screens/profile/personal_information_mentor.dart';
+import 'package:voyager/src/features/authentication/models/user_model.dart';
+import 'package:voyager/src/features/mentor/screens/profile/about.dart';
+import 'package:voyager/src/features/mentor/screens/profile/user_agreement.dart';
+import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
+import 'package:voyager/src/widgets/custom_page_route.dart';
 import 'package:voyager/src/widgets/profile.dart';
 import 'package:voyager/src/widgets/profile_list_tile.dart';
 
-class AdminProfile extends StatelessWidget {
+class AdminProfile extends StatefulWidget {
   const AdminProfile({super.key});
+
+    @override
+  State<AdminProfile> createState() => _AdminProfileState();
+}
+
+class _AdminProfileState extends State<AdminProfile> {
+  FirestoreInstance firestore = FirestoreInstance();
+  late UserModel userModel;
+
+    @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+    void fetchData() async {
+    userModel = await firestore.getUser(FirebaseAuth.instance.currentUser!
+        .uid); 
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,10 +41,6 @@ class AdminProfile extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () {},
-          ),
           title: const Text(
             "My Profile",
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
@@ -47,38 +69,38 @@ class AdminProfile extends StatelessWidget {
             //Add ProfileListTile widget
             ProfileListTile(
               text: "Personal Information",
-              onTap: () {
-                // Navigator.push(
-                //   context,
-                // CustomPageRoute(page: AdminPersonalInformation()),
-                // );
+              onTap: () async{
+                Navigator.push(
+                  context,
+                CustomPageRoute(page: AdminPersonalInformation(userModel: userModel)),
+                );
               },
             ),
             ProfileListTile(
               text: "Security and Password",
               onTap: () {
-                // Navigator.push(
-                //   context,
-                // CustomPageRoute(page: AdminPersonalInformation()),
-                // );
+                Navigator.push(
+                  context,
+                CustomPageRoute(page: AdminSecuritySettingsScreen()),
+                );
               },
             ),
             ProfileListTile(
               text: "User agreement",
               onTap: () {
-                // Navigator.push(
-                //   context,
-                // CustomPageRoute(page: AdminPersonalInformation()),
-                // );
+                Navigator.push(
+                  context,
+                CustomPageRoute(page: UserAgreement()),
+                );
               },
             ),
             ProfileListTile(
               text: "About",
               onTap: () {
-                // Navigator.push(
-                //   context,
-                //   // CustomPageRoute(page: AdminPersonalInformation()),
-                // );
+                Navigator.push(
+                  context,
+                  CustomPageRoute(page: AboutScreen()),
+                );
               },
             ),
           ],

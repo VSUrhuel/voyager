@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class SecuritySettingsScreen extends StatefulWidget {
-  const SecuritySettingsScreen({super.key});
+class AdminSecuritySettingsScreen extends StatefulWidget {
+  const AdminSecuritySettingsScreen({super.key});
 
   @override
-  State<SecuritySettingsScreen> createState() => _SecuritySettingsScreenState();
+  State<AdminSecuritySettingsScreen> createState() => _SecuritySettingsScreenState();
 }
 
-class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
+class _SecuritySettingsScreenState extends State<AdminSecuritySettingsScreen> {
   final _auth = FirebaseAuth.instance;
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();

@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/features/mentor/screens/input_information/mentor_info1.dart';
@@ -11,7 +12,11 @@ import 'package:voyager/src/repository/firebase_repository/firestore_instance.da
 import 'package:voyager/src/widgets/custom_page_route.dart';
 
 class AdminPersonalInformation extends StatefulWidget {
-  const AdminPersonalInformation({super.key});
+
+  const AdminPersonalInformation({super.key,
+    required this.userModel,
+  });
+  final UserModel userModel;
 
   @override
   State<AdminPersonalInformation> createState() =>
@@ -20,26 +25,40 @@ class AdminPersonalInformation extends StatefulWidget {
 
 class _AdminPersonalInformationState extends State<AdminPersonalInformation> {
   FirestoreInstance firestore = FirestoreInstance();
-  late MentorModel mentorModel;
-  late UserModel userModel;
+   late UserModel userModel;
 
   @override
   void initState() {
     super.initState();
-    fetchData();
-  }
-
-  void fetchData() async {
-    mentorModel = await firestore.getMentorThroughAccId(FirebaseAuth.instance
-        .currentUser!.uid); // Replace 'mentorId' with the actual argument
-    userModel = await firestore.getUser(FirebaseAuth.instance.currentUser!
-        .uid); // Replace 'userId' with the actual argument
+     userModel = widget.userModel;
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final supabase = Supabase.instance.client;
+    final imageUrl = (userModel.accountApiPhoto.isNotEmpty)
+        ? (userModel.accountApiPhoto.startsWith('http')
+            ? userModel.accountApiPhoto
+            : supabase.storage
+                .from('profile-picture')
+                .getPublicUrl(userModel.accountApiPhoto))
+        : 'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/profile-picture/profile.png';
+
+    String toTitleCase(String name) {
+      if (name.isEmpty) return name;
+      if (name.length == 1) return name.toUpperCase();
+      return name
+          .toLowerCase()
+          .split(' ')
+          .map((word) => word.isNotEmpty
+              ? '${word[0].toUpperCase()}${word.substring(1)}'
+              : '')
+          .join(' ');
+    }
+
+    final formattedName = toTitleCase(userModel.accountApiName);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
@@ -60,10 +79,9 @@ class _AdminPersonalInformationState extends State<AdminPersonalInformation> {
                     Container(
                       height: screenHeight * 0.4,
                       width: double.infinity,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         image: DecorationImage(
-                          image: AssetImage(
-                              'assets/images/application_images/profile.png'),
+                          image: NetworkImage(imageUrl),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -110,24 +128,24 @@ class _AdminPersonalInformationState extends State<AdminPersonalInformation> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Text(
-                              "3rd Year",
+                              "Eduvate Admin",
                               style: TextStyle(
                                   color: Colors.green,
                                   fontWeight: FontWeight.bold),
                             ),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.black),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                CustomPageRoute(
-                                    page: MentorInfo1(
-                                        mentorModel: mentorModel,
-                                        userModel: userModel)),
-                              );
-                            },
-                          ),
+                          // IconButton(
+                          //   icon: const Icon(Icons.edit, color: Colors.black),
+                          //   onPressed: () {
+                          //     Navigator.push(
+                          //       context,
+                          //       CustomPageRoute(
+                          //           page: MentorInfo1(
+                          //               mentorModel: mentorModel,
+                          //               userModel: userModel)),
+                          //     );
+                          //   },
+                          // ),
                         ],
                       ),
 
@@ -138,9 +156,9 @@ class _AdminPersonalInformationState extends State<AdminPersonalInformation> {
                                 left: screenWidth * 0.02,
                                 top: screenHeight * 0.0),
                             child: Text(
-                              "John Rhuel Laurente",
+                              userModel.accountApiName,
                               style: TextStyle(
-                                  fontSize: screenHeight * 0.03,
+                                  fontSize: screenHeight * 0.04,
                                   fontWeight: FontWeight.bold),
                             ),
                           ),
@@ -149,8 +167,17 @@ class _AdminPersonalInformationState extends State<AdminPersonalInformation> {
                       Padding(
                         padding: EdgeInsets.symmetric(
                             horizontal: screenWidth * 0.03),
-                        child: const Text(
-                          "johnrhuell@gmail.com",
+                        child: Text(
+                          userModel.accountUsername,
+                          style: TextStyle(color: Colors.black54, fontSize: 30, fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.03,
+                            vertical: screenHeight * 0.01),
+                        child: Text(
+                          userModel.accountApiEmail,
                           style: TextStyle(color: Colors.black54, fontSize: 14),
                         ),
                       ),
@@ -161,57 +188,57 @@ class _AdminPersonalInformationState extends State<AdminPersonalInformation> {
                       ),
                       // About Section (Title Inside Border)
                       _infoCardWithTitle("About",
-                          "Lorem ipsum dolor sit amet consectetur. Cras neque pulvinar vivamus commodo dui varius nulla venenatis faucibus."),
+                          "A dedicated administrator with experience overseeing a digital mentorship platform designed to connect computer science students for guided learning, collaboration, and career development. Skilled in managing user engagement, streamlining mentor-mentee matching processes, and ensuring a seamless user experience. Passionate about fostering inclusive, tech-forward learning communities and leveraging technology to bridge the gap between academic learning and real-world application."),
 
                       const SizedBox(height: 20),
-                      Row(
-                        children: [
-                          // Experience Section (60% width)
-                          Expanded(
-                            flex: 7,
-                            child: _experienceSection(screenHeight),
-                          ),
+                      // Row(
+                      //   children: [
+                      //     // Experience Section (60% width)
+                      //     Expanded(
+                      //       flex: 7,
+                      //       child: _experienceSection(screenHeight),
+                      //     ),
 
-                          const SizedBox(width: 10),
+                      //     const SizedBox(width: 10),
 
-                          // Mentorship Sessions (40% width)
-                          Expanded(
-                            flex: 3,
-                            child: _mentorshipCard("10",
-                                "Mentorship Sessions Completed", screenHeight),
-                          ),
-                        ],
-                      ),
+                      //     // Mentorship Sessions (40% width)
+                      //     Expanded(
+                      //       flex: 3,
+                      //       child: _mentorshipCard("10",
+                      //           "Mentorship Sessions Completed", screenHeight),
+                      //     ),
+                      //   ],
+                      // ),
 
                       // Experience Section with New UI
 
-                      const SizedBox(height: 20),
+                      // const SizedBox(height: 20),
 
-                      // Language Known
-                      _sectionTitle("Language Known"),
-                      Wrap(
-                        spacing: 8,
-                        children: [
-                          _languageChip("Waray-waray"),
-                          _languageChip("Cebuano"),
-                          _languageChip("Filipino"),
-                          _languageChip("English"),
-                        ],
-                      ),
+                      // // Language Known
+                      // _sectionTitle("Language Known"),
+                      // Wrap(
+                      //   spacing: 8,
+                      //   children: [
+                      //     _languageChip("Waray-waray"),
+                      //     _languageChip("Cebuano"),
+                      //     _languageChip("Filipino"),
+                      //     _languageChip("English"),
+                      //   ],
+                      // ),
 
-                      const SizedBox(height: 20),
+                      // const SizedBox(height: 20),
 
-                      // Social Links
-                      _sectionTitle("Social Links"),
-                      Row(
-                        children: [
-                          _socialIcon(Icons.facebook, Colors.blue),
-                          const SizedBox(width: 20),
-                          _socialIcon(Icons.link, Colors.blue.shade800),
-                        ],
-                      ),
+                      // // Social Links
+                      // _sectionTitle("Social Links"),
+                      // Row(
+                      //   children: [
+                      //     _socialIcon(Icons.facebook, Colors.blue),
+                      //     const SizedBox(width: 20),
+                      //     _socialIcon(Icons.link, Colors.blue.shade800),
+                      //   ],
+                      // ),
 
-                      const SizedBox(height: 30),
+                      // const SizedBox(height: 30),
                     ],
                   ),
                 ),
@@ -240,132 +267,133 @@ class _AdminPersonalInformationState extends State<AdminPersonalInformation> {
             title,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 5),
+          const SizedBox(height: 10),
           Text(
             text,
             style: const TextStyle(fontSize: 14, color: Colors.black87),
           ),
+          
         ],
       ),
     );
   }
 
   // Experience Section with Improved UI
-  Widget _experienceSection(double screenHeight) {
-    return Container(
-      height: screenHeight * 0.4,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "Experience",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-          _experienceItem("Product Designer at Google"),
-          _experienceItem("Product Designer at Google"),
-          _experienceItem("Product Designer at Google"),
-        ],
-      ),
-    );
-  }
+  // Widget _experienceSection(double screenHeight) {
+  //   return Container(
+  //     height: screenHeight * 0.4,
+  //     padding: const EdgeInsets.all(12),
+  //     decoration: BoxDecoration(
+  //       color: Colors.blue.shade50,
+  //       borderRadius: BorderRadius.circular(12),
+  //     ),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         const Text(
+  //           "Experience",
+  //           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+  //         ),
+  //         const SizedBox(height: 10),
+  //         _experienceItem("Product Designer at Google"),
+  //         _experienceItem("Product Designer at Google"),
+  //         _experienceItem("Product Designer at Google"),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   // Individual Experience Item
-  Widget _experienceItem(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "• $title",
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            "Lorem ipsum dolor sit amet consectetur.",
-            style: TextStyle(fontSize: 14, color: Colors.black87),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _experienceItem(String title) {
+  //   return Padding(
+  //     padding: const EdgeInsets.only(bottom: 8),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Text(
+  //           "• $title",
+  //           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+  //         ),
+  //         const SizedBox(height: 4),
+  //         const Text(
+  //           "Lorem ipsum dolor sit amet consectetur.",
+  //           style: TextStyle(fontSize: 14, color: Colors.black87),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   // Mentorship Card Widget
-  Widget _mentorshipCard(String number, String label, double screenHeight) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      width: 120,
-      height: screenHeight * 0.4,
-      decoration: BoxDecoration(
-        color: Colors.green.shade100,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        mainAxisAlignment:
-            MainAxisAlignment.center, // Centers content vertically
-        children: [
-          Text(
-            number,
-            style: const TextStyle(
-                fontSize: 32, fontWeight: FontWeight.bold, color: Colors.green),
-          ),
-          const SizedBox(height: 8), // Adds spacing between number and label
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style:
-                TextStyle(color: Colors.green, fontSize: screenHeight * 0.015),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _mentorshipCard(String number, String label, double screenHeight) {
+  //   return Container(
+  //     padding: const EdgeInsets.all(16),
+  //     width: 120,
+  //     height: screenHeight * 0.4,
+  //     decoration: BoxDecoration(
+  //       color: Colors.green.shade100,
+  //       borderRadius: BorderRadius.circular(12),
+  //     ),
+  //     child: Column(
+  //       mainAxisAlignment:
+  //           MainAxisAlignment.center, // Centers content vertically
+  //       children: [
+  //         Text(
+  //           number,
+  //           style: const TextStyle(
+  //               fontSize: 32, fontWeight: FontWeight.bold, color: Colors.green),
+  //         ),
+  //         const SizedBox(height: 8), // Adds spacing between number and label
+  //         Text(
+  //           label,
+  //           textAlign: TextAlign.center,
+  //           style:
+  //               TextStyle(color: Colors.green, fontSize: screenHeight * 0.015),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
-  // Section Title Widget
-  Widget _sectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-    );
-  }
+  // // Section Title Widget
+  // Widget _sectionTitle(String title) {
+  //   return Text(
+  //     title,
+  //     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+  //   );
+  // }
 
-  // Language Chip Widget
-  Widget _languageChip(String text) {
-    return Theme(
-      data: ThemeData(
-        chipTheme: ChipThemeData(
-          shape: RoundedRectangleBorder(
-            side: BorderSide(color: Colors.transparent), // Transparent border
-            borderRadius: BorderRadius.circular(20), // Keeps rounded shape
-          ),
-        ),
-      ),
-      child: Chip(
-        label: Text(
-          text,
-          style:
-              const TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.blue.shade100,
-      ),
-    );
-  }
+  // // Language Chip Widget
+  // Widget _languageChip(String text) {
+  //   return Theme(
+  //     data: ThemeData(
+  //       chipTheme: ChipThemeData(
+  //         shape: RoundedRectangleBorder(
+  //           side: BorderSide(color: Colors.transparent), // Transparent border
+  //           borderRadius: BorderRadius.circular(20), // Keeps rounded shape
+  //         ),
+  //       ),
+  //     ),
+  //     child: Chip(
+  //       label: Text(
+  //         text,
+  //         style:
+  //             const TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+  //       ),
+  //       backgroundColor: Colors.blue.shade100,
+  //     ),
+  //   );
+  // }
 
-  // Social Icon Widget
-  Widget _socialIcon(IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        shape: BoxShape.circle,
-      ),
-      child: Icon(icon, size: 30, color: color),
-    );
-  }
+  // // Social Icon Widget
+  // Widget _socialIcon(IconData icon, Color color) {
+  //   return Container(
+  //     padding: const EdgeInsets.all(8),
+  //     decoration: BoxDecoration(
+  //       color: color.withOpacity(0.1),
+  //       shape: BoxShape.circle,
+  //     ),
+  //     child: Icon(icon, size: 30, color: color),
+  //   );
+  // }
 }
