@@ -65,6 +65,7 @@ class _MentorListState extends State<MentorList> {
           schedule:
               '$regDay  ${(mentor.mentorRegStartTime.hour % 12).toString().padLeft(2, '0')}:${mentor.mentorRegStartTime.minute.toString().padLeft(2, '0')} - ${(mentor.mentorRegEndTime.hour % 12).toString().padLeft(2, '0')}:${mentor.mentorRegEndTime.minute.toString().padLeft(2, '0')}',
           course: mentor.mentorExpertise,
+          onActionComplete: () => getMentors(show),
         ));
       }
     } catch (e) {
@@ -294,6 +295,7 @@ class _MentorListState extends State<MentorList> {
                               studentId: mentorCard.studentId,
                               schedule: mentorCard.schedule,
                               course: mentorCard.course,
+                              onActionComplete: () => getMentors(show),
                             ),
                         SizedBox(height: 10),
                         Builder(
