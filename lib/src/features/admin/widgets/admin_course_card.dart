@@ -9,7 +9,7 @@ import 'package:voyager/src/repository/firebase_repository/firestore_instance.da
 class AdminCourseCard extends StatelessWidget {
   final CourseModel course;
   final VoidCallback onUpdate;
-  final List<CourseMentorModel> courseMentors ;
+  final List<CourseMentorModel> courseMentors;
   const AdminCourseCard({
     super.key,
     required this.course,
@@ -17,13 +17,10 @@ class AdminCourseCard extends StatelessWidget {
     required this.courseMentors,
   });
 
-
-
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-
 
     return Card(
       color: Colors.white,
@@ -46,10 +43,13 @@ class AdminCourseCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     image: DecorationImage(
                       // Use DecorationImage
-                      image: course.courseImgUrl.isEmpty 
-                          ? AssetImage('assets/images/application_images/code.jpg') as ImageProvider
+                      image: course.courseImgUrl.isEmpty
+                          ? AssetImage(
+                                  'assets/images/application_images/code.jpg')
+                              as ImageProvider
                           : NetworkImage(course.courseImgUrl),
-                      fit: BoxFit.fitHeight,// Or BoxFit.contain, or other BoxFit options
+                      fit: BoxFit
+                          .fitHeight, // Or BoxFit.contain, or other BoxFit options
                     ),
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(10), // Top left corner
@@ -112,7 +112,7 @@ class AdminCourseCard extends StatelessWidget {
                                       0.08, // Sets the icon color to white
                                 ),
                                 Text(
-                                  courseMentors.length.toString() + " Mentor(s)",
+                                  "${courseMentors.length} Mentor(s)",
                                   style: TextStyle(
                                       color: Colors.white, fontSize: 10),
                                 ),
@@ -145,8 +145,8 @@ class AdminCourseCard extends StatelessWidget {
                 // Spacer(),
                 IconButton(
                   constraints: BoxConstraints(
-                    minWidth: 0, 
-                    minHeight: screenWidth * 0.5, 
+                    minWidth: 0,
+                    minHeight: screenWidth * 0.5,
                   ),
                   icon: PopupMenuButton<String>(
                     icon: Icon(Icons.more_vert),
@@ -163,27 +163,30 @@ class AdminCourseCard extends StatelessWidget {
                           break;
                         case 'archive':
                           // Example: Archive the course
-                          if(course.courseStatus == 'archived'){
-                            await CourseController().restoreCourse(course.docId);
-                          }else{
-                          await CourseController().archiveCourse(course.docId);
+                          if (course.courseStatus == 'archived') {
+                            await CourseController()
+                                .restoreCourse(course.docId);
+                          } else {
+                            await CourseController()
+                                .archiveCourse(course.docId);
                           }
-                          onUpdate(); 
+                          onUpdate();
                           break;
                         case 'delete':
                           final confirmed = await showDialog<bool>(
                             context: context,
                             builder: (context) => AlertDialog(
                               title: const Text('Confirm Course Delete'),
-                              content: const Text('Are you sure you want to delete this course?'),
+                              content: const Text(
+                                  'Are you sure you want to delete this course?'),
                               actions: [
                                 TextButton(
-                                  onPressed: () => Navigator.pop(context, false),
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
                                   child: const Text('Cancel'),
                                 ),
                                 TextButton(
-                                  onPressed: () => 
-                                  Navigator.pop(context, true),
+                                  onPressed: () => Navigator.pop(context, true),
                                   child: const Text('Confirm'),
                                 ),
                               ],
@@ -191,7 +194,7 @@ class AdminCourseCard extends StatelessWidget {
                           );
                           if (confirmed == true) {
                             await CourseController().deleteCourse(course.docId);
-                            onUpdate(); 
+                            onUpdate();
                           }
                           break;
                       }
@@ -203,15 +206,18 @@ class AdminCourseCard extends StatelessWidget {
                       ),
                       PopupMenuItem<String>(
                         value: 'archive',
-                        child: Text(course.courseStatus == 'archived' ? 'Unarchive Course' : 'Archive Course'),
+                        child: Text(course.courseStatus == 'archived'
+                            ? 'Unarchive Course'
+                            : 'Archive Course'),
                       ),
                       const PopupMenuItem<String>(
                         value: 'delete',
-                        child: Text('Delete Course', style: TextStyle(color: Colors.red)),
+                        child: Text('Delete Course',
+                            style: TextStyle(color: Colors.red)),
                       ),
                     ],
                   ),
-                  onPressed: null, 
+                  onPressed: null,
                 )
               ],
             ),
@@ -219,7 +225,6 @@ class AdminCourseCard extends StatelessWidget {
               height: screenHeight * 0.01,
             ),
             //Button Section
-
           ],
         ),
       ),

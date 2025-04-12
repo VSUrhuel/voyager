@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:voyager/src/features/mentor/controller/mentor_controller.dart';
 
 class MultiSelectChips extends StatefulWidget {
   final List<String> items;

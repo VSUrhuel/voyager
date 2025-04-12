@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:voyager/src/features/mentor/controller/video_controller.dart';
 import 'package:voyager/src/features/mentor/screens/profile/mentor_profile.dart';
 import 'package:voyager/src/features/mentor/screens/session/session.dart';
 import 'package:voyager/src/features/mentor/screens/home/mentor_home.dart';
@@ -32,8 +33,11 @@ class _MentorDashboardState extends State<MentorDashboard> {
   }
 
   void _onItemTapped(int index) {
+    VideoPlaybackController.instance
+        .pauseVideo(); // Pause video when switching tabs
     setState(() {
       _selectedIndex = index;
+      // Pause video when switching tabs
     });
   }
 
