@@ -17,9 +17,8 @@ class AdminHome extends StatefulWidget {
   @override
   _AdminHomeState createState() => _AdminHomeState();
 }
-class _AdminHomeState extends State<AdminHome> {
-  
 
+class _AdminHomeState extends State<AdminHome> {
   // Future<UserModel?> getUserModel(String email) async {
   //   try {
   //     return await FirestoreInstance().getUserThroughEmail(email);
@@ -37,7 +36,7 @@ class _AdminHomeState extends State<AdminHome> {
     fetchData();
   }
 
-    void fetchData() async {
+  void fetchData() async {
     FirestoreInstance firestore = Get.put(FirestoreInstance());
 
     UserModel user =
@@ -67,13 +66,13 @@ class _AdminHomeState extends State<AdminHome> {
     final auth = Get.put(FirebaseAuthenticationRepository());
 
     return Scaffold(
-        appBar: AppBar(
-          systemOverlayStyle: SystemUiOverlayStyle.dark,
-          scrolledUnderElevation: 0,
-          backgroundColor: Colors.transparent,
-          automaticallyImplyLeading: false,
-          toolbarHeight: screenHeight * 0.10,
-          titleTextStyle: TextStyle(
+      appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.white,
+        automaticallyImplyLeading: false,
+        toolbarHeight: screenHeight * 0.10,
+        titleTextStyle: TextStyle(
           color: Colors.black,
           fontSize: screenWidth * 0.06,
           fontWeight: FontWeight.bold,
@@ -105,109 +104,114 @@ class _AdminHomeState extends State<AdminHome> {
             ),
           ],
         ),
-          // actions: [
-          //   Padding(
-          //     padding: const EdgeInsets.all(10.0),
-          //     child: IconButton(
-          //       icon: CircleAvatar(
-          //         backgroundColor: const Color.fromARGB(31, 182, 206, 239),
-          //         child: Icon(Icons.logout_sharp),
-          //       ),
-          //       onPressed: () async {
-          //         await auth.logout();
-          //       },
-          //     ),
-          //   )
-          // ],
-        ),
-        body: Padding(
-          padding: const EdgeInsets.only(left: 30, right: 35),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Actions',
-                style: TextStyle(
-                  fontSize: screenHeight * 0.025,
-                  fontWeight: FontWeight.bold,
-                ),
+        // actions: [
+        //   Padding(
+        //     padding: const EdgeInsets.all(10.0),
+        //     child: IconButton(
+        //       icon: CircleAvatar(
+        //         backgroundColor: const Color.fromARGB(31, 182, 206, 239),
+        //         child: Icon(Icons.logout_sharp),
+        //       ),
+        //       onPressed: () async {
+        //         await auth.logout();
+        //       },
+        //     ),
+        //   )
+        // ],
+      ),
+      body: Padding(
+        padding: EdgeInsets.only(
+                left: screenWidth * 0.06,
+                right: screenWidth * 0.05,
+                top: screenHeight * 0.01,
               ),
-              SizedBox(height: screenHeight * 0.01),
-              SizedBox(
-                width: screenWidth * 1,
-                height: screenHeight * 0.06,
-                child: OutlinedButton(
-                  onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => MentorList()));
-                  },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.black,
-                    backgroundColor: Color.fromARGB(255, 226, 225, 225),
-                    side: BorderSide(color: Color(0xFF666666)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(13.0),
-                    ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: screenHeight * 0.02),
+            Text(
+              'Actions',
+              style: TextStyle(
+                fontSize: screenWidth * 0.05,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: screenHeight * 0.01),
+            SizedBox(
+              width: screenWidth * 1,
+              height: screenHeight * 0.06,
+              child: OutlinedButton(
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => MentorList()));
+                },
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.black,
+                  backgroundColor: Color.fromARGB(255, 226, 225, 225),
+                  side: BorderSide(color: Color(0xFF666666)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(13.0),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        'View Mentors',
-                        style: TextStyle(
-                          fontSize: screenHeight * 0.018,
-                          fontWeight: FontWeight.normal,
-                        ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      'View Mentors',
+                      style: TextStyle(
+                        fontSize: screenHeight * 0.018,
+                        fontWeight: FontWeight.normal,
                       ),
-                      Spacer(),
-                      Icon(Icons.arrow_forward_ios,
-                          size: screenHeight * 0.02, color: Colors.black),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: screenHeight * 0.01),
-              SizedBox(
-                width: screenWidth * 1,
-                height: screenHeight * 0.06,
-                child: OutlinedButton(
-                  onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => CourseList()));
-                  },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.black,
-                    backgroundColor: Color.fromARGB(255, 226, 225, 225),
-                    side: BorderSide(color: Color(0xFF666666)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(13.0),
                     ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        'View Courses',
-                        style: TextStyle(
-                          fontSize: screenHeight * 0.018,
-                          fontWeight: FontWeight.normal,
-                        ),
-                      ),
-                      Spacer(),
-                      Icon(Icons.arrow_forward_ios,
-                          size: screenHeight * 0.02, color: Colors.black),
-                    ],
-                  ),
+                    Spacer(),
+                    Icon(Icons.arrow_forward_ios,
+                        size: screenHeight * 0.02, color: Colors.black),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+            SizedBox(height: screenHeight * 0.01),
+            SizedBox(
+              width: screenWidth * 1,
+              height: screenHeight * 0.06,
+              child: OutlinedButton(
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => CourseList()));
+                },
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.black,
+                  backgroundColor: Color.fromARGB(255, 226, 225, 225),
+                  side: BorderSide(color: Color(0xFF666666)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(13.0),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      'View Courses',
+                      style: TextStyle(
+                        fontSize: screenHeight * 0.018,
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                    Spacer(),
+                    Icon(Icons.arrow_forward_ios,
+                        size: screenHeight * 0.02, color: Colors.black),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
-      );
+      ),
+    );
   }
 
-    Widget _buildProfileImage(double screenWidth) {
+  Widget _buildProfileImage(double screenWidth) {
     return GestureDetector(
         onTap: () {
           Navigator.of(context).push(
@@ -229,7 +233,7 @@ class _AdminHomeState extends State<AdminHome> {
         ));
   }
 
-Widget _buildPlaceholderAvatar({bool isLoading = false}) {
+  Widget _buildPlaceholderAvatar({bool isLoading = false}) {
     return GestureDetector(
         onTap: () {
           Navigator.of(context).push(
@@ -259,6 +263,4 @@ Widget _buildPlaceholderAvatar({bool isLoading = false}) {
                 ),
         ));
   }
-
-
 }

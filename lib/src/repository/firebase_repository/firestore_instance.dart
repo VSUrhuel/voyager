@@ -272,6 +272,19 @@ class FirestoreInstance {
     }
   }
 
+  Future<String> getMentorThroughCourseMentorId(String courseMentorId) async {
+    try {
+      final mentor = await _db
+          .collection('courseMentor')
+          .where('courseMentorId', isEqualTo: courseMentorId)
+          .get();
+
+      return mentor.docs.first.data()['mentorId'];
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<MentorModel> getMentorThroughAccId(String accId) async {
     try {
       final mentor = await _db
@@ -652,6 +665,16 @@ class FirestoreInstance {
     }
   }
 
+  Future<String> getCourseMentorIdFromMca(String mcaDocId) async {
+    try {
+      final mca = await _db.collection('menteeCourseAlloc').doc(mcaDocId).get();
+      if (!mca.exists) return '';
+      return mca.data()?['courseMentorId'] ?? '';
+    } catch (e) {
+      return '';
+    }
+  }
+
   Future<UserModel> getUserThroughAccId(String accId) async {
     try {
       final user = await _db
@@ -1015,10 +1038,48 @@ class FirestoreInstance {
     }
   }
 
-  Future<MenteeModel> getMenteeThroughId(String menteeId) async {
+
+  Future<String> getMenteeStatus(String mcaId) async {
+    try {
+      final mentee = await _db.collection('menteeCourseAlloc').doc(mcaId).get();
+      if (mentee.exists) {
+        return mentee.data()!['mcaAllocStatus'];
+      } else {
+        throw Exception('Mentee not found');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<MenteeModel?> getMenteeThroughId(String menteeId) async {
     try {
       final mentee = await _db.collection('mentee').doc(menteeId).get();
-      return MenteeModel.fromJson(mentee.data()!, mentee.id);
+
+      if (!mentee.exists) {
+        return null;
+      }
+
+      final menteeData = mentee.data();
+      if (menteeData == null) {
+        return null;
+      }
+
+      return MenteeModel.fromJson(menteeData, mentee.id);
+    } catch (e) {
+      debugPrint('Error fetching mentee: $e');
+      rethrow; // Or return a default MenteeModel if preferred
+    }
+  }
+
+  Future<MenteeModel> getMenteeThroughAccId(String accId) async {
+    try {
+      final mentee = await _db
+          .collection('mentee')
+          .where('accountId', isEqualTo: accId)
+          .get();
+      return MenteeModel.fromJson(
+          mentee.docs.first.data(), mentee.docs.first.id);
     } catch (e) {
       rethrow;
     }
