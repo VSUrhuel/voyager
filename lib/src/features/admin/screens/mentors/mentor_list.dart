@@ -145,8 +145,8 @@ class _MentorListState extends State<MentorList> {
                   children: [
                     // Active Button
                     SizedBox(
-                      height: screenHeight * 0.030,
-                      width: screenWidth * 0.18,
+                      height: screenHeight * 0.038,
+                      width: screenWidth * 0.22,
                       child: Builder(
                         builder: (context) {
                           String bg = '0xFFa6a2a2';
@@ -167,7 +167,7 @@ class _MentorListState extends State<MentorList> {
                               backgroundColor: Color(int.parse(bg)),
                               padding: EdgeInsets.only(top: 5, bottom: 5),
                               textStyle: TextStyle(
-                                fontSize: screenWidth * 0.03,
+                                fontSize: screenWidth * 0.04,
                                 fontWeight: FontWeight.w600,
                               ),
                               side: BorderSide.none,
@@ -182,8 +182,8 @@ class _MentorListState extends State<MentorList> {
 
                     // Archived Button
                     SizedBox(
-                      height: screenHeight * 0.030,
-                      width: screenWidth * 0.18,
+                      height: screenHeight * 0.038,
+                      width: screenWidth * 0.22,
                       child: Builder(
                         builder: (context) {
                           String bg = '0xFFa6a2a2';
@@ -204,7 +204,7 @@ class _MentorListState extends State<MentorList> {
                               backgroundColor: Color(int.parse(bg)),
                               padding: EdgeInsets.only(top: 5, bottom: 5),
                               textStyle: TextStyle(
-                                fontSize: screenWidth * 0.03,
+                                fontSize: screenWidth * 0.04,
                                 fontWeight: FontWeight.w600,
                               ),
                               side: BorderSide.none,
@@ -219,8 +219,8 @@ class _MentorListState extends State<MentorList> {
 
                     // Suspended Button
                     SizedBox(
-                      height: screenHeight * 0.030,
-                      width: screenWidth * 0.19,
+                      height: screenHeight * 0.038,
+                      width: screenWidth * 0.27,
                       child: Builder(
                         builder: (context) {
                           String bg = '0xFFa6a2a2';
@@ -241,7 +241,7 @@ class _MentorListState extends State<MentorList> {
                               backgroundColor: Color(int.parse(bg)),
                               padding: EdgeInsets.only(top: 5, bottom: 5),
                               textStyle: TextStyle(
-                                fontSize: screenWidth * 0.03,
+                                fontSize: screenWidth * 0.04,
                                 fontWeight: FontWeight.w600,
                               ),
                               side: BorderSide.none,
@@ -304,9 +304,17 @@ class _MentorListState extends State<MentorList> {
                               return Text('');
                             }
                             if (mentorCards.isEmpty) {
-                              return Text('No $show mentor');
+                              return Text('No $show mentor',
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: screenWidth * 0.033,
+                                  ));
                             }
-                            return Text('Nothing follows');
+                            return Text('Nothing follows',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: screenWidth * 0.033,
+                                ));
                           },
                         ),
                       ],
