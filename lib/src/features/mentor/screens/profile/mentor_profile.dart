@@ -66,7 +66,7 @@ class _MentorProfileState extends State<MentorProfile> {
         ),
         body: Column(
           children: [
-            Profile(role: 'mentee'),
+            Profile(role: "mentor"),
             SizedBox(height: screenHeight * 0.03),
             Row(
               children: [
