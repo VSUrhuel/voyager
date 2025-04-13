@@ -5,18 +5,26 @@ class AdminSearchbar extends StatelessWidget {
   const AdminSearchbar({
     super.key,
     required this.onSearchChanged,
-    });
+  });
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.symmetric(
+        horizontal:
+            screenWidth * 0.04, // Responsive side padding (4% of screen width)
+        vertical: 12.0, // Consistent vertical padding
+      ),
       child: Container(
+        height: screenHeight * 0.06, // Slightly reduced for better proportions
         padding: EdgeInsets.symmetric(
-            horizontal: 16.0), // Add padding for aesthetics
+            horizontal: 16.0), // Inner padding for text field
         decoration: BoxDecoration(
-          color: Colors.white, // White background
-          borderRadius: BorderRadius.circular(30.0), // Rounded corners
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(30.0),
           border: Border.all(color: Colors.grey[300]!), // Light grey border
         ),
         child: Row(
@@ -26,16 +34,24 @@ class AdminSearchbar extends StatelessWidget {
                 onChanged: onSearchChanged,
                 decoration: InputDecoration(
                   hintText: 'Search',
-                  border: InputBorder.none, // Remove default underline
-                  contentPadding: EdgeInsets.symmetric(
-                      vertical: 8.0), // Adjust vertical padding
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.only(
+                    left: screenWidth * 0.02, // Responsive left padding
+                    // Precise vertical alignment
+                    bottom: screenHeight * 0.0, // Centers text vertically
+                  ),
+                  hintStyle: TextStyle(color: Colors.grey[500]),
                 ),
-                style: TextStyle(fontSize: 16.0), // Adjust font size as needed
+                style: TextStyle(
+                  fontSize: 16.0,
+                  color: Colors.black87,
+                ),
               ),
             ),
             Icon(
               Icons.search,
-              color: Colors.grey[600], // Grey search icon
+              color: Colors.grey[600],
+              size: 24.0, // Standardized icon size
             ),
           ],
         ),

@@ -4,6 +4,7 @@ import 'package:voyager/src/features/admin/controllers/create_mentor_controller.
 import 'package:voyager/src/features/admin/screens/mentors/mentor_profile.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
+
 class AdminMentorCard extends StatelessWidget {
   final MentorModel mentorModel;
   final UserModel userModel;
@@ -36,40 +37,49 @@ class AdminMentorCard extends StatelessWidget {
     return InkWell(
       onTap: () async {
         if (courseId != null) {
-        // Show confirmation dialog
-        final confirmed = await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Confirm Assignment'),
-            content: const Text('Are you sure you want to assign this mentor to the course?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () => 
-                Navigator.pop(context, true),
-                child: const Text('Confirm'),
-              ),
-            ],
-          ),
-        );
+          // Show confirmation dialog
+          final confirmed = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Confirm Assignment'),
+              content: const Text(
+                  'Are you sure you want to assign this mentor to the course?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Confirm'),
+                ),
+              ],
+            ),
+          );
 
-        if (confirmed == true) {
-          await CourseMentorController().createCourseMentor(courseId!, mentorModel.mentorId);
-          Navigator.pop(context);
-        }
-        else{
-          Navigator.push(context, MaterialPageRoute(builder: (context) => MentorProfile(mentorModel: mentorModel, user: userModel,) ));
-        }
-        
-      }
-        else{
-          Navigator.push(context, MaterialPageRoute(builder: (context) => MentorProfile(mentorModel: mentorModel, user: userModel,) ));
+          if (confirmed == true) {
+            await CourseMentorController()
+                .createCourseMentor(courseId!, mentorModel.mentorId);
+            Navigator.pop(context);
+          } else {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => MentorProfile(
+                          mentorModel: mentorModel,
+                          user: userModel,
+                        )));
+          }
+        } else {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => MentorProfile(
+                        mentorModel: mentorModel,
+                        user: userModel,
+                      )));
         }
       },
-    
       child: Card(
           color: Colors.white,
           elevation: 1,
@@ -101,181 +111,264 @@ class AdminMentorCard extends StatelessWidget {
                       Text(mentor,
                           style: TextStyle(
                             color: Colors.black,
-                            fontSize: screenWidth * 0.035,
+                            fontSize: screenWidth * 0.04,
                             fontWeight: FontWeight.bold,
                             height: 1.0,
                           )),
+                      SizedBox(height: screenHeight * 0.002),
                       Row(children: [
                         Builder(
                           builder: (context) {
                             email;
-                            double baseFontSize = screenWidth * 0.027;
-                            double dynamicFontSize = email.length > 20
-                                ? baseFontSize * (20 / email.length)
-                                : baseFontSize;
+                            // double baseFontSize = screenWidth * 0.027;
+                            // double dynamicFontSize = email.length > 20
+                            //     ? baseFontSize * (20 / email.length)
+                            //     : baseFontSize;
 
                             return Text(
                               email,
                               style: TextStyle(
                                 color: Colors.blue,
-                                fontSize: dynamicFontSize,
+                                fontSize: screenWidth * 0.035,
                                 fontWeight: FontWeight.w600,
                               ),
                             );
                           },
                         ),
-                        Text(' · '),
-                        Text(studentId,
-                            style: TextStyle(
-                              wordSpacing: 0,
-                              color: Colors.black,
-                              fontSize: screenWidth * 0.027,
-                              fontWeight: FontWeight.normal,
-                            )),
                       ]),
-                      Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Text(schedule,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: screenWidth * 0.028,
-                                  fontWeight: FontWeight.normal,
-                                  height: 1.0,
-                                )),
-                            SizedBox(width: screenWidth * 0.02),
-                            IntrinsicWidth(
-                              child: Container(
-                                padding: EdgeInsets.only(left: 7, right: 7),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue[100],
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(10),
-                                  ),
-                                ),
-                                child: Builder(
-                                  builder: (context) {
-                                    course[0]; //will make this array later
-                                    String dynamicText = '';
-                                    if (course[0].length > 17) {
-                                      for (var element
-                                          in course[0].split(' ')) {
-                                        if (element.isNotEmpty &&
-                                            element[0].toUpperCase() ==
-                                                element[0]) {
-                                          String sub = element.substring(0, 3);
-                                          dynamicText += sub;
-                                        }
-                                      }
-                                      course[0] = dynamicText;
-                                    }
+                      Row(children: [
+                        // Day indicators with accent background
+                        _buildDayPills(schedule, context),
+                        SizedBox(width: screenWidth * 0.015),
 
-                                    return Text(course[0],
-                                        style: TextStyle(
-                                          color: Colors.blue[800],
-                                          fontSize: screenWidth * 0.025,
-                                          fontWeight: FontWeight.w600,
-                                        ));
-                                  },
-                                ),
-                              ),
-                            ),
-                          ]),
+                        // Time range
+                        Text(
+                          schedule.substring(
+                              schedule.indexOf(' ') + 1), // Get time portion
+                          style: TextStyle(
+                            color: Colors.black87,
+                            fontSize: screenWidth * 0.035,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+
+                        // IntrinsicWidth(
+                        //   child: Container(
+                        //     padding: EdgeInsets.only(left: 7, right: 7),
+                        //     decoration: BoxDecoration(
+                        //       color: Colors.blue[100],
+                        //       borderRadius: BorderRadius.all(
+                        //         Radius.circular(10),
+                        //       ),
+                        //     ),
+                        //     child: Builder(
+                        //       builder: (context) {
+                        //         course[0]; //will make this array later
+                        //         String dynamicText = '';
+                        //         if (course[0].length > 17) {
+                        //           for (var element
+                        //               in course[0].split(' ')) {
+                        //             if (element.isNotEmpty &&
+                        //                 element[0].toUpperCase() ==
+                        //                     element[0]) {
+                        //               String sub = element.substring(0, 3);
+                        //               dynamicText += sub;
+                        //             }
+                        //           }
+                        //           course[0] = dynamicText;
+                        //         }
+
+                        //         return Text(course[0],
+                        //             style: TextStyle(
+                        //               color: Colors.blue[800],
+                        //               fontSize: screenWidth * 0.025,
+                        //               fontWeight: FontWeight.w600,
+                        //             ));
+                        //       },
+                        //     ),
+                        //   ),
+                        // ),
+                      ]),
                     ]),
                 Spacer(),
-                if(courseId == null)
-                  IconButton(onPressed: () {},
-                   icon: PopupMenuButton<String>(
-                    icon: Icon(Icons.more_vert, color: Colors.black),
-                    onSelected: (String value) async {
-                     switch (value){
-                      case 'archive':
-                      if(mentorModel.mentorStatus == 'archived'){
-                        await CreateMentorController().updateMentorStatus(mentorModel.mentorId,'active');
-                        onActionComplete!();
-                      }else{
-                        await CreateMentorController().updateMentorStatus(mentorModel.mentorId,'archived');
-                        onActionComplete!();
-                      }
+                if (courseId == null)
+                  IconButton(
+                    onPressed: () {},
+                    icon: PopupMenuButton<String>(
+                      icon: Icon(Icons.more_vert, color: Colors.black),
+                      onSelected: (String value) async {
+                        switch (value) {
+                          case 'archive':
+                            if (mentorModel.mentorStatus == 'archived') {
+                              await CreateMentorController().updateMentorStatus(
+                                  mentorModel.mentorId, 'active');
+                              onActionComplete!();
+                            } else {
+                              await CreateMentorController().updateMentorStatus(
+                                  mentorModel.mentorId, 'archived');
+                              onActionComplete!();
+                            }
 
-                      break;
+                            break;
 
-                      case 'suspend':
-                      if(mentorModel.mentorStatus == 'suspended'){
-                        await CreateMentorController().updateMentorStatus(mentorModel.mentorId,'active');
-                        onActionComplete!();
-                      }else{
-                        final confirmed = await showDialog<bool>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Confirm Mentor Suspension'),
-                              content: const Text('Are you sure you want to suspend this mentor?'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context, false),
-                                  child: const Text('Cancel'),
+                          case 'suspend':
+                            if (mentorModel.mentorStatus == 'suspended') {
+                              await CreateMentorController().updateMentorStatus(
+                                  mentorModel.mentorId, 'active');
+                              onActionComplete!();
+                            } else {
+                              final confirmed = await showDialog<bool>(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title:
+                                      const Text('Confirm Mentor Suspension'),
+                                  content: const Text(
+                                      'Are you sure you want to suspend this mentor?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, false),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, true),
+                                      child: const Text('Confirm'),
+                                    ),
+                                  ],
                                 ),
-                                TextButton(
-                                  onPressed: () => 
-                                  Navigator.pop(context, true),
-                                  child: const Text('Confirm'),
-                                ),
-                              ],
-                            ),
-                          );
-                          if (confirmed == true) {
-                           await CreateMentorController().updateMentorStatus(mentorModel.mentorId,'suspended');
-                            onActionComplete!();
-                          }
-                      }
-                        
-                      break;
+                              );
+                              if (confirmed == true) {
+                                await CreateMentorController()
+                                    .updateMentorStatus(
+                                        mentorModel.mentorId, 'suspended');
+                                onActionComplete!();
+                              }
+                            }
 
-                      case 'delete':
-                        final confirmed = await showDialog<bool>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Confirm Mentor Delete'),
-                              content: const Text('Are you sure you want to delete this mentor?'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context, false),
-                                  child: const Text('Cancel'),
-                                ),
-                                TextButton(
-                                  onPressed: () => 
-                                  Navigator.pop(context, true),
-                                  child: const Text('Confirm'),
-                                ),
-                              ],
-                            ),
-                          );
-                          if (confirmed == true) {
-                           await CreateMentorController().deleteMentor(mentorModel.mentorId);
-                            onActionComplete!();
-                          }
-                      break;
-                     }
-                    },
+                            break;
 
-                    itemBuilder: (BuildContext context) => [
-                      PopupMenuItem<String>(
-                        value: 'suspend',
-                        child: Text(mentorModel.mentorStatus == 'suspended' ? 'Lift Suspension' : 'Suspend Mentor'),
-                      ),
-                      PopupMenuItem<String>(
-                        value: 'archive',
-                        child: Text(mentorModel.mentorStatus == 'archived' ? 'Unarchive Mentor' : 'Archive Mentor'),
-                      ),
-                      const PopupMenuItem<String>(
-                        value: 'delete',
-                        child: Text('Delete Mentor', style: TextStyle(color: Colors.red)),
-                      ),
-                    ],
-
-                   ),
-                   )
+                          case 'delete':
+                            final confirmed = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Confirm Mentor Delete'),
+                                content: const Text(
+                                    'Are you sure you want to delete this mentor?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, false),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, true),
+                                    child: const Text('Confirm'),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (confirmed == true) {
+                              await CreateMentorController()
+                                  .deleteMentor(mentorModel.mentorId);
+                              onActionComplete!();
+                            }
+                            break;
+                        }
+                      },
+                      itemBuilder: (BuildContext context) => [
+                        PopupMenuItem<String>(
+                          value: 'suspend',
+                          child: Text(mentorModel.mentorStatus == 'suspended'
+                              ? 'Lift Suspension'
+                              : 'Suspend Mentor'),
+                        ),
+                        PopupMenuItem<String>(
+                          value: 'archive',
+                          child: Text(mentorModel.mentorStatus == 'archived'
+                              ? 'Unarchive Mentor'
+                              : 'Archive Mentor'),
+                        ),
+                        const PopupMenuItem<String>(
+                          value: 'delete',
+                          child: Text('Delete Mentor',
+                              style: TextStyle(color: Colors.red)),
+                        ),
+                      ],
+                    ),
+                  )
               ]))),
     );
+  }
+
+  Widget _buildDayPills(String fullSchedule, BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final dayPart = fullSchedule.substring(0, fullSchedule.indexOf(' '));
+    final days = _parseDays(dayPart);
+
+    return Wrap(
+      spacing: screenWidth * 0.01,
+      children: days.map((day) => _buildDayPill(day, context)).toList(),
+    );
+  }
+
+  List<String> _parseDays(String dayAbbreviation) {
+    final days = <String>[];
+    int i = 0;
+    while (i < dayAbbreviation.length) {
+      if (i + 1 < dayAbbreviation.length &&
+          dayAbbreviation.substring(i, i + 2) == 'Th') {
+        days.add('Th');
+        i += 2;
+      } else {
+        days.add(dayAbbreviation[i]);
+        i += 1;
+      }
+    }
+    return days;
+  }
+
+  Widget _buildDayPill(String day, BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: screenWidth * 0.02,
+        vertical: screenHeight * 0.003,
+      ),
+      decoration: BoxDecoration(
+        color: _getDayColor(day, context),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        day,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: day.length > 1 ? screenWidth * 0.025 : screenWidth * 0.028,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Color _getDayColor(String day, BuildContext context) {
+    final theme = Theme.of(context);
+    switch (day) {
+      case 'M':
+        return theme.colorScheme.primary;
+      case 'T':
+        return Colors.purple;
+      case 'W':
+        return Colors.orange;
+      case 'Th':
+        return Colors.teal;
+      case 'F':
+        return Colors.blueGrey;
+      case 'S':
+        return Colors.red;
+      default:
+        return theme.colorScheme.secondary;
+    }
   }
 }
