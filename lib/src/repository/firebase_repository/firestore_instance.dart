@@ -715,11 +715,22 @@ class FirestoreInstance {
 
   Future<List<UserModel>> getMentors() async {
     try {
-      final mentors = await _db.collection('mentors').get();
+      // Query mentors collection and exclude soft deleted mentors
+      final mentors = await _db
+          .collection('mentors')
+          .where('mentorSoftDeleted',
+              isEqualTo: false) // filter out soft deleted
+          .get();
+
       List<UserModel> users = [];
+
       for (var mentor in mentors.docs) {
-        users.add(await getUser(mentor.data()['accountId']));
+        final accId = mentor.data()['accountId'];
+        final user = await getUserThroughAccId(
+            accId); // Make sure you're using this version
+        users.add(user);
       }
+
       return users;
     } catch (e) {
       rethrow;
@@ -1026,6 +1037,7 @@ class FirestoreInstance {
       rethrow;
     }
   }
+
 
   Future<String> getMenteeStatus(String mcaId) async {
     try {
