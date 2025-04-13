@@ -7,6 +7,7 @@ import 'package:voyager/src/features/mentor/controller/mentor_controller.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/features/mentor/widget/experience_input.dart';
 import 'package:voyager/src/features/mentor/widget/multiselect.dart';
+import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/routing/routes.dart';
 import 'package:voyager/src/widgets/custom_button.dart';
 import 'package:voyager/src/widgets/time.dart';
@@ -31,6 +32,8 @@ class MentorInfo2 extends StatefulWidget {
 }
 
 class _MentorInfo2State extends State<MentorInfo2> {
+  bool isLoading = false;
+
   late final MentorController controller;
   @override
   void initState() {
@@ -52,6 +55,8 @@ class _MentorInfo2State extends State<MentorInfo2> {
           widget.mentorModel!.mentorLanguages.join(',');
 
       controller.selectedSkills.value = widget.mentorModel!.mentorExpertise;
+      print(
+          "Selected header: ${controller.mentorExpHeader.text}"); // Debug print
     }
   }
 
@@ -289,9 +294,66 @@ class _MentorInfo2State extends State<MentorInfo2> {
                     buttonText: 'Proceed',
                     bgColor: Color(0xFF1877F2),
                     textColor: Colors.white,
-                    isLoading: false,
+                    isLoading: isLoading,
                     borderColor: Colors.transparent,
                     onPressed: () async {
+                      FirestoreInstance firestoreInstance = FirestoreInstance();
+                      if (!firestoreInstance
+                          .parseTimeString(controller.mentorRegStartTime.text)
+                          .isBefore(firestoreInstance.parseTimeString(
+                              controller.mentorRegEndTime.text))) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content:
+                                Text('Start time must be less than end time.'),
+                          ),
+                        );
+                        return;
+                      }
+                      if (controller.selectedDays.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please select at least one day.'),
+                          ),
+                        );
+                        return;
+                      }
+                      if (controller.selectedSkills.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please select at least one skill.'),
+                          ),
+                        );
+                        return;
+                      }
+                      if (controller.selectedLanguages.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content:
+                                Text('Please select at least one language.'),
+                          ),
+                        );
+                        return;
+                      }
+                      if (controller.mentorFbUrl.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please enter your Facebook link.'),
+                          ),
+                        );
+                        return;
+                      }
+                      if (controller.mentorGitUrl.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please enter your Github link.'),
+                          ),
+                        );
+                        return;
+                      }
+                      setState(() {
+                        isLoading = true;
+                      });
                       await controller.generateMentor();
 
                       await controller.updateUsername(widget.image);
