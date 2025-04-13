@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
+import 'package:voyager/src/features/mentee/model/mentee_model.dart';
 import 'package:voyager/src/features/mentor/model/content_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -535,12 +536,21 @@ class FirestoreInstance {
     }
   }
 
-  Future<List<String>> getMentorApPIIds() async {
+  Future<List<String>> getMentorAPIIds() async {
     try {
       final mentors = await _db.collection('mentors').get();
       return mentors.docs
           .map((doc) => doc.data()['accountId'].toString())
           .toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<String> getMentorAccountId(String mentorId) async {
+    try {
+      final mentor = await _db.collection('mentors').doc(mentorId).get();
+      return mentor.data()!['accountId'];
     } catch (e) {
       rethrow;
     }
@@ -871,7 +881,7 @@ Future<void> updateCourseMentor(
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('courseMentor')
-          .where('courseMentorId', isEqualTo: docId)
+          .where('courseId', isEqualTo: docId)
           .where('courseMentorSoftDelete', isEqualTo: false)
           .get();
       //print(querySnapshot.docs.length);
@@ -889,11 +899,12 @@ Future<void> updateCourseMentor(
       final courseMentorQuerySnapshot = await FirebaseFirestore.instance
           .collection('courseMentor')
           .where('courseId', isEqualTo: docId)
-          .where('courseMentorSoftDelete', isEqualTo: false)
+          .where('courseMentorSoftDeleted', isEqualTo: false)
           .get();
 
       // Initialize mentee count
       int menteeCount = 0;
+      print("Total Coursementores--------");
       print(courseMentorQuerySnapshot.docs.length);
 
       // Step 2: For each courseMentor, get the matching menteeCourseAllocID
@@ -917,6 +928,87 @@ Future<void> updateCourseMentor(
     } catch (e) {
       print('Error fetching course mentees: $e');
       return 0;
+    }
+  }
+
+  Future<List<UserModel>> getMenteeAccountsForCourse(String docId, String status) async {
+    try {
+      // Step 1: Get the list of courseMentors that match the provided course ID
+      final courseMentorQuerySnapshot = await FirebaseFirestore.instance
+          .collection('courseMentor')
+          .where('courseId', isEqualTo: docId)
+          .where('courseMentorSoftDeleted', isEqualTo: false)
+          .get();
+
+      // Initialize mentee count
+      List<String> menteesIds = [];
+      print("Total Coursementores--------");
+      print(courseMentorQuerySnapshot.docs.length);
+
+      // Step 2: For each courseMentor, get the matching menteeCourseAllocID
+      for (var courseMentorDoc in courseMentorQuerySnapshot.docs) {
+        final courseMentorId = courseMentorDoc.id;
+
+        // Step 3: Get the mentees for this courseMentorId by matching menteeCourseAllocID
+        final menteeQuerySnapshot = await FirebaseFirestore.instance
+            .collection('menteeCourseAlloc')
+            .where('courseMentorId', isEqualTo: courseMentorId)
+            .where('mcaAllocStatus', isEqualTo: status)
+            .where('mcaSoftDeleted', isEqualTo: false)
+            .get();
+
+        menteesIds.addAll(menteeQuerySnapshot.docs
+            .map((doc) => doc.data()['menteeId'].toString())
+            .toList());
+      }
+
+      List<UserModel> users = [];
+      for (String id in menteesIds) {
+
+        final menteeDoc = await _db.collection('mentee').doc(id).get();
+        if (menteeDoc.exists) {
+          users.add(await getUser(menteeDoc.data()!['accountId']));
+        }
+      }
+
+      return users;
+    } catch (e) {
+      print('Error fetching course mentees: $e');
+      return [];
+    }
+  }
+
+  Future<List<UserModel>> getMenteesThroughCourseMentor(String courseMentorId) async {
+    try {
+      final menteeAllocations = await _db
+          .collection('menteeCourseAlloc')
+          .where('courseMentorId', isEqualTo: courseMentorId)
+          .where('mcaSoftDeleted', isEqualTo: false)
+          .where('mcaAllocStatus', isEqualTo: 'accepted')
+          .get();
+
+      List<UserModel> users = [];
+      for (var allocation in menteeAllocations.docs) {
+        final menteeId = allocation.data()['menteeId'];
+
+        final menteeDoc = await _db.collection('mentee').doc(menteeId).get();
+        if (menteeDoc.exists) {
+          users.add(await getUser(menteeDoc.data()!['accountId']));
+        }
+      }
+      return users;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
+  Future<MenteeModel> getMenteeThroughId(String menteeId) async {
+    try {
+      final mentee = await _db.collection('mentee').doc(menteeId).get();
+      return MenteeModel.fromJson(mentee.data()!, mentee.id);
+    } catch (e) {
+      rethrow;
     }
   }
 
