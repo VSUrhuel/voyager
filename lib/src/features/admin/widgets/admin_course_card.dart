@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:voyager/src/features/admin/controllers/course_controller.dart';
 import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
+import 'package:voyager/src/features/admin/screens/courses/course_details.dart';
 import 'package:voyager/src/features/admin/screens/courses/mentor_popup.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
 
@@ -39,29 +40,42 @@ class AdminCourseCard extends StatelessWidget {
             Row(
               children: [
                 //Left Half
-                Container(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      // Use DecorationImage
-                      image: course.courseImgUrl.isEmpty
-                          ? AssetImage(
-                                  'assets/images/application_images/code.jpg')
-                              as ImageProvider
-                          : NetworkImage(course.courseImgUrl),
-                      fit: BoxFit
-                          .fitHeight, // Or BoxFit.contain, or other BoxFit options
+                InkWell(
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(
+                      builder: (context) => CourseDetails(courseModel: course, courseMentors: courseMentors),
+                    ));
+                  },
+                  child:Container(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: course.courseImgUrl.isEmpty
+                            ? AssetImage(
+                                    'assets/images/application_images/code.jpg')
+                                as ImageProvider
+                            : NetworkImage(course.courseImgUrl),
+                        fit: BoxFit
+                            .fitHeight, 
+                      ),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(10), // Top left corner
+                        bottomLeft: Radius.circular(10),
+                      ),
+                      color: Colors.black,
                     ),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(10), // Top left corner
-                      bottomLeft: Radius.circular(10), // Bottom left corner
-                    ),
-                    color: Colors.black,
+                    width: screenWidth * 0.28,
+                    height: screenHeight * 0.20,
                   ),
-                  width: screenWidth * 0.28,
-                  height: screenHeight * 0.20,
                 ),
+                
                 //Right Half
-                Container(
+                InkWell(
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(
+                      builder: (context) => CourseDetails(courseModel: course, courseMentors: courseMentors),
+                    ));
+                  },
+                  child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.only(
                       topRight: Radius.circular(10), // Top left corner
@@ -142,6 +156,8 @@ class AdminCourseCard extends StatelessWidget {
                     ],
                   ),
                 ),
+                ),
+                
                 // Spacer(),
                 IconButton(
                   constraints: BoxConstraints(
