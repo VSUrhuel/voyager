@@ -9,7 +9,7 @@ import 'package:voyager/src/repository/supabase_repository/supabase_instance.dar
 
 class MentorController extends GetxController {
   static MentorController get instance => Get.find();
-
+  final isLoading = false.obs;
   final mentorId = TextEditingController();
   final accountId = TextEditingController();
   final mentorYearLvl = TextEditingController();
@@ -74,6 +74,7 @@ class MentorController extends GetxController {
 
   Future<bool> generateMentor() async {
     try {
+      isLoading.value = true;
       final firebaseID = FirestoreInstance().getFirebaseUser().uid;
       final List<String> mentorIDs = await FirestoreInstance().getMentorIDs();
       final List<String> accountIDs =
@@ -119,6 +120,7 @@ class MentorController extends GetxController {
       firestore.updateInitialCourseMentor(
           FirestoreInstance().getFirebaseUser().email.toString(),
           mentor.mentorId);
+      isLoading.value = false;
       return Future<bool>.value(true);
     } catch (e) {
       Get.snackbar("Error", e.toString());
@@ -128,6 +130,7 @@ class MentorController extends GetxController {
 
   Future<bool> updateMentorInformation() async {
     try {
+      isLoading.value = true;
       final firebaseID = FirestoreInstance().getFirebaseUser().uid;
 
       String mentorID = await FirestoreInstance().getMentorID(firebaseID);
@@ -151,12 +154,11 @@ class MentorController extends GetxController {
         mentorStatus: mentorStatus.text,
         mentorSoftDeleted: false,
       );
-      print(mentor.toJson());
-      print(selectedExpHeader);
       final firestore = FirestoreInstance();
 
       firestore.setMentor(mentor);
       clearController();
+      isLoading.value = false;
       return Future<bool>.value(true);
     } catch (e) {
       Get.snackbar("Error", e.toString());

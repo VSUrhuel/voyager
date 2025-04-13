@@ -82,6 +82,19 @@ class _CalendarViewState extends State<CalendarView> {
     });
   }
 
+  void clearController() {
+    scheduleConrtoller.scheduleDate.text = '';
+    scheduleConrtoller.scheduleDescription.text = '';
+    scheduleConrtoller.scheduleEndTime.text = '';
+    scheduleConrtoller.scheduleStartTime.text = '';
+    scheduleConrtoller.scheduleRoomName.text = '';
+    scheduleConrtoller.scheduleMenteeId.text = '';
+    scheduleConrtoller.scheduleMentorId.text = '';
+    scheduleConrtoller.scheduleTitle.text = '';
+  }
+
+  FirestoreInstance firestoreInstance = Get.put(FirestoreInstance());
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -232,8 +245,38 @@ class _CalendarViewState extends State<CalendarView> {
               TextButton(
                 child: const Text('Save'),
                 onPressed: () async {
+                  if (scheduleConrtoller.scheduleTitle.text == '' ||
+                      scheduleConrtoller.scheduleDescription.text == '' ||
+                      scheduleConrtoller.scheduleStartTime.text.isEmpty ||
+                      scheduleConrtoller.scheduleEndTime.text.isEmpty ||
+                      scheduleConrtoller.scheduleRoomName.text.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Please fill in all fields.',
+                        ),
+                      ),
+                    );
+                    return;
+                  }
+                  if (!firestoreInstance
+                      .parseTimeString(
+                          scheduleConrtoller.scheduleStartTime.text)
+                      .isBefore(firestoreInstance.parseTimeString(
+                          scheduleConrtoller.scheduleEndTime.text))) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Start time must be before end time.',
+                        ),
+                      ),
+                    );
+                    return;
+                  }
+
                   await scheduleConrtoller.generateSchedule();
                   Navigator.of(context).pop();
+                  clearController();
                 },
               ),
             ],
@@ -491,6 +534,16 @@ class _CalendarViewState extends State<CalendarView> {
               onTapUp: (_) => setState(() => _isPressed = false),
               onTapCancel: () => setState(() => _isPressed = false),
               onTap: () {
+                if (selectedDay.isBefore(DateTime.now())) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'You cannot create a schedule for a past date.',
+                      ),
+                    ),
+                  );
+                  return;
+                }
                 showMyDialog();
               },
               child: AnimatedContainer(
