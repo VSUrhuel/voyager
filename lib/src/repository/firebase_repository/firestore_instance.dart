@@ -557,8 +557,6 @@ class FirestoreInstance {
     }
   }
 
-  
-
   Future<List<MentorModel>> getMentorsThroughStatus(String status) async {
     try {
       final mentor = await _db
@@ -685,24 +683,12 @@ class FirestoreInstance {
   Future<List<UserModel>> getMentors() async {
     try {
       final mentors = await _db.collection('mentors').get();
-      print(
-          "✅ Fetched ${mentors.docs.length} mentor documents from 'mentors' collection");
-
       List<UserModel> users = [];
-
       for (var mentor in mentors.docs) {
-        final accId = mentor.data()['accountId'];
-        print("🔍 Fetching user with accountId: $accId");
-
-        final user = await getUserThroughAccId(
-            accId); // Make sure you're using this version
-        users.add(user);
+        users.add(await getUser(mentor.data()['accountId']));
       }
-
-      print("👥 Total users matched with mentors: ${users.length}");
       return users;
     } catch (e) {
-      print("❌ Error in getMentors(): $e");
       rethrow;
     }
   }
@@ -763,6 +749,27 @@ class FirestoreInstance {
     }
   }
 
+  Future<bool> archiveCourse(String courseId) async {
+    try {
+      await _db.collection('course').doc(courseId).update({
+        'courseStatus': 'archived',
+      });
+      return true;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> unarchiveCourse(String courseId) async {
+    try {
+      await _db.collection('course').doc(courseId).update({
+        'courseStatus': 'active',
+      });
+      return true;
+    } catch (e) {
+      rethrow;
+    }
+  }
 
   Future<List<CourseModel>> getArchivedCourses() async {
     try {
@@ -786,6 +793,17 @@ class FirestoreInstance {
     try {
       String uniqueID = generateUniqueId();
       await _db.collection('course').doc(uniqueID).set(course.toJson());
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> deleteCourse(String courseId) async {
+    try {
+      await _db.collection('course').doc(courseId).update({
+        'courseSoftDelete': true,
+      });
+      return true;
     } catch (e) {
       rethrow;
     }
@@ -823,6 +841,21 @@ class FirestoreInstance {
     }
   }
 
+  Future<List<CourseMentorModel>> getCourseMentorsThroughCourseId(
+      String courseId) async {
+    try {
+      final courseMentors = await _db
+          .collection('courseMentor')
+          .where('courseId', isEqualTo: courseId)
+          .get();
+      return courseMentors.docs
+          .map((doc) => CourseMentorModel.fromJson(doc.data()))
+          .toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> updateCourseMentor(
       String courseMentorId, String courseId, String mentorId) async {
     try {
@@ -839,7 +872,7 @@ class FirestoreInstance {
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('courseMentor')
-          .where('courseId', isEqualTo: docId)
+          .where('courseMentorId', isEqualTo: docId)
           .where('courseMentorSoftDelete', isEqualTo: false)
           .get();
       //print(querySnapshot.docs.length);
@@ -853,31 +886,31 @@ class FirestoreInstance {
 
   Future<int> getTotalMenteeForCourse(String docId) async {
     try {
-      final firestore = FirebaseFirestore.instance;
-
-      // Step 1: Get courseMentor docs where courseId == docId and not soft-deleted
-      final courseMentorQuerySnapshot = await firestore
+      // Step 1: Get the list of courseMentors that match the provided course ID
+      final courseMentorQuerySnapshot = await FirebaseFirestore.instance
           .collection('courseMentor')
           .where('courseId', isEqualTo: docId)
-          .where('courseMentorSoftDeleted', isEqualTo: false)
+          .where('courseMentorSoftDelete', isEqualTo: false)
           .get();
 
-      // Extract their document IDs
-      final courseMentorIds =
-          courseMentorQuerySnapshot.docs.map((doc) => doc.id).toList();
+      // Initialize mentee count
+      int menteeCount = 0;
+      print(courseMentorQuerySnapshot.docs.length);
 
-      if (courseMentorIds.isEmpty) {
-        return 0;
+      // Step 2: For each courseMentor, get the matching menteeCourseAllocID
+      for (var courseMentorDoc in courseMentorQuerySnapshot.docs) {
+        final courseMentorId = courseMentorDoc.id;
+
+        // Step 3: Get the mentees for this courseMentorId by matching menteeCourseAllocID
+        final menteeQuerySnapshot = await FirebaseFirestore.instance
+            .collection('menteeCourseAlloc')
+            .where('courseMentorId', isEqualTo: courseMentorId)
+            .where('mcaSoftDeleted', isEqualTo: false)
+            .get();
+
+        // Increment the mentee count based on the number of matching mentees
+        menteeCount += menteeQuerySnapshot.docs.length;
       }
-
-      // Step 2: Query menteeCourseAlloc where courseMentorId is in the above list and not soft-deleted
-      final menteeCourseAllocQuerySnapshot = await firestore
-          .collection('menteeCourseAlloc')
-          .where('courseMentorId', whereIn: courseMentorIds)
-          .where('mcaSoftDeleted', isEqualTo: false)
-          .get();
-
-      final menteeCount = menteeCourseAllocQuerySnapshot.docs.length;
 
       print("Total Mentees for Course $docId: $menteeCount");
 
