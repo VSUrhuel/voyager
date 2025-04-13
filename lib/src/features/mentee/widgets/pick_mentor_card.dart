@@ -23,14 +23,15 @@ class PickMentorCard extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    String formatTime(TimeOfDay time) {
+
+    String _formatTime(TimeOfDay time) {
       final now = DateTime.now();
       final dateTime =
           DateTime(now.year, now.month, now.day, time.hour, time.minute);
       return DateFormat('h:mm a').format(dateTime);
     }
 
-    String formatDays(List<String> days) {
+    String _formatDays(List<String> days) {
       return days.map((day) {
         if (day == 'Thursday') {
           return 'Th';
@@ -93,9 +94,9 @@ class PickMentorCard extends StatelessWidget {
                   ),
                   SizedBox(height: screenHeight * 0.005),
                   Text(
-                    "Schedule: ${formatDays(mentorModel.mentorRegDay)} "
-                            "${formatTime(mentorModel.mentorRegStartTime)} - " +
-                        formatTime(mentorModel.mentorRegEndTime),
+                    "Schedule: ${_formatDays(mentorModel.mentorRegDay)} " +
+                        "${_formatTime(mentorModel.mentorRegStartTime)} - " +
+                        "${_formatTime(mentorModel.mentorRegEndTime)}",
                     style: TextStyle(
                       fontSize: screenWidth * 0.035,
                       color: Colors.black54,

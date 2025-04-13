@@ -167,19 +167,19 @@ class _MeetingCardState extends State<MeetingCard> {
                     widget.scheduleModel.scheduleDate),
                 style: TextStyle(color: Colors.blue),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  // Handle view action
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child:
-                    const Text("View", style: TextStyle(color: Colors.white)),
-              ),
+              // ElevatedButton(
+              //   onPressed: () {
+              //     // Handle view action
+              //   },
+              //   style: ElevatedButton.styleFrom(
+              //     backgroundColor: Colors.blue,
+              //     shape: RoundedRectangleBorder(
+              //       borderRadius: BorderRadius.circular(8),
+              //     ),
+              //   ),
+              //   child:
+              //       const Text("View", style: TextStyle(color: Colors.white)),
+              // ),
             ],
           ),
         ],

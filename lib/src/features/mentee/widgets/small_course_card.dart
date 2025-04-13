@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
+import 'package:voyager/src/features/mentee/screens/home/enroll_course.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 
 class SmallCourseCard extends StatelessWidget {
@@ -9,6 +13,17 @@ class SmallCourseCard extends StatelessWidget {
   final FirestoreInstance firestoreInstance = FirestoreInstance();
 
   SmallCourseCard({super.key, required this.courseModel});
+
+  Future<int> fetchTotalMentors() async {
+    try {
+      List<UserModel> users =
+          await firestoreInstance.getCourseMentors(courseModel.docId);
+      return users.length;
+    } catch (e) {
+      print("Error fetching mentors: $e");
+      return 0;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,8 +35,21 @@ class SmallCourseCard extends StatelessWidget {
     final endDate =
         DateFormat('MMM dd').format(courseModel.courseModifiedTimestamp);
 
+    final currentUser = FirebaseAuth.instance.currentUser;
+    final userEmail = currentUser?.email ?? '';
+    final userId = firestoreInstance.getUserDocIdThroughEmail(userEmail);
+
+    final supabase = Supabase.instance.client;
+    final imageUrl = (courseModel.courseImgUrl.isNotEmpty)
+        ? (courseModel.courseImgUrl.startsWith('http')
+            ? courseModel.courseImgUrl
+            : supabase.storage
+                .from('course-picture')
+                .getPublicUrl(courseModel.courseImgUrl))
+        : 'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/course-picture/linear-algebra.png';
+
     return FutureBuilder<int>(
-      future: firestoreInstance.getTotalMentorsForCourse(courseModel.docId),
+      future: fetchTotalMentors(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
@@ -46,14 +74,9 @@ class SmallCourseCard extends StatelessWidget {
                 // Display
                 Row(
                   children: [
-                    // Left Half
+                    // Left Half (Image)
                     Container(
                       decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage(
-                              'assets/images/application_images/code.jpg'),
-                          fit: BoxFit.contain,
-                        ),
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(10),
                           bottomLeft: Radius.circular(10),
@@ -62,7 +85,20 @@ class SmallCourseCard extends StatelessWidget {
                       ),
                       width: screenWidth * 0.25,
                       height: screenHeight * 0.22,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                          bottomLeft: Radius.circular(10),
+                        ),
+                        child: Image.network(
+                          imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Icon(Icons.broken_image, color: Colors.white),
+                        ),
+                      ),
                     ),
+
                     // Right Half
                     Container(
                       decoration: BoxDecoration(
@@ -144,7 +180,28 @@ class SmallCourseCard extends StatelessWidget {
                     SizedBox(width: screenWidth * 0.03),
                     ElevatedButton(
                       onPressed: () {
-                        // Add navigation or logic here
+                        if (userEmail.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Please sign in to enroll')),
+                          );
+                          return;
+                        }
+
+                        userId.then((resolvedUserId) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EnrollCourse(
+                                courseModel: courseModel,
+                                userId: resolvedUserId,
+                              ),
+                            ),
+                          );
+                        }).catchError((error) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error: $error')),
+                          );
+                        });
                       },
                       child: Text("Enroll Now"),
                     ),

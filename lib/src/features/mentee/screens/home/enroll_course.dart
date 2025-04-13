@@ -26,11 +26,17 @@ class _EnrollCourseState extends State<EnrollCourse> {
   String? selectedMentorId;
   bool isLoading = false;
 
+
+  List<UserModel> fetchedUsers = [];
+
   Future<List<PickMentorCard>> fetchMentorsWithDetails() async {
     try {
-      List<UserModel> users = await firestoreInstance.getMentors();
+      List<UserModel> users =
+          await firestoreInstance.getCourseMentors(widget.courseModel.docId);
       List<MentorModel> mentorDetails = await Future.wait(users.map((user) =>
           firestoreInstance.getMentorThroughAccId(user.accountApiID)));
+
+      fetchedUsers = users;
 
       return List.generate(users.length, (index) {
         return PickMentorCard(
@@ -63,13 +69,14 @@ class _EnrollCourseState extends State<EnrollCourse> {
       final firestore = FirebaseFirestore.instance;
       final Timestamp createdTimestamp = Timestamp.now();
 
-      // Step 1: Query courseMentor collection where courseId field matches
-      final courseMentorQuery = firestore
-          .collection('courseMentor')
-          .where('courseId', isEqualTo: widget.courseModel.docId);
 
-      final courseMentorSnapshot = await courseMentorQuery.get();
-      print(widget.courseModel.docId);
+      // 1. Get courseMentorId using courseId and mentorId
+      final courseMentorSnapshot = await firestore
+          .collection('courseMentor')
+          .where('courseId', isEqualTo: widget.courseModel.docId)
+          .where('courseMentorSoftDeleted', isEqualTo: false)
+          .get();
+
       if (courseMentorSnapshot.docs.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -78,17 +85,47 @@ class _EnrollCourseState extends State<EnrollCourse> {
         return;
       }
 
-      // Step 2: Get the courseMentorId from the first matching document
       final courseMentorId = courseMentorSnapshot.docs.first.id;
 
-      // Step 3: Add record to menteeCourseAlloc
-      await firestore.collection('menteeCourseAlloc').add({
+      // 2. Check if mentee already exists
+      final existingMenteeSnapshot = await firestore
+          .collection('mentee')
+          .where('accountId', isEqualTo: widget.userId)
+          .where('menteeSoftDelete', isEqualTo: false)
+          .get();
+
+      DocumentReference menteeRef;
+      String menteeId;
+
+      if (existingMenteeSnapshot.docs.isNotEmpty) {
+        // Use existing mentee
+        menteeRef = existingMenteeSnapshot.docs.first.reference;
+        menteeId = existingMenteeSnapshot.docs.first.id;
+      } else {
+        // Create new mentee
+        final newMentee = await firestore.collection('mentee').add({
+          'accountId': widget.userId,
+          'menteeMcaId': [],
+          'menteeSoftDelete': false,
+        });
+        menteeRef = newMentee;
+        menteeId = newMentee.id;
+      }
+
+      // 3. Add new menteeCourseAlloc document
+      final menteeCourseAllocRef =
+          await firestore.collection('menteeCourseAlloc').add({
         'courseMentorId': courseMentorId,
-        'mcaAllocStatus': 'accepted',
+        'mcaAllocStatus': 'pending',
         'mcaCreatedTimestamp': createdTimestamp,
         'mcaSoftDeleted': false,
-        'menteeId': widget.userId,
-        'mentorId': selectedMentorId, // Use selected mentor
+        'menteeId': menteeId,
+      });
+
+      // 4. Append the new menteeMcaId to the mentee document
+      await menteeRef.update({
+        'menteeMcaId': FieldValue.arrayUnion([menteeCourseAllocRef.id])
+
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -96,13 +133,12 @@ class _EnrollCourseState extends State<EnrollCourse> {
       );
 
       if (mounted) {
-        Navigator.pop(context); // Go back after successful enrollment
+
+        Navigator.pop(context);
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content:
-                Text('Error enrolling in the course: $e $selectedMentorId')),
+        SnackBar(content: Text('Error enrolling in the course: $e')),
       );
     } finally {
       if (mounted) {
@@ -145,64 +181,47 @@ class _EnrollCourseState extends State<EnrollCourse> {
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    height: screenHeight * 0.25,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: NetworkImage(imageUrl),
-                        fit: BoxFit.cover,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  SizedBox(height: screenHeight * 0.02),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                        vertical: screenHeight * 0.015,
-                        horizontal: screenWidth * 0.05),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black12),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: FutureBuilder<int>(
-                      future: firestoreInstance
-                          .getTotalMentorsForCourse(widget.courseModel.docId),
-                      builder: (context, mentorSnapshot) {
-                        if (mentorSnapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _InfoItemShimmer(),
-                              _InfoItemShimmer(),
-                              _InfoItemShimmer(),
-                            ],
-                          );
-                        }
-                        final totalMentor = mentorSnapshot.data ?? 0;
+          : FutureBuilder<List<PickMentorCard>>(
+              future: fetchMentorsWithDetails(),
+              builder: (context, mentorCardSnapshot) {
+                if (mentorCardSnapshot.connectionState ==
+                    ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-                        return FutureBuilder<int>(
+                final mentorCards = mentorCardSnapshot.data ?? [];
+
+                return SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: screenHeight * 0.25,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: NetworkImage(imageUrl),
+                            fit: BoxFit.cover,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.02),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          vertical: screenHeight * 0.015,
+                          horizontal: screenWidth * 0.05,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black12),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: FutureBuilder<int>(
                           future: firestoreInstance.getTotalMenteeForCourse(
                               widget.courseModel.docId),
                           builder: (context, menteeSnapshot) {
-                            if (menteeSnapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  _InfoItemShimmer(),
-                                  _InfoItemShimmer(),
-                                  _InfoItemShimmer(),
-                                ],
-                              );
-                            }
+
                             final totalMentee = menteeSnapshot.data ?? 0;
 
                             return Row(
@@ -210,103 +229,80 @@ class _EnrollCourseState extends State<EnrollCourse> {
                               children: [
                                 _infoItem(Icons.access_time, '1 Semester',
                                     screenHeight),
-                                _infoItem(Icons.groups, "$totalMentor Mentors",
+                                _infoItem(
+                                    Icons.groups,
+                                    "${fetchedUsers.length} Mentors",
                                     screenHeight),
                                 _infoItem(Icons.people, "$totalMentee Mentees",
                                     screenHeight),
                               ],
                             );
                           },
-                        );
-                      },
-                    ),
-                  ),
-                  SizedBox(height: screenHeight * 0.03),
-                  Text(
-                    "Description",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: screenHeight * 0.022,
-                    ),
-                  ),
-                  SizedBox(height: screenHeight * 0.005),
-                  Text(
-                    widget.courseModel.courseDescription,
-                    style: TextStyle(fontSize: screenHeight * 0.018),
-                  ),
-                  SizedBox(height: screenHeight * 0.03),
-                  Text(
-                    "What You'll Learn:",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: screenHeight * 0.022,
-                    ),
-                  ),
-                  SizedBox(height: screenHeight * 0.005),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      for (int i = 0;
-                          widget.courseModel.courseDeliverables.length > i;
-                          i++)
-                        _bulletPoint(widget.courseModel.courseDeliverables[i],
-                            screenHeight),
-                    ],
-                  ),
-                  SizedBox(height: screenHeight * 0.03),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.03),
                       Text(
-                        "Pick your Mentor",
+                        "Description",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: screenHeight * 0.022,
                         ),
                       ),
-                      TextButton(
-                        onPressed: () {
-                          // Navigate to mentor selection
-                        },
-                        child: Text(
-                          "View Mentors",
-                          style: TextStyle(
-                            color: Colors.blue,
-                            fontSize: screenHeight * 0.020,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      SizedBox(height: screenHeight * 0.005),
+                      Text(
+                        widget.courseModel.courseDescription,
+                        style: TextStyle(fontSize: screenHeight * 0.018),
+                      ),
+                      SizedBox(height: screenHeight * 0.03),
+                      Text(
+                        "What You'll Learn:",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: screenHeight * 0.022,
                         ),
                       ),
+                      SizedBox(height: screenHeight * 0.005),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          for (final deliverable
+                              in widget.courseModel.courseDeliverables)
+                            _bulletPoint(deliverable, screenHeight),
+                        ],
+                      ),
+                      SizedBox(height: screenHeight * 0.03),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Pick your Mentor",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: screenHeight * 0.022,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {},
+                            child: Text(
+                              "View Mentors",
+                              style: TextStyle(
+                                color: Colors.blue,
+                                fontSize: screenHeight * 0.020,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: screenHeight * 0.02),
+                      mentorCards.isEmpty
+                          ? const Center(child: Text('No mentors available'))
+                          : Column(children: mentorCards),
+                      SizedBox(height: screenHeight * 0.03),
                     ],
                   ),
-                  SizedBox(height: screenHeight * 0.02),
-                  FutureBuilder<List<PickMentorCard>>(
-                    future: fetchMentorsWithDetails(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (snapshot.hasError) {
-                        return Center(child: Text('Error: ${snapshot.error}'));
-                      }
-
-                      final mentors = snapshot.data ?? [];
-
-                      return SizedBox(
-                        height: screenHeight * 0.4,
-                        child: mentors.isEmpty
-                            ? const Center(child: Text('No mentors available'))
-                            : ListView.builder(
-                                itemCount: mentors.length,
-                                itemBuilder: (context, index) {
-                                  return mentors[index];
-                                },
-                              ),
-                      );
-                    },
-                  ),
-                  SizedBox(height: screenHeight * 0.03),
-                ],
-              ),
+                );
+              },
             ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

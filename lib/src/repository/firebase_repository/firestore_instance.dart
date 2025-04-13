@@ -567,8 +567,6 @@ class FirestoreInstance {
     }
   }
 
-  
-
   Future<List<MentorModel>> getMentorsThroughStatus(String status) async {
     try {
       final mentor = await _db
@@ -743,7 +741,7 @@ class FirestoreInstance {
     }
   }
 
-   Future<List<CourseModel>> getActiveCourses() async {
+  Future<List<CourseModel>> getActiveCourses() async {
     try {
       final courses = await _db
           .collection('course')
@@ -783,7 +781,7 @@ class FirestoreInstance {
     }
   }
 
-   Future<List<CourseModel>> getArchivedCourses() async {
+  Future<List<CourseModel>> getArchivedCourses() async {
     try {
       final courses = await _db
           .collection('course')
@@ -802,80 +800,83 @@ class FirestoreInstance {
   }
 
   Future<void> setCourse(CourseModel course) async {
-  try {
-    String uniqueID = generateUniqueId();
-    await _db.collection('course').doc(uniqueID).set(course.toJson());
-  } catch (e) {
-    rethrow;
+    try {
+      String uniqueID = generateUniqueId();
+      await _db.collection('course').doc(uniqueID).set(course.toJson());
+    } catch (e) {
+      rethrow;
+    }
   }
-}
 
-Future<bool> deleteCourse(String courseId) async {
-  try {
-    await _db.collection('course').doc(courseId).update({
-      'courseSoftDelete': true,
-    });
-    return true;
-  } catch (e) {
-    rethrow;
+  Future<bool> deleteCourse(String courseId) async {
+    try {
+      await _db.collection('course').doc(courseId).update({
+        'courseSoftDelete': true,
+      });
+      return true;
+    } catch (e) {
+      rethrow;
+    }
   }
-}
 
-Future<void> setCourseMentor(String courseId, String mentorId) async {
-  try {
-    String uniqueID = generateUniqueId();
-    final cm = CourseMentorModel(
-      courseMentorId: uniqueID,
-      courseId: courseId,
-      mentorId: mentorId,
-      courseMentorCreatedTimestamp: DateTime.now(),
-      courseMentorSoftDeleted: false,
-    );
-    await _db
-        .collection('courseMentor')
-        .doc(uniqueID)
-        .set(cm.toJson());
-  } catch (e) {
-    rethrow;
+  Future<void> setCourseMentor(String courseId, String mentorId) async {
+    try {
+      String uniqueID = generateUniqueId();
+      final cm = CourseMentorModel(
+        courseMentorId: uniqueID,
+        courseId: courseId,
+        mentorId: mentorId,
+        courseMentorCreatedTimestamp: DateTime.now(),
+        courseMentorSoftDeleted: false,
+      );
+      await _db.collection('courseMentor').doc(uniqueID).set(cm.toJson());
+    } catch (e) {
+      rethrow;
+    }
   }
-}
 
-Future<void> updateInitialCourseMentor(String email, String newMentorId) async{
-  try {
-    CourseMentorModel courseMentor = await getCourseMentorThroughMentor(email);
-    await _db.collection('courseMentor').doc(courseMentor.courseMentorId).update({
-      'mentorId': newMentorId,
-    });
-  } catch (e) {
-    rethrow;
+  Future<void> updateInitialCourseMentor(
+      String email, String newMentorId) async {
+    try {
+      CourseMentorModel courseMentor =
+          await getCourseMentorThroughMentor(email);
+      await _db
+          .collection('courseMentor')
+          .doc(courseMentor.courseMentorId)
+          .update({
+        'mentorId': newMentorId,
+      });
+    } catch (e) {
+      rethrow;
+    }
   }
-}
 
-Future<List<CourseMentorModel>> getCourseMentorsThroughCourseId(String courseId) async {
-  try {
-    final courseMentors = await _db
-        .collection('courseMentor')
-        .where('courseId', isEqualTo: courseId)
-        .get();
-    return courseMentors.docs
-        .map((doc) => CourseMentorModel.fromJson(doc.data()))
-        .toList();
-  } catch (e) {
-    rethrow;
+  Future<List<CourseMentorModel>> getCourseMentorsThroughCourseId(
+      String courseId) async {
+    try {
+      final courseMentors = await _db
+          .collection('courseMentor')
+          .where('courseId', isEqualTo: courseId)
+          .get();
+      return courseMentors.docs
+          .map((doc) => CourseMentorModel.fromJson(doc.data()))
+          .toList();
+    } catch (e) {
+      rethrow;
+    }
   }
-}
 
-Future<void> updateCourseMentor(
-    String courseMentorId, String courseId, String mentorId) async {
-  try {
-    await _db.collection('courseMentor').doc(courseMentorId).update({
-      'courseId': courseId,
-      'mentorId': mentorId,
-    });
-  } catch (e) {
-    rethrow;
+  Future<void> updateCourseMentor(
+      String courseMentorId, String courseId, String mentorId) async {
+    try {
+      await _db.collection('courseMentor').doc(courseMentorId).update({
+        'courseId': courseId,
+        'mentorId': mentorId,
+      });
+    } catch (e) {
+      rethrow;
+    }
   }
-}
 
   Future<int> getTotalMentorsForCourse(String docId) async {
     try {
@@ -1045,6 +1046,53 @@ Future<void> updateCourseMentor(
       print("Successfully enrolled in the course!");
     } catch (e) {
       print("Error enrolling in the course: $e");
+    }
+  }
+
+  Future<List<UserModel>> getCourseMentors(String courseId) async {
+    try {
+      final courseMentorQuery = await _db
+          .collection('courseMentor')
+          .where('courseId', isEqualTo: courseId)
+          .get();
+
+      List<UserModel> users = [];
+
+      for (var courseMentorDoc in courseMentorQuery.docs) {
+        final mentorId = courseMentorDoc.data()['mentorId'];
+
+        // Get mentor document by ID
+        final mentorDoc = await _db.collection('mentors').doc(mentorId).get();
+
+        if (mentorDoc.exists) {
+          final accountId = mentorDoc.data()?['accountId'];
+          if (accountId != null) {
+            final user = await getUser(accountId);
+            users.add(user);
+          }
+        }
+      }
+
+      return users;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<String> getUserDocIdThroughEmail(String email) async {
+    try {
+      final userSnapshot = await _db
+          .collection('users')
+          .where('accountApiEmail', isEqualTo: email)
+          .get();
+
+      if (userSnapshot.docs.isEmpty) {
+        throw Exception("No user found with email: $email");
+      }
+
+      return userSnapshot.docs.first.id;
+    } catch (e) {
+      rethrow;
     }
   }
 }

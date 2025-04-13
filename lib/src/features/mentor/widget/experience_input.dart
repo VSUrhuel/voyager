@@ -29,13 +29,24 @@ class _ExperienceInputState extends State<ExperienceInput> {
     final controller = widget.controller;
     if (controller.selectedExpHeader.isNotEmpty &&
         controller.selectedExpDesc.isNotEmpty) {
-      final headers = controller.selectedExpHeader;
-      final descriptions = controller.selectedExpDesc;
+      final headers = widget.controller.mentorExpHeader.text
+          .split(',')
+          .map((e) => e.trim())
+          .toList();
+      final descriptions = widget.controller.mentorExpDesc.text
+          .split(',')
+          .map((e) => e.trim())
+          .toList();
 
-      for (int i = 0; i < headers.length; i++) {
+      // Use the minimum length to avoid index errors
+      final maxEntries = headers.length < descriptions.length
+          ? headers.length
+          : descriptions.length;
+
+      for (int i = 0; i < maxEntries; i++) {
         _addExperience(
-          header: i < headers.length ? headers[i] : '',
-          description: i < descriptions.length ? descriptions[i] : '',
+          header: headers[i],
+          description: descriptions[i],
           updateController: false,
         );
       }

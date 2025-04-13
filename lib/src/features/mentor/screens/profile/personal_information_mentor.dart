@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
@@ -226,8 +227,11 @@ class _MentorPersonalInformationState extends State<MentorPersonalInformation> {
                           _socialIcon(Icons.facebook, Colors.blue,
                               mentorModel.mentorFbUrl, context),
                           const SizedBox(width: 20),
-                          _socialIcon(Icons.link, Colors.blue.shade800,
-                              mentorModel.mentorGitUrl, context),
+                          _socialIcon(
+                              FontAwesomeIcons.github,
+                              Colors.blue.shade800,
+                              mentorModel.mentorGitUrl,
+                              context),
                         ],
                       ),
 
@@ -398,29 +402,16 @@ class _MentorPersonalInformationState extends State<MentorPersonalInformation> {
           EdgeInsets.only(bottom: MediaQuery.of(context).size.height * 0.01),
       child: InkWell(
         onTap: () async {
-          // Try parsing the URL to avoid errors with invalid URLs
           final uri = Uri.tryParse(url);
-
-          // Check if the URL is valid
+          print(uri);
           if (uri != null) {
-            // Try to launch the URL
-            if (await canLaunchUrl(uri)) {
-              await launchUrl(uri, mode: LaunchMode.externalApplication);
-            } else {
-              // Show a Snackbar if the URL can't be launched
+            if (!await launchUrl(uri)) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Could not open $url'),
+                  content: Text('Failed to open $uri! Contact your mentor.'),
                 ),
               );
             }
-          } else {
-            // Handle invalid URL case
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Invalid URL: $url'),
-              ),
-            );
           }
         },
         child: Container(
