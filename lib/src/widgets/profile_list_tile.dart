@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 class ProfileListTile extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
+  final IconData? iconData;
 
-  const ProfileListTile({super.key, required this.text, required this.onTap});
+  const ProfileListTile(
+      {super.key, required this.text, required this.onTap, this.iconData});
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +22,9 @@ class ProfileListTile extends StatelessWidget {
           border: Border.all(color: Colors.grey[400]!),
         ),
         child: ListTile(
+          leading: iconData != null
+              ? Icon(iconData, color: Colors.black54, size: 24)
+              : null,
           title: Text(
             text,
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),

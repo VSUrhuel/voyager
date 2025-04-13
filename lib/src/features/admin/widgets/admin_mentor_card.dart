@@ -307,10 +307,28 @@ class AdminMentorCard extends StatelessWidget {
     final dayPart = fullSchedule.substring(0, fullSchedule.indexOf(' '));
     final days = _parseDays(dayPart);
 
-    return Wrap(
-      spacing: screenWidth * 0.01,
-      children: days.map((day) => _buildDayPill(day, context)).toList(),
-    );
+    // return Wrap(
+    //   spacing: screenWidth * 0.01,
+    //   children: days.map((day) => _buildDayPill(day, context)).toList(),
+    // );
+    return Row(children: [
+      Text(
+        'Sched: ',
+        style: TextStyle(
+          color: Colors.black87,
+          fontSize: screenWidth * 0.035,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      Text(
+        days.join(''),
+        style: TextStyle(
+          color: Colors.black87,
+          fontSize: screenWidth * 0.035,
+          fontWeight: FontWeight.w500,
+        ),
+      )
+    ]);
   }
 
   List<String> _parseDays(String dayAbbreviation) {
@@ -338,7 +356,7 @@ class AdminMentorCard extends StatelessWidget {
         vertical: screenHeight * 0.003,
       ),
       decoration: BoxDecoration(
-        color: _getDayColor(day, context),
+        color: Colors.blue,
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
@@ -350,25 +368,5 @@ class AdminMentorCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Color _getDayColor(String day, BuildContext context) {
-    final theme = Theme.of(context);
-    switch (day) {
-      case 'M':
-        return theme.colorScheme.primary;
-      case 'T':
-        return Colors.purple;
-      case 'W':
-        return Colors.orange;
-      case 'Th':
-        return Colors.teal;
-      case 'F':
-        return Colors.blueGrey;
-      case 'S':
-        return Colors.red;
-      default:
-        return theme.colorScheme.secondary;
-    }
   }
 }

@@ -109,10 +109,7 @@ class MenteePostController {
       }
 
       // Filter out soft-deleted posts and ensure timestamps are non-null
-      allPosts = allPosts
-          .where((post) =>
-              !post.contentSoftDelete && post.contentModifiedTimestamp != null)
-          .toList()
+      allPosts = allPosts.where((post) => !post.contentSoftDelete).toList()
         ..sort((a, b) =>
             b.contentModifiedTimestamp.compareTo(a.contentModifiedTimestamp));
 
