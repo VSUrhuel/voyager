@@ -358,68 +358,65 @@ class FirebaseAuthenticationRepository extends GetxController {
     }
   }
 
-Future<UserCredential?> createUserWithoutSignIn(
-  String email, 
-  String password,
-  String studentID,
-  String fullName,
-) async {
-  try {
-    final firestore = FirestoreInstance();
-    
-    // 1. Get current user info and force token refresh
-    final currentUser = _auth.currentUser;
-    final currentAuthToken = await currentUser?.getIdToken(true); // Force refresh
-    
-    // 2. Create new account
-    final newUserCredential = await _auth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+  Future<UserCredential?> createUserWithoutSignIn(String email, String password,
+      String studentID, String fullName, String profileImage) async {
+    try {
+      final firestore = FirestoreInstance();
 
-    if (newUserCredential.user == null) {
-      throw AuthenticationExceptions("Failed to create user.");
-    }
+      // 1. Get current user info and force token refresh
+      final currentUser = _auth.currentUser;
+      final currentAuthToken =
+          await currentUser?.getIdToken(true); // Force refresh
 
-    // 3. Create user model and save to Firestore
-    UserModel user = UserModel(
-      accountApiID: newUserCredential.user!.uid,
-      accountApiEmail: newUserCredential.user!.email ?? "",
-      accountApiName: fullName,
-      accountApiPhoto: newUserCredential.user!.photoURL ?? "",
-      accountPassword: password,
-      accountUsername: newUserCredential.user?.displayName ?? "Unknown",
-      accountRole: UserRoleEnum.mentor,
-      accountStudentId: studentID,
-      accountCreatedTimestamp: DateTime.now(),
-      accountModifiedTimestamp: DateTime.now(),
-      accountSoftDeleted: false,
-    );
-    
-    await firestore.setUser(user);
+      // 2. Create new account
+      final newUserCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-    // 4. Sign out new user
-    await _auth.signOut();
-
-    // 5. Add delay to ensure token operations complete
-    await Future.delayed(const Duration(seconds: 1));
-
-    // 6. Restore original session if we had one
-    if (currentAuthToken != null && currentUser != null) {
-      try {
-        return await _auth.signInWithCustomToken(currentAuthToken);
-      } catch (e) {
-        // If custom token fails, try to sign in with original credentials
-        // You'll need to have stored these somewhere secure
-        // Alternatively, you could sign in anonymously here if appropriate
-        print("Failed to restore session with custom token: $e");
-        return null;
+      if (newUserCredential.user == null) {
+        throw AuthenticationExceptions("Failed to create user.");
       }
+
+      // 3. Create user model and save to Firestore
+      UserModel user = UserModel(
+        accountApiID: newUserCredential.user!.uid,
+        accountApiEmail: newUserCredential.user!.email ?? "",
+        accountApiName: fullName,
+        accountApiPhoto: profileImage,
+        accountPassword: password,
+        accountUsername: newUserCredential.user?.displayName ?? "Unknown",
+        accountRole: UserRoleEnum.mentor,
+        accountStudentId: studentID,
+        accountCreatedTimestamp: DateTime.now(),
+        accountModifiedTimestamp: DateTime.now(),
+        accountSoftDeleted: false,
+      );
+
+      await firestore.setUser(user);
+
+      // 4. Sign out new user
+      await _auth.signOut();
+
+      // 5. Add delay to ensure token operations complete
+      await Future.delayed(const Duration(seconds: 1));
+
+      // 6. Restore original session if we had one
+      if (currentAuthToken != null && currentUser != null) {
+        try {
+          return await _auth.signInWithCustomToken(currentAuthToken);
+        } catch (e) {
+          // If custom token fails, try to sign in with original credentials
+          // You'll need to have stored these somewhere secure
+          // Alternatively, you could sign in anonymously here if appropriate
+          print("Failed to restore session with custom token: $e");
+          return null;
+        }
+      }
+
+      return null;
+    } catch (e) {
+      rethrow;
     }
-    
-    return null;
-  } catch (e) {
-    rethrow;
   }
-}
 }

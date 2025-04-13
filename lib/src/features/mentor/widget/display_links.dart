@@ -45,7 +45,8 @@ class DisplayLinks extends StatelessWidget {
                         if (!await launchUrl(uri)) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Failed to open $uri'),
+                              content: Text(
+                                  'Failed to open $uri! Contact your mentor.'),
                             ),
                           );
                         }

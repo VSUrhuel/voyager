@@ -60,6 +60,8 @@ class _CourseCardState extends State<CourseCard> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final currentUser = FirebaseAuth.instance.currentUser;
+    final userEmail = currentUser?.email ?? '';
 
     final startDate =
         DateFormat('MMM dd').format(widget.courseModel.courseCreatedTimestamp);
@@ -209,7 +211,6 @@ class _CourseCardState extends State<CourseCard> {
                             );
                             return;
                           }
-
                           userIdFuture.then((resolvedUserId) {
                             Navigator.push(
                               context,

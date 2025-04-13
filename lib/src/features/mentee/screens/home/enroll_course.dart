@@ -26,6 +26,7 @@ class _EnrollCourseState extends State<EnrollCourse> {
   String? selectedMentorId;
   bool isLoading = false;
 
+
   List<UserModel> fetchedUsers = [];
 
   Future<List<PickMentorCard>> fetchMentorsWithDetails() async {
@@ -67,6 +68,7 @@ class _EnrollCourseState extends State<EnrollCourse> {
     try {
       final firestore = FirebaseFirestore.instance;
       final Timestamp createdTimestamp = Timestamp.now();
+
 
       // 1. Get courseMentorId using courseId and mentorId
       final courseMentorSnapshot = await firestore
@@ -123,6 +125,7 @@ class _EnrollCourseState extends State<EnrollCourse> {
       // 4. Append the new menteeMcaId to the mentee document
       await menteeRef.update({
         'menteeMcaId': FieldValue.arrayUnion([menteeCourseAllocRef.id])
+
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -130,6 +133,7 @@ class _EnrollCourseState extends State<EnrollCourse> {
       );
 
       if (mounted) {
+
         Navigator.pop(context);
       }
     } catch (e) {
@@ -217,6 +221,7 @@ class _EnrollCourseState extends State<EnrollCourse> {
                           future: firestoreInstance.getTotalMenteeForCourse(
                               widget.courseModel.docId),
                           builder: (context, menteeSnapshot) {
+
                             final totalMentee = menteeSnapshot.data ?? 0;
 
                             return Row(
@@ -369,6 +374,30 @@ class _EnrollCourseState extends State<EnrollCourse> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _InfoItemShimmer extends StatelessWidget {
+  const _InfoItemShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 24,
+          height: 24,
+          color: Colors.grey[200],
+        ),
+        const SizedBox(height: 4),
+        Container(
+          width: 60,
+          height: 16,
+          color: Colors.grey[200],
+        ),
+      ],
     );
   }
 }

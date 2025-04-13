@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:voyager/src/features/mentor/controller/post_controller.dart';
+import 'package:voyager/src/features/mentor/controller/video_controller.dart';
 import 'package:voyager/src/features/mentor/model/content_model.dart';
 import 'package:voyager/src/features/mentor/screens/post/create_post.dart';
 import 'package:voyager/src/features/mentor/widget/post_content.dart';
@@ -22,6 +23,8 @@ class _PostState extends State<Post> {
   bool _isRefreshing = false;
   bool _hasMorePosts = true;
   late Future<List<PostContentModel>> postsFuture;
+  VideoPlaybackController videoPlaybackController =
+      Get.put(VideoPlaybackController());
 
   @override
   void initState() {
@@ -113,13 +116,16 @@ class _PostState extends State<Post> {
               backgroundColor: Colors.grey[200],
               child: IconButton(
                 icon: const FaIcon(FontAwesomeIcons.pen, color: Colors.black),
-                onPressed: () => Navigator.push(
-                  context,
-                  CustomPageRoute(
-                      page: CreatePost(
-                    fromHome: true,
-                  )),
-                ),
+                onPressed: () {
+                  videoPlaybackController.videoController
+                      .pause(); // ⏸️ Pause video here
+                  Navigator.push(
+                    context,
+                    CustomPageRoute(
+                      page: CreatePost(fromHome: true),
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -240,15 +246,17 @@ class _PostState extends State<Post> {
 
   Widget _buildErrorState(BuildContext context, String error) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(height: MediaQuery.of(context).size.height * 0.2),
         Icon(Icons.error_outline, size: 50, color: Colors.red[300]),
         const SizedBox(height: 16),
-        Text(
+        Center(
+            child: Text(
           'Failed to load posts',
           style: Theme.of(context).textTheme.titleMedium,
-        ),
+        )),
         const SizedBox(height: 8),
         Text(
           error,

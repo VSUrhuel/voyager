@@ -17,16 +17,21 @@ class PendingList extends StatefulWidget {
 }
 
 class _PendingListState extends State<PendingList> {
-  late Future<List<UserModel>> _pendingMenteesFuture;
+  late Future<List<UserModel>> _pendingMenteesFuture = _fetchPendingMentees();
   final FirestoreInstance _firestore = FirestoreInstance();
   bool _isMounted = false;
+  double _pendingMenteesHeight = 0.6;
 
   @override
   void initState() {
     super.initState();
     _isMounted = true;
     widget.menteeListController.searchMenteeController.addListener(loadNewData);
-    _pendingMenteesFuture = _fetchPendingMentees();
+    if (widget.isMentorHome) {
+      _pendingMenteesHeight = 0.27; // 27% of screen height for mentor home
+    } else {
+      _pendingMenteesHeight = 0.6; // 25% of screen height for other screens
+    }
   }
 
   @override
@@ -77,66 +82,65 @@ class _PendingListState extends State<PendingList> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    return SizedBox(
-      height: screenHeight * 0.6, // Limits to 25% of screen height
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      // Limits to 25% of screen height
       child: SizedBox(
-        height: screenHeight * 0.25, // Limits to 25% of screen height
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              FutureBuilder<List<UserModel>>(
-                future: _pendingMenteesFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return FutureBuilder(
-                      future: Future.delayed(const Duration(seconds: 3)),
-                      builder: (context, delaySnapshot) {
-                        if (delaySnapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return SizedBox(
-                              height: screenHeight * 0.25,
-                              child: const Center(
-                                  child: CircularProgressIndicator()));
-                        }
-                        refreshPendingMentees(); // Refresh accepted mentees after loading
-                        return const Center(
-                            child: Text('Still loading, please wait...'));
-                      },
-                    );
-                  } else if (snapshot.hasError) {
-                    return Text(
-                        'Error retrieving pending mentees: ${snapshot.error}',
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontSize: screenWidth * 0.033,
-                        ));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Text(
-                      'No pending mentees',
+        height: screenHeight * _pendingMenteesHeight,
+        child: Column(
+          children: [
+            FutureBuilder<List<UserModel>>(
+              future: _pendingMenteesFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return FutureBuilder(
+                    future: Future.delayed(const Duration(seconds: 3)),
+                    builder: (context, delaySnapshot) {
+                      if (delaySnapshot.connectionState ==
+                          ConnectionState.waiting) {
+                        return SizedBox(
+                            height: screenHeight * 0.25,
+                            child: const Center(
+                                child: CircularProgressIndicator()));
+                      }
+                      refreshPendingMentees(); // Refresh accepted mentees after loading
+                      return const Center(
+                          child: Text('Still loading, please wait...'));
+                    },
+                  );
+                } else if (snapshot.hasError) {
+                  return Text(
+                      'Error retrieving pending mentees: ${snapshot.error}',
                       style: TextStyle(
-                        color: Colors.grey,
+                        color: Colors.red,
                         fontSize: screenWidth * 0.033,
-                      ),
-                    );
-                  } else {
-                    return SizedBox(
-                        height: screenHeight * 0.6,
-                        child: Column(
-                          // Use Column to prevent overflow in ListView
-                          children: snapshot.data!
-                              .map((mentee) => UserCard(
-                                    user: mentee,
-                                    height: screenHeight * 0.80,
-                                    actions: ['Accept', 'Reject'],
-                                    onActionCompleted: refreshPendingMentees,
-                                  ))
-                              .toList(),
-                        ));
-                  }
-                },
-              ),
-            ],
-          ),
+                      ));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Text(
+                    'No pending mentees',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: screenWidth * 0.033,
+                    ),
+                  );
+                } else {
+                  return SizedBox(
+                      height: screenHeight * _pendingMenteesHeight,
+                      child: Column(
+                        // Use Column to prevent overflow in ListView
+                        children: snapshot.data!
+                            .map((mentee) => UserCard(
+                                  user: mentee,
+                                  height: screenHeight * 0.80,
+                                  actions: ['Accept', 'Reject'],
+                                  onActionCompleted: refreshPendingMentees,
+                                ))
+                            .toList(),
+                      ));
+                }
+              },
+            ),
+          ],
         ),
       ),
     );

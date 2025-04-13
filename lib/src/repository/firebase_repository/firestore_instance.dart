@@ -189,6 +189,7 @@ class FirestoreInstance {
       final courseMentor = await _db
           .collection('courseMentor')
           .where('mentorId', isEqualTo: mentorId)
+          .where('courseMentorSoftDeleted', isEqualTo: false)
           .limit(1)
           .get();
       if (courseMentor.docs.isEmpty) {
@@ -206,6 +207,7 @@ class FirestoreInstance {
       final courseMentor = await _db
           .collection('courseMentor')
           .where('mentorId', isEqualTo: mentorId)
+          .where('courseMentorSoftDeleted', isEqualTo: false)
           .limit(1)
           .get();
       if (courseMentor.docs.isEmpty) {
@@ -243,6 +245,7 @@ class FirestoreInstance {
       final courseMentor = await _db
           .collection('courseMentor')
           .where('mentorId', isEqualTo: mentorId)
+          .where('courseMentorSoftDeleted', isEqualTo: false)
           .limit(1)
           .get();
       if (courseMentor.docs.isEmpty) {
@@ -255,11 +258,25 @@ class FirestoreInstance {
     }
   }
 
+  Future<MentorModel> getMentorThroughStudentId(String studentId) async {
+    try {
+      final mentor = await _db
+          .collection('mentors')
+          .where('accountStudentId', isEqualTo: studentId)
+          .where('mentorSoftDeleted', isEqualTo: false)
+          .get();
+      return MentorModel.fromJson(mentor.docs.first.data());
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<MentorModel> getMentorThroughAccId(String accId) async {
     try {
       final mentor = await _db
           .collection('mentors')
           .where('accountId', isEqualTo: accId)
+          .where('mentorSoftDeleted', isEqualTo: false)
           .get();
       return MentorModel.fromJson(mentor.docs.first.data());
     } catch (e) {
@@ -540,15 +557,28 @@ class FirestoreInstance {
     }
   }
 
+  
+
   Future<List<MentorModel>> getMentorsThroughStatus(String status) async {
     try {
       final mentor = await _db
           .collection('mentors')
           .where('mentorStatus', isEqualTo: status)
+          .where('mentorSoftDeleted', isEqualTo: false)
           .get();
       return mentor.docs
           .map((doc) => MentorModel.fromJson(doc.data()))
           .toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteMentor(String mentorId) async {
+    try {
+      await _db.collection('mentors').doc(mentorId).update({
+        'mentorSoftDeleted': true,
+      });
     } catch (e) {
       rethrow;
     }
@@ -732,6 +762,7 @@ class FirestoreInstance {
       rethrow;
     }
   }
+
 
   Future<List<CourseModel>> getArchivedCourses() async {
     try {

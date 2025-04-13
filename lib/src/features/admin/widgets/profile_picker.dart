@@ -14,6 +14,13 @@ class ProfilePickerState extends State<ProfilePicker> {
   XFile? _image;
   final ImagePicker _picker = ImagePicker();
 
+    void resetImage() {
+    setState(() {
+      _image = null;
+    });
+    // widget.onImagePicked(null); // Notify parent
+  }
+
   Future<void> _pickImage() async {
     try {
       final XFile? pickedFile = await _picker.pickImage(

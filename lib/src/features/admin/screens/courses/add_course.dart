@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:get/route_manager.dart';
 import 'package:voyager/src/features/admin/controllers/course_controller.dart';
 import 'package:voyager/src/features/admin/screens/admin_dashboard.dart';
+import 'package:voyager/src/features/admin/screens/courses/course_list.dart';
 import 'package:voyager/src/features/admin/widgets/cover_photo_picker.dart';
 import 'package:voyager/src/widgets/custom_button.dart';
 
@@ -53,10 +54,11 @@ class _AddCourseState extends State<AddCourse> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final GlobalKey<CoverPhotoPickerState> pickerKey = GlobalKey();
 
     return SafeArea(
         child: Scaffold(
-          resizeToAvoidBottomInset: false,
+            resizeToAvoidBottomInset: false,
             appBar: AppBar(
               systemOverlayStyle: SystemUiOverlayStyle.dark,
               backgroundColor: Colors.transparent,
@@ -83,7 +85,6 @@ class _AddCourseState extends State<AddCourse> {
                 child: Column(
                   children: [
                     Expanded(
-                      
                       // height: screenHeight * 0.70,
                       // padding: EdgeInsets.only(
                       //   bottom: screenHeight * 0.04,
@@ -113,7 +114,6 @@ class _AddCourseState extends State<AddCourse> {
                                     EdgeInsets.only(top: screenHeight * 0.02),
                                 child: TextFormField(
                                   controller: _courseController.courseCode,
-
                                   style: TextStyle(
                                     fontSize: screenWidth * 0.04,
                                   ),
@@ -165,7 +165,8 @@ class _AddCourseState extends State<AddCourse> {
                                 padding:
                                     EdgeInsets.only(top: screenHeight * 0.02),
                                 child: TextFormField(
-                                  controller: _courseController.courseDescription,
+                                  controller:
+                                      _courseController.courseDescription,
                                   style: TextStyle(
                                     fontSize: screenWidth * 0.04,
                                   ),
@@ -232,16 +233,20 @@ class _AddCourseState extends State<AddCourse> {
                                 height: screenHeight * height,
                                 child: Expanded(
                                   child: ListView.builder(
-                                      itemCount: _courseController.courseDeliverables.length,
+                                      itemCount: _courseController
+                                          .courseDeliverables.length,
                                       itemBuilder: (context, index) {
                                         return Card(
                                           child: ListTile(
-                                            title: Text(_courseController.courseDeliverables[index]),
+                                            title: Text(_courseController
+                                                .courseDeliverables[index]),
                                             trailing: IconButton(
                                               icon: Icon(Icons.delete),
                                               onPressed: () {
                                                 setState(() {
-                                                  _courseController.courseDeliverables.removeAt(index);
+                                                  _courseController
+                                                      .courseDeliverables
+                                                      .removeAt(index);
                                                   height = height - 0.07;
                                                 });
                                               },
@@ -256,8 +261,8 @@ class _AddCourseState extends State<AddCourse> {
                               ),
                               Container(
                                 alignment: Alignment.center,
-                                padding:
-                                    EdgeInsets.only(bottom: screenHeight * 0.05),
+                                padding: EdgeInsets.only(
+                                    bottom: screenHeight * 0.05),
                                 child: Container(
                                   decoration: BoxDecoration(
                                     border: Border.all(
@@ -268,7 +273,10 @@ class _AddCourseState extends State<AddCourse> {
                                   height: screenHeight * 0.2,
                                   width: screenWidth * 0.5,
                                   child: CoverPhotoPicker(
-                                    //controller
+                                    key: pickerKey,
+                                    onImagePicked: (image) {
+                                      _courseController.courseImage = image;
+                                    },
                                   ),
                                 ),
                               ),
@@ -286,13 +294,40 @@ class _AddCourseState extends State<AddCourse> {
                       isLoading: false,
                       borderColor: Colors.transparent,
                       onPressed: () async {
-                        await _courseController.createCourse();
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AdminDashboard(),
-                          ),
-                        );
+                        final currentContext = context;
+                        final messenger = ScaffoldMessenger.of(currentContext);
+                        // final navigator = Navigator.of(currentContext);
+                        try {
+                          showDialog(
+                            context: currentContext,
+                            barrierDismissible: false,
+                            builder: (_) => const Center(
+                                child: CircularProgressIndicator()),
+                          );
+                          await _courseController.createCourse();
+                          _courseController.courseCode.clear();
+                          _courseController.courseName.clear();
+                          _courseController.courseDescription.clear();
+                          _courseController.courseDeliverables.clear();
+                          pickerKey.currentState?.resetImage();
+
+                          if (currentContext.mounted) {
+                            messenger.showSnackBar(
+                              SnackBar(
+                                  content: Text('Course added successfully')),
+                            );
+                            Navigator.of(currentContext).pop();
+                            // Navigator.push(context,
+                            // MaterialPageRoute(builder: (context) => CourseList()));
+                          }
+                        } catch (e) {
+                          messenger.showSnackBar(
+                            SnackBar(
+                              content: Text('Error: $e'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
                       },
                     ),
                   ],

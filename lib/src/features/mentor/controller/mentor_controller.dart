@@ -56,7 +56,7 @@ class MentorController extends GetxController {
   final SupabaseInstance supabase = SupabaseInstance(Supabase.instance.client);
   Future<bool> updateUsername(File? image) async {
     final firestore = FirestoreInstance();
-    if (image != null) {
+    if (image != null && image.path.isNotEmpty) {
       final String imageUrl = await supabase.uploadProfileImage(image);
       await firestore.updateProfileImage(
           imageUrl, firestore.getFirebaseUser().uid);
@@ -78,17 +78,18 @@ class MentorController extends GetxController {
       final List<String> mentorIDs = await FirestoreInstance().getMentorIDs();
       final List<String> accountIDs =
           await FirestoreInstance().getAccountIDInMentor();
-      print("here");
+
       if (accountIDs.contains(firebaseID)) {
-        print("out");
         return Future<bool>.value(false);
       }
+
       String mentorID = "";
       if (mentorIDs.contains(firebaseID)) {
         mentorID = await FirestoreInstance().getMentorID(firebaseID);
       } else {
         mentorID = FirestoreInstance().generateUniqueId();
       }
+
       final mentor = MentorModel(
         mentorId: mentorID,
         accountId: FirestoreInstance().getFirebaseUser().uid,
@@ -103,25 +104,21 @@ class MentorController extends GetxController {
         mentorExpertise: selectedSkills,
         mentorExpDesc: selectedExpDesc,
         mentorRegDay: selectedDays,
-        mentorRegStartTime: TimeOfDay(
-          hour: int.parse(mentorRegStartTime.text.split(':')[0]) % 12 +
-              (mentorRegStartTime.text.toLowerCase().contains('pm') ? 12 : 0),
-          minute:
-              int.parse(mentorRegStartTime.text.split(':')[1].split(' ')[0]),
+        mentorRegStartTime: parseTime(
+          mentorRegStartTime.text,
         ),
-        mentorRegEndTime: TimeOfDay(
-          hour: int.parse(mentorRegEndTime.text.split(':')[0]) % 12 +
-              (mentorRegEndTime.text.toLowerCase().contains('pm') ? 12 : 0),
-          minute: int.parse(mentorRegEndTime.text.split(':')[1].split(' ')[0]),
+        mentorRegEndTime: parseTime(
+          mentorRegEndTime.text,
         ),
-        mentorStatus: mentorStatus.text,
+        mentorStatus: "active",
         mentorSoftDeleted: false,
       );
-
       final firestore = FirestoreInstance();
 
       firestore.setMentor(mentor);
-      firestore.updateInitialCourseMentor(FirestoreInstance().getFirebaseUser().email.toString(), mentor.mentorId);
+      firestore.updateInitialCourseMentor(
+          FirestoreInstance().getFirebaseUser().email.toString(),
+          mentor.mentorId);
       return Future<bool>.value(true);
     } catch (e) {
       Get.snackbar("Error", e.toString());
@@ -129,7 +126,7 @@ class MentorController extends GetxController {
     }
   }
 
-    Future<bool> updateMentorInformation() async {
+  Future<bool> updateMentorInformation() async {
     try {
       final firebaseID = FirestoreInstance().getFirebaseUser().uid;
 
@@ -151,19 +148,40 @@ class MentorController extends GetxController {
         mentorRegDay: selectedDays,
         mentorRegStartTime: parseTime(mentorRegStartTime.text),
         mentorRegEndTime: parseTime(mentorRegEndTime.text),
-        mentorStatus: "active",
+        mentorStatus: mentorStatus.text,
         mentorSoftDeleted: false,
       );
-
+      print(mentor.toJson());
+      print(selectedExpHeader);
       final firestore = FirestoreInstance();
 
       firestore.setMentor(mentor);
-
+      clearController();
       return Future<bool>.value(true);
     } catch (e) {
       Get.snackbar("Error", e.toString());
       return Future<bool>.value(false);
     }
+  }
+
+  void clearController() {
+    mentorId.clear();
+    accountId.clear();
+    mentorYearLvl.clear();
+    mentorAbout.clear();
+    mentorSessionCompleted.clear();
+    mentorLanguages.clear();
+    mentorFbUrl.clear();
+    mentorGitUrl.clear();
+    mentorExpHeader.clear();
+    mentorMotto.clear();
+    mentorExpertise.clear();
+    mentorExpDesc.clear();
+    mentorRegDay.clear();
+    mentorRegStartTime.clear();
+    mentorRegEndTime.clear();
+    mentorStatus.clear();
+    mentorSoftDeleted.clear();
   }
 
   TimeOfDay parseTime(String time) {

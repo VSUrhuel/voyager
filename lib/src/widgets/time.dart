@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'dart:ui' as ui show TextDirection;
 
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';

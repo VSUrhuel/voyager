@@ -92,7 +92,9 @@ class _StatusToggleButtonState extends State<StatusToggleButton> {
         key: _refreshIndicatorKey,
         child: selectedIndex == 0
             ? AcceptedList(
-                menteeListController: widget.controller, key: _acceptedListKey)
+                menteeListController: widget.controller,
+                key: _acceptedListKey,
+                isMentorHome: false)
             : selectedIndex == 1
                 ? PendingList(
                     menteeListController: widget.controller,
