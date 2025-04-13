@@ -239,7 +239,7 @@ class _MentorHomeState extends State<MentorHome> {
                     ],
                   ),
                   SizedBox(
-                    height: screenHeight * 0.3,
+                    height: screenHeight * 0.35,
                     child: AcceptedList(
                       menteeListController: menteeListController,
                       key: _acceptedListKey,

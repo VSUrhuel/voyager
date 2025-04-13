@@ -3,17 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_instance/src/extension_instance.dart';
-import 'package:get/route_manager.dart';
 import 'package:voyager/src/features/admin/controllers/course_controller.dart';
 import 'package:voyager/src/features/admin/controllers/course_mentor_controller.dart';
 import 'package:voyager/src/features/admin/controllers/create_mentor_controller.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
-import 'package:voyager/src/features/admin/screens/admin_dashboard.dart';
 import 'package:voyager/src/features/admin/widgets/profile_picker.dart';
-import 'package:voyager/src/features/authentication/controllers/signup_controller.dart';
-import 'package:voyager/src/features/mentor/controller/mentor_controller.dart';
 import 'package:voyager/src/widgets/custom_button.dart';
 
 // import 'package:voyager/src/features/admin/widgets/regular_sched_picker.dart';

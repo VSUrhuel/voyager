@@ -1,18 +1,14 @@
 // ignore_for_file: deprecated_member_use
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
-import 'package:voyager/src/features/mentor/model/mentor_model.dart';
-import 'package:voyager/src/features/mentor/screens/input_information/mentor_info1.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
-import 'package:voyager/src/widgets/custom_page_route.dart';
 
 class AdminPersonalInformation extends StatefulWidget {
-
-  const AdminPersonalInformation({super.key,
+  const AdminPersonalInformation({
+    super.key,
     required this.userModel,
   });
   final UserModel userModel;
@@ -24,12 +20,12 @@ class AdminPersonalInformation extends StatefulWidget {
 
 class _AdminPersonalInformationState extends State<AdminPersonalInformation> {
   FirestoreInstance firestore = FirestoreInstance();
-   late UserModel userModel;
+  late UserModel userModel;
 
   @override
   void initState() {
     super.initState();
-     userModel = widget.userModel;
+    userModel = widget.userModel;
   }
 
   @override
@@ -168,7 +164,10 @@ class _AdminPersonalInformationState extends State<AdminPersonalInformation> {
                             horizontal: screenWidth * 0.03),
                         child: Text(
                           userModel.accountUsername,
-                          style: TextStyle(color: Colors.black54, fontSize: 30, fontWeight: FontWeight.w500),
+                          style: TextStyle(
+                              color: Colors.black54,
+                              fontSize: 30,
+                              fontWeight: FontWeight.w500),
                         ),
                       ),
                       Padding(
@@ -271,7 +270,6 @@ class _AdminPersonalInformationState extends State<AdminPersonalInformation> {
             text,
             style: const TextStyle(fontSize: 14, color: Colors.black87),
           ),
-          
         ],
       ),
     );

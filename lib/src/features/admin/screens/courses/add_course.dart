@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:get/route_manager.dart';
 import 'package:voyager/src/features/admin/controllers/course_controller.dart';
-import 'package:voyager/src/features/admin/screens/admin_dashboard.dart';
-import 'package:voyager/src/features/admin/screens/courses/course_list.dart';
 import 'package:voyager/src/features/admin/widgets/cover_photo_picker.dart';
 import 'package:voyager/src/widgets/custom_button.dart';
 
