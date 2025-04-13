@@ -243,6 +243,7 @@ class _MentorHomeState extends State<MentorHome> {
                     child: AcceptedList(
                       menteeListController: menteeListController,
                       key: _acceptedListKey,
+                      isMentorHome: true,
                     ),
                   ),
                 ],

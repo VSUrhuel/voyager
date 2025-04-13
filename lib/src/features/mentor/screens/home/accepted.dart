@@ -6,8 +6,12 @@ import 'package:voyager/src/widgets/user_card.dart';
 import 'package:voyager/src/widgets/vertical_widget_slider.dart';
 
 class AcceptedList extends StatefulWidget {
-  const AcceptedList({super.key, required this.menteeListController});
+  const AcceptedList(
+      {super.key,
+      required this.menteeListController,
+      required this.isMentorHome});
   final MenteeListController menteeListController;
+  final bool isMentorHome; // Added to control the height of the list
 
   @override
   State<AcceptedList> createState() => _AcceptedListState();
@@ -19,12 +23,18 @@ class _AcceptedListState extends State<AcceptedList> {
   bool _isMounted = false;
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
+  double _acceptedMenteesHeight = 0.6; // Default height for accepted mentees
   @override
   void initState() {
     super.initState();
     _isMounted = true;
     widget.menteeListController.searchMenteeController.addListener(loadNewData);
     _acceptedMenteesFuture = _fetchAcceptedMentees();
+    if (widget.isMentorHome) {
+      _acceptedMenteesHeight = 0.27; // 27% of screen height for mentor home
+    } else {
+      _acceptedMenteesHeight = 0.6; // 25% of screen height for other screens
+    }
   }
 
   @override
@@ -88,7 +98,7 @@ class _AcceptedListState extends State<AcceptedList> {
             physics: const AlwaysScrollableScrollPhysics(),
             // Limits to 25% of screen height
             child: SizedBox(
-                height: screenHeight * 0.6,
+                height: screenHeight * _acceptedMenteesHeight,
                 child: Column(children: [
                   FutureBuilder<List<UserModel>>(
                     future: _acceptedMenteesFuture,
@@ -137,7 +147,7 @@ class _AcceptedListState extends State<AcceptedList> {
 
                       return SizedBox(
                           height: screenHeight *
-                              0.6, // Limits to 25% of screen height
+                              _acceptedMenteesHeight, // Limits to 25% of screen height
                           child: VerticalWidgetSlider(
                             widgets: snapshot.data!
                                 .map((mentee) => UserCard(

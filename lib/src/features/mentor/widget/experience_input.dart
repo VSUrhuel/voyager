@@ -15,7 +15,7 @@ class ExperienceInput extends StatefulWidget {
 }
 
 class _ExperienceInputState extends State<ExperienceInput> {
-  late List<ExperienceEntry> _experiences = [];
+  late final List<ExperienceEntry> _experiences = [];
   final List<TextEditingController> _headerControllers = [];
   final List<TextEditingController> _descControllers = [];
 

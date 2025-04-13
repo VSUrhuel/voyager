@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:voyager/src/features/admin/widgets/profile_picker.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/controller/about_controller.dart';
 import 'package:voyager/src/features/mentor/controller/mentor_controller.dart';

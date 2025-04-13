@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:flutter/material.dart';
@@ -83,12 +82,14 @@ class MentorController extends GetxController {
       if (accountIDs.contains(firebaseID)) {
         return Future<bool>.value(false);
       }
+
       String mentorID = "";
       if (mentorIDs.contains(firebaseID)) {
         mentorID = await FirestoreInstance().getMentorID(firebaseID);
       } else {
         mentorID = FirestoreInstance().generateUniqueId();
       }
+
       final mentor = MentorModel(
         mentorId: mentorID,
         accountId: FirestoreInstance().getFirebaseUser().uid,
@@ -103,21 +104,15 @@ class MentorController extends GetxController {
         mentorExpertise: selectedSkills,
         mentorExpDesc: selectedExpDesc,
         mentorRegDay: selectedDays,
-        mentorRegStartTime: TimeOfDay(
-          hour: int.parse(mentorRegStartTime.text.split(':')[0]) % 12 +
-              (mentorRegStartTime.text.toLowerCase().contains('pm') ? 12 : 0),
-          minute:
-              int.parse(mentorRegStartTime.text.split(':')[1].split(' ')[0]),
+        mentorRegStartTime: parseTime(
+          mentorRegStartTime.text,
         ),
-        mentorRegEndTime: TimeOfDay(
-          hour: int.parse(mentorRegEndTime.text.split(':')[0]) % 12 +
-              (mentorRegEndTime.text.toLowerCase().contains('pm') ? 12 : 0),
-          minute: int.parse(mentorRegEndTime.text.split(':')[1].split(' ')[0]),
+        mentorRegEndTime: parseTime(
+          mentorRegEndTime.text,
         ),
         mentorStatus: "active",
         mentorSoftDeleted: false,
       );
-
       final firestore = FirestoreInstance();
 
       firestore.setMentor(mentor);
@@ -161,12 +156,32 @@ class MentorController extends GetxController {
       final firestore = FirestoreInstance();
 
       firestore.setMentor(mentor);
-
+      clearController();
       return Future<bool>.value(true);
     } catch (e) {
       Get.snackbar("Error", e.toString());
       return Future<bool>.value(false);
     }
+  }
+
+  void clearController() {
+    mentorId.clear();
+    accountId.clear();
+    mentorYearLvl.clear();
+    mentorAbout.clear();
+    mentorSessionCompleted.clear();
+    mentorLanguages.clear();
+    mentorFbUrl.clear();
+    mentorGitUrl.clear();
+    mentorExpHeader.clear();
+    mentorMotto.clear();
+    mentorExpertise.clear();
+    mentorExpDesc.clear();
+    mentorRegDay.clear();
+    mentorRegStartTime.clear();
+    mentorRegEndTime.clear();
+    mentorStatus.clear();
+    mentorSoftDeleted.clear();
   }
 
   TimeOfDay parseTime(String time) {
