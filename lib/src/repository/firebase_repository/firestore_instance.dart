@@ -272,6 +272,19 @@ class FirestoreInstance {
     }
   }
 
+  Future<String> getMentorThroughCourseMentorId(String courseMentorId) async {
+    try {
+      final mentor = await _db
+          .collection('courseMentor')
+          .where('courseMentorId', isEqualTo: courseMentorId)
+          .get();
+
+      return mentor.docs.first.data()['mentorId'];
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<MentorModel> getMentorThroughAccId(String accId) async {
     try {
       final mentor = await _db
@@ -652,6 +665,16 @@ class FirestoreInstance {
     }
   }
 
+  Future<String> getCourseMentorIdFromMca(String mcaDocId) async {
+    try {
+      final mca = await _db.collection('menteeCourseAlloc').doc(mcaDocId).get();
+      if (!mca.exists) return '';
+      return mca.data()?['courseMentorId'] ?? '';
+    } catch (e) {
+      return '';
+    }
+  }
+
   Future<UserModel> getUserThroughAccId(String accId) async {
     try {
       final user = await _db
@@ -692,11 +715,22 @@ class FirestoreInstance {
 
   Future<List<UserModel>> getMentors() async {
     try {
-      final mentors = await _db.collection('mentors').get();
+      // Query mentors collection and exclude soft deleted mentors
+      final mentors = await _db
+          .collection('mentors')
+          .where('mentorSoftDeleted',
+              isEqualTo: false) // filter out soft deleted
+          .get();
+
       List<UserModel> users = [];
+
       for (var mentor in mentors.docs) {
-        users.add(await getUser(mentor.data()['accountId']));
+        final accId = mentor.data()['accountId'];
+        final user = await getUserThroughAccId(
+            accId); // Make sure you're using this version
+        users.add(user);
       }
+
       return users;
     } catch (e) {
       rethrow;
@@ -932,7 +966,8 @@ class FirestoreInstance {
     }
   }
 
-  Future<List<UserModel>> getMenteeAccountsForCourse(String docId, String status) async {
+  Future<List<UserModel>> getMenteeAccountsForCourse(
+      String docId, String status) async {
     try {
       // Step 1: Get the list of courseMentors that match the provided course ID
       final courseMentorQuerySnapshot = await FirebaseFirestore.instance
@@ -965,7 +1000,6 @@ class FirestoreInstance {
 
       List<UserModel> users = [];
       for (String id in menteesIds) {
-
         final menteeDoc = await _db.collection('mentee').doc(id).get();
         if (menteeDoc.exists) {
           users.add(await getUser(menteeDoc.data()!['accountId']));
@@ -979,7 +1013,8 @@ class FirestoreInstance {
     }
   }
 
-  Future<List<UserModel>> getMenteesThroughCourseMentor(String courseMentorId) async {
+  Future<List<UserModel>> getMenteesThroughCourseMentor(
+      String courseMentorId) async {
     try {
       final menteeAllocations = await _db
           .collection('menteeCourseAlloc')
@@ -1004,10 +1039,47 @@ class FirestoreInstance {
   }
 
 
-  Future<MenteeModel> getMenteeThroughId(String menteeId) async {
+  Future<String> getMenteeStatus(String mcaId) async {
+    try {
+      final mentee = await _db.collection('menteeCourseAlloc').doc(mcaId).get();
+      if (mentee.exists) {
+        return mentee.data()!['mcaAllocStatus'];
+      } else {
+        throw Exception('Mentee not found');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<MenteeModel?> getMenteeThroughId(String menteeId) async {
     try {
       final mentee = await _db.collection('mentee').doc(menteeId).get();
-      return MenteeModel.fromJson(mentee.data()!, mentee.id);
+
+      if (!mentee.exists) {
+        return null;
+      }
+
+      final menteeData = mentee.data();
+      if (menteeData == null) {
+        return null;
+      }
+
+      return MenteeModel.fromJson(menteeData, mentee.id);
+    } catch (e) {
+      debugPrint('Error fetching mentee: $e');
+      rethrow; // Or return a default MenteeModel if preferred
+    }
+  }
+
+  Future<MenteeModel> getMenteeThroughAccId(String accId) async {
+    try {
+      final mentee = await _db
+          .collection('mentee')
+          .where('accountId', isEqualTo: accId)
+          .get();
+      return MenteeModel.fromJson(
+          mentee.docs.first.data(), mentee.docs.first.id);
     } catch (e) {
       rethrow;
     }

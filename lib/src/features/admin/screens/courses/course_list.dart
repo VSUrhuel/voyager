@@ -98,8 +98,8 @@ class _CourseListState extends State<CourseList> {
                   children: [
                     // Active Button
                     SizedBox(
-                      height: screenHeight * 0.030,
-                      width: screenWidth * 0.18,
+                      height: screenHeight * 0.038,
+                      width: screenWidth * 0.22,
                       child: OutlinedButton(
                         onPressed: () {
                           setState(() {
@@ -112,7 +112,7 @@ class _CourseListState extends State<CourseList> {
                               : const Color(0xFFa6a2a2),
                           padding: const EdgeInsets.symmetric(vertical: 5),
                           textStyle: TextStyle(
-                            fontSize: screenWidth * 0.03,
+                            fontSize: screenWidth * 0.04,
                             fontWeight: FontWeight.w600,
                           ),
                           side: BorderSide.none,
@@ -127,8 +127,8 @@ class _CourseListState extends State<CourseList> {
 
                     // Archived Button
                     SizedBox(
-                      height: screenHeight * 0.030,
-                      width: screenWidth * 0.18,
+                      height: screenHeight * 0.038,
+                      width: screenWidth * 0.22,
                       child: OutlinedButton(
                         onPressed: () {
                           setState(() {
@@ -141,7 +141,7 @@ class _CourseListState extends State<CourseList> {
                               : const Color(0xFFa6a2a2),
                           padding: const EdgeInsets.symmetric(vertical: 5),
                           textStyle: TextStyle(
-                            fontSize: screenWidth * 0.03,
+                            fontSize: screenWidth * 0.04,
                             fontWeight: FontWeight.w600,
                           ),
                           side: BorderSide.none,

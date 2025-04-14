@@ -6,11 +6,11 @@ import 'package:voyager/src/features/admin/screens/courses/course_details.dart';
 import 'package:voyager/src/features/admin/screens/courses/mentor_popup.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
 
-
 class AdminCourseCard extends StatelessWidget {
   final CourseModel course;
   final VoidCallback onUpdate;
   final List<CourseMentorModel> courseMentors;
+
   const AdminCourseCard({
     super.key,
     required this.course,
@@ -22,225 +22,261 @@ class AdminCourseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final theme = Theme.of(context);
 
     return Card(
-      color: Colors.white,
-      elevation: 2,
-      margin: EdgeInsets.only(bottom: screenWidth * 0.05),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(
-          Radius.circular(10),
-        ),
+      elevation: 4,
+      margin: EdgeInsets.symmetric(
+        horizontal: screenWidth * 0.03,
+        vertical: screenHeight * 0.01,
       ),
-      child: Padding(
-        padding: EdgeInsets.all(screenWidth * 0.001),
-        child: Column(
-          children: [
-            //Display
-            Row(
-              children: [
-                //Left Half
-                InkWell(
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(
-                      builder: (context) => CourseDetails(courseModel: course, courseMentors: courseMentors),
-                    ));
-                  },
-                  child:Container(
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: course.courseImgUrl.isEmpty
-                            ? AssetImage(
-                                    'assets/images/application_images/code.jpg')
-                                as ImageProvider
-                            : NetworkImage(course.courseImgUrl),
-                        fit: BoxFit
-                            .fitHeight, 
-                      ),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(10), // Top left corner
-                        bottomLeft: Radius.circular(10),
-                      ),
-                      color: Colors.black,
-                    ),
-                    width: screenWidth * 0.28,
-                    height: screenHeight * 0.20,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CourseDetails(
+                courseModel: course,
+                courseMentors: courseMentors,
+              ),
+            ),
+          );
+        },
+        child: SizedBox(
+          height: screenHeight * 0.18,
+          child: Row(
+            children: [
+              // Course Image
+              Container(
+                width: screenWidth * 0.28,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    bottomLeft: Radius.circular(12),
+                  ),
+                  image: DecorationImage(
+                    image: course.courseImgUrl.isEmpty
+                        ? const AssetImage(
+                                'assets/images/application_images/code.jpg')
+                            as ImageProvider
+                        : NetworkImage(course.courseImgUrl),
+                    fit: BoxFit.cover,
                   ),
                 ),
-                
-                //Right Half
-                InkWell(
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(
-                      builder: (context) => CourseDetails(courseModel: course, courseMentors: courseMentors),
-                    ));
-                  },
-                  child: Container(
+              ),
+
+              // Course Info
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.all(screenWidth * 0.03),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(10), // Top left corner
-                      bottomRight: Radius.circular(10), // Bottom left corner
+                    color: theme.cardColor,
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(12),
+                      bottomRight: Radius.circular(12),
                     ),
-                    color: Colors.grey[800],
                   ),
-                  width: screenWidth * 0.46,
-                  height: screenHeight * 0.20,
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      //Header
+                      // Course Name and Status
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
-                            child: Padding(
-                              // Add Padding here
-                              padding: const EdgeInsets.all(
-                                  16.0), // Adjust padding values as needed
+                            child: Text(
+                              course.courseName,
+                              style: TextStyle(
+                                fontSize: screenWidth * 0.045,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (course.courseStatus == 'archived')
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                               child: Text(
-                                course.courseName,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15,
+                                'Archived',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: Colors.orange,
                                 ),
                               ),
                             ),
+                        ],
+                      ),
+
+                      SizedBox(height: screenHeight * 0.01),
+
+                      // Course Description (if available)
+                      // if (course.courseDescription?.isNotEmpty ?? false)
+                      //   Flexible(
+                      //     child: Text(
+                      //       course.courseDescription,
+                      //       style: TextStyle(
+                      //         fontSize: screenWidth * 0.030,
+                      //       ),
+                      //       maxLines: 2,
+                      //       overflow: TextOverflow.ellipsis,
+
+                      //     ),
+                      //   ),
+
+                      const Spacer(),
+
+                      // Stats Row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _buildStatItem(
+                            context,
+                            icon: Icons.group,
+                            value: '${courseMentors.length}',
+                            label: 'Mentors',
+                          ),
+                          _buildStatItem(
+                            context,
+                            icon: FontAwesomeIcons.peopleGroup,
+                            value: '1',
+                            label: 'Mentees',
+                          ),
+                          _buildStatItem(
+                            context,
+                            icon: FontAwesomeIcons.calendar,
+                            value: '1',
+                            label: 'Sem',
                           ),
                         ],
                       ),
-                      //Details
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          children: [
-                            //semester details
+                    ],
+                  ),
+                ),
+              ),
 
-                            //Mentors details
-                            SizedBox(
-                              width: screenWidth * 0.05,
+              // Options Menu
+              PopupMenuButton<String>(
+                icon: Icon(
+                  Icons.more_vert,
+                  color: theme.iconTheme.color,
+                ),
+                onSelected: (String value) async {
+                  switch (value) {
+                    case 'add':
+                      await showDialog(
+                        context: context,
+                        builder: (context) => Dialog(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: MentorPopup(course: course.docId),
+                        ),
+                      );
+                      onUpdate();
+                      break;
+                    case 'archive':
+                      if (course.courseStatus == 'archived') {
+                        await CourseController().restoreCourse(course.docId);
+                      } else {
+                        await CourseController().archiveCourse(course.docId);
+                      }
+                      onUpdate();
+                      break;
+                    case 'delete':
+                      final confirmed = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Confirm Deletion'),
+                          content: const Text(
+                              'This will permanently delete the course. Are you sure?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Cancel'),
                             ),
-                            Column(
-                              children: [
-                                Icon(
-                                  Icons.group,
-                                  color: Colors.white,
-                                  size: screenWidth *
-                                      0.08, // Sets the icon color to white
-                                ),
-                                Text(
-                                  "${courseMentors.length} Mentor(s)",
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 10),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              width: screenWidth * 0.05,
-                            ),
-                            //Mentes details
-                            Column(
-                              children: [
-                                FaIcon(
-                                  FontAwesomeIcons.peopleGroup,
-                                  color: Colors.white,
-                                  size: screenWidth * 0.08,
-                                ),
-                                Text(
-                                  "1 Semester",
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 10),
-                                ),
-                              ],
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text(
+                                'Delete',
+                                style: TextStyle(color: Colors.red),
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                ),
-                
-                // Spacer(),
-                IconButton(
-                  constraints: BoxConstraints(
-                    minWidth: 0,
-                    minHeight: screenWidth * 0.5,
-                  ),
-                  icon: PopupMenuButton<String>(
-                    icon: Icon(Icons.more_vert),
-                    onSelected: (String value) async {
-                      switch (value) {
-                        case 'add':
-                          await showDialog(
-                            context: context,
-                            builder: (context) => Dialog(
-                              child: MentorPopup(course: course.docId),
-                            ),
-                          );
-                          onUpdate();
-                          break;
-                        case 'archive':
-                          if(course.courseStatus == 'archived'){
-                            await CourseController().restoreCourse(course.docId);
-                          }else{
-                          await CourseController().archiveCourse(course.docId);
-                          }
-                          onUpdate();
-                          break;
-                        case 'delete':
-                          final confirmed = await showDialog<bool>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Confirm Course Delete'),
-                              content: const Text(
-                                  'Are you sure you want to delete this course?'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () =>
-                                      Navigator.pop(context, false),
-                                  child: const Text('Cancel'),
-                                ),
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context, true),
-                                  child: const Text('Confirm'),
-                                ),
-                              ],
-                            ),
-                          );
-                          if (confirmed == true) {
-                            await CourseController().deleteCourse(course.docId);
-                            onUpdate();
-                          }
-                          break;
+                      );
+                      if (confirmed == true) {
+                        await CourseController().deleteCourse(course.docId);
+                        onUpdate();
                       }
-                    },
-                    itemBuilder: (BuildContext context) => [
-                      const PopupMenuItem<String>(
-                        value: 'add',
-                        child: Text('Add Course Mentor'),
-                      ),
-                      PopupMenuItem<String>(
-                        value: 'archive',
-                        child: Text(course.courseStatus == 'archived'
-                            ? 'Unarchive Course'
-                            : 'Archive Course'),
-                      ),
-                      const PopupMenuItem<String>(
-                        value: 'delete',
-                        child: Text('Delete Course',
-                            style: TextStyle(color: Colors.red)),
-                      ),
-                    ],
+                      break;
+                  }
+                },
+                itemBuilder: (BuildContext context) => [
+                  const PopupMenuItem<String>(
+                    value: 'add',
+                    child: Text('Add Mentor'),
                   ),
-                  onPressed: null,
-                )
-              ],
-            ),
-            SizedBox(
-              height: screenHeight * 0.01,
-            ),
-            //Button Section
-          ],
+                  PopupMenuItem<String>(
+                    value: 'archive',
+                    child: Text(
+                      course.courseStatus == 'archived'
+                          ? 'Restore Course'
+                          : 'Archive Course',
+                    ),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'delete',
+                    child: Text(
+                      'Delete Course',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildStatItem(
+    BuildContext context, {
+    required IconData icon,
+    required String value,
+    required String label,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          size: 20,
+          color: Theme.of(context).primaryColor,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelSmall,
+        ),
+      ],
     );
   }
 }
