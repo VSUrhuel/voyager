@@ -123,25 +123,27 @@ class _MentorHomeState extends State<MentorHome> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              radius: screenHeight * 0.03,
-              backgroundColor: Colors.grey[200],
-              child: IconButton(
-                icon: const FaIcon(
-                  FontAwesomeIcons.pen,
-                  color: Colors.black,
+            child: IconButton(
+              icon: Container(
+                padding: const EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Theme.of(context).primaryColor.withOpacity(0.1),
                 ),
-                onPressed: () {
-                  // Handle the button press here
-                  Navigator.push(
-                    context,
-                    CustomPageRoute(
-                      page: CreatePost(),
-                      direction: AxisDirection.left,
-                    ),
-                  ).then((_) => _refreshIndicatorKey.currentState?.show());
-                },
+                child: Icon(Icons.edit,
+                    color: Theme.of(context).primaryColor,
+                    size: screenWidth * 0.065),
               ),
+              onPressed: () {
+                // Handle the button press here
+                Navigator.push(
+                  context,
+                  CustomPageRoute(
+                    page: CreatePost(),
+                    direction: AxisDirection.left,
+                  ),
+                ).then((_) => _refreshIndicatorKey.currentState?.show());
+              },
             ),
           ),
         ],
@@ -239,7 +241,7 @@ class _MentorHomeState extends State<MentorHome> {
                     ],
                   ),
                   SizedBox(
-                    height: screenHeight * 0.3,
+                    height: screenHeight * 0.35,
                     child: AcceptedList(
                       menteeListController: menteeListController,
                       key: _acceptedListKey,

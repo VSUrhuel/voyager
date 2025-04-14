@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
@@ -58,6 +59,7 @@ class _MentorPersonalInformationState extends State<MentorPersonalInformation> {
           .join(' ');
     }
 
+    final theme = Theme.of(context);
     final formattedName = toTitleCase(userModel.accountApiName);
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
@@ -65,181 +67,345 @@ class _MentorPersonalInformationState extends State<MentorPersonalInformation> {
         statusBarIconBrightness: Brightness.dark,
       ),
       child: Scaffold(
-        backgroundColor: Colors.black,
-        body: SafeArea(
-          top: false,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Profile Image
-                Stack(
-                  children: [
-                    Container(
-                      height: screenHeight * 0.4,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: NetworkImage(imageUrl),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: MediaQuery.of(context).padding.top + 10,
-                      left: 16,
-                      child: IconButton(
-                        icon: const Icon(Icons.arrow_back,
-                            color: Colors.black, size: 30),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-
-                // Profile Details
-                Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.05, vertical: 20),
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Name & Year Badge
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: screenWidth * 0.02,
-                                vertical: screenHeight * 0),
-                            decoration: BoxDecoration(
-                              color: Colors.green.shade100,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              mentorModel.mentorYearLvl,
-                              style: TextStyle(
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.black),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                CustomPageRoute(
-                                    page: MentorInfo1(
-                                        mentorModel: mentorModel,
-                                        userModel: userModel)),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-
-                      Row(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(
-                                left: screenWidth * 0.02,
-                                top: screenHeight * 0.0),
-                            child: Text(
-                              formattedName,
-                              style: TextStyle(
-                                  fontSize: screenHeight * 0.03,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.03),
-                        child: Text(
-                          userModel.accountApiEmail,
-                          style: TextStyle(color: Colors.black54, fontSize: 14),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-                      Row(
-                        children: [],
-                      ),
-                      // About Section (Title Inside Border)
-                      _infoCardWithTitle("About", mentorModel.mentorAbout),
-
-                      const SizedBox(height: 20),
-                      Row(
-                        children: [
-                          // Experience Section (60% width)
-                          Expanded(
-                            flex: 7,
-                            child: _experienceSection(screenHeight),
-                          ),
-
-                          const SizedBox(width: 10),
-
-                          // Mentorship Sessions (40% width)
-                          Expanded(
-                            flex: 3,
-                            child: _mentorshipCard(
-                                mentorModel.mentorSessionCompleted.toString(),
-                                "Mentorship Sessions Completed",
-                                screenHeight),
-                          ),
-                        ],
-                      ),
-
-                      // Experience Section with New UI
-
-                      const SizedBox(height: 20),
-
-                      // Language Known
-                      _sectionTitle("Language Known"),
-                      Wrap(
-                        spacing: 8,
-                        children: [
-                          for (int i = 0;
-                              i < mentorModel.mentorLanguages.length;
-                              i++)
-                            _languageChip(mentorModel.mentorLanguages[i]),
-                        ],
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Social Links
-                      _sectionTitle("Social Links"),
-                      Row(
-                        children: [
-                          _socialIcon(Icons.facebook, Colors.blue,
-                              mentorModel.mentorFbUrl, context),
-                          const SizedBox(width: 20),
-                          _socialIcon(Icons.link, Colors.blue.shade800,
-                              mentorModel.mentorGitUrl, context),
-                        ],
-                      ),
-
-                      const SizedBox(height: 30),
-                    ],
+          backgroundColor: Colors.white,
+          body: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                expandedHeight: screenHeight * 0.3,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
                   ),
                 ),
-              ],
-            ),
+                pinned: true,
+                floating: false,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                backgroundColor: Colors.transparent,
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                    padding: EdgeInsets.all(screenWidth * 0.06),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: screenWidth * 0.03,
+                                  vertical: screenHeight * 0.005),
+                              decoration: BoxDecoration(
+                                color: Colors.green.shade100,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                mentorModel.mentorYearLvl,
+                                style: TextStyle(
+                                    color: Colors.green,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            IconButton(
+                              icon: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: theme.primaryColor.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(Icons.edit,
+                                    color: theme.primaryColor,
+                                    size: screenHeight * 0.03),
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  CustomPageRoute(
+                                      page: MentorInfo1(
+                                          mentorModel: mentorModel,
+                                          userModel: userModel)),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+
+                        Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(
+                                  left: screenWidth * 0.02,
+                                  top: screenHeight * 0.0),
+                              child: Text(
+                                formattedName,
+                                style: TextStyle(
+                                    fontSize: screenHeight * 0.03,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.03),
+                          child: Text(
+                            userModel.accountApiEmail,
+                            style:
+                                TextStyle(color: Colors.black54, fontSize: 14),
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+                        Row(
+                          children: [],
+                        ),
+                        // About Section (Title Inside Border)
+                        _infoCardWithTitle("About", mentorModel.mentorAbout),
+
+                        const SizedBox(height: 20),
+                        Row(
+                          children: [
+                            // Experience Section (60% width)
+                            Expanded(
+                              flex: 7,
+                              child: _experienceSection(screenHeight),
+                            ),
+
+                            const SizedBox(width: 10),
+
+                            // Mentorship Sessions (40% width)
+                            Expanded(
+                              flex: 3,
+                              child: _mentorshipCard(
+                                  mentorModel.mentorSessionCompleted.toString(),
+                                  "Mentorship Sessions Completed",
+                                  screenHeight),
+                            ),
+                          ],
+                        ),
+
+                        // Experience Section with New UI
+
+                        const SizedBox(height: 20),
+
+                        // Language Known
+                        _sectionTitle("Language Known"),
+                        Wrap(
+                          spacing: 8,
+                          children: [
+                            for (int i = 0;
+                                i < mentorModel.mentorLanguages.length;
+                                i++)
+                              _languageChip(mentorModel.mentorLanguages[i]),
+                          ],
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Social Links
+                        _sectionTitle("Social Links"),
+                        Row(
+                          children: [
+                            _socialIcon(Icons.facebook, Colors.blue,
+                                mentorModel.mentorFbUrl, context),
+                            const SizedBox(width: 20),
+                            _socialIcon(
+                                FontAwesomeIcons.github,
+                                Colors.blue.shade800,
+                                mentorModel.mentorGitUrl,
+                                context),
+                          ],
+                        ),
+
+                        const SizedBox(height: 30),
+                      ],
+                    )),
+              )
+            ],
+          )
+          // SafeArea(
+          //   top: false,
+          //   child: SingleChildScrollView(
+          //     child: Column(
+          //       crossAxisAlignment: CrossAxisAlignment.start,
+          //       children: [
+          //         // Profile Image
+          //         Stack(
+          //           children: [
+          //             Container(
+          //               height: screenHeight * 0.4,
+          //               width: double.infinity,
+          //               decoration: BoxDecoration(
+          //                 image: DecorationImage(
+          //                   image: NetworkImage(imageUrl),
+          //                   fit: BoxFit.cover,
+          //                 ),
+          //               ),
+          //             ),
+          //             Positioned(
+          //               top: MediaQuery.of(context).padding.top + 10,
+          //               left: 16,
+          //               child: IconButton(
+          //                 icon: const Icon(Icons.arrow_back,
+          //                     color: Colors.black, size: 30),
+          //                 onPressed: () {
+          //                   Navigator.pop(context);
+          //                 },
+          //               ),
+          //             ),
+          //           ],
+          //         ),
+
+          //         // Profile Details
+          //         Container(
+          //           padding: EdgeInsets.symmetric(
+          //               horizontal: screenWidth * 0.05, vertical: 20),
+          //           width: double.infinity,
+          //           decoration: const BoxDecoration(
+          //             color: Colors.white,
+          //             borderRadius: BorderRadius.only(
+          //               topLeft: Radius.circular(30),
+          //               topRight: Radius.circular(30),
+          //             ),
+          //           ),
+          //           child: Column(
+          //             crossAxisAlignment: CrossAxisAlignment.start,
+          //             children: [
+          //               // Name & Year Badge
+          //               Row(
+          //                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //                 children: [
+          //                   Container(
+          //                     padding: EdgeInsets.symmetric(
+          //                         horizontal: screenWidth * 0.02,
+          //                         vertical: screenHeight * 0),
+          //                     decoration: BoxDecoration(
+          //                       color: Colors.green.shade100,
+          //                       borderRadius: BorderRadius.circular(12),
+          //                     ),
+          //                     child: Text(
+          //                       mentorModel.mentorYearLvl,
+          //                       style: TextStyle(
+          //                           color: Colors.green,
+          //                           fontWeight: FontWeight.bold),
+          //                     ),
+          //                   ),
+          //                   IconButton(
+          //                     icon: const Icon(Icons.edit, color: Colors.black),
+          //                     onPressed: () {
+          //                       Navigator.push(
+          //                         context,
+          //                         CustomPageRoute(
+          //                             page: MentorInfo1(
+          //                                 mentorModel: mentorModel,
+          //                                 userModel: userModel)),
+          //                       );
+          //                     },
+          //                   ),
+          //                 ],
+          //               ),
+
+          //               Row(
+          //                 children: [
+          //                   Padding(
+          //                     padding: EdgeInsets.only(
+          //                         left: screenWidth * 0.02,
+          //                         top: screenHeight * 0.0),
+          //                     child: Text(
+          //                       formattedName,
+          //                       style: TextStyle(
+          //                           fontSize: screenHeight * 0.03,
+          //                           fontWeight: FontWeight.bold),
+          //                     ),
+          //                   ),
+          //                 ],
+          //               ),
+          //               Padding(
+          //                 padding: EdgeInsets.symmetric(
+          //                     horizontal: screenWidth * 0.03),
+          //                 child: Text(
+          //                   userModel.accountApiEmail,
+          //                   style: TextStyle(color: Colors.black54, fontSize: 14),
+          //                 ),
+          //               ),
+
+          //               const SizedBox(height: 20),
+          //               Row(
+          //                 children: [],
+          //               ),
+          //               // About Section (Title Inside Border)
+          //               _infoCardWithTitle("About", mentorModel.mentorAbout),
+
+          //               const SizedBox(height: 20),
+          //               Row(
+          //                 children: [
+          //                   // Experience Section (60% width)
+          //                   Expanded(
+          //                     flex: 7,
+          //                     child: _experienceSection(screenHeight),
+          //                   ),
+
+          //                   const SizedBox(width: 10),
+
+          //                   // Mentorship Sessions (40% width)
+          //                   Expanded(
+          //                     flex: 3,
+          //                     child: _mentorshipCard(
+          //                         mentorModel.mentorSessionCompleted.toString(),
+          //                         "Mentorship Sessions Completed",
+          //                         screenHeight),
+          //                   ),
+          //                 ],
+          //               ),
+
+          //               // Experience Section with New UI
+
+          //               const SizedBox(height: 20),
+
+          //               // Language Known
+          //               _sectionTitle("Language Known"),
+          //               Wrap(
+          //                 spacing: 8,
+          //                 children: [
+          //                   for (int i = 0;
+          //                       i < mentorModel.mentorLanguages.length;
+          //                       i++)
+          //                     _languageChip(mentorModel.mentorLanguages[i]),
+          //                 ],
+          //               ),
+
+          //               const SizedBox(height: 20),
+
+          //               // Social Links
+          //               _sectionTitle("Social Links"),
+          //               Row(
+          //                 children: [
+          //                   _socialIcon(Icons.facebook, Colors.blue,
+          //                       mentorModel.mentorFbUrl, context),
+          //                   const SizedBox(width: 20),
+          //                   _socialIcon(
+          //                       FontAwesomeIcons.github,
+          //                       Colors.blue.shade800,
+          //                       mentorModel.mentorGitUrl,
+          //                       context),
+          //                 ],
+          //               ),
+
+          //               const SizedBox(height: 30),
+          //             ],
+          //           ),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ),
           ),
-        ),
-      ),
     );
   }
 
@@ -398,29 +564,16 @@ class _MentorPersonalInformationState extends State<MentorPersonalInformation> {
           EdgeInsets.only(bottom: MediaQuery.of(context).size.height * 0.01),
       child: InkWell(
         onTap: () async {
-          // Try parsing the URL to avoid errors with invalid URLs
           final uri = Uri.tryParse(url);
-
-          // Check if the URL is valid
+          print(uri);
           if (uri != null) {
-            // Try to launch the URL
-            if (await canLaunchUrl(uri)) {
-              await launchUrl(uri, mode: LaunchMode.externalApplication);
-            } else {
-              // Show a Snackbar if the URL can't be launched
+            if (!await launchUrl(uri)) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Could not open $url'),
+                  content: Text('Failed to open $uri! Contact your mentor.'),
                 ),
               );
             }
-          } else {
-            // Handle invalid URL case
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Invalid URL: $url'),
-              ),
-            );
           }
         },
         child: Container(

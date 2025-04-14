@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/controller/post_controller.dart';
 import 'package:voyager/src/features/mentor/model/content_model.dart';
 import 'package:voyager/src/features/mentor/screens/post/display_video_link.dart';
 import 'package:voyager/src/features/mentor/widget/display_files_link.dart';
 import 'package:voyager/src/features/mentor/widget/display_images.dart';
 import 'package:voyager/src/features/mentor/widget/display_links.dart';
+import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
+
+import '../model/mentor_model.dart';
 
 class PostContent extends StatefulWidget {
   final PostContentModel post;
@@ -57,10 +61,23 @@ class _PostContentState extends State<PostContent> {
   }
 
   Future<void> _initializeUserdetails() async {
-    username = await postController.getUsername();
-    apiPhoto = await postController.getApiPhoto();
+    String courseMentorId = _post.courseMentorId;
+    FirestoreInstance firestoreInstance = FirestoreInstance();
 
-    setState(() {});
+    String mentor =
+        await firestoreInstance.getMentorThroughCourseMentorId(courseMentorId);
+
+    MentorModel mentorModel = await firestoreInstance.getMentor(mentor);
+    UserModel user =
+        await firestoreInstance.getUserThroughAccId(mentorModel.accountId);
+
+    username = user.accountUsername;
+    apiPhoto = user.accountApiPhoto;
+
+    setState(() {
+      username = user.accountUsername;
+      apiPhoto = user.accountApiPhoto;
+    });
   }
 
   bool checkIfHasAttachements() {

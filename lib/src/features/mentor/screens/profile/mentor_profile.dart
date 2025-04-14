@@ -66,7 +66,7 @@ class _MentorProfileState extends State<MentorProfile> {
         ),
         body: Column(
           children: [
-            Profile(role: 'mentee'),
+            Profile(role: "mentor"),
             SizedBox(height: screenHeight * 0.03),
             Row(
               children: [
@@ -85,6 +85,7 @@ class _MentorProfileState extends State<MentorProfile> {
             SizedBox(height: screenHeight * 0.01),
             //Add ProfileListTile widget
             ProfileListTile(
+              iconData: Icons.person,
               text: "Personal Information",
               onTap: () {
                 Navigator.push(
@@ -96,6 +97,7 @@ class _MentorProfileState extends State<MentorProfile> {
               },
             ),
             ProfileListTile(
+              iconData: Icons.lock,
               text: "Security and Password",
               onTap: () {
                 Navigator.push(
@@ -105,6 +107,7 @@ class _MentorProfileState extends State<MentorProfile> {
               },
             ),
             ProfileListTile(
+              iconData: Icons.verified_user,
               text: "User agreement",
               onTap: () {
                 Navigator.push(
@@ -114,6 +117,7 @@ class _MentorProfileState extends State<MentorProfile> {
               },
             ),
             ProfileListTile(
+              iconData: Icons.info,
               text: "About",
               onTap: () {
                 Navigator.push(

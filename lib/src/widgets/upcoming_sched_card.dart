@@ -167,19 +167,19 @@ class _MeetingCardState extends State<MeetingCard> {
                     widget.scheduleModel.scheduleDate),
                 style: TextStyle(color: Colors.blue),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  // Handle view action
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child:
-                    const Text("View", style: TextStyle(color: Colors.white)),
-              ),
+              // ElevatedButton(
+              //   onPressed: () {
+              //     // Handle view action
+              //   },
+              //   style: ElevatedButton.styleFrom(
+              //     backgroundColor: Colors.blue,
+              //     shape: RoundedRectangleBorder(
+              //       borderRadius: BorderRadius.circular(8),
+              //     ),
+              //   ),
+              //   child:
+              //       const Text("View", style: TextStyle(color: Colors.white)),
+              // ),
             ],
           ),
         ],
@@ -245,10 +245,16 @@ class _MeetingCardState extends State<MeetingCard> {
       return "Session has ended";
     } else if (difference.inMinutes == 0) {
       return "Session is starting now";
+    } else if (difference.inMinutes == 1) {
+      return "1 min to go";
     } else if (difference.inMinutes < 60) {
       return "${difference.inMinutes} mins to go";
+    } else if (difference.inHours == 1) {
+      return "1 hour to go";
     } else if (difference.inHours < 24) {
       return "${(difference.inHours).toString()} hours to go";
+    } else if (difference.inDays == 1) {
+      return "${(difference.inDays).toString()} day to go";
     } else {
       return "${(difference.inDays).toString()} days to go";
     }

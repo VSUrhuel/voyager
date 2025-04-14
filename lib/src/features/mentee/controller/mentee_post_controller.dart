@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:voyager/src/features/mentee/model/mentee_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
@@ -7,10 +8,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:voyager/src/features/mentor/model/content_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 
-class PostController {
-  static PostController get instance => Get.find();
+class MenteePostController {
+  static MenteePostController get instance => Get.find();
 
   String getTimePosted(DateTime time) {
     final now = DateTime.now();
@@ -77,21 +77,37 @@ class PostController {
   // }
   Future<PostsResult> getPosts({
     required int limit,
-    DateTime? lastPostTimestamp, // Use timestamp instead of DocumentSnapshot
+    DateTime? lastPostTimestamp,
   }) async {
     try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) throw Exception("User not logged in");
+
       FirestoreInstance firestoreInstance = FirestoreInstance();
+      MenteeModel mentee =
+          await firestoreInstance.getMenteeThroughAccId(currentUser.uid);
 
-      MentorModel mentor = await firestoreInstance
-          .getMentorThroughAccId(FirebaseAuth.instance.currentUser!.uid);
+      List<String> courseMentorIds = [];
+      List<String> menteeMcaIds = mentee.menteeMcaId ?? [];
+      for (var menteeMcaId in menteeMcaIds) {
+        final String status =
+            await firestoreInstance.getMenteeStatus(menteeMcaId);
+        if (status != 'accepted') continue;
 
-      String courseMentor =
-          await firestoreInstance.getCourseMentorDocId(mentor.mentorId);
+        final courseMentorId =
+            await firestoreInstance.getCourseMentorIdFromMca(menteeMcaId);
+        if (courseMentorId.isNotEmpty) {
+          courseMentorIds.add(courseMentorId);
+        }
+      }
+      List<PostContentModel> allPosts = [];
+      for (var courseMentorId in courseMentorIds) {
+        List<PostContentModel> postContent = await firestoreInstance
+            .getPostContentThroughCourseMentor(courseMentorId);
+        allPosts.addAll(postContent);
+      }
 
-      List<PostContentModel> allPosts = await firestoreInstance
-          .getPostContentThroughCourseMentor(courseMentor);
-
-      // Filter and sort
+      // Filter out soft-deleted posts and ensure timestamps are non-null
       allPosts = allPosts.where((post) => !post.contentSoftDelete).toList()
         ..sort((a, b) =>
             b.contentModifiedTimestamp.compareTo(a.contentModifiedTimestamp));
@@ -112,14 +128,13 @@ class PostController {
       List<PostContentModel> paginatedPosts =
           allPosts.sublist(startIndex, endIndex);
 
-      // Get last post's timestamp for next page
       DateTime? newLastTimestamp = paginatedPosts.isNotEmpty
           ? paginatedPosts.last.contentModifiedTimestamp
           : null;
 
       return PostsResult(
         posts: paginatedPosts,
-        lastTimestamp: newLastTimestamp, // Return timestamp instead
+        lastTimestamp: newLastTimestamp,
         hasMore: endIndex < allPosts.length,
       );
     } catch (e) {
@@ -133,8 +148,9 @@ class PostController {
       if (isLoading.value) return;
       isLoading.value = true;
       error.value = '';
-      PostsResult postsResult =
-          await getPosts(limit: _limit, lastPostTimestamp: DateTime.now());
+      PostsResult postsResult = await getPosts(
+        limit: _limit,
+      );
       WidgetsBinding.instance.addPostFrameCallback((_) {
         posts.assignAll(postsResult.posts);
         lastTimesTamp = postsResult.lastTimestamp;

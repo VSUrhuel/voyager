@@ -2,35 +2,45 @@ import 'package:flutter/material.dart';
 
 class SkillsDisplay extends StatelessWidget {
   final Color color;
-  final Text text;
-  final dynamic width;
-  final dynamic height;
-  const SkillsDisplay(
-      {super.key,
-      required this.color,
-      required this.text,
-      required this.width,
-      required this.height});
+  final String text; // Changed from Text to String for more control
+  final double widthFactor;
+  final double heightFactor;
+
+  const SkillsDisplay({
+    super.key,
+    required this.color,
+    required this.text,
+    this.widthFactor = 0.3, // Default values
+    this.heightFactor = 0.03,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    return SizedBox(
-      width: screenWidth * width, // Adjust width as needed
-      height: screenHeight * height, // Adjust height as needed
-      child: Container(
-        decoration: BoxDecoration(
-          color: color, // Light Green Color (adjust as needed)
-          borderRadius:
-              BorderRadius.circular(20), // Half of height for pill shape
-          boxShadow: [
-            // Add shadow for depth
-          ],
-        ),
-        child: Center(
-          // Center the text within the container
-          child: text,
+    final screenSize = MediaQuery.of(context).size;
+    final maxWidth = screenSize.width * widthFactor;
+    final height = screenSize.height * heightFactor;
+
+    return Container(
+      constraints: BoxConstraints(
+        maxWidth: maxWidth,
+        minWidth: 40, // Minimum width to prevent too small badges
+      ),
+      height: height,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(height / 2), // Perfect pill shape
+      ),
+      child: Center(
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: height * 0.5, // Responsive font size
+            fontWeight: FontWeight.w500,
+            color: Colors.white,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ),
     );

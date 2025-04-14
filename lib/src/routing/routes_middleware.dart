@@ -55,7 +55,7 @@ class MRouteMiddleware extends GetMiddleware {
           break;
         case UserRoleEnum.mentor:
           if (Get.context != null) {
-            final accountIDs = await firestore.getMentorApPIIds();
+            final accountIDs = await firestore.getMentorAPIIds();
             if (!accountIDs.contains(user.uid)) {
               Navigator.pushReplacement(Get.context!,
                   MaterialPageRoute(builder: (context) => MentorInfo1()));

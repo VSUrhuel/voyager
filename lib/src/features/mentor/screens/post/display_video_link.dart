@@ -3,7 +3,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import 'package:voyager/src/features/mentor/controller/post_controller.dart';
 import 'package:voyager/src/features/mentor/controller/video_controller.dart'; // For better controls

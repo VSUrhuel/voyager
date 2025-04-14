@@ -31,9 +31,9 @@ class _AcceptedListState extends State<AcceptedList> {
     widget.menteeListController.searchMenteeController.addListener(loadNewData);
     _acceptedMenteesFuture = _fetchAcceptedMentees();
     if (widget.isMentorHome) {
-      _acceptedMenteesHeight = 0.27; // 27% of screen height for mentor home
+      _acceptedMenteesHeight = 0.4; // 27% of screen height for mentor home
     } else {
-      _acceptedMenteesHeight = 0.6; // 25% of screen height for other screens
+      _acceptedMenteesHeight = 0.7; // 25% of screen height for other screens
     }
   }
 

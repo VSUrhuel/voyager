@@ -93,9 +93,7 @@ class PickMentorCard extends StatelessWidget {
                   ),
                   SizedBox(height: screenHeight * 0.005),
                   Text(
-                    "Schedule: ${formatDays(mentorModel.mentorRegDay)} "
-                            "${formatTime(mentorModel.mentorRegStartTime)} - " +
-                        formatTime(mentorModel.mentorRegEndTime),
+                    "Schedule: ${formatDays(mentorModel.mentorRegDay)} ${formatTime(mentorModel.mentorRegStartTime)} - ${formatTime(mentorModel.mentorRegEndTime)}",
                     style: TextStyle(
                       fontSize: screenWidth * 0.035,
                       color: Colors.black54,

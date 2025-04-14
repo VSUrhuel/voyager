@@ -1,18 +1,12 @@
-// ignore_for_file: deprecated_member_use
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:googleapis/apigeeregistry/v1.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
-import 'package:voyager/src/features/mentor/model/mentor_model.dart';
-import 'package:voyager/src/features/mentor/screens/input_information/mentor_info1.dart';
-import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
-import 'package:voyager/src/widgets/custom_page_route.dart';
 
 class AdminPersonalInformation extends StatefulWidget {
-
-  const AdminPersonalInformation({super.key,
+  const AdminPersonalInformation({
+    super.key,
     required this.userModel,
   });
   final UserModel userModel;
@@ -23,13 +17,12 @@ class AdminPersonalInformation extends StatefulWidget {
 }
 
 class _AdminPersonalInformationState extends State<AdminPersonalInformation> {
-  FirestoreInstance firestore = FirestoreInstance();
-   late UserModel userModel;
+  late UserModel userModel;
 
   @override
   void initState() {
     super.initState();
-     userModel = widget.userModel;
+    userModel = widget.userModel;
   }
 
   @override
@@ -45,354 +38,193 @@ class _AdminPersonalInformationState extends State<AdminPersonalInformation> {
                 .getPublicUrl(userModel.accountApiPhoto))
         : 'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/profile-picture/profile.png';
 
-    String toTitleCase(String name) {
-      if (name.isEmpty) return name;
-      if (name.length == 1) return name.toUpperCase();
-      return name
-          .toLowerCase()
-          .split(' ')
-          .map((word) => word.isNotEmpty
-              ? '${word[0].toUpperCase()}${word.substring(1)}'
-              : '')
-          .join(' ');
-    }
-
-    final formattedName = toTitleCase(userModel.accountApiName);
-
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
         statusBarColor: Colors.white,
         statusBarIconBrightness: Brightness.dark,
       ),
       child: Scaffold(
-        backgroundColor: Colors.black,
-        body: SafeArea(
-          top: false,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Profile Image
-                Stack(
-                  children: [
-                    Container(
-                      height: screenHeight * 0.4,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: NetworkImage(imageUrl),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: MediaQuery.of(context).padding.top + 10,
-                      left: 16,
-                      child: IconButton(
-                        icon: const Icon(Icons.arrow_back,
-                            color: Colors.black, size: 30),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ),
-                  ],
+        backgroundColor: Colors.white,
+        body: CustomScrollView(
+          slivers: [
+            // Profile Header with Image
+            SliverAppBar(
+              expandedHeight: screenHeight * 0.3,
+              floating: false,
+              pinned: true,
+              flexibleSpace: FlexibleSpaceBar(
+                background: Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
                 ),
+              ),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
+              ),
+              backgroundColor: Colors.transparent,
+            ),
 
-                // Profile Details
-                Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.05, vertical: 20),
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
-                    ),
-                  ),
+            // Profile Content
+            SliverToBoxAdapter(
+              child: Padding(
+                  padding: EdgeInsets.all(screenWidth * 0.06),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Name & Year Badge
+                      // Name and Admin Badge
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  userModel.accountApiName,
+                                  style: TextStyle(
+                                    fontSize: screenHeight * 0.028,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  userModel.accountApiEmail,
+                                  style: TextStyle(
+                                    color: Colors.grey[500],
+                                    fontSize: screenHeight * 0.018,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                           Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: screenWidth * 0.02,
-                                vertical: screenHeight * 0),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: Colors.green.shade100,
-                              borderRadius: BorderRadius.circular(12),
+                              color: Colors.indigo.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
                             ),
                             child: const Text(
-                              "Eduvate Admin",
+                              "Administrator",
                               style: TextStyle(
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          // IconButton(
-                          //   icon: const Icon(Icons.edit, color: Colors.black),
-                          //   onPressed: () {
-                          //     Navigator.push(
-                          //       context,
-                          //       CustomPageRoute(
-                          //           page: MentorInfo1(
-                          //               mentorModel: mentorModel,
-                          //               userModel: userModel)),
-                          //     );
-                          //   },
-                          // ),
-                        ],
-                      ),
-
-                      Row(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(
-                                left: screenWidth * 0.02,
-                                top: screenHeight * 0.0),
-                            child: Text(
-                              userModel.accountApiName,
-                              style: TextStyle(
-                                  fontSize: screenHeight * 0.04,
-                                  fontWeight: FontWeight.bold),
+                                color: Color(0xFF1877F2),
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.03),
-                        child: Text(
-                          userModel.accountUsername,
-                          style: TextStyle(color: Colors.black54, fontSize: 30, fontWeight: FontWeight.w500),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.03,
-                            vertical: screenHeight * 0.01),
-                        child: Text(
-                          userModel.accountApiEmail,
-                          style: TextStyle(color: Colors.black54, fontSize: 14),
-                        ),
-                      ),
 
-                      const SizedBox(height: 20),
-                      Row(
-                        children: [],
-                      ),
-                      // About Section (Title Inside Border)
-                      _infoCardWithTitle("About",
-                          "A dedicated administrator with experience overseeing a digital mentorship platform designed to connect computer science students for guided learning, collaboration, and career development. Skilled in managing user engagement, streamlining mentor-mentee matching processes, and ensuring a seamless user experience. Passionate about fostering inclusive, tech-forward learning communities and leveraging technology to bridge the gap between academic learning and real-world application."),
+                      SizedBox(height: screenHeight * 0.02),
 
-                      const SizedBox(height: 20),
-                      // Row(
-                      //   children: [
-                      //     // Experience Section (60% width)
-                      //     Expanded(
-                      //       flex: 7,
-                      //       child: _experienceSection(screenHeight),
-                      //     ),
+                      // About Section
+                      _buildSectionTitle("About"),
+                      SizedBox(height: screenHeight * 0.01),
+                      _buildInfoCard(
+                          "As the administrator of Eduvate, I oversee the platform's operations, ensuring smooth functionality and user satisfaction. My role involves managing user accounts, resolving technical issues, and implementing platform improvements to enhance the mentorship experience for both mentors and mentees.",
+                          context),
 
-                      //     const SizedBox(width: 10),
+                      SizedBox(height: screenHeight * 0.02),
 
-                      //     // Mentorship Sessions (40% width)
-                      //     Expanded(
-                      //       flex: 3,
-                      //       child: _mentorshipCard("10",
-                      //           "Mentorship Sessions Completed", screenHeight),
-                      //     ),
-                      //   ],
-                      // ),
+                      // Responsibilities Section
+                      _buildSectionTitle("Key Responsibilities"),
+                      SizedBox(height: screenHeight * 0.01),
+                      _buildResponsibilityItem(
+                          "Platform Management", Icons.settings),
+                      _buildResponsibilityItem(
+                          "User Support", Icons.support_agent),
+                      _buildResponsibilityItem(
+                          "Content Moderation", Icons.verified_user),
+                      _buildResponsibilityItem(
+                          "Feature Implementation", Icons.developer_mode),
 
-                      // Experience Section with New UI
+                      SizedBox(height: screenHeight * 0.02),
 
-                      // const SizedBox(height: 20),
+                      // Contact Information
+                      _buildSectionTitle("Contact Information"),
+                      SizedBox(height: screenHeight * 0.01),
+                      _buildContactInfo(
+                          Icons.email, "Admin Email", "admin@eduvate.com"),
+                      _buildContactInfo(
+                          Icons.phone, "Support Line", "+63 (909) 915-3546"),
 
-                      // // Language Known
-                      // _sectionTitle("Language Known"),
-                      // Wrap(
-                      //   spacing: 8,
-                      //   children: [
-                      //     _languageChip("Waray-waray"),
-                      //     _languageChip("Cebuano"),
-                      //     _languageChip("Filipino"),
-                      //     _languageChip("English"),
-                      //   ],
-                      // ),
-
-                      // const SizedBox(height: 20),
-
-                      // // Social Links
-                      // _sectionTitle("Social Links"),
-                      // Row(
-                      //   children: [
-                      //     _socialIcon(Icons.facebook, Colors.blue),
-                      //     const SizedBox(width: 20),
-                      //     _socialIcon(Icons.link, Colors.blue.shade800),
-                      //   ],
-                      // ),
-
-                      // const SizedBox(height: 30),
+                      SizedBox(height: screenHeight * 0.04),
                     ],
-                  ),
-                ),
-              ],
+                  )),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF1877F2),
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(String text, BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: screenWidth * 0.035,
+            height: 1.5,
           ),
         ),
       ),
     );
   }
 
-  // Section Title Inside Border
-  Widget _infoCardWithTitle(String title, String text) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      margin: const EdgeInsets.only(top: 5),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildResponsibilityItem(String text, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5.0),
+      child: Row(
         children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Icon(icon, color: Color(0xFF1877F2), size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 16,
+              ),
+            ),
           ),
-          const SizedBox(height: 10),
-          Text(
-            text,
-            style: const TextStyle(fontSize: 14, color: Colors.black87),
-          ),
-          
         ],
       ),
     );
   }
 
-  // Experience Section with Improved UI
-  // Widget _experienceSection(double screenHeight) {
-  //   return Container(
-  //     height: screenHeight * 0.4,
-  //     padding: const EdgeInsets.all(12),
-  //     decoration: BoxDecoration(
-  //       color: Colors.blue.shade50,
-  //       borderRadius: BorderRadius.circular(12),
-  //     ),
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         const Text(
-  //           "Experience",
-  //           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-  //         ),
-  //         const SizedBox(height: 10),
-  //         _experienceItem("Product Designer at Google"),
-  //         _experienceItem("Product Designer at Google"),
-  //         _experienceItem("Product Designer at Google"),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  // Individual Experience Item
-  // Widget _experienceItem(String title) {
-  //   return Padding(
-  //     padding: const EdgeInsets.only(bottom: 8),
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         Text(
-  //           "• $title",
-  //           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-  //         ),
-  //         const SizedBox(height: 4),
-  //         const Text(
-  //           "Lorem ipsum dolor sit amet consectetur.",
-  //           style: TextStyle(fontSize: 14, color: Colors.black87),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  // Mentorship Card Widget
-  // Widget _mentorshipCard(String number, String label, double screenHeight) {
-  //   return Container(
-  //     padding: const EdgeInsets.all(16),
-  //     width: 120,
-  //     height: screenHeight * 0.4,
-  //     decoration: BoxDecoration(
-  //       color: Colors.green.shade100,
-  //       borderRadius: BorderRadius.circular(12),
-  //     ),
-  //     child: Column(
-  //       mainAxisAlignment:
-  //           MainAxisAlignment.center, // Centers content vertically
-  //       children: [
-  //         Text(
-  //           number,
-  //           style: const TextStyle(
-  //               fontSize: 32, fontWeight: FontWeight.bold, color: Colors.green),
-  //         ),
-  //         const SizedBox(height: 8), // Adds spacing between number and label
-  //         Text(
-  //           label,
-  //           textAlign: TextAlign.center,
-  //           style:
-  //               TextStyle(color: Colors.green, fontSize: screenHeight * 0.015),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  // // Section Title Widget
-  // Widget _sectionTitle(String title) {
-  //   return Text(
-  //     title,
-  //     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-  //   );
-  // }
-
-  // // Language Chip Widget
-  // Widget _languageChip(String text) {
-  //   return Theme(
-  //     data: ThemeData(
-  //       chipTheme: ChipThemeData(
-  //         shape: RoundedRectangleBorder(
-  //           side: BorderSide(color: Colors.transparent), // Transparent border
-  //           borderRadius: BorderRadius.circular(20), // Keeps rounded shape
-  //         ),
-  //       ),
-  //     ),
-  //     child: Chip(
-  //       label: Text(
-  //         text,
-  //         style:
-  //             const TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
-  //       ),
-  //       backgroundColor: Colors.blue.shade100,
-  //     ),
-  //   );
-  // }
-
-  // // Social Icon Widget
-  // Widget _socialIcon(IconData icon, Color color) {
-  //   return Container(
-  //     padding: const EdgeInsets.all(8),
-  //     decoration: BoxDecoration(
-  //       color: color.withOpacity(0.1),
-  //       shape: BoxShape.circle,
-  //     ),
-  //     child: Icon(icon, size: 30, color: color),
-  //   );
-  // }
+  Widget _buildContactInfo(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.grey[600], size: 22),
+          const SizedBox(width: 15),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.normal,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
