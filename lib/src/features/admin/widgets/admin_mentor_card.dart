@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:voyager/src/features/admin/controllers/course_mentor_controller.dart';
 import 'package:voyager/src/features/admin/controllers/create_mentor_controller.dart';
+import 'package:voyager/src/features/admin/controllers/admin_mentor_controller.dart';
 import 'package:voyager/src/features/admin/screens/mentors/mentor_profile.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
@@ -60,6 +61,7 @@ class AdminMentorCard extends StatelessWidget {
           if (confirmed == true) {
             await CourseMentorController()
                 .createCourseMentor(courseId!, mentorModel.mentorId);
+            await AdminMentorController().updateMentorStatus(mentorModel.mentorId, 'active');
             Navigator.pop(context);
           } else {
             Navigator.push(
