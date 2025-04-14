@@ -101,9 +101,8 @@ class _PostState extends State<Post> {
                   top: screenHeight * 0.013, left: screenHeight * 0.01),
               child: Text(
                 'Posts',
-                style: textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(
+                    fontSize: screenWidth * 0.07, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -111,22 +110,27 @@ class _PostState extends State<Post> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              radius: screenHeight * 0.03,
-              backgroundColor: Colors.grey[200],
-              child: IconButton(
-                icon: const FaIcon(FontAwesomeIcons.pen, color: Colors.black),
-                onPressed: () {
-                  videoPlaybackController.videoController
-                      .pause(); // ⏸️ Pause video here
-                  Navigator.push(
-                    context,
-                    CustomPageRoute(
-                      page: CreatePost(fromHome: true),
-                    ),
-                  );
-                },
+            child: IconButton(
+              icon: Container(
+                padding: const EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Theme.of(context).primaryColor.withOpacity(0.1),
+                ),
+                child: Icon(Icons.edit,
+                    color: Theme.of(context).primaryColor,
+                    size: screenWidth * 0.065),
               ),
+              onPressed: () {
+                // Handle the button press here
+                Navigator.push(
+                  context,
+                  CustomPageRoute(
+                    page: CreatePost(),
+                    direction: AxisDirection.left,
+                  ),
+                );
+              },
             ),
           ),
         ],

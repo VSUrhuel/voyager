@@ -5,14 +5,11 @@ import 'package:voyager/src/features/admin/screens/admin_dashboard.dart';
 import 'package:voyager/src/features/admin/screens/courses/course_list.dart';
 import 'package:voyager/src/features/admin/screens/home/admin_settings.dart';
 import 'package:voyager/src/features/admin/screens/mentors/mentor_list.dart';
-import 'package:voyager/src/features/admin/screens/profile/admin_profile.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/repository/authentication_repository_firebase/authentication_repository.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
-import 'package:voyager/src/widgets/custom_page_route.dart';
-import 'package:voyager/src/widgets/profile_list_tile.dart';
 
 class AdminHome extends StatefulWidget {
   const AdminHome({super.key});
@@ -183,8 +180,8 @@ class _AdminHomeState extends State<AdminHome> {
                 context,
                 MaterialPageRoute(builder: (context) => const CourseList()),
               ),
-              color: Colors.purple[50],
-              iconColor: Colors.purple,
+              color: Colors.green[50],
+              iconColor: Colors.green,
             ),
             const SizedBox(height: 24),
             Text(
@@ -274,7 +271,7 @@ class _AdminHomeState extends State<AdminHome> {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: screenWidth * 0.045,
+                      fontSize: screenWidth * 0.047,
                       fontWeight: FontWeight.w500,
                       color: theme.textTheme.bodyMedium?.color,
                     ),
@@ -283,7 +280,7 @@ class _AdminHomeState extends State<AdminHome> {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      fontSize: screenWidth * 0.04,
+                      fontSize: screenWidth * 0.033,
                       color:
                           theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                     ),

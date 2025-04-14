@@ -173,15 +173,15 @@ class _MentorInfo1State extends State<MentorInfo1> {
                           : controller.mentorYearLvl.text,
                       hintStyle: TextStyle(
                         fontSize: screenWidth * 0.04,
-                        height: 1,
-                        color: Colors.grey[600],
+                        fontWeight: FontWeight.normal,
                         fontStyle: FontStyle.italic,
+                        color: Colors.black,
                       ),
                       labelStyle: TextStyle(
                         fontSize: screenWidth * 0.04,
-                        height: 1,
-                        color: Colors.grey[600],
-                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.normal,
+                        fontStyle: FontStyle.normal,
+                        color: Colors.black,
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
