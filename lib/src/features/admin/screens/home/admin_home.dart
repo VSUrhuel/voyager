@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:voyager/src/features/admin/screens/admin_dashboard.dart';
 import 'package:voyager/src/features/admin/screens/courses/course_list.dart';
+import 'package:voyager/src/features/admin/screens/home/admin_settings.dart';
 import 'package:voyager/src/features/admin/screens/mentors/mentor_list.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/repository/authentication_repository_firebase/authentication_repository.dart';
@@ -183,6 +184,36 @@ class _AdminHomeState extends State<AdminHome> {
               iconColor: Colors.green,
             ),
             const SizedBox(height: 24),
+            Text(
+              'Admin Tools',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            ProfileListTile(
+              iconData: Icons.person,
+              text: 'Admin Profile',
+              onTap: () => Navigator.of(context).push(
+                CustomPageRoute(
+                  page: const AdminProfile(),
+                  direction: AxisDirection.left,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            ProfileListTile(
+              iconData: Icons.settings,
+              text: 'Settings',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AdminSettings(),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),

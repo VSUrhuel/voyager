@@ -2,32 +2,54 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:voyager/src/features/mentor/screens/input_information/mentor_info1.dart';
+import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
+import 'package:voyager/src/widgets/custom_page_route.dart';
 
-class MentorProfile extends StatelessWidget {
+class MentorProfile extends StatefulWidget {
+  const MentorProfile(
+      {super.key, required this.mentorModel, required this.user});
   final MentorModel mentorModel;
   final UserModel user;
 
-  const MentorProfile(
-      {super.key, required this.mentorModel, required this.user});
+  @override
+  State<MentorProfile> createState() =>
+      _MentorProfileState();
+}
+
+class _MentorProfileState extends State<MentorProfile> {
+  FirestoreInstance firestore = FirestoreInstance();
+  late MentorModel mentorModel;
+  late UserModel userModel;
+
+  @override
+  void initState() {
+    super.initState();
+    mentorModel = widget.mentorModel;
+    userModel = widget.user;
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final supabase = Supabase.instance.client;
-    final imageUrl = (user.accountApiPhoto.isNotEmpty)
-        ? (user.accountApiPhoto.startsWith('http')
-            ? user.accountApiPhoto
+    final imageUrl = (userModel.accountApiPhoto.isNotEmpty)
+        ? (userModel.accountApiPhoto.startsWith('http')
+            ? userModel.accountApiPhoto
             : supabase.storage
                 .from('profile-picture')
-                .getPublicUrl(user.accountApiPhoto))
+                .getPublicUrl(userModel.accountApiPhoto))
         : 'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/profile-picture/profile.png';
 
     String toTitleCase(String name) {
+      if (name.isEmpty) return name;
+      if (name.length == 1) return name.toUpperCase();
       return name
           .toLowerCase()
           .split(' ')
@@ -37,7 +59,7 @@ class MentorProfile extends StatelessWidget {
           .join(' ');
     }
 
-    final formattedName = toTitleCase(user.accountApiName);
+    final formattedName = toTitleCase(userModel.accountApiName);
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
         statusBarColor: Colors.white,
@@ -95,21 +117,34 @@ class MentorProfile extends StatelessWidget {
                     children: [
                       // Name & Year Badge
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Container(
                             padding: EdgeInsets.symmetric(
                                 horizontal: screenWidth * 0.02,
-                                vertical: screenHeight * 0.001),
+                                vertical: screenHeight * 0),
                             decoration: BoxDecoration(
                               color: Colors.green.shade100,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
                               mentorModel.mentorYearLvl,
-                              style: const TextStyle(
+                              style: TextStyle(
                                   color: Colors.green,
                                   fontWeight: FontWeight.bold),
                             ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.black),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                CustomPageRoute(
+                                    page: MentorInfo1(
+                                        mentorModel: mentorModel,
+                                        userModel: userModel)),
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -119,7 +154,7 @@ class MentorProfile extends StatelessWidget {
                           Padding(
                             padding: EdgeInsets.only(
                                 left: screenWidth * 0.02,
-                                top: screenHeight * 0.01),
+                                top: screenHeight * 0.0),
                             child: Text(
                               formattedName,
                               style: TextStyle(
@@ -133,7 +168,7 @@ class MentorProfile extends StatelessWidget {
                         padding: EdgeInsets.symmetric(
                             horizontal: screenWidth * 0.03),
                         child: Text(
-                          user.accountApiEmail,
+                          userModel.accountApiEmail,
                           style: TextStyle(color: Colors.black54, fontSize: 14),
                         ),
                       ),
@@ -190,10 +225,15 @@ class MentorProfile extends StatelessWidget {
                       Row(
                         children: [
                           _socialIcon(Icons.facebook, Colors.blue,
-                              mentorModel.mentorFbUrl, context),
+                              mentorModel.mentorFbUrl.startsWith('http')? mentorModel.mentorFbUrl:
+                              'https://${mentorModel.mentorFbUrl}', context),
                           const SizedBox(width: 20),
-                          _socialIcon(Icons.link, Colors.blue.shade800,
-                              mentorModel.mentorGitUrl, context),
+                          _socialIcon(
+                              FontAwesomeIcons.github,
+                              Colors.blue.shade800,
+                              mentorModel.mentorGitUrl.startsWith('http')? mentorModel.mentorGitUrl:
+                              'https://${mentorModel.mentorGitUrl}',
+                              context),
                         ],
                       ),
 
@@ -209,7 +249,7 @@ class MentorProfile extends StatelessWidget {
     );
   }
 
-  // Section Title Inside Border
+// Section Title Inside Border
   Widget _infoCardWithTitle(String title, String text) {
     return Container(
       width: double.infinity,
@@ -364,29 +404,16 @@ class MentorProfile extends StatelessWidget {
           EdgeInsets.only(bottom: MediaQuery.of(context).size.height * 0.01),
       child: InkWell(
         onTap: () async {
-          // Try parsing the URL to avoid errors with invalid URLs
           final uri = Uri.tryParse(url);
-
-          // Check if the URL is valid
+          print(uri);
           if (uri != null) {
-            // Try to launch the URL
-            if (await canLaunchUrl(uri)) {
-              await launchUrl(uri, mode: LaunchMode.externalApplication);
-            } else {
-              // Show a Snackbar if the URL can't be launched
+            if (!await launchUrl(uri)) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Could not open $url'),
+                  content: Text('Failed to open $uri! Contact your mentor.'),
                 ),
               );
             }
-          } else {
-            // Handle invalid URL case
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Invalid URL: $url'),
-              ),
-            );
           }
         },
         child: Container(

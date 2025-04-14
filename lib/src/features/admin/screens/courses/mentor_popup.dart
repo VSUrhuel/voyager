@@ -28,22 +28,22 @@ class _MentorPopupState extends State<MentorPopup> {
   @override
   void initState() {
     super.initState();
-    show = 'active';
+    show = 'archived';
     getMentors(show);
   }
 
   Future<void> getMentors(show) async {
     List<MentorModel> mentors = [];
-    List<CourseMentorModel> courseMentors = [];
+    // List<CourseMentorModel> courseMentors = [];
     isLoading = true;
     try {
-      courseMentors =
-          await firestore.getCourseMentorsThroughCourseId(widget.course);
+      // courseMentors =
+      //     await firestore.getCourseMentorsThroughCourseId(widget.course);
       mentors = await firestore.getMentorsThroughStatus(show);
-      final assignedMentorIds = courseMentors.map((cm) => cm.mentorId).toSet();
-      mentors = mentors
-          .where((mentor) => !assignedMentorIds.contains(mentor.mentorId))
-          .toList();
+      // final assignedMentorIds = courseMentors.map((cm) => cm.mentorId).toSet();
+      // mentors = mentors
+      //     .where((mentor) => !assignedMentorIds.contains(mentor.mentorId))
+      //     .toList();
     } catch (e) {
       throw Exception('Failed to fetch mentors: $e');
     }
