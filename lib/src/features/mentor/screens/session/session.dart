@@ -35,7 +35,7 @@ class Session extends StatelessWidget {
                 'My Sessions',
                 style: TextStyle(
                   color: Colors.black,
-                  fontSize: screenHeight * 0.037, // Adjust font size as needed
+                  fontSize: screenWidth * 0.07, // Adjust font size as needed
                   fontWeight: FontWeight.bold, // Bold
                 ),
               ),
@@ -47,23 +47,24 @@ class Session extends StatelessWidget {
           Padding(
             padding:
                 const EdgeInsets.only(right: 16.0), // Add padding to the right
-            child: CircleAvatar(
-              // Adjust size as needed
-              radius: screenHeight * 0.03,
-              backgroundColor: Colors.grey[200], // Light grey background
-              child: IconButton(
-                icon: FaIcon(
-                  FontAwesomeIcons.calendarDay,
-                  color: Colors.black,
+            child: IconButton(
+              icon: Container(
+                padding: const EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Theme.of(context).primaryColor.withOpacity(0.1),
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    CustomPageRoute(page: CalendarView()),
-                  );
-                  // Handle notification tap
-                },
+                child: Icon(Icons.calendar_month,
+                    color: Theme.of(context).primaryColor,
+                    size: screenWidth * 0.069),
               ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  CustomPageRoute(page: CalendarView()),
+                );
+                // Handle notification tap
+              },
             ),
           ),
         ],

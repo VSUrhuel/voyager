@@ -133,9 +133,8 @@ class PostController {
       if (isLoading.value) return;
       isLoading.value = true;
       error.value = '';
-      PostsResult postsResult = await getPosts(
-        limit: _limit,
-      );
+      PostsResult postsResult =
+          await getPosts(limit: _limit, lastPostTimestamp: DateTime.now());
       WidgetsBinding.instance.addPostFrameCallback((_) {
         posts.assignAll(postsResult.posts);
         lastTimesTamp = postsResult.lastTimestamp;

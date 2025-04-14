@@ -13,7 +13,7 @@ import 'package:voyager/src/widgets/profile_list_tile.dart';
 class AdminProfile extends StatefulWidget {
   const AdminProfile({super.key});
 
-    @override
+  @override
   State<AdminProfile> createState() => _AdminProfileState();
 }
 
@@ -21,14 +21,14 @@ class _AdminProfileState extends State<AdminProfile> {
   FirestoreInstance firestore = FirestoreInstance();
   late UserModel userModel;
 
-    @override
+  @override
   void initState() {
     super.initState();
     fetchData();
   }
-    void fetchData() async {
-    userModel = await firestore.getUser(FirebaseAuth.instance.currentUser!
-        .uid); 
+
+  void fetchData() async {
+    userModel = await firestore.getUser(FirebaseAuth.instance.currentUser!.uid);
   }
 
   @override
@@ -68,33 +68,38 @@ class _AdminProfileState extends State<AdminProfile> {
             SizedBox(height: screenHeight * 0.01),
             //Add ProfileListTile widget
             ProfileListTile(
+              iconData: Icons.person,
               text: "Personal Information",
-              onTap: () async{
+              onTap: () async {
                 Navigator.push(
                   context,
-                CustomPageRoute(page: AdminPersonalInformation(userModel: userModel)),
+                  CustomPageRoute(
+                      page: AdminPersonalInformation(userModel: userModel)),
                 );
               },
             ),
             ProfileListTile(
+              iconData: Icons.lock,
               text: "Security and Password",
               onTap: () {
                 Navigator.push(
                   context,
-                CustomPageRoute(page: AdminSecuritySettingsScreen()),
+                  CustomPageRoute(page: AdminSecuritySettingsScreen()),
                 );
               },
             ),
             ProfileListTile(
+              iconData: Icons.verified_user,
               text: "User agreement",
               onTap: () {
                 Navigator.push(
                   context,
-                CustomPageRoute(page: UserAgreement()),
+                  CustomPageRoute(page: UserAgreement()),
                 );
               },
             ),
             ProfileListTile(
+              iconData: Icons.info,
               text: "About",
               onTap: () {
                 Navigator.push(
@@ -104,7 +109,6 @@ class _AdminProfileState extends State<AdminProfile> {
               },
             ),
           ],
-        )
-        );
+        ));
   }
 }

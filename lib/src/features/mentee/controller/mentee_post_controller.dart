@@ -8,7 +8,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:voyager/src/features/mentor/model/content_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 
 class MenteePostController {
   static MenteePostController get instance => Get.find();
