@@ -1,5 +1,5 @@
-import 'package:voyager/src/features/mentor/screens/profile/mentor_profile.dart';
-import 'package:voyager/src/features/mentor/widget/toggle_button.dart';
+import 'package:voyager/src/features/mentee/screens/session/mentee_calendar.dart';
+import 'package:voyager/src/features/mentee/widgets/mentee_toggle.dart'; // Updated import
 import 'package:voyager/src/widgets/custom_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -59,28 +59,23 @@ class Session extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    CustomPageRoute(page: MentorProfile()),
+                    CustomPageRoute(page: MenteeCalendarView()),
                   );
-                  // Handle notification tap
                 },
               ),
             ),
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Center(
-            child: Padding(
-                padding: EdgeInsets.only(
-                    left: screenWidth * 0.06,
-                    right: screenWidth * 0.05,
-                    top: screenHeight * 0.00),
-                child: Column(children: [
-                  ToggleButton(),
-                  //CompletedSchedCard(),
-                  //UpcomingSchedCard()
-                ]))),
-      ),
+      body: Center(
+          child: Padding(
+              padding: EdgeInsets.only(
+                  left: screenWidth * 0.06,
+                  right: screenWidth * 0.05,
+                  top: screenHeight * 0.00),
+              child: Column(children: [
+                MenteeToggle(), // Updated to use MenteeToggle
+              ]))),
     );
   }
 }
