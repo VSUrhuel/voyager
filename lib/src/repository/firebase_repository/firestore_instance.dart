@@ -298,7 +298,8 @@ class FirestoreInstance {
     }
   }
 
-  Future<List<ScheduleModel>> getScheduleByDay(DateTime date) async {
+  Future<List<ScheduleModel>> getScheduleByDay(
+      DateTime date, String courseMentorId) async {
     try {
       DateTime dateOnly = DateTime(date.year, date.month, date.day);
       DateTime nextDay = dateOnly.add(Duration(days: 1));
@@ -306,10 +307,12 @@ class FirestoreInstance {
           .collection('schedule')
           .where('scheduleDate', isGreaterThanOrEqualTo: dateOnly)
           .where('scheduleDate', isLessThan: nextDay)
+          .orderBy('scheduleDate')
           .get();
 
       if (schedule.docs.isNotEmpty) {
         return schedule.docs
+            .where((doc) => doc['courseMentorId'] == courseMentorId)
             .map((doc) => ScheduleModel.fromJson(doc.data()))
             .toList();
       } else {
@@ -1037,7 +1040,6 @@ class FirestoreInstance {
       rethrow;
     }
   }
-
 
   Future<String> getMenteeStatus(String mcaId) async {
     try {
