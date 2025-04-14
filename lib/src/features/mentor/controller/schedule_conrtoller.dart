@@ -81,7 +81,15 @@ class ScheduleConrtoller extends GetxController {
           await firestore.getMentorID(FirebaseAuth.instance.currentUser!.uid);
 
       String courseMentorId = await firestore.getCourseMentorDocId(mentor);
-      return await firestore.getUpcomingSchedule(courseMentorId);
+      List<ScheduleModel> upcomingSchedules =
+          await firestore.getUpcomingSchedule(courseMentorId);
+
+      // Sort the schedules by time posted (scheduleStartTime)
+      upcomingSchedules.sort((a, b) => firestore
+          .parseTimeString(a.scheduleStartTime)
+          .compareTo(firestore.parseTimeString(b.scheduleStartTime)));
+
+      return upcomingSchedules;
     } catch (e) {
       throw Exception("Failed to fetch schedule sessions: $e");
     }
@@ -135,8 +143,11 @@ class ScheduleConrtoller extends GetxController {
       DateTime parsedDate = DateTime.parse(date);
       DateTime dateOnly =
           DateTime(parsedDate.year, parsedDate.month, parsedDate.day);
-
-      return await firestore.getScheduleByDay(dateOnly);
+      MentorModel mentor = await firestore
+          .getMentorThroughAccId(FirebaseAuth.instance.currentUser!.uid);
+      String courseMentorId =
+          await firestore.getCourseMentorId(mentor.mentorId);
+      return await firestore.getScheduleByDay(dateOnly, courseMentorId);
     } catch (e) {
       throw Exception("Failed to fetch schedule sessions: $e");
     }
