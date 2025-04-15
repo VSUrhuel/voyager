@@ -27,17 +27,13 @@ class SmallCourseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final theme = Theme.of(context);
+    final currentUser = FirebaseAuth.instance.currentUser;
 
     final startDate =
         DateFormat('MMM dd').format(courseModel.courseCreatedTimestamp);
     final endDate =
         DateFormat('MMM dd').format(courseModel.courseModifiedTimestamp);
-
-    final currentUser = FirebaseAuth.instance.currentUser;
-    final userEmail = currentUser?.email ?? '';
-    final userId = firestoreInstance.getUserDocIdThroughEmail(userEmail);
 
     final supabase = Supabase.instance.client;
     final imageUrl = (courseModel.courseImgUrl.isNotEmpty)
@@ -52,162 +48,133 @@ class SmallCourseCard extends StatelessWidget {
       future: fetchTotalMentors(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          return const Center(child: CircularProgressIndicator());
         }
 
         final totalMentor = snapshot.data ?? 0;
 
         return Card(
-          color: Colors.white,
-          elevation: 2,
+          elevation: 1,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(10),
-            ),
+            borderRadius: BorderRadius.circular(12),
           ),
-          child: Padding(
-            padding: EdgeInsets.all(4.0),
-            child: Column(
-              children: [
-                // Display
-                Row(
-                  children: [
-                    // Left Half (Image)
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(10),
-                          bottomLeft: Radius.circular(10),
-                        ),
-                        color: Colors.black,
-                      ),
-                      width: screenWidth * 0.25,
-                      height: screenHeight * 0.22,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(10),
-                          bottomLeft: Radius.circular(10),
-                        ),
-                        child: Image.network(
-                          imageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Icon(Icons.broken_image, color: Colors.white),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () {
+              if (currentUser == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please sign in to enroll')),
+                );
+                return;
+              }
+              firestoreInstance
+                  .getUserDocIdThroughEmail(currentUser.email!)
+                  .then((userId) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EnrollCourse(
+                      courseModel: courseModel,
+                      userId: userId,
+                    ),
+                  ),
+                );
+              });
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Course Image
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: AspectRatio(
+                      aspectRatio: 16 / 9,
+                      child: Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: theme.colorScheme.surfaceVariant,
+                          child:
+                              const Center(child: Icon(Icons.image, size: 40)),
                         ),
                       ),
                     ),
+                  ),
 
-                    // Right Half
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(10),
-                          bottomRight: Radius.circular(10),
+                  const SizedBox(height: 12),
+
+                  // Course Title
+                  Text(
+                    '${courseModel.courseCode} - ${courseModel.courseName}',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // Stats Row
+                  Row(
+                    children: [
+                      Icon(Icons.people,
+                          size: 16, color: theme.colorScheme.primary),
+                      const SizedBox(width: 4),
+                      Text('$totalMentor', style: theme.textTheme.bodySmall),
+                      const SizedBox(width: 12),
+                      Icon(Icons.calendar_today,
+                          size: 16, color: theme.colorScheme.primary),
+                      const SizedBox(width: 4),
+                      Text('Modified on $startDate',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          )),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Enroll Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        color: Colors.grey[800],
                       ),
-                      width: screenWidth * 0.6,
-                      height: screenHeight * 0.22,
-                      child: Column(
-                        children: [
-                          // Header
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Text(
-                                    "${courseModel.courseCode} - ${courseModel.courseName}",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          // Details
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              children: [
-                                SizedBox(width: screenWidth * 0.05),
-                                Column(
-                                  children: [
-                                    Icon(
-                                      Icons.group,
-                                      color: Colors.white,
-                                      size: screenWidth * 0.08,
-                                    ),
-                                    Text(
-                                      "$totalMentor Mentors",
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 10),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(width: screenWidth * 0.05),
-                                Column(
-                                  children: [
-                                    FaIcon(
-                                      FontAwesomeIcons.peopleGroup,
-                                      color: Colors.white,
-                                      size: screenWidth * 0.08,
-                                    ),
-                                    Text(
-                                      "1 Semester",
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 10),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-                SizedBox(height: screenHeight * 0.01),
-                // Bottom section
-                Row(
-                  children: [
-                    Text("Start on $startDate - $endDate"),
-                    SizedBox(width: screenWidth * 0.03),
-                    ElevatedButton(
                       onPressed: () {
-                        if (userEmail.isEmpty) {
+                        if (currentUser == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Please sign in to enroll')),
+                            const SnackBar(
+                                content: Text('Please sign in to enroll')),
                           );
                           return;
                         }
-
-                        userId.then((resolvedUserId) {
+                        firestoreInstance
+                            .getUserDocIdThroughEmail(currentUser.email!)
+                            .then((userId) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => EnrollCourse(
                                 courseModel: courseModel,
-                                userId: resolvedUserId,
+                                userId: userId,
                               ),
                             ),
                           );
-                        }).catchError((error) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error: $error')),
-                          );
                         });
                       },
-                      child: Text("Enroll Now"),
+                      child: const Text('Enroll Now'),
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
           ),
         );

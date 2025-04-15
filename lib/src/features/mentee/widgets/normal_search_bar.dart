@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 
-class NormalSearchbar extends StatelessWidget {
-  const NormalSearchbar({super.key});
+class NormalSearchbar extends StatefulWidget {
+  const NormalSearchbar({super.key, this.searchController});
+  final TextEditingController? searchController;
 
+  @override
+  State<NormalSearchbar> createState() => _NormalSearchbarState();
+}
+
+class _NormalSearchbarState extends State<NormalSearchbar> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -19,6 +25,7 @@ class NormalSearchbar extends StatelessWidget {
           children: [
             Expanded(
               child: TextField(
+                controller: widget.searchController,
                 decoration: InputDecoration(
                   hintText: 'Search',
                   border: InputBorder.none, // Remove default underline
