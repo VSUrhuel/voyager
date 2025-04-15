@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/controller/mentee_schedule_controller.dart';
+import 'package:voyager/src/features/mentee/screens/session/completed_card.dart';
 import 'package:voyager/src/features/mentee/screens/session/upcoming_card.dart';
 import 'package:voyager/src/features/mentor/model/schedule_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
@@ -93,12 +94,25 @@ class _MenteeSessionCompletedState extends State<MenteeSessionCompleted> {
           //padding: const EdgeInsets.all(5),
           itemCount: completedSessions.length,
           itemBuilder: (context, index) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 2),
-              child: UpcomingCard(
-                scheduleModel: completedSessions[index],
-                email: completedMentors[index].accountApiEmail,
-              ),
+            return FutureBuilder<String>(
+              future: menteeScheduleController.getCourseNameFromCourseMentorId(
+                  completedSessions[index].courseMentorId),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return const Center(child: Text("Error loading course name"));
+                } else {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 2),
+                    child: CompletedCard(
+                      scheduleModel: completedSessions[index],
+                      email: completedMentors[index].accountApiEmail,
+                      courseName: snapshot.data ?? "Unknown Course",
+                    ),
+                  );
+                }
+              },
             );
           },
         ),

@@ -371,4 +371,32 @@ class MenteeScheduleController extends GetxController {
       return [];
     }
   }
+
+  Future<String> getCourseNameFromCourseMentorId(String courseMentorId) async {
+    try {
+      // Step 1: Get the courseMentor document
+      final courseMentorDoc =
+          await _db.collection('courseMentor').doc(courseMentorId).get();
+      final courseMentorData = courseMentorDoc.data();
+
+      if (courseMentorData == null || courseMentorData['courseId'] == null) {
+        throw Exception("Course ID not found in courseMentor document");
+      }
+
+      final courseId = courseMentorData['courseId'];
+
+      // Step 2: Get the course document
+      final courseDoc = await _db.collection('course').doc(courseId).get();
+      final courseData = courseDoc.data();
+
+      if (courseData == null || courseData['courseName'] == null) {
+        throw Exception("Course name not found in course document");
+      }
+
+      return courseData['courseName'];
+    } catch (e) {
+      print("❌ Error fetching course name: $e");
+      throw Exception("Failed to fetch course name: $e");
+    }
+  }
 }

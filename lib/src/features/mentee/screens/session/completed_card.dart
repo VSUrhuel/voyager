@@ -7,21 +7,23 @@ import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/model/schedule_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 
-class UpcomingCard extends StatefulWidget {
-  const UpcomingCard({
+class CompletedCard extends StatefulWidget {
+  const CompletedCard({
     super.key,
     required this.email,
     required this.scheduleModel,
+    required this.courseName, // Add course name
   });
 
   final String email;
   final ScheduleModel scheduleModel;
+  final String courseName; // Add this line
 
   @override
-  State<UpcomingCard> createState() => _UpcomingCardState();
+  State<CompletedCard> createState() => _CompletedCardState();
 }
 
-class _UpcomingCardState extends State<UpcomingCard> {
+class _CompletedCardState extends State<CompletedCard> {
   late final FirestoreInstance _firestoreInstance;
   UserModel? _user;
   bool _isLoading = true;
@@ -53,7 +55,6 @@ class _UpcomingCardState extends State<UpcomingCard> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final isSmallScreen = screenWidth < 360 || screenHeight < 700;
 
     if (_isLoading) {
       return Center(
@@ -70,10 +71,7 @@ class _UpcomingCardState extends State<UpcomingCard> {
           padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
           child: Text(
             "Failed to load user data",
-            style: TextStyle(
-              fontSize:
-                  isSmallScreen ? screenWidth * 0.04 : screenWidth * 0.045,
-            ),
+            style: TextStyle(fontSize: screenWidth * 0.045),
           ),
         ),
       );
@@ -88,178 +86,133 @@ class _UpcomingCardState extends State<UpcomingCard> {
         borderRadius: BorderRadius.circular(screenWidth * 0.03),
       ),
       elevation: 1,
-      child: Padding(
-        padding: EdgeInsets.all(screenWidth * 0.03),
-        child: MeetingCard(
-          scheduleModel: widget.scheduleModel,
-          user: _user!,
-          isSmallScreen: isSmallScreen,
-        ),
+      child: CompletedMeetingCard(
+        scheduleModel: widget.scheduleModel,
+        user: _user!,
+        courseName: widget.courseName, // Pass course name here
       ),
     );
   }
 }
 
-class MeetingCard extends StatelessWidget {
-  const MeetingCard({
+class CompletedMeetingCard extends StatelessWidget {
+  const CompletedMeetingCard({
     super.key,
     required this.scheduleModel,
     required this.user,
-    required this.isSmallScreen,
+    required this.courseName, // Receive course name
   });
 
   final ScheduleModel scheduleModel;
   final UserModel user;
-  final bool isSmallScreen;
+  final String courseName;
+
+  String _getProfileImageUrl() {
+    if (user.accountApiPhoto.isEmpty) {
+      return 'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/profile-picture/profile.png';
+    }
+    return user.accountApiPhoto.startsWith('http')
+        ? user.accountApiPhoto
+        : Supabase.instance.client.storage
+            .from('profile-picture')
+            .getPublicUrl(user.accountApiPhoto);
+  }
+
+  String formatName(String name) {
+    return name.split(' ').map((word) {
+      if (word.isEmpty) return '';
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final fullName = _formatName(user.accountUsername);
+    final profileImageUrl = _getProfileImageUrl();
+    final dateTimeFormatted =
+        "${DateFormat.yMMMd().format(scheduleModel.scheduleDate)} - ${scheduleModel.scheduleStartTime}";
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "${DateFormat('MMM d, y').format(scheduleModel.scheduleDate)} • ${scheduleModel.scheduleStartTime}",
-              style: TextStyle(
-                fontSize:
-                    isSmallScreen ? screenWidth * 0.04 : screenWidth * 0.045,
-                fontWeight: FontWeight.bold,
-              ),
+    return Padding(
+      padding: EdgeInsets.all(screenWidth * 0.04),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Course name at the top
+          Text(
+            courseName,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
             ),
-            Text(
-              _getRemainingTime(scheduleModel),
-              style: TextStyle(
-                fontSize:
-                    isSmallScreen ? screenWidth * 0.035 : screenWidth * 0.04,
-                color: const Color(0xFF52CA82),
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: screenHeight * 0.015),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildProfileImage(user),
-            SizedBox(width: screenWidth * 0.03),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    fullName,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: isSmallScreen
-                          ? screenWidth * 0.04
-                          : screenWidth * 0.045,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+          ),
+          SizedBox(height: screenHeight * 0.015),
+
+          Row(
+            children: [
+              CachedNetworkImage(
+                imageUrl: profileImageUrl,
+                imageBuilder: (context, imageProvider) => CircleAvatar(
+                  radius: 24,
+                  backgroundImage: imageProvider,
+                ),
+                placeholder: (context, url) => CircleAvatar(
+                  radius: 24,
+                  backgroundColor: Colors.grey[200],
+                  child: const CircularProgressIndicator(strokeWidth: 2),
+                ),
+                errorWidget: (context, url, error) => CircleAvatar(
+                  radius: 24,
+                  backgroundColor: Colors.grey[200],
+                  child: Icon(
+                    Icons.person,
+                    size: 24,
+                    color: Colors.grey[600],
                   ),
-                  SizedBox(height: screenHeight * 0.005),
-                  Text(
-                    scheduleModel.scheduleTitle,
-                    style: TextStyle(
-                      fontSize: isSmallScreen
-                          ? screenWidth * 0.035
-                          : screenWidth * 0.04,
-                      color: Colors.grey[700],
+                ),
+              ),
+              SizedBox(width: screenWidth * 0.04),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      formatName(user.accountApiName),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: isSmallScreen ? 2 : 3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+                    SizedBox(height: screenHeight * 0.005),
+                    Text(
+                      scheduleModel.scheduleTitle,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: screenHeight * 0.015),
+          const Divider(),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              dateTimeFormatted,
+              style: const TextStyle(
+                fontSize: 13,
+                color: Colors.black87,
               ),
             ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildProfileImage(UserModel user) {
-    final url = _getProfileImageUrl(user.accountApiPhoto);
-
-    return CachedNetworkImage(
-      imageUrl: url,
-      imageBuilder: (context, imageProvider) => CircleAvatar(
-        radius: isSmallScreen ? 20 : 25,
-        backgroundImage: imageProvider,
-      ),
-      placeholder: (_, __) => CircleAvatar(
-        radius: isSmallScreen ? 20 : 25,
-        backgroundColor: Colors.grey[200],
-        child: const CircularProgressIndicator(strokeWidth: 2),
-      ),
-      errorWidget: (_, __, ___) => CircleAvatar(
-        radius: isSmallScreen ? 20 : 25,
-        backgroundColor: Colors.grey[200],
-        child: Icon(
-          Icons.person,
-          size: isSmallScreen ? 20 : 25,
-          color: Colors.grey[600],
-        ),
+          ),
+        ],
       ),
     );
-  }
-
-  String _getProfileImageUrl(String apiPhoto) {
-    if (apiPhoto.isEmpty) {
-      return 'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/profile-picture/profile.png';
-    }
-    return apiPhoto.startsWith('http')
-        ? apiPhoto
-        : Supabase.instance.client.storage
-            .from('profile-picture')
-            .getPublicUrl(apiPhoto);
-  }
-
-  String _formatName(String? name) {
-    if (name == null || name.trim().isEmpty) return "Unknown";
-
-    final parts = name.trim().split(" ");
-    if (parts.length == 1) return _capitalize(parts.first);
-
-    final initials = parts
-        .sublist(0, parts.length - 1)
-        .map((e) => e[0].toUpperCase())
-        .join();
-    final lastName = _capitalize(parts.last);
-
-    return "$initials $lastName";
-  }
-
-  String _capitalize(String s) =>
-      s[0].toUpperCase() + s.substring(1).toLowerCase();
-
-  String _getRemainingTime(ScheduleModel model) {
-    final instance = Get.find<FirestoreInstance>();
-    final startTime = instance.parseTimeString(model.scheduleStartTime);
-    final sessionDate = DateTime(
-        model.scheduleDate.year,
-        model.scheduleDate.month,
-        model.scheduleDate.day,
-        startTime.hour,
-        startTime.minute);
-    final now = DateTime.now();
-    final diff = sessionDate.difference(now);
-
-    if (diff.isNegative) return "Session ended";
-    if (diff.inMinutes == 0) return "Starting now";
-    if (diff.inMinutes == 1) return "1 min to go";
-    if (diff.inMinutes < 60) return "${diff.inMinutes} mins to go";
-    if (diff.inHours == 1) return "1 hour to go";
-    if (diff.inHours < 24) return "${diff.inHours} hours to go";
-    if (diff.inDays == 1) return "1 day to go";
-
-    return "${diff.inDays} days to go";
   }
 }
