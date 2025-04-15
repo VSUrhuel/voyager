@@ -5,8 +5,28 @@ import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 
-class MentorsList extends StatelessWidget {
+class MentorsList extends StatefulWidget {
   const MentorsList({super.key});
+
+  @override
+  State<MentorsList> createState() => _MentorsListState();
+}
+
+class _MentorsListState extends State<MentorsList> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchText = '';
+  bool _isSearching = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      setState(() {
+        _searchText = _searchController.text;
+        _isSearching = _searchText.isNotEmpty;
+      });
+    });
+  }
 
   Future<List<MentorCard>> fetchMentorsWithDetails() async {
     FirestoreInstance firestoreInstance = FirestoreInstance();
@@ -19,12 +39,24 @@ class MentorsList extends StatelessWidget {
           firestoreInstance.getMentorThroughAccId(user.accountApiID)));
 
       // Return list of MentorCard widgets with fetched data
-      return List.generate(users.length, (index) {
+      List<MentorCard> mentors = List.generate(users.length, (index) {
         return MentorCard(
           mentorModel: mentorDetails[index],
           user: users[index],
         );
       });
+
+      if (_isSearching) {
+        mentors = mentors.where((mentor) {
+          return mentor.user.accountApiName
+                  .toLowerCase()
+                  .contains(_searchText.toLowerCase()) ||
+              mentor.user.accountApiName
+                  .toLowerCase()
+                  .contains(_searchText.toLowerCase());
+        }).toList();
+      }
+      return mentors;
     } catch (e) {
       print("Error fetching mentors: $e");
       return []; // Return an empty list in case of an error
@@ -57,7 +89,7 @@ class MentorsList extends StatelessWidget {
       ),
       body: Column(
         children: [
-          NormalSearchbar(),
+          NormalSearchbar(searchController: _searchController),
           Expanded(
             child: FutureBuilder<List<MentorCard>>(
               future: fetchMentorsWithDetails(),

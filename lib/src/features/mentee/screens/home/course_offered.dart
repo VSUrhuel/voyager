@@ -7,8 +7,28 @@ import 'package:voyager/src/features/mentee/widgets/small_course_card.dart';
 import 'package:flutter/material.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 
-class CourseOffered extends StatelessWidget {
+class CourseOffered extends StatefulWidget {
   const CourseOffered({super.key});
+
+  @override
+  State<CourseOffered> createState() => _CourseOfferedState();
+}
+
+class _CourseOfferedState extends State<CourseOffered> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchText = '';
+  bool _isSearching = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      setState(() {
+        _searchText = _searchController.text;
+        _isSearching = _searchText.isNotEmpty;
+      });
+    });
+  }
 
   Future<List<CourseModel>> fetchCoursesWithDetails(String userEmail) async {
     try {
@@ -30,11 +50,19 @@ class CourseOffered extends StatelessWidget {
       final List<String> enrolledCourseNames =
           enrolledCourses.map((course) => course.courseName).toList();
 
-      final List<CourseModel> availableCourses = allCourses.where((course) {
+      List<CourseModel> availableCourses = allCourses.where((course) {
         return !enrolledCourseNames.contains(course.courseName) &&
             course.courseSoftDelete == false &&
             course.courseStatus == 'active';
       }).toList();
+
+      if (_isSearching) {
+        availableCourses = availableCourses.where((course) {
+          return course.courseName
+              .toLowerCase()
+              .contains(_searchText.toLowerCase());
+        }).toList();
+      }
 
       return availableCourses;
     } catch (e) {
@@ -71,7 +99,7 @@ class CourseOffered extends StatelessWidget {
       ),
       body: Column(
         children: [
-          NormalSearchbar(),
+          NormalSearchbar(searchController: _searchController),
           Expanded(
             child: SingleChildScrollView(
               child: Padding(

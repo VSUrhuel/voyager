@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
+import 'package:voyager/src/features/mentee/controller/mentee_controller.dart';
 import 'package:voyager/src/features/mentee/controller/notification_controller.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
 import 'package:voyager/src/features/mentee/screens/home/course_offered.dart';
@@ -25,6 +27,23 @@ class MenteeHome extends StatefulWidget {
 class _MenteeHomeState extends State<MenteeHome> {
   User? user = FirebaseAuth.instance.currentUser;
   FirestoreInstance firestoreInstance = FirestoreInstance();
+  MenteeController menteeController = Get.put(MenteeController());
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  bool _isSearching = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(_onSearchChange);
+  }
+
+  void _onSearchChange() {
+    setState(() {
+      _searchQuery = _searchController.text.trim().toLowerCase();
+      _isSearching = _searchQuery.isNotEmpty;
+    });
+  }
 
   // Fetch mentors with details
   Future<List<MentorCard>> fetchMentorsWithDetails() async {
@@ -34,12 +53,23 @@ class _MenteeHomeState extends State<MenteeHome> {
       List<MentorModel> mentorDetails = await Future.wait(users.map((user) =>
           firestoreInstance.getMentorThroughAccId(user.accountApiID)));
 
-      return List.generate(users.length, (index) {
+      List<MentorCard> mentors = List.generate(users.length, (index) {
         return MentorCard(
           mentorModel: mentorDetails[index],
           user: users[index],
         );
       });
+
+      if (_isSearching && menteeController.searchCategory.text == 'Mentors') {
+        mentors = mentors.where((mentor) {
+          return mentor.user.accountApiName
+                  .toLowerCase()
+                  .contains(_searchQuery) ||
+              mentor.user.accountApiEmail.toLowerCase().contains(_searchQuery);
+        }).toList();
+      }
+
+      return mentors;
     } catch (e) {
       return [];
     }
@@ -65,11 +95,17 @@ class _MenteeHomeState extends State<MenteeHome> {
       final List<String> enrolledCourseNames =
           enrolledCourses.map((course) => course.courseName).toList();
 
-      final List<CourseModel> availableCourses = allCourses.where((course) {
+      List<CourseModel> availableCourses = allCourses.where((course) {
         return !enrolledCourseNames.contains(course.courseName) &&
             course.courseSoftDelete == false &&
             course.courseStatus == 'active';
       }).toList();
+
+      if (_isSearching && menteeController.searchCategory.text == 'Courses') {
+        availableCourses = availableCourses.where((course) {
+          return course.courseName.toLowerCase().contains(_searchQuery);
+        }).toList();
+      }
 
       return List.generate(availableCourses.length, (index) {
         return CourseCard(
@@ -178,7 +214,10 @@ class _MenteeHomeState extends State<MenteeHome> {
                   ],
                 ),
                 SizedBox(height: screenHeight * 0.01),
-                SearchBarWithDropdown(),
+                SearchBarWithDropdown(
+                    onChanged: _onSearchChange,
+                    controller: menteeController,
+                    searchController: _searchController),
                 SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
