@@ -199,6 +199,7 @@ class _CourseCardState extends State<CourseCard> {
                       padding: EdgeInsets.only(left: 12.0),
                       child: Text("Start on $startDate - $endDate"),
                     ),
+                    SizedBox(width: screenWidth * 0.045),
                     Padding(
                       padding: EdgeInsets.only(right: 12.0),
                       child: ElevatedButton(
