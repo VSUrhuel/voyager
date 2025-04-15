@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/controller/mentee_schedule_controller.dart';
+import 'package:voyager/src/features/mentee/screens/session/upcoming_card.dart';
 import 'package:voyager/src/features/mentor/model/schedule_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
-import 'package:voyager/src/widgets/completed_sched_card.dart';
 
 class MenteeSessionCompleted extends StatefulWidget {
   const MenteeSessionCompleted({super.key});
@@ -20,6 +20,7 @@ class _MenteeSessionCompletedState extends State<MenteeSessionCompleted> {
       Get.put(MenteeScheduleController());
   late UserModel user;
   late List<ScheduleModel> completedSessions = [];
+  late List<UserModel> completedMentors = [];
   bool isLoading = true;
   final currentUser = FirebaseAuth.instance.currentUser;
   late String userEmail;
@@ -33,11 +34,22 @@ class _MenteeSessionCompletedState extends State<MenteeSessionCompleted> {
 
   Future<void> _loadData() async {
     try {
-      final [sessions, userData] = await Future.wait([
-        menteeScheduleController.getCompletedScheduleForMentee(
-            userEmail), // Pass the userEmail here
+      final results = await Future.wait([
+        menteeScheduleController.getCompletedScheduleForMentee(userEmail),
+        menteeScheduleController.getMentorsForCompleted(userEmail),
         firestore.getUser(FirebaseAuth.instance.currentUser!.uid),
       ]);
+
+      final sessions = results[0] as List<ScheduleModel>;
+      final mentors = results[1] as List<UserModel>;
+      final userData = results[2] as UserModel;
+
+      setState(() {
+        completedSessions = sessions;
+        completedMentors = mentors;
+        user = userData;
+        isLoading = false;
+      });
 
       setState(() {
         completedSessions = sessions as List<ScheduleModel>;
@@ -83,9 +95,9 @@ class _MenteeSessionCompletedState extends State<MenteeSessionCompleted> {
           itemBuilder: (context, index) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 2),
-              child: CompletedSchedCard(
+              child: UpcomingCard(
                 scheduleModel: completedSessions[index],
-                fullName: user.accountApiEmail,
+                email: completedMentors[index].accountApiEmail,
               ),
             );
           },

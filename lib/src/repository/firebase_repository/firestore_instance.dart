@@ -533,8 +533,10 @@ class FirestoreInstance {
 
   Future<UserModel> getUserThroughEmail(String email) async {
     try {
-      final user =
-          await _db.collection('users').where('email', isEqualTo: email).get();
+      final user = await _db
+          .collection('users')
+          .where('accountApiEmail', isEqualTo: email)
+          .get();
       return UserModel.fromJson(user.docs.first.data());
     } catch (e) {
       rethrow;
