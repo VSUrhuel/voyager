@@ -796,6 +796,15 @@ class FirestoreInstance {
     }
   }
 
+  Future<CourseModel> getCourse(String courseId) async {
+    try {
+      final course = await _db.collection('course').doc(courseId).get();
+      return CourseModel.fromJson(course.data()!, course.id);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<bool> archiveCourse(String courseId) async {
     try {
       await _db.collection('course').doc(courseId).update({
