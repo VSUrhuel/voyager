@@ -73,7 +73,7 @@ class AboutScreen extends StatelessWidget {
               role: 'Test Engineer',
               description:
                   'Testing, quality assurance, and database integration',
-              imagePath: 'assets/images/application_images/profile.png',
+              imagePath: 'assets/images/application_images/jade-pic.png',
             ),
             const SizedBox(height: 30),
 
