@@ -1,4 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:voyager/src/features/mentee/controller/notification_controller.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
+import 'package:voyager/src/features/mentee/widgets/course_card.dart';
 import 'package:voyager/src/features/mentee/widgets/normal_search_bar.dart';
 import 'package:voyager/src/features/mentee/widgets/small_course_card.dart';
 import 'package:flutter/material.dart';
@@ -7,15 +10,44 @@ import 'package:voyager/src/repository/firebase_repository/firestore_instance.da
 class CourseOffered extends StatelessWidget {
   const CourseOffered({super.key});
 
-  Future<List<CourseModel>> fetchCoursesWithDetails() async {
-    FirestoreInstance firestoreInstance = FirestoreInstance();
-    List<CourseModel> courses = await firestoreInstance.getCourses();
-    return courses;
+  Future<List<CourseModel>> fetchCoursesWithDetails(String userEmail) async {
+    try {
+      FirestoreInstance firestoreInstance = FirestoreInstance();
+      final notificationController = NotificationController();
+      final menteeId =
+          await notificationController.getUserIdThroughEmail(userEmail);
+      final enrolledCourseMentorIds =
+          await notificationController.getCourseMentorIdsForMentee(menteeId);
+      List<CourseModel> enrolledCourses = [];
+      for (String mentorId in enrolledCourseMentorIds) {
+        final course =
+            await firestoreInstance.getMentorCourseThroughId(mentorId);
+        if (course != null) {
+          enrolledCourses.add(course);
+        }
+      }
+      final List<CourseModel> allCourses = await firestoreInstance.getCourses();
+      final List<String> enrolledCourseNames =
+          enrolledCourses.map((course) => course.courseName).toList();
+
+      final List<CourseModel> availableCourses = allCourses.where((course) {
+        return !enrolledCourseNames.contains(course.courseName) &&
+            course.courseSoftDelete == false &&
+            course.courseStatus == 'active';
+      }).toList();
+
+      return availableCourses;
+    } catch (e) {
+      print("❌ Error fetching courses with details: $e");
+      return [];
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    FirestoreInstance firestoreInstance = FirestoreInstance();
+    User? user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
       appBar: AppBar(
@@ -47,7 +79,7 @@ class CourseOffered extends StatelessWidget {
                     left: screenWidth * 0.05, right: screenWidth * 0.05),
                 child: Center(
                   child: FutureBuilder<List<CourseModel>>(
-                    future: fetchCoursesWithDetails(),
+                    future: fetchCoursesWithDetails(user?.email ?? ''),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Center(child: CircularProgressIndicator());

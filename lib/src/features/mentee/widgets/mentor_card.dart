@@ -56,12 +56,12 @@ class MentorCard extends StatelessWidget {
           ),
         ),
       ),
-
       child: Card(
-        elevation: 2,
+        elevation: 4,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
         ),
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         child: ConstrainedBox(
           constraints: BoxConstraints(
             minWidth: screenSize.width * 0.6,
@@ -70,83 +70,137 @@ class MentorCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Profile Image
-              Container(
+              // Profile Image Container
+              SizedBox(
                 height: screenSize.height * 0.22,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: NetworkImage(imageUrl),
-                    fit: BoxFit.cover,
-                  ),
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(10),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Stack(
                   children: [
-                    // Year Badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
+                    // Profile Image
+                    ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(12),
                       ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF52CA82),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        mentorModel.mentorYearLvl,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
+                      child: Image.network(
+                        imageUrl,
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.person, size: 50),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    // Gradient overlay
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(12)),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withOpacity(0.3),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
+                    // Year Badge - positioned at top right
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF52CA82),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          mentorModel.mentorYearLvl,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Content below image
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     // Mentor Name
                     Text(
                       mentorName,
                       style: TextStyle(
                         fontSize: screenSize.width * 0.045,
                         fontWeight: FontWeight.bold,
+                        color: Colors.grey[800],
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
-                    // Mentor Motto
-                    Text(
-                      motto,
-                      style: TextStyle(
-                        fontSize: screenSize.width * 0.035,
-                        fontWeight: FontWeight.w300,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 12),
-                    // Skills Display - Show only first 2 skills max
-                    if (skills.isNotEmpty)
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          for (int i = 0; i < skills.length && i < 2; i++)
-                            SkillsDisplay(
-                              color: i == 0
-                                  ? Colors.blue[300]!
-                                  : Colors.grey[300]!,
-                              text: skills[i].split(" ").first,
-                              widthFactor: 0.25,
-                              heightFactor: 0.035,
+                    const SizedBox(height: 8),
+                    // Mentor Motto with icon
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.format_quote,
+                          size: 16,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            motto,
+                            style: TextStyle(
+                              fontSize: screenSize.width * 0.035,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.grey[600],
+                              fontStyle: FontStyle.italic,
                             ),
-                        ],
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    // Single Skill Display
+                    if (skills.isNotEmpty) ...[
+                      Text(
+                        'Expertise',
+                        style: TextStyle(
+                          fontSize: screenSize.width * 0.038,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[700],
+                        ),
                       ),
+                      const SizedBox(height: 8),
+                      SkillsDisplay(
+                        color: Theme.of(context).primaryColor,
+                        text: skills.first.split(" ").first,
+                        widthFactor: 0.4,
+                        heightFactor: 0.035,
+                      ),
+                    ],
                   ],
                 ),
               ),

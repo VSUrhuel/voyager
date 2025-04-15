@@ -1,6 +1,6 @@
-// ignore_for_file: library_private_types_in_public_api
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
+import 'package:voyager/src/features/mentee/controller/notification_controller.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
 import 'package:voyager/src/features/mentee/screens/home/course_offered.dart';
 import 'package:voyager/src/features/mentee/screens/home/mentors_list.dart';
@@ -46,16 +46,38 @@ class _MenteeHomeState extends State<MenteeHome> {
   }
 
   // Fetch courses with details (similar to fetching mentors)
-  Future<List<CourseCard>> fetchCoursesWithDetails() async {
+  Future<List<CourseCard>> fetchCoursesWithDetails(String userEmail) async {
     try {
-      List<CourseModel> courses = await firestoreInstance.getCourses();
+      final notificationController = NotificationController();
+      final menteeId =
+          await notificationController.getUserIdThroughEmail(userEmail);
+      final enrolledCourseMentorIds =
+          await notificationController.getCourseMentorIdsForMentee(menteeId);
+      List<CourseModel> enrolledCourses = [];
+      for (String mentorId in enrolledCourseMentorIds) {
+        final course =
+            await firestoreInstance.getMentorCourseThroughId(mentorId);
+        if (course != null) {
+          enrolledCourses.add(course);
+        }
+      }
+      final List<CourseModel> allCourses = await firestoreInstance.getCourses();
+      final List<String> enrolledCourseNames =
+          enrolledCourses.map((course) => course.courseName).toList();
 
-      return List.generate(courses.length, (index) {
+      final List<CourseModel> availableCourses = allCourses.where((course) {
+        return !enrolledCourseNames.contains(course.courseName) &&
+            course.courseSoftDelete == false &&
+            course.courseStatus == 'active';
+      }).toList();
+
+      return List.generate(availableCourses.length, (index) {
         return CourseCard(
-          courseModel: courses[index],
+          courseModel: availableCourses[index],
         );
       });
     } catch (e) {
+      print("❌ Error fetching courses with details: $e");
       return [];
     }
   }
@@ -184,7 +206,7 @@ class _MenteeHomeState extends State<MenteeHome> {
                 ),
                 // Updated HorizontalWidgetSlider for Courses
                 FutureBuilder<List<CourseCard>>(
-                  future: fetchCoursesWithDetails(),
+                  future: fetchCoursesWithDetails(user?.email ?? ''),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return Center(child: CircularProgressIndicator());

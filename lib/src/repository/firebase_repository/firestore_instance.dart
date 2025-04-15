@@ -1178,4 +1178,39 @@ class FirestoreInstance {
       rethrow;
     }
   }
+
+  Future<CourseModel?> getMentorCourseThroughId(String courseMentorId) async {
+    try {
+      final courseMentorSnap = await FirebaseFirestore.instance
+          .collection('courseMentor')
+          .doc(courseMentorId)
+          .get();
+
+      if (!courseMentorSnap.exists) {
+        print("❌ courseMentor not found.");
+        return null;
+      }
+
+      final courseId = courseMentorSnap.data()?['courseId'];
+      if (courseId == null) {
+        print("❌ courseId not found in courseMentor.");
+        return null;
+      }
+
+      final courseSnap = await FirebaseFirestore.instance
+          .collection('course')
+          .doc(courseId)
+          .get();
+
+      if (!courseSnap.exists) {
+        print("❌ Course not found for courseId: $courseId");
+        return null;
+      }
+
+      return CourseModel.fromJson(courseSnap.data()!, courseSnap.id);
+    } catch (e) {
+      print("❌ Error in getMentorCourseThroughId: $e");
+      return null;
+    }
+  }
 }
