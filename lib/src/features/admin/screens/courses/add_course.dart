@@ -254,7 +254,7 @@ class _AddCourseState extends State<AddCourse> {
                                 ),
                               ),
                               SizedBox(
-                                height: screenHeight * 0.01,
+                                height: screenHeight * 0.02,
                               ),
                               Container(
                                 alignment: Alignment.center,
@@ -267,8 +267,8 @@ class _AddCourseState extends State<AddCourse> {
                                     ),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  height: screenHeight * 0.2,
-                                  width: screenWidth * 0.5,
+                                  height: screenHeight * 0.23,
+                                  width: screenWidth * 0.6,
                                   child: CoverPhotoPicker(
                                     key: pickerKey,
                                     onImagePicked: (image) {
@@ -326,6 +326,9 @@ class _AddCourseState extends State<AddCourse> {
                           );
                         }
                       },
+                    ),
+                    SizedBox(
+                      height: screenHeight * 0.03,
                     ),
                   ],
                 ))));

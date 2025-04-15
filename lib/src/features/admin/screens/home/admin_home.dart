@@ -129,23 +129,28 @@ class _AdminHomeState extends State<AdminHome> {
                 ],
               ),
         actions: [
-          IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: theme.primaryColor.withOpacity(0.1),
-              ),
-              child: Icon(
-                Icons.logout,
-                color: theme.primaryColor,
-                size: 20,
-              ),
+          Padding(
+            padding: EdgeInsets.only(
+              right: screenSize.width * 0.04,
             ),
-            onPressed: () async {
-              await auth.logout();
-            },
-          ),
+            child: IconButton(
+              icon: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: theme.primaryColor.withOpacity(0.1),
+                ),
+                child: Icon(
+                  Icons.logout,
+                  color: theme.primaryColor,
+                  size: screenSize.width * 0.06,
+                ),
+              ),
+              onPressed: () async {
+                await auth.logout();
+              },
+            ),
+          )
         ],
       ),
       body: SingleChildScrollView(
@@ -187,36 +192,36 @@ class _AdminHomeState extends State<AdminHome> {
               iconColor: Colors.green,
             ),
             const SizedBox(height: 24),
-            Text(
-              'Admin Tools',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ProfileListTile(
-              iconData: Icons.person,
-              text: 'Admin Profile',
-              onTap: () => Navigator.of(context).push(
-                CustomPageRoute(
-                  page: const AdminProfile(),
-                  direction: AxisDirection.left,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            ProfileListTile(
-              iconData: Icons.settings,
-              text: 'Settings',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AdminSettings(),
-                  ),
-                );
-              },
-            ),
+            // Text(
+            //   'Admin Tools',
+            //   style: theme.textTheme.titleLarge?.copyWith(
+            //     fontWeight: FontWeight.bold,
+            //   ),
+            // ),
+            // const SizedBox(height: 16),
+            // ProfileListTile(
+            //   iconData: Icons.person,
+            //   text: 'Admin Profile',
+            //   onTap: () => Navigator.of(context).push(
+            //     CustomPageRoute(
+            //       page: const AdminProfile(),
+            //       direction: AxisDirection.left,
+            //     ),
+            //   ),
+            // ),
+            // const SizedBox(height: 8),
+            // ProfileListTile(
+            //   iconData: Icons.settings,
+            //   text: 'Settings',
+            //   onTap: () {
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //         builder: (context) => const AdminSettings(),
+            //       ),
+            //     );
+            //   },
+            // ),
           ],
         ),
       ),
