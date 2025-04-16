@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:voyager/src/features/admin/controllers/course_mentor_controller.dart';
 import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/admin/screens/mentors/mentor_list.dart';
+import 'package:voyager/src/features/admin/screens/mentors/mentor_profile.dart';
+import 'package:voyager/src/features/admin/widgets/view_remove.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
+import 'package:voyager/src/features/mentee/widgets/pick_mentor_card.dart';
+import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 
 class MenteesOfMentor {
@@ -37,46 +42,236 @@ class _CourseDetailsState extends State<CourseDetails> {
   List<UserModel> allCourseMentees = [];
   List<MenteesOfMentor> menteesByMentor = [];
 
-  @override
-  void initState() {
-    super.initState();
-    _loadData();
-  }
+List<UserModel> fetchedUsers = [];
+String? selectedMentorId;
 
-  Future<void> _loadData() async {
-    setState(() => isLoading = true);
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _loadData();
+  // }
+
+    Future<List<PickMentorCard>> fetchMentorsWithDetails() async {
     try {
-      // 1. Get all mentees for this course (accepted status)
-      final menteeList = await firestoreInstance.getMenteeAccountsForCourse(
+      List<UserModel> users =
+          await firestoreInstance.getCourseMentors(widget.courseModel.docId);
+      List<MentorModel> mentorDetails = await Future.wait(users.map((user) =>
+          firestoreInstance.getMentorThroughAccId(user.accountApiID)));
+      allCourseMentees = await firestoreInstance.getMenteeAccountsForCourse(
           widget.courseModel.docId, 'accepted');
-      
-      // 2. For each courseMentor, get their specific mentees
-      List<MenteesOfMentor> mentorMenteesList = [];
-      
-      for (var courseMentor in widget.courseMentors) {
-        // Get the mentor's user data
-        final mentorAccountId = await firestoreInstance.getMentorAccountId(courseMentor.mentorId);
-        final mentorUser = await firestoreInstance.getUserThroughAccId(mentorAccountId);
+      fetchedUsers = users;
+      // setState(() {
         
-        // Get mentees assigned to this specific courseMentor relationship
-        final mentees = await firestoreInstance.getMenteesThroughCourseMentor(courseMentor.courseMentorId);
-        
-        mentorMenteesList.add(MenteesOfMentor(
-          mentees: mentees,
-          courseMentorId: courseMentor.courseMentorId,
-          mentorUser: mentorUser,
-        ));
-      }
-      setState(() {
-        allCourseMentees = menteeList;
-        menteesByMentor = mentorMenteesList;
-        isLoading = false;
+      // });
+
+      return List.generate(users.length, (index) {
+        return PickMentorCard(
+          mentorModel: mentorDetails[index],
+          user: users[index],
+          isSelected: selectedMentorId == users[index].accountApiID,
+          onTap: () {
+                _showCustomDialog(context, mentorDetails[index], users[index], widget.courseModel.docId);
+          },
+        );
       });
     } catch (e) {
-      setState(() => isLoading = false);
-      print('Error loading data: $e');
+      return [];
     }
   }
+
+  // Future<void> _loadData() async {
+  //   setState(() => isLoading = true);
+  //   try {
+  //     // 1. Get all mentees for this course (accepted status)
+  //     final menteeList = await firestoreInstance.getMenteeAccountsForCourse(
+  //         widget.courseModel.docId, 'accepted');
+      
+  //     // 2. For each courseMentor, get their specific mentees
+  //     List<MenteesOfMentor> mentorMenteesList = [];
+      
+  //     for (var courseMentor in widget.courseMentors) {
+  //       // Get the mentor's user data
+  //       final mentorAccountId = await firestoreInstance.getMentorAccountId(courseMentor.mentorId);
+  //       final mentorUser = await firestoreInstance.getUserThroughAccId(mentorAccountId);
+        
+  //       // Get mentees assigned to this specific courseMentor relationship
+  //       final mentees = await firestoreInstance.getMenteesThroughCourseMentor(courseMentor.courseMentorId);
+        
+  //       mentorMenteesList.add(MenteesOfMentor(
+  //         mentees: mentees,
+  //         courseMentorId: courseMentor.courseMentorId,
+  //         mentorUser: mentorUser,
+  //       ));
+  //     }
+  //     setState(() {
+  //       allCourseMentees = menteeList;
+  //       menteesByMentor = mentorMenteesList;
+  //       isLoading = false;
+  //     });
+  //   } catch (e) {
+  //     setState(() => isLoading = false);
+  //     print('Error loading data: $e');
+  //   }
+  // }
+
+ Future<void> _showCustomDialog(BuildContext context, MentorModel mentor, UserModel user, String courseId) async {
+  final courseMentor = widget.courseMentors.firstWhere((cm)=> cm.mentorId == mentor.mentorId && cm.courseId == courseId);
+  final choice = await showDialog<String>(
+    context: context,
+    builder: (context) => Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      elevation: 0,
+      backgroundColor: Colors.transparent,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Mentor Options',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.blueGrey[800],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'What would you like to do with this mentor?',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[700],
+              ),
+            ),
+            const SizedBox(height: 24),
+            
+            // View Mentor Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context, 'view'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue[600],
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 2,
+                ),
+                child: const Text(
+                  'View Mentor Profile',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            
+            // Remove Mentor Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context, 'remove'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red[50],
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: Colors.red[300]!),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  'Remove Mentor',
+                  style: TextStyle(
+                    color: Colors.red[700],
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            
+            // Cancel Button
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(
+                  color: Colors.blueGrey,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+
+  if (choice != null) {
+    if (choice == 'view') {
+      Navigator.push(
+        context, 
+        MaterialPageRoute(
+          builder: (context) => MentorProfile(mentorModel: mentor, user: user),
+        ),
+      );
+    } else if (choice == 'remove') {
+        if (courseId != null) {
+          // Show confirmation dialog
+          final confirmed = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Confirm Removal '),
+              content:  Text(
+                  'Are you sure you want to remove mentor ${user.accountApiName} to the course?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Confirm'),
+                ),
+              ],
+            ),
+          );
+
+          if (confirmed == true) {
+            try{
+                    await CourseMentorController().removeMentorFromCourse(courseMentor.courseMentorId, mentor.mentorId);
+                    print('Remove mentor selected');
+                                Navigator.pop(context);
+                }catch(e){
+                  print('Error removing mentor: $e');
+                }
+
+          } 
+        } 
+      
+    }
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +299,14 @@ class _CourseDetailsState extends State<CourseDetails> {
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
+          : FutureBuilder<List<PickMentorCard>>(
+            future: fetchMentorsWithDetails(),
+            builder: (context, mentorCardSnapshot) {
+              if(mentorCardSnapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              final mentorCards = mentorCardSnapshot.data ?? [];
+          return SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -220,77 +422,83 @@ class _CourseDetailsState extends State<CourseDetails> {
                     ],
                   ),
                   SizedBox(height: screenHeight * 0.02),
-                  SingleChildScrollView(
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        left: screenWidth * 0.05,
-                        right: screenWidth * 0.05,
-                      ),
-                      child: Column(
-                        children: [
-                          if (widget.courseMentors.isEmpty)
-                            const Text('No mentors available')
-                          else
-                            for (var mentorData in menteesByMentor)
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        "Mentor: ",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: screenHeight * 0.017,
-                                        ),
-                                      ),
-                                      Text(
-                                        mentorData.mentorUser.accountApiName,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: screenHeight * 0.017,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: screenHeight * 0.005),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "Mentees:",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: screenHeight * 0.017,
-                                        ),
-                                      ),
-                                      if (mentorData.mentees.isEmpty)
-                                        Text(
-                                          'No mentees assigned',
-                                          style: TextStyle(fontSize: screenHeight * 0.017),
-                                        )
-                                      else
-                                        Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            for (var mentee in mentorData.mentees)
-                                              _bulletPoint(mentee.accountApiName, screenHeight),
-                                          ],
-                                        ),
-                                    ],
-                                  ),
-                                  SizedBox(height: screenHeight * 0.02),
-                                ],
-                              ),
-                          SizedBox(height: 10),
-                        ],
-                      ),
-                    ),
-                  ),
+                   mentorCards.isEmpty
+                          ? const Center(child: Text('No mentors available'))
+                          : Column(children: mentorCards),
+                  // SingleChildScrollView(
+                  //   child: Padding(
+                  //     padding: EdgeInsets.only(
+                  //       left: screenWidth * 0.05,
+                  //       right: screenWidth * 0.05,
+                  //     ),
+                  //     child: Column(
+                  //       children: [
+                  //         if (widget.courseMentors.isEmpty)
+                  //           const Text('No mentors available')
+                  //         else
+                  //           for (var mentorData in menteesByMentor)
+                  //             Column(
+                  //               crossAxisAlignment: CrossAxisAlignment.start,
+                  //               children: [
+                  //                 PickMentorCard(mentorModel: mentorModel, user: user, isSelected: isSelected, onTap: onTap)
+                  //                 Row(
+                  //                   children: [
+                  //                     Text(
+                  //                       "Mentor: ",
+                  //                       style: TextStyle(
+                  //                         fontWeight: FontWeight.w800,
+                  //                         fontSize: screenHeight * 0.017,
+                  //                       ),
+                  //                     ),
+                  //                     Text(
+                  //                       mentorData.mentorUser.accountApiName,
+                  //                       style: TextStyle(
+                  //                         fontWeight: FontWeight.w500,
+                  //                         fontSize: screenHeight * 0.017,
+                  //                       ),
+                  //                     ),
+                  //                   ],
+                  //                 ),
+                  //                 SizedBox(height: screenHeight * 0.005),
+                  //                 Column(
+                  //                   crossAxisAlignment: CrossAxisAlignment.start,
+                  //                   children: [
+                  //                     Text(
+                  //                       "Mentees:",
+                  //                       style: TextStyle(
+                  //                         fontWeight: FontWeight.w800,
+                  //                         fontSize: screenHeight * 0.017,
+                  //                       ),
+                  //                     ),
+                  //                     if (mentorData.mentees.isEmpty)
+                  //                       Text(
+                  //                         'No mentees assigned',
+                  //                         style: TextStyle(fontSize: screenHeight * 0.017),
+                  //                       )
+                  //                     else
+                  //                       Column(
+                  //                         crossAxisAlignment: CrossAxisAlignment.start,
+                  //                         children: [
+                  //                           for (var mentee in mentorData.mentees)
+                  //                             _bulletPoint(mentee.accountApiName, screenHeight),
+                  //                         ],
+                  //                       ),
+                  //                   ],
+                  //                 ),
+                  //                 SizedBox(height: screenHeight * 0.02),
+                  //               ],
+                  //             ),
+                  //         SizedBox(height: 10),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
                   SizedBox(height: screenHeight * 0.03),
                 ],
               ),
-            ),
+            );
+            }
+          ),
     );
   }
 
