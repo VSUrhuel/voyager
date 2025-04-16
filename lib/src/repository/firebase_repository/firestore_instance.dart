@@ -657,6 +657,39 @@ class FirestoreInstance {
     }
   }
 
+  Future<void> softDeleteCourseAllocatedMentee(String courseMentorId) async {
+    try{
+      final docRef = await _db
+      .collection('menteeCourseAlloc')
+      .where('courseMentorId', isEqualTo: courseMentorId)
+      .get();
+      if(docRef.docs.isNotEmpty){
+        _db
+        .collection('menteeCourseAlloc')
+        .doc(docRef.docs[0].id)
+        .update({
+            'mcaSoftDeleted': true,
+        });
+      }
+
+    }catch(e){
+      rethrow;
+    }
+  }
+
+  Future<void> softDeleteCourseMentor(String courseMentorId) async {
+    try{
+      await _db
+      .collection('courseMentor')
+      .doc(courseMentorId)
+      .update({
+        'courseMentorSoftDeleted': true,
+      });
+    }catch (e){
+      rethrow;
+    }
+  }
+
   Future<String> getCourseMentorId(String mentorId) async {
     try {
       final courseMentor = await _db
@@ -679,6 +712,8 @@ class FirestoreInstance {
       return '';
     }
   }
+
+
 
   Future<UserModel> getUserThroughAccId(String accId) async {
     try {
