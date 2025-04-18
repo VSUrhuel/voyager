@@ -1,3 +1,6 @@
+import 'package:voyager/src/features/mentee/screens/profile/mentee_about.dart';
+import 'package:voyager/src/features/mentee/screens/profile/mentee_security_password.dart';
+import 'package:voyager/src/features/mentee/screens/profile/mentee_user_agreement.dart';
 import 'package:voyager/src/features/mentee/screens/profile/personal_information.dart';
 import 'package:voyager/src/widgets/custom_page_route.dart';
 import 'package:voyager/src/widgets/profile.dart';
@@ -67,7 +70,7 @@ class MenteeProfile extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  CustomPageRoute(page: PersonalInformation()),
+                  CustomPageRoute(page: MenteeSecurityPassword()),
                 );
               },
             ),
@@ -76,7 +79,7 @@ class MenteeProfile extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  CustomPageRoute(page: PersonalInformation()),
+                  CustomPageRoute(page: MenteeUserAgreement()),
                 );
               },
             ),
@@ -85,7 +88,7 @@ class MenteeProfile extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  CustomPageRoute(page: PersonalInformation()),
+                  CustomPageRoute(page: MenteeAbout()),
                 );
               },
             ),
