@@ -25,45 +25,30 @@ class Session extends StatelessWidget {
           fontWeight: FontWeight.bold,
         ),
         elevation: 0, // No shadow
-        title: Row(
-          children: [
-            Padding(
-              padding: EdgeInsets.only(
-                  top: screenHeight * 0.013,
-                  left: screenHeight * 0.01), // Add padding to the left
-              child: Text(
-                'My Sessions',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: screenHeight * 0.037, // Adjust font size as needed
-                  fontWeight: FontWeight.bold, // Bold
-                ),
-              ),
-            ),
-            SizedBox(width: 16), // Spacing between image and text
-          ],
+        title: Text(
+          'My Sessions',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: screenWidth * 0.07,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         actions: [
           Padding(
             padding:
                 const EdgeInsets.only(right: 16.0), // Add padding to the right
             child: CircleAvatar(
-              // Adjust size as needed
-              radius: screenHeight * 0.03,
-              backgroundColor: Colors.grey[200], // Light grey background
-              child: IconButton(
-                icon: FaIcon(
-                  FontAwesomeIcons.calendarDay,
-                  color: Colors.black,
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    CustomPageRoute(page: MenteeCalendarView()),
-                  );
-                },
-              ),
-            ),
+                backgroundColor: Colors.grey[200],
+                child: IconButton(
+                  icon: Icon(Icons.calendar_month, color: Colors.black),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => MenteeCalendarView()),
+                    );
+                  },
+                )),
           ),
         ],
       ),

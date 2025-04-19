@@ -6,9 +6,11 @@ import 'package:voyager/src/features/admin/screens/mentors/mentor_profile.dart';
 import 'package:voyager/src/features/admin/widgets/view_remove.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
+import 'package:voyager/src/features/mentee/screens/home/mentor_profile.dart';
 import 'package:voyager/src/features/mentee/widgets/pick_mentor_card.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
+import 'package:voyager/src/widgets/custom_page_route.dart';
 
 class MenteesOfMentor {
   final List<UserModel> mentees;
@@ -70,9 +72,11 @@ class _ViewCourseState extends State<ViewCourse> {
           user: users[index],
           isSelected: selectedMentorId == users[index].accountApiID,
           onTap: () {
-            MentorProfile(
-              mentorModel: mentorDetails[index],
-              user: users[index],
+            Navigator.push(
+              context,
+              CustomPageRoute(
+                  page: MentorProfilePage(
+                      mentorModel: mentorDetails[index], user: users[index])),
             );
           },
         );

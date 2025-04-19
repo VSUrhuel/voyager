@@ -43,6 +43,7 @@ class _MentorsListState extends State<MentorsList> {
         return MentorCard(
           mentorModel: mentorDetails[index],
           user: users[index],
+          isSmallCard: true,
         );
       });
 

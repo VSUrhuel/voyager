@@ -301,7 +301,7 @@ class _MenteeHomeState extends State<MenteeHome> {
                     );
                   },
                 ),
-                SizedBox(height: 100),
+                SizedBox(height: screenHeight * 0.02),
               ],
             ),
           ),
