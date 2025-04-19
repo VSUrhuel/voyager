@@ -1,11 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:voyager/src/features/mentor/model/content_model.dart';
+import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 
-class NotificationContentCard extends StatelessWidget {
+class NotificationContentCard extends StatefulWidget {
   final PostContentModel post;
 
   const NotificationContentCard({super.key, required this.post});
+
+  @override
+  State<NotificationContentCard> createState() =>
+      _NotificationContentCardState();
+}
+
+class _NotificationContentCardState extends State<NotificationContentCard> {
+  String mentorName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchMentorName();
+  }
+
+  void _fetchMentorName() async {
+    // Simulate fetching mentor name from a service or database
+    await Future.delayed(const Duration(seconds: 1));
+
+    FirestoreInstance firestoreInstance = FirestoreInstance();
+    final mentorId = await firestoreInstance
+        .getMentorThroughCourseMentorId(widget.post.courseMentorId);
+    final mentor = await firestoreInstance.getMentor(mentorId);
+    final user = await firestoreInstance.getUser(mentor.accountId);
+    setState(() {
+      mentorName = user.accountApiName;
+    });
+  }
 
   String _formatTimestamp(DateTime timestamp) {
     return DateFormat('MMM dd, yyyy • hh:mm a').format(timestamp);
@@ -69,7 +98,7 @@ class NotificationContentCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    post.contentTitle,
+                    widget.post.contentTitle,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: isSmallScreen
@@ -81,7 +110,7 @@ class NotificationContentCard extends StatelessWidget {
                   ),
                   SizedBox(height: screenHeight * 0.005),
                   Text(
-                    post.contentDescription,
+                    widget.post.contentDescription,
                     style: TextStyle(
                       fontSize: isSmallScreen
                           ? screenWidth * 0.035
@@ -97,7 +126,7 @@ class NotificationContentCard extends StatelessWidget {
                     children: [
                       Flexible(
                         child: Text(
-                          _formatTimestamp(post.contentCreatedTimestamp),
+                          _formatTimestamp(widget.post.contentCreatedTimestamp),
                           style: TextStyle(
                             fontSize: screenWidth * 0.03,
                             color: Colors.grey,
@@ -107,7 +136,7 @@ class NotificationContentCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        _getTimeAgo(post.contentCreatedTimestamp),
+                        _getTimeAgo(widget.post.contentCreatedTimestamp),
                         style: TextStyle(
                           fontSize: screenWidth * 0.03,
                           color: const Color(

@@ -17,7 +17,7 @@ class MentorCard extends StatelessWidget {
       final nameParts = fullName.split(" ");
       if (nameParts.isEmpty) return "";
       if (nameParts.length == 1) return nameParts[0];
-      return "${nameParts[0][0]}. ${nameParts.last}";
+      return "${nameParts[0][0]}. ${nameParts.last[0]}${nameParts.last.substring(1, nameParts.last.length).toLowerCase()}";
     }
 
     // Get profile image URL
@@ -182,23 +182,34 @@ class MentorCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     // Single Skill Display
+
                     if (skills.isNotEmpty) ...[
                       Text(
                         'Expertise',
                         style: TextStyle(
-                          fontSize: screenSize.width * 0.038,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[700],
-                        ),
+                            fontSize: screenSize.width * 0.035,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[800]),
                       ),
                       const SizedBox(height: 8),
-                      SkillsDisplay(
-                        color: Theme.of(context).primaryColor,
-                        text: skills.first.split(" ").first,
-                        widthFactor: 0.4,
-                        heightFactor: 0.035,
+                      SizedBox(
+                        height: 32, // Fixed height for skills row
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          shrinkWrap: true,
+                          children: skills.take(3).map((skill) {
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: SkillsDisplay(
+                                color: Theme.of(context).colorScheme.primary,
+                                text: skill.trim(),
+                                isPrimary: skills.indexOf(skill) == 0,
+                              ),
+                            );
+                          }).toList(),
+                        ),
                       ),
                     ],
                   ],

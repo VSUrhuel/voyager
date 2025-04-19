@@ -2,45 +2,39 @@ import 'package:flutter/material.dart';
 
 class SkillsDisplay extends StatelessWidget {
   final Color color;
-  final String text; // Changed from Text to String for more control
+  final String text;
+  final bool isPrimary;
   final double widthFactor;
   final double heightFactor;
 
   const SkillsDisplay({
-    super.key,
     required this.color,
     required this.text,
-    this.widthFactor = 0.3, // Default values
-    this.heightFactor = 0.03,
-  });
+    this.isPrimary = false,
+    this.widthFactor = 0.4,
+    this.heightFactor = 0.035,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    final maxWidth = screenSize.width * widthFactor;
-    final height = screenSize.height * heightFactor;
 
     return Container(
-      constraints: BoxConstraints(
-        maxWidth: maxWidth,
-        minWidth: 40, // Minimum width to prevent too small badges
-      ),
-      height: height,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(height / 2), // Perfect pill shape
+        color: isPrimary ? color : color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(20),
+        border: isPrimary
+            ? null
+            : Border.all(color: color.withOpacity(0.3), width: 1),
       ),
-      child: Center(
-        child: Text(
-          text,
-          style: TextStyle(
-            fontSize: height * 0.5, // Responsive font size
-            fontWeight: FontWeight.w500,
-            color: Colors.white,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: screenSize.width * 0.032,
+          fontWeight: isPrimary ? FontWeight.w600 : FontWeight.w500,
+          color: isPrimary ? Colors.white : color,
         ),
       ),
     );
