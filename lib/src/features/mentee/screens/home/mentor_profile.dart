@@ -42,6 +42,7 @@ class MentorProfilePage extends StatelessWidget {
 
     final formattedName = toTitleCase(user.accountApiName);
     final theme = Theme.of(context);
+    final screenSize = MediaQuery.of(context).size;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
         statusBarColor: Colors.white,
@@ -135,15 +136,58 @@ class MentorProfilePage extends StatelessWidget {
                             ],
                           ),
                           Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: screenWidth * 0.03),
-                            child: Text(
-                              user.accountApiEmail,
-                              style: TextStyle(
-                                  color: Colors.black54, fontSize: 14),
-                            ),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: screenWidth * 0.03),
+                              child: Row(children: [
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 7, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[100],
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    '@${user.accountUsername}',
+                                    style: TextStyle(
+                                      fontSize: screenSize.width * 0.04,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Text('|'),
+                                const SizedBox(width: 10),
+                                Text(
+                                  user.accountApiEmail,
+                                  style: TextStyle(
+                                      color: Colors.black54, fontSize: 14),
+                                ),
+                              ])),
+                          const SizedBox(height: 10),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.format_quote,
+                                size: 16,
+                                color: Colors.grey[400],
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  mentorModel.mentorMotto,
+                                  style: TextStyle(
+                                    fontSize: screenSize.width * 0.035,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.grey[600],
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
-
                           const SizedBox(height: 20),
                           Row(
                             children: [],
@@ -415,38 +459,38 @@ class MentorProfilePage extends StatelessWidget {
         color: Colors.blue.shade50,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Text(
+          "Experience",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        if (isExperienceEmpty)
           const Text(
-            "Experience",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            "No Experience",
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.black87,
+              fontStyle: FontStyle.italic,
+            ),
+          )
+        else ...[
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: screenHeight * 0.29, // Adjust height as needed
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (int i = 0; i < mentorModel.mentorExpHeader.length; i++)
+                    _experienceItem(mentorModel.mentorExpHeader[i], i),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: 10),
-          if (isExperienceEmpty)
-            const Text(
-              "No Experience",
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.black87,
-                fontStyle: FontStyle.italic,
-              ),
-            )
-          else ...[
-            // Display up to 3 experience items
-            for (int i = 0; i < mentorModel.mentorExpHeader.take(3).length; i++)
-              _experienceItem(mentorModel.mentorExpHeader[i], i),
-
-            // Show indicator if there are more experiences
-            if (mentorModel.mentorExpHeader.length > 3)
-              _experienceItem(
-                'Showing 3 of ${mentorModel.mentorExpHeader.length} experiences',
-                3,
-                isLimitIndicator: true,
-              ),
-          ]
-        ],
-      ),
+        ]
+      ]),
     );
   }
 

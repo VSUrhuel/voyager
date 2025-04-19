@@ -8,7 +8,12 @@ import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 class MentorCard extends StatelessWidget {
   final MentorModel mentorModel;
   final UserModel user;
-  const MentorCard({super.key, required this.mentorModel, required this.user});
+  final bool isSmallCard;
+  const MentorCard(
+      {super.key,
+      required this.mentorModel,
+      required this.user,
+      this.isSmallCard = false});
 
   @override
   Widget build(BuildContext context) {
@@ -111,9 +116,9 @@ class MentorCard extends StatelessWidget {
                       top: 12,
                       right: 12,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isSmallCard ? 8 : 12,
+                          vertical: isSmallCard ? 4 : 6,
                         ),
                         decoration: BoxDecoration(
                           color: const Color(0xFF52CA82),
@@ -128,10 +133,10 @@ class MentorCard extends StatelessWidget {
                         ),
                         child: Text(
                           mentorModel.mentorYearLvl,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                            fontSize: isSmallCard ? 10 : 12,
                           ),
                         ),
                       ),
@@ -146,16 +151,65 @@ class MentorCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Mentor Name
-                    Text(
-                      mentorName,
-                      style: TextStyle(
-                        fontSize: screenSize.width * 0.045,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    isSmallCard
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                mentorName,
+                                style: TextStyle(
+                                  fontSize: screenSize.width * 0.045,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  '@${user.accountUsername}',
+                                  style: TextStyle(
+                                    fontSize: screenSize.width * 0.03,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                mentorName,
+                                style: TextStyle(
+                                  fontSize: screenSize.width * 0.045,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              SizedBox(width: 4),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  '@${user.accountUsername}',
+                                  style: TextStyle(
+                                    fontSize: screenSize.width * 0.03,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                     const SizedBox(height: 8),
                     // Mentor Motto with icon
                     Row(
@@ -176,7 +230,7 @@ class MentorCard extends StatelessWidget {
                               color: Colors.grey[600],
                               fontStyle: FontStyle.italic,
                             ),
-                            maxLines: 2,
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -185,7 +239,7 @@ class MentorCard extends StatelessWidget {
                     const SizedBox(height: 12),
                     // Single Skill Display
 
-                    if (skills.isNotEmpty) ...[
+                    if (skills.isNotEmpty && !isSmallCard) ...[
                       Text(
                         'Expertise',
                         style: TextStyle(

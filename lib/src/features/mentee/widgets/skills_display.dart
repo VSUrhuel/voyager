@@ -25,9 +25,9 @@ class SkillsDisplay extends StatelessWidget {
       decoration: BoxDecoration(
         color: isPrimary ? color : color.withOpacity(0.08),
         borderRadius: BorderRadius.circular(20),
-        border: isPrimary
-            ? null
-            : Border.all(color: color.withOpacity(0.3), width: 1),
+        // border: isPrimary
+        //     ? Border.all(color: color.withOpacity(0.0), width: 0)
+        //     : Border.all(color: color.withOpacity(0.3), width: 1),
       ),
       child: Text(
         text,
