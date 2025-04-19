@@ -18,8 +18,7 @@ class MentorProfile extends StatefulWidget {
   final UserModel user;
 
   @override
-  State<MentorProfile> createState() =>
-      _MentorProfileState();
+  State<MentorProfile> createState() => _MentorProfileState();
 }
 
 class _MentorProfileState extends State<MentorProfile> {
@@ -59,6 +58,7 @@ class _MentorProfileState extends State<MentorProfile> {
           .join(' ');
     }
 
+    final theme = Theme.of(context);
     final formattedName = toTitleCase(userModel.accountApiName);
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
@@ -66,186 +66,208 @@ class _MentorProfileState extends State<MentorProfile> {
         statusBarIconBrightness: Brightness.dark,
       ),
       child: Scaffold(
-        backgroundColor: Colors.black,
-        body: SafeArea(
-          top: false,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Profile Image
-                Stack(
-                  children: [
-                    Container(
-                      height: screenHeight * 0.4,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: NetworkImage(imageUrl),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: MediaQuery.of(context).padding.top + 10,
-                      left: 16,
-                      child: IconButton(
-                        icon: const Icon(Icons.arrow_back,
-                            color: Colors.black, size: 30),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-
-                // Profile Details
-                Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.05, vertical: 20),
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
-                    ),
+          backgroundColor: Colors.white,
+          body: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                expandedHeight: screenHeight * 0.3,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Name & Year Badge
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
+                ),
+                pinned: true,
+                floating: false,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                backgroundColor: Colors.transparent,
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                    padding: EdgeInsets.all(screenWidth * 0.06),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: screenWidth * 0.03,
+                                  vertical: screenHeight * 0.005),
+                              decoration: BoxDecoration(
+                                color: Colors.green.shade100,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                mentorModel.mentorYearLvl,
+                                style: TextStyle(
+                                    color: Colors.green,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            IconButton(
+                              icon: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: theme.primaryColor.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(Icons.edit,
+                                    color: theme.primaryColor,
+                                    size: screenHeight * 0.03),
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  CustomPageRoute(
+                                      page: MentorInfo1(
+                                          mentorModel: mentorModel,
+                                          userModel: userModel)),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+
+                        Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(
+                                  left: screenWidth * 0.02,
+                                  top: screenHeight * 0.0),
+                              child: Text(
+                                formattedName,
+                                style: TextStyle(
+                                    fontSize: screenHeight * 0.03,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Padding(
                             padding: EdgeInsets.symmetric(
-                                horizontal: screenWidth * 0.02,
-                                vertical: screenHeight * 0),
-                            decoration: BoxDecoration(
-                              color: Colors.green.shade100,
-                              borderRadius: BorderRadius.circular(12),
+                                horizontal: screenWidth * 0.03),
+                            child: Row(children: [
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 7, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  '@${userModel.accountUsername}',
+                                  style: TextStyle(
+                                    fontSize: screenWidth * 0.04,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Text('|'),
+                              const SizedBox(width: 10),
+                              Text(
+                                userModel.accountApiEmail,
+                                style: TextStyle(
+                                    color: Colors.black54, fontSize: 14),
+                              ),
+                            ])),
+                        const SizedBox(height: 10),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.format_quote,
+                              size: 16,
+                              color: Colors.grey[400],
                             ),
-                            child: Text(
-                              mentorModel.mentorYearLvl,
-                              style: TextStyle(
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.bold),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                mentorModel.mentorMotto,
+                                style: TextStyle(
+                                  fontSize: screenWidth * 0.035,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.grey[600],
+                                  fontStyle: FontStyle.italic,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.black),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                CustomPageRoute(
-                                    page: MentorInfo1(
-                                        mentorModel: mentorModel,
-                                        userModel: userModel)),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-
-                      Row(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(
-                                left: screenWidth * 0.02,
-                                top: screenHeight * 0.0),
-                            child: Text(
-                              formattedName,
-                              style: TextStyle(
-                                  fontSize: screenHeight * 0.03,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.03),
-                        child: Text(
-                          userModel.accountApiEmail,
-                          style: TextStyle(color: Colors.black54, fontSize: 14),
+                          ],
                         ),
-                      ),
+                        const SizedBox(height: 20),
+                        // About Section (Title Inside Border)
+                        _infoCardWithTitle("About", mentorModel.mentorAbout),
 
-                      const SizedBox(height: 20),
-                      Row(
-                        children: [],
-                      ),
-                      // About Section (Title Inside Border)
-                      _infoCardWithTitle("About", mentorModel.mentorAbout),
+                        const SizedBox(height: 20),
+                        Row(
+                          children: [
+                            // Experience Section (60% width)
+                            Expanded(
+                              flex: 7,
+                              child: _experienceSection(screenHeight),
+                            ),
 
-                      const SizedBox(height: 20),
-                      Row(
-                        children: [
-                          // Experience Section (60% width)
-                          Expanded(
-                            flex: 7,
-                            child: _experienceSection(screenHeight),
-                          ),
+                            const SizedBox(width: 10),
 
-                          const SizedBox(width: 10),
+                            // Mentorship Sessions (40% width)
+                            Expanded(
+                              flex: 3,
+                              child: _mentorshipCard(
+                                  mentorModel.mentorSessionCompleted.toString(),
+                                  "Mentorship Sessions Completed",
+                                  screenHeight),
+                            ),
+                          ],
+                        ),
 
-                          // Mentorship Sessions (40% width)
-                          Expanded(
-                            flex: 3,
-                            child: _mentorshipCard(
-                                mentorModel.mentorSessionCompleted.toString(),
-                                "Mentorship Sessions Completed",
-                                screenHeight),
-                          ),
-                        ],
-                      ),
+                        // Experience Section with New UI
 
-                      // Experience Section with New UI
+                        const SizedBox(height: 20),
 
-                      const SizedBox(height: 20),
+                        // Language Known
+                        _sectionTitle("Language Known"),
+                        Wrap(
+                          spacing: 8,
+                          children: [
+                            for (int i = 0;
+                                i < mentorModel.mentorLanguages.length;
+                                i++)
+                              _languageChip(mentorModel.mentorLanguages[i]),
+                          ],
+                        ),
 
-                      // Language Known
-                      _sectionTitle("Language Known"),
-                      Wrap(
-                        spacing: 8,
-                        children: [
-                          for (int i = 0;
-                              i < mentorModel.mentorLanguages.length;
-                              i++)
-                            _languageChip(mentorModel.mentorLanguages[i]),
-                        ],
-                      ),
+                        const SizedBox(height: 20),
 
-                      const SizedBox(height: 20),
+                        // Social Links
+                        _sectionTitle("Social Links"),
+                        Row(
+                          children: [
+                            _socialIcon(Icons.facebook, Colors.blue,
+                                mentorModel.mentorFbUrl, context),
+                            const SizedBox(width: 20),
+                            _socialIcon(
+                                FontAwesomeIcons.github,
+                                Colors.blue.shade800,
+                                mentorModel.mentorGitUrl,
+                                context),
+                          ],
+                        ),
 
-                      // Social Links
-                      _sectionTitle("Social Links"),
-                      Row(
-                        children: [
-                          _socialIcon(Icons.facebook, Colors.blue,
-                              mentorModel.mentorFbUrl.startsWith('http')? mentorModel.mentorFbUrl:
-                              'https://${mentorModel.mentorFbUrl}', context),
-                          const SizedBox(width: 20),
-                          _socialIcon(
-                              FontAwesomeIcons.github,
-                              Colors.blue.shade800,
-                              mentorModel.mentorGitUrl.startsWith('http')? mentorModel.mentorGitUrl:
-                              'https://${mentorModel.mentorGitUrl}',
-                              context),
-                        ],
-                      ),
-
-                      const SizedBox(height: 30),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+                        const SizedBox(height: 30),
+                      ],
+                    )),
+              )
+            ],
+          )),
     );
   }
 
@@ -306,9 +328,22 @@ class _MentorProfileState extends State<MentorProfile> {
                 fontStyle: FontStyle.italic,
               ),
             )
-          else
-            for (int i = 0; i < mentorModel.mentorExpHeader.length; i++)
-              _experienceItem(mentorModel.mentorExpHeader[i], i),
+          else ...[
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: screenHeight * 0.29, // Adjust height as needed
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (int i = 0; i < mentorModel.mentorExpHeader.length; i++)
+                      _experienceItem(mentorModel.mentorExpHeader[i], i),
+                  ],
+                ),
+              ),
+            ),
+          ]
         ],
       ),
     );

@@ -57,7 +57,7 @@ class _MenteeProfileState extends State<MenteeProfile> {
             'My Profile',
             style: TextStyle(
               color: Colors.black,
-              fontSize: screenHeight * 0.037,
+              fontSize: screenWidth * 0.07,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -66,7 +66,8 @@ class _MenteeProfileState extends State<MenteeProfile> {
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Column(
+          : SingleChildScrollView(
+              child: Column(
               children: [
                 SizedBox(height: screenHeight * 0.025),
                 Profile(role: 'mentee'),
@@ -89,6 +90,7 @@ class _MenteeProfileState extends State<MenteeProfile> {
                 ),
                 SizedBox(height: screenHeight * 0.01),
                 ProfileListTile(
+                  iconData: Icons.person,
                   text: "Personal Information",
                   onTap: () {
                     Navigator.push(
@@ -100,6 +102,7 @@ class _MenteeProfileState extends State<MenteeProfile> {
                   },
                 ),
                 ProfileListTile(
+                  iconData: Icons.lock,
                   text: "Security and Password",
                   onTap: () {
                     Navigator.push(
@@ -109,6 +112,7 @@ class _MenteeProfileState extends State<MenteeProfile> {
                   },
                 ),
                 ProfileListTile(
+                  iconData: Icons.verified_user,
                   text: "User agreement",
                   onTap: () {
                     Navigator.push(
@@ -118,6 +122,7 @@ class _MenteeProfileState extends State<MenteeProfile> {
                   },
                 ),
                 ProfileListTile(
+                  iconData: Icons.info,
                   text: "About",
                   onTap: () {
                     Navigator.push(
@@ -127,7 +132,7 @@ class _MenteeProfileState extends State<MenteeProfile> {
                   },
                 ),
               ],
-            ),
+            )),
     );
   }
 }

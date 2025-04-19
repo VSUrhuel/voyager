@@ -12,7 +12,6 @@ import 'package:voyager/src/features/mentor/screens/home/pending.dart';
 import 'package:voyager/src/features/mentor/screens/home/request_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:voyager/src/features/mentor/screens/post/create_post.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/widgets/custom_page_route.dart';

@@ -95,7 +95,7 @@ class SmallCourseCard extends StatelessWidget {
                         imageUrl,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) => Container(
-                          color: theme.colorScheme.surfaceVariant,
+                          color: theme.colorScheme.surfaceContainerHighest,
                           child:
                               const Center(child: Icon(Icons.image, size: 40)),
                         ),

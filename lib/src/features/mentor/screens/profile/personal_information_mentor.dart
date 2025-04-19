@@ -152,19 +152,59 @@ class _MentorPersonalInformationState extends State<MentorPersonalInformation> {
                           ],
                         ),
                         Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: screenWidth * 0.03),
-                          child: Text(
-                            userModel.accountApiEmail,
-                            style:
-                                TextStyle(color: Colors.black54, fontSize: 14),
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: screenWidth * 0.03),
+                            child: Row(children: [
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 7, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  '@${userModel.accountUsername}',
+                                  style: TextStyle(
+                                    fontSize: screenWidth * 0.04,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Text('|'),
+                              const SizedBox(width: 10),
+                              Text(
+                                userModel.accountApiEmail,
+                                style: TextStyle(
+                                    color: Colors.black54, fontSize: 14),
+                              ),
+                            ])),
+                        const SizedBox(height: 10),
                         Row(
-                          children: [],
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.format_quote,
+                              size: 16,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                mentorModel.mentorMotto,
+                                style: TextStyle(
+                                  fontSize: screenWidth * 0.035,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.grey[600],
+                                  fontStyle: FontStyle.italic,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
+                        const SizedBox(height: 20),
                         // About Section (Title Inside Border)
                         _infoCardWithTitle("About", mentorModel.mentorAbout),
 
@@ -466,9 +506,22 @@ class _MentorPersonalInformationState extends State<MentorPersonalInformation> {
                 fontStyle: FontStyle.italic,
               ),
             )
-          else
-            for (int i = 0; i < mentorModel.mentorExpHeader.length; i++)
-              _experienceItem(mentorModel.mentorExpHeader[i], i),
+          else ...[
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: screenHeight * 0.29, // Adjust height as needed
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (int i = 0; i < mentorModel.mentorExpHeader.length; i++)
+                      _experienceItem(mentorModel.mentorExpHeader[i], i),
+                  ],
+                ),
+              ),
+            ),
+          ]
         ],
       ),
     );

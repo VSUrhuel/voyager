@@ -89,11 +89,13 @@ class MenteePostController {
 
       List<String> courseMentorIds = [];
       List<String> menteeMcaIds = mentee.menteeMcaId ?? [];
+      print(menteeMcaIds.length);
       for (var menteeMcaId in menteeMcaIds) {
         final String status =
             await firestoreInstance.getMenteeStatus(menteeMcaId);
         if (status != 'accepted') continue;
 
+        print('Course Mentor ID: $menteeMcaId');
         final courseMentorId =
             await firestoreInstance.getCourseMentorIdFromMca(menteeMcaId);
         if (courseMentorId.isNotEmpty) {

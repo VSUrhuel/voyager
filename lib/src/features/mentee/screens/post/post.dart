@@ -99,60 +99,29 @@ class _PostState extends State<Post> {
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
-          title: Row(
-            children: [
-              CircleAvatar(
-                radius: 25,
-                backgroundImage: user?.photoURL != null
-                    ? NetworkImage(profileImageURL)
-                    : AssetImage(profileImageURL) as ImageProvider,
-              ),
-              SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Hello, ${getName(user?.displayName)}!',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    'Courses awaits you!',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+          title: Text(
+            'Posts',
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: screenWidth * 0.07,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          centerTitle: false,
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 16.0),
               child: CircleAvatar(
                   backgroundColor: Colors.grey[200],
-                  child: TextButton(
+                  child: IconButton(
+                    icon: Icon(Icons.notifications_none, color: Colors.black),
                     onPressed: () {
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => NotificationScreen()));
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => NotificationScreen()),
+                      );
                     },
-                    style: TextButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      foregroundColor: Colors.blue,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 8),
-                      textStyle: const TextStyle(fontSize: 16),
-                    ),
-                    child: Center(
-                      child:
-                          Icon(Icons.notifications_none, color: Colors.black),
-                    ),
                   )),
             ),
           ],

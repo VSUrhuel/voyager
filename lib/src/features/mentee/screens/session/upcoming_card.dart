@@ -1,19 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/model/schedule_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 
 class UpcomingCard extends StatefulWidget {
-  const UpcomingCard({
-    super.key,
-    required this.email,
-    required this.scheduleModel,
-  });
-
+  const UpcomingCard(
+      {super.key, required this.email, required this.scheduleModel});
   final String email;
   final ScheduleModel scheduleModel;
 
@@ -21,228 +17,266 @@ class UpcomingCard extends StatefulWidget {
   State<UpcomingCard> createState() => _UpcomingCardState();
 }
 
+final FirestoreInstance firestoreInstance = Get.put(FirestoreInstance());
+
 class _UpcomingCardState extends State<UpcomingCard> {
-  late final FirestoreInstance _firestoreInstance;
-  UserModel? _user;
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _firestoreInstance = Get.put(FirestoreInstance());
-    _loadUser();
-  }
-
-  Future<void> _loadUser() async {
-    try {
-      final user = await _firestoreInstance.getUserThroughEmail(widget.email);
-      if (mounted) {
-        setState(() {
-          _user = user;
-          _isLoading = false;
-        });
-      }
-    } catch (_) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final isSmallScreen = screenWidth < 360 || screenHeight < 700;
-
-    if (_isLoading) {
-      return Center(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
-          child: const CircularProgressIndicator(),
-        ),
-      );
-    }
-
-    if (_user == null) {
-      return Center(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
-          child: Text(
-            "Failed to load user data",
-            style: TextStyle(
-              fontSize:
-                  isSmallScreen ? screenWidth * 0.04 : screenWidth * 0.045,
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Card(
-      margin: EdgeInsets.symmetric(
-        horizontal: screenWidth * 0.03,
-        vertical: screenHeight * 0.01,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(screenWidth * 0.03),
-      ),
-      elevation: 1,
-      child: MeetingCard(
-        scheduleModel: widget.scheduleModel,
-        user: _user!,
-        isSmallScreen: isSmallScreen,
+    final Future<UserModel> userName =
+        firestoreInstance.getUserThroughEmail(widget.email);
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: FutureBuilder<UserModel>(
+        future: userName,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator(); // Show a loading indicator
+          } else if (snapshot.hasError) {
+            return const Text('Error loading user data'); // Handle error
+          } else if (snapshot.hasData) {
+            return MeetingCard(
+              scheduleModel: widget.scheduleModel,
+              email: snapshot.data!.accountUsername,
+            );
+          } else {
+            return const Text('No user data available'); // Handle no data
+          }
+        },
       ),
     );
   }
 }
 
-class MeetingCard extends StatelessWidget {
-  const MeetingCard({
-    super.key,
-    required this.scheduleModel,
-    required this.user,
-    required this.isSmallScreen,
-  });
+String formatName(String fullName) {
+  List<String> nameParts = fullName.split(" ");
 
+  if (nameParts.isEmpty) return "";
+
+  if (nameParts.length == 1) {
+    // If there's only one name, capitalize the first letter and lowercase the rest
+    return nameParts[0][0].toUpperCase() +
+        nameParts[0].substring(1).toLowerCase();
+  }
+
+  // Extract last name and format it (capitalize first letter, lowercase the rest)
+  String lastName = nameParts.last[0].toUpperCase() +
+      nameParts.last.substring(1).toLowerCase();
+
+  // Convert all given names (except last) to initials
+  String initials = nameParts
+      .sublist(0, nameParts.length - 1)
+      .map((name) => name[0].toUpperCase()) // Get first letter as uppercase
+      .join(""); // Join initials
+
+  return "$initials $lastName"; // Combine initials and formatted last name
+}
+
+class MeetingCard extends StatefulWidget {
+  const MeetingCard(
+      {super.key, required this.scheduleModel, required this.email});
   final ScheduleModel scheduleModel;
-  final UserModel user;
-  final bool isSmallScreen;
+  final String email;
 
-  String _getProfileImageUrl() {
-    if (user.accountApiPhoto.isEmpty) {
-      return 'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/profile-picture/profile.png';
+  @override
+  State<MeetingCard> createState() => _MeetingCardState();
+}
+
+class _MeetingCardState extends State<MeetingCard> {
+  var profileImageURL = '';
+  bool _isLoading = true;
+  bool _hasError = false;
+  @override
+  void initState() {
+    super.initState();
+    fetchImage();
+  }
+
+  void fetchImage() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final firestoreInstance = Get.put(FirestoreInstance());
+        final userData = await firestoreInstance.getUser(user.uid);
+        if (mounted) {
+          setState(() {
+            profileImageURL = userData.accountApiPhoto;
+            _isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _hasError = true;
+          _isLoading = false;
+        });
+      }
     }
-    return user.accountApiPhoto.startsWith('http')
-        ? user.accountApiPhoto
-        : Supabase.instance.client.storage
-            .from('profile-picture')
-            .getPublicUrl(user.accountApiPhoto);
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final profileImageUrl = _getProfileImageUrl();
-    final dateTimeFormatted =
-        "${DateFormat.yMMMd().format(scheduleModel.scheduleDate)} | ${scheduleModel.scheduleStartTime}";
+    String fullName = widget.email;
+    String formattedName = formatName(fullName);
 
-    return Padding(
+    return Container(
+      width: screenWidth * 0.9,
       padding: EdgeInsets.all(screenWidth * 0.04),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(screenWidth * 0.04),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 5,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
       child: Column(
+        mainAxisSize: MainAxisSize.min, // Prevent infinite height issue
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            dateTimeFormatted,
+            "${DateFormat('MMM d, y').format(widget.scheduleModel.scheduleDate)} | ${widget.scheduleModel.scheduleStartTime}",
             style: TextStyle(
-              fontSize: isSmallScreen ? 14 : 16,
+              fontSize: screenHeight * 0.025,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: screenHeight * 0.02),
+          SizedBox(height: screenWidth * 0.04),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              CachedNetworkImage(
-                imageUrl: profileImageUrl,
-                imageBuilder: (context, imageProvider) => CircleAvatar(
-                  radius: isSmallScreen ? 20 : 25,
-                  backgroundImage: imageProvider,
-                ),
-                placeholder: (context, url) => CircleAvatar(
-                  radius: isSmallScreen ? 20 : 25,
-                  backgroundColor: Colors.grey[200],
-                  child: const CircularProgressIndicator(strokeWidth: 2),
-                ),
-                errorWidget: (context, url, error) => CircleAvatar(
-                  radius: isSmallScreen ? 20 : 25,
-                  backgroundColor: Colors.grey[200],
-                  child: Icon(
-                    Icons.person,
-                    size: isSmallScreen ? 20 : 25,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ),
+              _buildProfileImage(screenWidth),
               SizedBox(width: screenWidth * 0.04),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _formatName(
-                          user.accountApiName), // Name formatting applied
+                      formattedName,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: isSmallScreen ? 14 : 16,
+                        fontSize: screenHeight * 0.02,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: screenHeight * 0.005),
                     Text(
-                      scheduleModel.scheduleTitle,
+                      widget.scheduleModel.scheduleTitle,
                       style: TextStyle(
-                        fontSize: isSmallScreen ? 13 : 14,
-                        color: Colors.grey[600],
+                        color: Colors.grey[700],
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
+              Column(
+                children: [],
+              )
             ],
           ),
-          SizedBox(height: screenHeight * 0.015),
-          const Divider(),
-          SizedBox(height: screenHeight * 0.005),
-          Text(
-            _getRemainingTime(scheduleModel),
-            style: TextStyle(
-              fontSize: isSmallScreen ? 13 : 14,
-              color: Colors.blueAccent,
-              fontWeight: FontWeight.w500,
-            ),
+          SizedBox(height: screenHeight * 0.02),
+          Divider(),
+          SizedBox(height: screenHeight * 0.0),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                getRemainingTime(widget.scheduleModel.scheduleStartTime,
+                    widget.scheduleModel.scheduleDate),
+                style: TextStyle(color: Colors.blue),
+              ),
+              // ElevatedButton(
+              //   onPressed: () {
+              //     // Handle view action
+              //   },
+              //   style: ElevatedButton.styleFrom(
+              //     backgroundColor: Colors.blue,
+              //     shape: RoundedRectangleBorder(
+              //       borderRadius: BorderRadius.circular(8),
+              //     ),
+              //   ),
+              //   child:
+              //       const Text("View", style: TextStyle(color: Colors.white)),
+              // ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  String _formatName(String? name) {
-    if (name == null || name.trim().isEmpty) return "Unknown";
+  Widget _buildProfileImage(double screenWidth) {
+    if (_isLoading) {
+      return _buildPlaceholderAvatar(isLoading: true);
+    }
 
-    return name.trim().split(' ').map((word) {
-      if (word.isEmpty) return '';
-      return word[0].toUpperCase() + word.substring(1).toLowerCase();
-    }).join(' ');
+    if (profileImageURL == '' || _hasError) {
+      return _buildPlaceholderAvatar();
+    }
+
+    return CachedNetworkImage(
+      imageUrl: profileImageURL,
+      imageBuilder: (context, imageProvider) => CircleAvatar(
+        radius: 30,
+        backgroundImage: imageProvider,
+      ),
+      placeholder: (context, url) => _buildPlaceholderAvatar(isLoading: true),
+      errorWidget: (context, url, error) => _buildPlaceholderAvatar(),
+    );
   }
 
-  String _capitalize(String s) =>
-      s[0].toUpperCase() + s.substring(1).toLowerCase();
+  Widget _buildPlaceholderAvatar({bool isLoading = false}) {
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.grey[300],
+      ),
+      child: isLoading
+          ? Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.grey[600],
+              ),
+            )
+          : Image.asset(
+              'assets/images/application_images/profile.png',
+              fit: BoxFit.cover,
+            ),
+    );
+  }
 
-  String _getRemainingTime(ScheduleModel model) {
-    final instance = Get.find<FirestoreInstance>();
-    final startTime = instance.parseTimeString(model.scheduleStartTime);
-    final sessionDate = DateTime(
-        model.scheduleDate.year,
-        model.scheduleDate.month,
-        model.scheduleDate.day,
-        startTime.hour,
-        startTime.minute);
+  String getRemainingTime(String startTime, DateTime date) {
+    FirestoreInstance firestoreInstance = Get.put(FirestoreInstance());
+    final convertedTime = firestoreInstance.parseTimeString(startTime);
     final now = DateTime.now();
-    final diff = sessionDate.difference(now);
-
-    if (diff.isNegative) return "Session ended";
-    if (diff.inMinutes == 0) return "Starting now";
-    if (diff.inMinutes == 1) return "1 min to go";
-    if (diff.inMinutes < 60) return "${diff.inMinutes} mins to go";
-    if (diff.inHours == 1) return "1 hour to go";
-    if (diff.inHours < 24) return "${diff.inHours} hours to go";
-    if (diff.inDays == 1) return "1 day to go";
-
-    return "${diff.inDays} days to go";
+    DateTime newDate = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      convertedTime.hour,
+      convertedTime.minute,
+    );
+    final difference = newDate.difference(now);
+    if (difference.isNegative) {
+      return "Session has ended";
+    } else if (difference.inMinutes == 0) {
+      return "Session is starting now";
+    } else if (difference.inMinutes == 1) {
+      return "1 min to go";
+    } else if (difference.inMinutes < 60) {
+      return "${difference.inMinutes} mins to go";
+    } else if (difference.inHours == 1) {
+      return "1 hour to go";
+    } else if (difference.inHours < 24) {
+      return "${(difference.inHours).toString()} hours to go";
+    } else if (difference.inDays == 1) {
+      return "${(difference.inDays).toString()} day to go";
+    } else {
+      return "${(difference.inDays).toString()} days to go";
+    }
   }
 }

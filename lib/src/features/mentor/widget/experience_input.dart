@@ -125,6 +125,17 @@ class _ExperienceInputState extends State<ExperienceInput> {
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
+          const SizedBox(
+            height: 12,
+          ),
+          Text(
+              "If you have any previous work experience and it is not displayed, please go back the previous page and proceed here again.",
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.black.withOpacity(0.6),
+                fontStyle: FontStyle.italic,
+              )),
+          const SizedBox(height: 12),
           Align(
             alignment: Alignment.topLeft,
             child: TextButton.icon(

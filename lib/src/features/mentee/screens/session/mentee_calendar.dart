@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:voyager/src/features/mentee/controller/mentee_schedule_controller.dart';
+import 'package:voyager/src/features/mentee/screens/session/upcoming_card.dart';
+import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/features/mentor/model/schedule_model.dart';
 import 'package:voyager/src/features/mentor/widget/task.dart';
 
@@ -22,12 +24,21 @@ class _MenteeCalendarViewState extends State<MenteeCalendarView> {
   DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
   bool _isLoading = false;
+
+  bool hasScheduleToday = false;
   late List<ScheduleModel> scheduleListToday = [];
+  late List<MentorModel> mentorRegSched = [];
 
   Future<void> _loadScheduleForSelectedDay(DateTime day) async {
     setState(() => _isLoading = true);
 
     try {
+      final formatDate =
+          "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
+      String dayOfTheWeek =
+          await menteeScheduleController.getDayOfTheWeek(selectedDay);
+      final scheduleListTodayTemp =
+          await menteeScheduleController.getScheduleByDay(formatDate);
       final schedules =
           await menteeScheduleController.getUpcomingScheduleForMentee(
               menteeScheduleController.currentUserEmail);
@@ -36,11 +47,27 @@ class _MenteeCalendarViewState extends State<MenteeCalendarView> {
             schedule.scheduleDate.month == day.month &&
             schedule.scheduleDate.day == day.day;
       }).toList();
+      bool hasSchedule = false;
+      if (selectedDay.month > 5) {
+        hasSchedule = false;
+      } else {
+        hasSchedule =
+            await menteeScheduleController.hasRegScheduleToday(dayOfTheWeek);
+      }
+      List<MentorModel> regSched = [];
+      if (hasSchedule) {
+        regSched =
+            await menteeScheduleController.getRegScheduleToday(dayOfTheWeek);
+      } else {
+        scheduleListToday = [];
+      }
 
       if (mounted) {
         setState(() {
           _isLoading = false;
-          scheduleListToday = filteredSchedules;
+          mentorRegSched = regSched;
+          scheduleListToday = scheduleListTodayTemp;
+          hasScheduleToday = hasSchedule;
         });
       }
     } catch (e) {
@@ -219,7 +246,8 @@ class _MenteeCalendarViewState extends State<MenteeCalendarView> {
                                     child: CircularProgressIndicator(),
                                   ),
                                 )
-                              else if (scheduleListToday.isEmpty)
+                              else if (scheduleListToday.isEmpty &&
+                                  hasScheduleToday == false)
                                 SizedBox(
                                   height: screenHeight * 0.2,
                                   child: Center(
@@ -257,6 +285,24 @@ class _MenteeCalendarViewState extends State<MenteeCalendarView> {
                                     }
                                   }).toList(),
                                 ),
+                              SizedBox(height: screenHeight * 0.02),
+                              if (hasScheduleToday == true) ...[
+                                for (final mentor in mentorRegSched) ...[
+                                  Task(
+                                    taskName: 'Regular Mentorship Schedule',
+                                    taskDescription:
+                                        "${mentor.mentorRegStartTime.hour % 12}:${mentor.mentorRegStartTime.minute.toString().padLeft(2, '0')} "
+                                        "${mentor.mentorRegStartTime.hour < 12 ? 'AM' : 'PM'} - "
+                                        "${mentor.mentorRegEndTime.hour % 12}:${mentor.mentorRegEndTime.minute.toString().padLeft(2, '0')} "
+                                        "${mentor.mentorRegEndTime.hour < 12 ? 'AM' : 'PM'}",
+                                    icon:
+                                        CupertinoIcons.check_mark_circled_solid,
+                                    iconColor: Colors.blue,
+                                  ),
+                                ],
+                              ] else ...[
+                                SizedBox(),
+                              ],
                             ],
                           ),
                         ],

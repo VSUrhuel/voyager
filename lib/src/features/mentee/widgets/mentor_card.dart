@@ -8,7 +8,12 @@ import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 class MentorCard extends StatelessWidget {
   final MentorModel mentorModel;
   final UserModel user;
-  const MentorCard({super.key, required this.mentorModel, required this.user});
+  final bool isSmallCard;
+  const MentorCard(
+      {super.key,
+      required this.mentorModel,
+      required this.user,
+      this.isSmallCard = false});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +22,7 @@ class MentorCard extends StatelessWidget {
       final nameParts = fullName.split(" ");
       if (nameParts.isEmpty) return "";
       if (nameParts.length == 1) return nameParts[0];
-      return "${nameParts[0][0]}. ${nameParts.last}";
+      return "${nameParts[0][0]}. ${nameParts.last[0]}${nameParts.last.substring(1, nameParts.last.length).toLowerCase()}";
     }
 
     // Get profile image URL
@@ -111,9 +116,9 @@ class MentorCard extends StatelessWidget {
                       top: 12,
                       right: 12,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isSmallCard ? 8 : 12,
+                          vertical: isSmallCard ? 4 : 6,
                         ),
                         decoration: BoxDecoration(
                           color: const Color(0xFF52CA82),
@@ -128,10 +133,10 @@ class MentorCard extends StatelessWidget {
                         ),
                         child: Text(
                           mentorModel.mentorYearLvl,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                            fontSize: isSmallCard ? 10 : 12,
                           ),
                         ),
                       ),
@@ -146,16 +151,65 @@ class MentorCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Mentor Name
-                    Text(
-                      mentorName,
-                      style: TextStyle(
-                        fontSize: screenSize.width * 0.045,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    isSmallCard
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                mentorName,
+                                style: TextStyle(
+                                  fontSize: screenSize.width * 0.045,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  '@${user.accountUsername}',
+                                  style: TextStyle(
+                                    fontSize: screenSize.width * 0.03,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                mentorName,
+                                style: TextStyle(
+                                  fontSize: screenSize.width * 0.045,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              SizedBox(width: 4),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  '@${user.accountUsername}',
+                                  style: TextStyle(
+                                    fontSize: screenSize.width * 0.03,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                     const SizedBox(height: 8),
                     // Mentor Motto with icon
                     Row(
@@ -176,29 +230,40 @@ class MentorCard extends StatelessWidget {
                               color: Colors.grey[600],
                               fontStyle: FontStyle.italic,
                             ),
-                            maxLines: 2,
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     // Single Skill Display
-                    if (skills.isNotEmpty) ...[
+
+                    if (skills.isNotEmpty && !isSmallCard) ...[
                       Text(
                         'Expertise',
                         style: TextStyle(
-                          fontSize: screenSize.width * 0.038,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[700],
-                        ),
+                            fontSize: screenSize.width * 0.035,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[800]),
                       ),
                       const SizedBox(height: 8),
-                      SkillsDisplay(
-                        color: Theme.of(context).primaryColor,
-                        text: skills.first.split(" ").first,
-                        widthFactor: 0.4,
-                        heightFactor: 0.035,
+                      SizedBox(
+                        height: 32, // Fixed height for skills row
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          shrinkWrap: true,
+                          children: skills.take(3).map((skill) {
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: SkillsDisplay(
+                                color: Theme.of(context).colorScheme.primary,
+                                text: skill.trim(),
+                                isPrimary: skills.indexOf(skill) == 0,
+                              ),
+                            );
+                          }).toList(),
+                        ),
                       ),
                     ],
                   ],

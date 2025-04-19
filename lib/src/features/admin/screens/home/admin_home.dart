@@ -3,16 +3,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:voyager/src/features/admin/screens/admin_dashboard.dart';
 import 'package:voyager/src/features/admin/screens/courses/course_list.dart';
-import 'package:voyager/src/features/admin/screens/home/admin_settings.dart';
 import 'package:voyager/src/features/admin/screens/mentors/mentor_list.dart';
-import 'package:voyager/src/features/admin/screens/profile/admin_profile.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/repository/authentication_repository_firebase/authentication_repository.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
-import 'package:voyager/src/widgets/custom_page_route.dart';
-import 'package:voyager/src/widgets/profile_list_tile.dart';
 
 class AdminHome extends StatefulWidget {
   const AdminHome({super.key});
