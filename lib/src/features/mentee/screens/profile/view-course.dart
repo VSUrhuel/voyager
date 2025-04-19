@@ -22,21 +22,21 @@ class MenteesOfMentor {
   });
 }
 
-class CourseDetails extends StatefulWidget {
+class ViewCourse extends StatefulWidget {
   final CourseModel courseModel;
   final List<CourseMentorModel> courseMentors;
 
-  const CourseDetails({
+  const ViewCourse({
     super.key,
     required this.courseModel,
     required this.courseMentors,
   });
 
   @override
-  State<CourseDetails> createState() => _CourseDetailsState();
+  State<ViewCourse> createState() => _ViewCourseState();
 }
 
-class _CourseDetailsState extends State<CourseDetails> {
+class _ViewCourseState extends State<ViewCourse> {
   final FirestoreInstance firestoreInstance = FirestoreInstance();
   bool isLoading = false;
   List<UserModel> allCourseMentees = [];
@@ -54,7 +54,7 @@ class _CourseDetailsState extends State<CourseDetails> {
   Future<List<PickMentorCard>> fetchMentorsWithDetails() async {
     try {
       List<UserModel> users =
-          await firestoreInstance.getCourseMentors(widget.courseModel.docId);
+          await firestoreInstance.getEnrolledMentors(widget.courseModel.docId);
       List<MentorModel> mentorDetails = await Future.wait(users.map((user) =>
           firestoreInstance.getMentorThroughAccId(user.accountApiID)));
       allCourseMentees = await firestoreInstance.getMenteeAccountsForCourse(
@@ -70,8 +70,10 @@ class _CourseDetailsState extends State<CourseDetails> {
           user: users[index],
           isSelected: selectedMentorId == users[index].accountApiID,
           onTap: () {
-            _showCustomDialog(context, mentorDetails[index], users[index],
-                widget.courseModel.docId);
+            MentorProfile(
+              mentorModel: mentorDetails[index],
+              user: users[index],
+            );
           },
         );
       });
@@ -652,24 +654,7 @@ class _CourseDetailsState extends State<CourseDetails> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          _buildSectionTitle("Assigned Mentors"),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => MentorList(),
-                                  ));
-                            },
-                            child: Text(
-                              "Edit Mentors",
-                              style: TextStyle(
-                                color: Colors.blue[600],
-                                fontSize: screenHeight * 0.018,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
+                          _buildSectionTitle("Your Mentor"),
                         ],
                       ),
 

@@ -658,34 +658,27 @@ class FirestoreInstance {
   }
 
   Future<void> softDeleteCourseAllocatedMentee(String courseMentorId) async {
-    try{
+    try {
       final docRef = await _db
-      .collection('menteeCourseAlloc')
-      .where('courseMentorId', isEqualTo: courseMentorId)
-      .get();
-      if(docRef.docs.isNotEmpty){
-        _db
-        .collection('menteeCourseAlloc')
-        .doc(docRef.docs[0].id)
-        .update({
-            'mcaSoftDeleted': true,
+          .collection('menteeCourseAlloc')
+          .where('courseMentorId', isEqualTo: courseMentorId)
+          .get();
+      if (docRef.docs.isNotEmpty) {
+        _db.collection('menteeCourseAlloc').doc(docRef.docs[0].id).update({
+          'mcaSoftDeleted': true,
         });
       }
-
-    }catch(e){
+    } catch (e) {
       rethrow;
     }
   }
 
   Future<void> softDeleteCourseMentor(String courseMentorId) async {
-    try{
-      await _db
-      .collection('courseMentor')
-      .doc(courseMentorId)
-      .update({
+    try {
+      await _db.collection('courseMentor').doc(courseMentorId).update({
         'courseMentorSoftDeleted': true,
       });
-    }catch (e){
+    } catch (e) {
       rethrow;
     }
   }
@@ -712,8 +705,6 @@ class FirestoreInstance {
       return '';
     }
   }
-
-
 
   Future<UserModel> getUserThroughAccId(String accId) async {
     try {
@@ -1194,6 +1185,57 @@ class FirestoreInstance {
       }
 
       return users;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<UserModel>> getEnrolledMentors(String courseId) async {
+    try {
+      // 1. Get current mentee ID
+      final menteeId =
+          await getMenteeId(FirebaseAuth.instance.currentUser!.uid);
+
+      // 2. Get all accepted course allocations for this mentee
+      final menteeAllocs = await _db
+          .collection('menteeCourseAlloc')
+          .where('menteeId', isEqualTo: menteeId)
+          .where('mcaAllocStatus',
+              isEqualTo: 'accepted') // Only accepted allocations
+          .where('mcaSoftDeleted', isEqualTo: false) // Not soft-deleted
+          .get();
+
+      // 3. Get all courseMentor references from these allocations
+      final courseMentorIds = menteeAllocs.docs
+          .map((doc) => doc.data()['courseMentorId'] as String)
+          .toList();
+
+      // 4. Get all courseMentor documents for these IDs
+      final courseMentors = await Future.wait(courseMentorIds
+          .map((id) => _db.collection('courseMentor').doc(id).get()));
+
+      // 5. Filter courseMentors by the specific courseId and get mentor details
+      final users = await Future.wait(
+        courseMentors.where((doc) => doc.exists).map((doc) async {
+          final courseMentorData = doc.data()!;
+
+          // Verify this courseMentor is for the requested course
+          if (courseMentorData['courseId'] == courseId) {
+            final mentorId = courseMentorData['mentorId'] as String;
+            final mentorDoc =
+                await _db.collection('mentors').doc(mentorId).get();
+
+            if (mentorDoc.exists) {
+              final accountId = mentorDoc.data()!['accountId'] as String;
+              return await getUser(accountId);
+            }
+          }
+          return null;
+        }),
+      );
+
+      // 6. Remove nulls and return the list of UserModel
+      return users.whereType<UserModel>().toList();
     } catch (e) {
       rethrow;
     }

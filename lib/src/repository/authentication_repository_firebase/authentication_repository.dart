@@ -230,12 +230,13 @@ class FirebaseAuthenticationRepository extends GetxController {
 
       throw ex;
     } catch (e) {
-      const ex = AuthenticationExceptions();
+      final ex = AuthenticationExceptions.code(e.toString());
+
       ScaffoldMessenger.of(Get.context!).showSnackBar(
         SnackBar(
           content: AwesomeSnackbarContent(
               title: 'Oh Snap!',
-              message: e.toString(),
+              message: ex.message,
               contentType: ContentType.failure,
               color: Colors.red),
           width: MediaQuery.of(Get.context!).size.width,
@@ -339,12 +340,12 @@ class FirebaseAuthenticationRepository extends GetxController {
 
       throw ex;
     } catch (e) {
-      const ex = AuthenticationExceptions();
+      final ex = AuthenticationExceptions.code(e.toString());
       ScaffoldMessenger.of(Get.context!).showSnackBar(
         SnackBar(
           content: AwesomeSnackbarContent(
               title: 'Error!',
-              message: e.toString(),
+              message: ex.message,
               contentType: ContentType.failure,
               color: Colors.red),
           width: MediaQuery.of(Get.context!).size.width,
@@ -409,7 +410,7 @@ class FirebaseAuthenticationRepository extends GetxController {
           // If custom token fails, try to sign in with original credentials
           // You'll need to have stored these somewhere secure
           // Alternatively, you could sign in anonymously here if appropriate
-          print("Failed to restore session with custom token: $e");
+
           return null;
         }
       }

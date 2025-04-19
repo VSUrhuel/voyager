@@ -74,182 +74,176 @@ class _CourseCardState extends State<CourseCard> {
         final totalMentor = snapshot.data ?? 0;
 
         return GestureDetector(
-            onTap: () {
-              final user = FirebaseAuth.instance.currentUser;
-              if (user == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Please sign in to enroll')),
-                );
-                return;
-              }
-              userIdFuture.then((resolvedUserId) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => EnrollCourse(
-                      courseModel: widget.courseModel,
-                      userId: resolvedUserId,
-                    ),
+          onTap: () {
+            final user = FirebaseAuth.instance.currentUser;
+            if (user == null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Please sign in to enroll')),
+              );
+              return;
+            }
+            userIdFuture.then((resolvedUserId) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EnrollCourse(
+                    courseModel: widget.courseModel,
+                    userId: resolvedUserId,
                   ),
-                );
-              }).catchError((error) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error: $error')),
-                );
-              });
-            },
-            child: Expanded(
-              flex: 2,
-              child: Card(
-                elevation: 1,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
                 ),
-                clipBehavior: Clip.antiAlias,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: MediaQuery.of(context).size.width * 0.9,
-                    minHeight: MediaQuery.of(context).size.height *
-                        0.5, // Increased height
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Image section - now takes more space
-                      Flexible(
-                        flex: 6, // Increased from 5 to give more space to image
-                        child: AspectRatio(
-                          aspectRatio: 16 / 9,
-                          child: Image.network(
-                            imageUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                Container(
-                              color: theme.colorScheme.surfaceVariant,
-                              child: Center(
-                                  child: Icon(Icons.broken_image, size: 40)),
-                            ),
-                          ),
+              );
+            }).catchError((error) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Error: $error')),
+              );
+            });
+          },
+          child: Card(
+            elevation: 1,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.9,
+                minHeight: MediaQuery.of(context).size.height *
+                    0.5, // Increased height
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Image section - now takes more space
+                  Flexible(
+                    flex: 6, // Increased from 5 to give more space to image
+                    child: AspectRatio(
+                      aspectRatio: 16 / 9,
+                      child: Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: theme.colorScheme.surfaceContainerHighest,
+                          child:
+                              Center(child: Icon(Icons.broken_image, size: 40)),
                         ),
                       ),
+                    ),
+                  ),
 
-                      // Content section
-                      Flexible(
-                        flex:
-                            6, // Adjusted from 4 to balance the increased height
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                              top: 16.0, left: 16.0, right: 16.0, bottom: 0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment
-                                .spaceBetween, // Better space distribution
+                  // Content section
+                  Flexible(
+                    flex: 6, // Adjusted from 4 to balance the increased height
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                          top: 16.0, left: 16.0, right: 16.0, bottom: 0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment
+                            .spaceBetween, // Better space distribution
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              // Course Title
+                              Text(
+                                '${widget.courseModel.courseCode} - ${widget.courseModel.courseName}',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 12),
+
+                              // Stats Section
+                              Wrap(
+                                spacing: 24,
+                                runSpacing: 12,
                                 children: [
-                                  // Course Title
-                                  Text(
-                                    '${widget.courseModel.courseCode} - ${widget.courseModel.courseName}',
-                                    style:
-                                        theme.textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
+                                  _buildStatItem(
+                                    icon: Icons.group,
+                                    value: '$totalMentor',
+                                    label: 'Mentors',
+                                    theme: theme,
                                   ),
-                                  const SizedBox(height: 12),
-
-                                  // Stats Section
-                                  Wrap(
-                                    spacing: 24,
-                                    runSpacing: 12,
-                                    children: [
-                                      _buildStatItem(
-                                        icon: Icons.group,
-                                        value: '$totalMentor',
-                                        label: 'Mentors',
-                                        theme: theme,
-                                      ),
-                                      _buildStatItem(
-                                        icon: FontAwesomeIcons.users,
-                                        value: totalMentor > 0
-                                            ? '$totalMentor'
-                                            : '0',
-                                        label: 'Mentee',
-                                        theme: theme,
-                                      ),
-                                      _buildStatItem(
-                                        icon: FontAwesomeIcons.calendar,
-                                        value: '1',
-                                        label: 'Semester',
-                                        theme: theme,
-                                      ),
-                                    ],
+                                  _buildStatItem(
+                                    icon: FontAwesomeIcons.users,
+                                    value:
+                                        totalMentor > 0 ? '$totalMentor' : '0',
+                                    label: 'Mentee',
+                                    theme: theme,
                                   ),
-                                  SizedBox(
-                                    height: screenHeight * 0.02,
-                                  ),
-
-                                  Text(
-                                    'This course was modified on $endDate',
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: screenHeight * 0.015,
-                                      fontStyle: FontStyle.italic,
-                                    ),
+                                  _buildStatItem(
+                                    icon: FontAwesomeIcons.calendar,
+                                    value: '1',
+                                    label: 'Semester',
+                                    theme: theme,
                                   ),
                                 ],
                               ),
+                              SizedBox(
+                                height: screenHeight * 0.02,
+                              ),
 
-                              // Enroll Button
-                              // SizedBox(
-                              //   width: double.infinity,
-                              //   child: ElevatedButton(
-                              //     style: ElevatedButton.styleFrom(
-                              //       backgroundColor: theme.colorScheme.primary,
-                              //       foregroundColor: theme.colorScheme.onPrimary,
-                              //       shape: RoundedRectangleBorder(
-                              //         borderRadius: BorderRadius.circular(8),
-                              //       ),
-                              //     ),
-                              //     onPressed: () {
-                              //       if (currentUser == null) {
-                              //         ScaffoldMessenger.of(context).showSnackBar(
-                              //           const SnackBar(
-                              //             content: Text('Please sign in to enroll'),
-                              //           ),
-                              //         );
-                              //         return;
-                              //       }
-                              //       userIdFuture.then((resolvedUserId) {
-                              //         Navigator.push(
-                              //           context,
-                              //           MaterialPageRoute(
-                              //             builder: (context) => EnrollCourse(
-                              //               courseModel: widget.courseModel,
-                              //               userId: resolvedUserId,
-                              //             ),
-                              //           ),
-                              //         );
-                              //       }).catchError((error) {
-                              //         ScaffoldMessenger.of(context).showSnackBar(
-                              //           SnackBar(content: Text('Error: $error')),
-                              //         );
-                              //       });
-                              //     },
-                              //     child: const Text('Enroll Now'),
-                              //   ),
-                              // ),
+                              Text(
+                                'This course was modified on $endDate',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: screenHeight * 0.015,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
                             ],
                           ),
-                        ),
+
+                          // Enroll Button
+                          // SizedBox(
+                          //   width: double.infinity,
+                          //   child: ElevatedButton(
+                          //     style: ElevatedButton.styleFrom(
+                          //       backgroundColor: theme.colorScheme.primary,
+                          //       foregroundColor: theme.colorScheme.onPrimary,
+                          //       shape: RoundedRectangleBorder(
+                          //         borderRadius: BorderRadius.circular(8),
+                          //       ),
+                          //     ),
+                          //     onPressed: () {
+                          //       if (currentUser == null) {
+                          //         ScaffoldMessenger.of(context).showSnackBar(
+                          //           const SnackBar(
+                          //             content: Text('Please sign in to enroll'),
+                          //           ),
+                          //         );
+                          //         return;
+                          //       }
+                          //       userIdFuture.then((resolvedUserId) {
+                          //         Navigator.push(
+                          //           context,
+                          //           MaterialPageRoute(
+                          //             builder: (context) => EnrollCourse(
+                          //               courseModel: widget.courseModel,
+                          //               userId: resolvedUserId,
+                          //             ),
+                          //           ),
+                          //         );
+                          //       }).catchError((error) {
+                          //         ScaffoldMessenger.of(context).showSnackBar(
+                          //           SnackBar(content: Text('Error: $error')),
+                          //         );
+                          //       });
+                          //     },
+                          //     child: const Text('Enroll Now'),
+                          //   ),
+                          // ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
-            ));
+            ),
+          ),
+        );
       },
     );
   }

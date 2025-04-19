@@ -1,4 +1,3 @@
-import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/admin/widgets/admin_mentor_card.dart';
 import 'package:voyager/src/features/admin/widgets/admin_search_bar.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
@@ -168,7 +167,6 @@ class _MentorPopupState extends State<MentorPopup> {
                               schedule: mentorCard.schedule,
                               course: mentorCard.course,
                               courseId: widget.course,
-                              
                             ),
                         SizedBox(height: 10),
                         Builder(

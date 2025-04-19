@@ -26,7 +26,6 @@ class _EnrollCourseState extends State<EnrollCourse> {
   String? selectedMentorId;
   bool isLoading = false;
 
-
   List<UserModel> fetchedUsers = [];
 
   Future<List<PickMentorCard>> fetchMentorsWithDetails() async {
@@ -68,7 +67,6 @@ class _EnrollCourseState extends State<EnrollCourse> {
     try {
       final firestore = FirebaseFirestore.instance;
       final Timestamp createdTimestamp = Timestamp.now();
-
 
       // 1. Get courseMentorId using courseId and mentorId
       final courseMentorSnapshot = await firestore
@@ -125,7 +123,6 @@ class _EnrollCourseState extends State<EnrollCourse> {
       // 4. Append the new menteeMcaId to the mentee document
       await menteeRef.update({
         'menteeMcaId': FieldValue.arrayUnion([menteeCourseAllocRef.id])
-
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -133,7 +130,6 @@ class _EnrollCourseState extends State<EnrollCourse> {
       );
 
       if (mounted) {
-
         Navigator.pop(context);
       }
     } catch (e) {
@@ -196,32 +192,40 @@ class _EnrollCourseState extends State<EnrollCourse> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        height: screenHeight * 0.25,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: NetworkImage(imageUrl),
-                            fit: BoxFit.cover,
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          height: screenHeight * 0.25,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
                           ),
-                          borderRadius: BorderRadius.circular(10),
+                          child: widget.courseModel.courseImgUrl.isEmpty
+                              ? Image.asset(
+                                  'assets/images/application_images/code.jpg',
+                                  fit: BoxFit.cover)
+                              : Image.network(imageUrl, fit: BoxFit.cover),
                         ),
                       ),
                       SizedBox(height: screenHeight * 0.02),
                       Container(
-                        padding: EdgeInsets.symmetric(
-                          vertical: screenHeight * 0.015,
-                          horizontal: screenWidth * 0.05,
-                        ),
+                        padding:
+                            EdgeInsets.symmetric(vertical: 16, horizontal: 16),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black12),
-                          borderRadius: BorderRadius.circular(16),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.07),
+                              blurRadius: 8,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: FutureBuilder<int>(
                           future: firestoreInstance.getTotalMenteeForCourse(
                               widget.courseModel.docId),
                           builder: (context, menteeSnapshot) {
-
                             final totalMentee = menteeSnapshot.data ?? 0;
 
                             return Row(
@@ -231,9 +235,11 @@ class _EnrollCourseState extends State<EnrollCourse> {
                                     screenHeight),
                                 _infoItem(
                                     Icons.groups,
-                                    "${fetchedUsers.length} Mentors",
+                                    "${fetchedUsers.length} ${fetchedUsers.length == 1 ? 'Mentor' : 'Mentors'}",
                                     screenHeight),
-                                _infoItem(Icons.people, "$totalMentee Mentees",
+                                _infoItem(
+                                    Icons.people,
+                                    "$totalMentee ${totalMentee == 1 ? 'Mentee' : 'Mentees'}",
                                     screenHeight),
                               ],
                             );
@@ -294,11 +300,11 @@ class _EnrollCourseState extends State<EnrollCourse> {
                           ),
                         ],
                       ),
-                      SizedBox(height: screenHeight * 0.02),
+                      SizedBox(height: screenHeight * 0.01),
                       mentorCards.isEmpty
                           ? const Center(child: Text('No mentors available'))
                           : Column(children: mentorCards),
-                      SizedBox(height: screenHeight * 0.03),
+                      SizedBox(height: screenHeight * 0.02),
                     ],
                   ),
                 );
@@ -344,15 +350,14 @@ class _EnrollCourseState extends State<EnrollCourse> {
 
   Widget _infoItem(IconData icon, String text, double screenHeight) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: screenHeight * 0.04),
-        SizedBox(height: screenHeight * 0.005),
+        Icon(icon, color: Colors.blue[600], size: 24),
+        SizedBox(height: 6),
         Text(
           text,
           style: TextStyle(
-            fontSize: screenHeight * 0.018,
-            fontWeight: FontWeight.normal,
+            fontSize: screenHeight * 0.016,
+            color: Colors.grey[700],
           ),
         ),
       ],
@@ -361,15 +366,22 @@ class _EnrollCourseState extends State<EnrollCourse> {
 
   Widget _bulletPoint(String text, double screenHeight) {
     return Padding(
-      padding: EdgeInsets.only(bottom: screenHeight * 0.005),
+      padding: EdgeInsets.symmetric(vertical: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("\u2022 ", style: TextStyle(fontSize: screenHeight * 0.018)),
+          Padding(
+            padding: EdgeInsets.only(top: 4, right: 8),
+            child: Icon(Icons.circle, size: 6, color: Colors.blue[600]),
+          ),
           Expanded(
             child: Text(
               text,
-              style: TextStyle(fontSize: screenHeight * 0.018),
+              style: TextStyle(
+                fontSize: screenHeight * 0.018,
+                color: Colors.black87,
+                height: 1.5,
+              ),
             ),
           ),
         ],

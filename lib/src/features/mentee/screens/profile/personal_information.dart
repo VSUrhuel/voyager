@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/controller/notification_controller.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
-import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart'; // Make sure this is correct
+import 'package:voyager/src/features/mentee/screens/profile/view-course.dart';
+import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
+import 'package:voyager/src/widgets/custom_page_route.dart'; // Make sure this is correct
 
 class MenteePersonalInformation extends StatefulWidget {
   const MenteePersonalInformation({
@@ -22,12 +25,26 @@ class _MenteePersonalInformationState extends State<MenteePersonalInformation> {
   late UserModel userModel;
   final firestore = FirestoreInstance(); // Add this if you have not already
   List<CourseModel> enrolledCourses = [];
+  List<CourseMentorModel> courseMentorModels = [];
 
   @override
   void initState() {
     super.initState();
     userModel = widget.userModel;
     fetchEnrolledCourses();
+  }
+
+  Future<void> fetchCourseMentor(String courseId) async {
+    try {
+      final courseMentor =
+          await firestore.getCourseMentorsThroughCourseId(courseId);
+
+      setState(() {
+        courseMentorModels = courseMentor;
+      });
+    } catch (e) {
+      print("❌ Error fetching course mentor: $e");
+    }
   }
 
   Future<void> fetchEnrolledCourses() async {
@@ -52,6 +69,7 @@ class _MenteePersonalInformationState extends State<MenteePersonalInformation> {
       for (String mentorId in courseMentorIds) {
         final course = await firestore.getMentorCourseThroughId(mentorId);
         if (course != null) {
+          await fetchCourseMentor(course.docId);
           fetchedCourses.add(course);
         }
       }
@@ -72,30 +90,44 @@ class _MenteePersonalInformationState extends State<MenteePersonalInformation> {
   Widget _buildCapabilityItem(
     BuildContext context,
     IconData icon,
-    String text,
+    CourseModel course,
     double screenWidth,
   ) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: screenWidth * 0.01),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            icon,
-            size: screenWidth * 0.05,
-            color: Theme.of(context).primaryColor.withOpacity(0.7),
-          ),
-          SizedBox(width: screenWidth * 0.03),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: screenWidth * 0.038,
-                color: Colors.black87,
-              ),
+    fetchCourseMentor(course.docId);
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          CustomPageRoute(
+            page: ViewCourse(
+              courseModel: course,
+              courseMentors: courseMentorModels,
             ),
           ),
-        ],
+        );
+      },
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: screenWidth * 0.01),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              icon,
+              size: screenWidth * 0.05,
+              color: Theme.of(context).primaryColor.withOpacity(0.7),
+            ),
+            SizedBox(width: screenWidth * 0.03),
+            Expanded(
+              child: Text(
+                course.courseName,
+                style: TextStyle(
+                  fontSize: screenWidth * 0.038,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -124,7 +156,8 @@ class _MenteePersonalInformationState extends State<MenteePersonalInformation> {
           children: [
             // Header
             Row(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Icon(
                   Icons.school,
@@ -142,56 +175,61 @@ class _MenteePersonalInformationState extends State<MenteePersonalInformation> {
                 ),
               ],
             ),
-            SizedBox(height: screenHeight * 0.02),
 
             // Course List
-            enrolledCourses.isEmpty
-                ? Text(
-                    "No enrolled courses found.",
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.035,
-                      color: Colors.grey,
-                    ),
-                  )
-                : ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxHeight: screenHeight * 0.4,
-                    ),
-                    child: ListView.separated(
-                      itemCount: enrolledCourses.length,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      separatorBuilder: (_, __) =>
-                          SizedBox(height: screenHeight * 0.015),
-                      itemBuilder: (context, index) {
-                        final course = enrolledCourses[index];
-                        return Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.04,
-                            vertical: screenHeight * 0.01,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius:
-                                BorderRadius.circular(30), // Oval shape
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.3),
-                                blurRadius: 6,
-                                spreadRadius: 2,
-                              ),
-                            ],
-                          ),
-                          child: _buildCapabilityItem(
-                            context,
-                            Icons.menu_book,
-                            course.courseName,
-                            screenWidth,
-                          ),
-                        );
-                      },
-                    ),
+            if (enrolledCourses.isEmpty)
+              Padding(
+                padding: EdgeInsets.only(top: screenHeight * 0.02),
+                child: Text(
+                  "No enrolled courses",
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.03,
+                    fontWeight: FontWeight.w400,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.grey,
                   ),
+                ),
+              )
+            else
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: screenHeight * 0.4,
+                  minHeight: screenHeight * 0,
+                ),
+                child: ListView.separated(
+                  itemCount: enrolledCourses.length,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  separatorBuilder: (_, __) =>
+                      SizedBox(height: screenHeight * 0.015),
+                  itemBuilder: (context, index) {
+                    final course = enrolledCourses[index];
+                    return Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.04,
+                        vertical: screenHeight * 0.01,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(30), // Oval shape
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.3),
+                            blurRadius: 6,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: _buildCapabilityItem(
+                        context,
+                        Icons.menu_book,
+                        course,
+                        screenWidth,
+                      ),
+                    );
+                  },
+                ),
+              ),
           ],
         ),
       ),

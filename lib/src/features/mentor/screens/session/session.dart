@@ -3,7 +3,6 @@ import 'package:voyager/src/features/mentor/widget/toggle_button.dart';
 import 'package:voyager/src/widgets/custom_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class Session extends StatelessWidget {
   const Session({super.key});
