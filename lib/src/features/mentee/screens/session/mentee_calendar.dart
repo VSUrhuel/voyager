@@ -288,7 +288,6 @@ class _MenteeCalendarViewState extends State<MenteeCalendarView> {
                               SizedBox(height: screenHeight * 0.02),
                               if (hasScheduleToday == true) ...[
                                 for (final mentor in mentorRegSched) ...[
-                                  SizedBox(height: screenHeight * 0.02),
                                   Task(
                                     taskName: 'Regular Mentorship Schedule',
                                     taskDescription:
@@ -300,7 +299,6 @@ class _MenteeCalendarViewState extends State<MenteeCalendarView> {
                                         CupertinoIcons.check_mark_circled_solid,
                                     iconColor: Colors.blue,
                                   ),
-                                  SizedBox(height: screenHeight * 0.02),
                                 ],
                               ] else ...[
                                 SizedBox(),
