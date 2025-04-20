@@ -118,11 +118,28 @@ class CompletedMeetingCard extends StatelessWidget {
             .getPublicUrl(user.accountApiPhoto);
   }
 
-  String formatName(String name) {
-    return name.split(' ').map((word) {
-      if (word.isEmpty) return '';
-      return word[0].toUpperCase() + word.substring(1).toLowerCase();
-    }).join(' ');
+  String formatName(String fullName) {
+    List<String> nameParts = fullName.split(" ");
+
+    if (nameParts.isEmpty) return "";
+
+    if (nameParts.length == 1) {
+      // If there's only one name, capitalize the first letter and lowercase the rest
+      return nameParts[0][0].toUpperCase() +
+          nameParts[0].substring(1).toLowerCase();
+    }
+
+    // Extract last name and format it (capitalize first letter, lowercase the rest)
+    String lastName = nameParts.last[0].toUpperCase() +
+        nameParts.last.substring(1).toLowerCase();
+
+    // Convert all given names (except last) to initials
+    String initials = nameParts
+        .sublist(0, nameParts.length - 1)
+        .map((name) => name[0].toUpperCase()) // Get first letter as uppercase
+        .join(""); // Join initials
+
+    return "$initials $lastName"; // Combine initials and formatted last name
   }
 
   @override
