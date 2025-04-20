@@ -63,7 +63,10 @@ class AdminMentorCard extends StatelessWidget {
                 .createCourseMentor(courseId!, mentorModel.mentorId);
             await AdminMentorController().updateMentorStatus(mentorModel.mentorId, 'active');
             Navigator.pop(context);
-          } else {
+          } else if (confirmed == false) {
+            // Navigator.pop(context);
+          } 
+          else {
             Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -200,18 +203,18 @@ class AdminMentorCard extends StatelessWidget {
                       icon: Icon(Icons.more_vert, color: Colors.black),
                       onSelected: (String value) async {
                         switch (value) {
-                          case 'archive':
-                            if (mentorModel.mentorStatus == 'archived') {
-                              await CreateMentorController().updateMentorStatus(
-                                  mentorModel.mentorId, 'active');
-                              onActionComplete!();
-                            } else {
-                              await CreateMentorController().updateMentorStatus(
-                                  mentorModel.mentorId, 'archived');
-                              onActionComplete!();
-                            }
+                          // case 'archive':
+                          //   if (mentorModel.mentorStatus == 'archived') {
+                          //     await CreateMentorController().updateMentorStatus(
+                          //         mentorModel.mentorId, 'active');
+                          //     onActionComplete!();
+                          //   } else {
+                          //     await CreateMentorController().updateMentorStatus(
+                          //         mentorModel.mentorId, 'archived');
+                          //     onActionComplete!();
+                          //   }
 
-                            break;
+                          //   break;
 
                           case 'suspend':
                             if (mentorModel.mentorStatus == 'suspended') {
@@ -286,12 +289,12 @@ class AdminMentorCard extends StatelessWidget {
                               ? 'Lift Suspension'
                               : 'Suspend Mentor'),
                         ),
-                        PopupMenuItem<String>(
-                          value: 'archive',
-                          child: Text(mentorModel.mentorStatus == 'archived'
-                              ? 'Unarchive Mentor'
-                              : 'Archive Mentor'),
-                        ),
+                        // PopupMenuItem<String>(
+                        //   value: 'archive',
+                        //   child: Text(mentorModel.mentorStatus == 'archived'
+                        //       ? 'Unarchive Mentor'
+                        //       : 'Archive Mentor'),
+                        // ),
                         const PopupMenuItem<String>(
                           value: 'delete',
                           child: Text('Delete Mentor',
