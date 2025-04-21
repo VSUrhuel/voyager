@@ -155,7 +155,7 @@ class _EnrollCourseState extends State<EnrollCourse> {
                 .from('course-picture')
                 .getPublicUrl(widget.courseModel.courseImgUrl))
         : 'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/course-picture/linear-algebra.png';
-
+    final courseName = widget.courseModel.courseName;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -165,8 +165,8 @@ class _EnrollCourseState extends State<EnrollCourse> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Enroll Course',
+        title: Text(
+          courseName,
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.normal,

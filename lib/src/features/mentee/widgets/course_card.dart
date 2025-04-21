@@ -153,7 +153,7 @@ class _CourseCardState extends State<CourseCard> {
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 10),
 
                               // Stats Section
                               Wrap(
