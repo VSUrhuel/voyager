@@ -103,11 +103,26 @@ class AdminMentorCard extends StatelessWidget {
               child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
                 SizedBox(
                   width: screenWidth * 0.2,
-                  child: Icon(
-                    Icons.person,
-                    size: screenWidth * 0.1,
-                  ),
+                  child: userModel.accountApiPhoto.isNotEmpty?
+
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10), // Adjust for desired roundness
+                    child: Image.network(
+                      userModel.accountApiPhoto,
+                      fit: BoxFit.cover, // Ensures the image covers the space
+                      width: screenWidth * 0.15,
+                      height: screenWidth * 0.15,
+                    ),
+                  )
+                  : CircleAvatar(
+                      radius: screenWidth * 0.05,
+                      child: Icon(
+                        Icons.person,
+                        size: screenWidth * 0.05,
+                      ),
+                    ),
                 ),
+                SizedBox(width: screenWidth * 0.02),
                 Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
