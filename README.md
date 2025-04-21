@@ -10,7 +10,27 @@ Development of a Mobile-based Mentorship Application using Flutter for Computer 
 | VG.010.004            | 2025-04-02    |
 | VG.010.005            | 2025-04-12    |
 | VG.010.006            | 2025-04-15    |
+| VG.010.007            | 2025-04-21    |
 
+## VG.010.007 Release Notes
+**Admin Features**  
+- Alignment of mentor status
+- Refactor the widget cards for improve UI
+- Proper navigation for canceling adding mentor
+  
+**Mentor Features**
+- Implemented search functionality in mentee interface
+- Implemented display feature for course view
+- Improve UI for expertise to make it responsive design
+- Implemented a notification view
+- Implemented regular schedule view in calendar
+- Enhance and improve the mentor profile view across the interfaces
+
+ **Mentee Features**
+- Improve the session filtering
+- Improve the interface for mentee home
+- Added features for mentor profile
+- Implemented the mentee personal information
 
 ## VG.010.006 Release Notes
 **Admin Features**  
