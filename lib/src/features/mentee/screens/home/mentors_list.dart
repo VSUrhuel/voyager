@@ -104,34 +104,26 @@ class _MentorsListState extends State<MentorsList> {
                   return Center(child: Text("No mentors available"));
                 }
 
+                // In the build method, replace the rows building logic with this:
                 List<Widget> rows = [];
                 int itemCount = snapshot.data!.length;
 
-                // Build the rows of mentor cards
+// Build the rows of mentor cards
                 for (int i = 0; i < itemCount; i += 2) {
-                  var mentorCard = snapshot.data![i];
-
-                  if (i + 1 < itemCount) {
-                    var mentorCard2 = snapshot.data![i + 1];
-
-                    rows.add(
-                      Row(
-                        children: [
-                          Expanded(child: mentorCard),
-                          SizedBox(width: 8.0),
-                          Expanded(child: mentorCard2),
-                        ],
-                      ),
-                    );
-                  } else {
-                    rows.add(
-                      Row(
-                        children: [
-                          Expanded(child: mentorCard),
-                        ],
-                      ),
-                    );
-                  }
+                  // Always create a row with two Expanded widgets
+                  rows.add(
+                    Row(
+                      children: [
+                        Expanded(child: snapshot.data![i]),
+                        if (i + 1 <
+                            itemCount) // Only add second card if it exists
+                          Expanded(child: snapshot.data![i + 1]),
+                        if (i + 1 >=
+                            itemCount) // If odd card, add an empty Expanded
+                          Expanded(child: Container()),
+                      ],
+                    ),
+                  );
                   rows.add(SizedBox(height: 8.0));
                 }
 
