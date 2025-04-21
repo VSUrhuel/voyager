@@ -36,7 +36,7 @@ class _UpcomingCardState extends State<UpcomingCard> {
           } else if (snapshot.hasData) {
             return MeetingCard(
               scheduleModel: widget.scheduleModel,
-              email: snapshot.data!.accountUsername,
+              email: snapshot.data!.accountApiName,
             );
           } else {
             return const Text('No user data available'); // Handle no data
