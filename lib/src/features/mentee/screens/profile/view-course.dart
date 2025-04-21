@@ -246,36 +246,34 @@ class _ViewCourseState extends State<ViewCourse> {
           ),
         );
       } else if (choice == 'remove') {
-        if (courseId != null) {
-          // Show confirmation dialog
-          final confirmed = await showDialog<bool>(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Confirm Removal '),
-              content: Text(
-                  'Are you sure you want to remove mentor ${user.accountApiName} to the course?'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: const Text('Confirm'),
-                ),
-              ],
-            ),
-          );
+        // Show confirmation dialog
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Confirm Removal '),
+            content: Text(
+                'Are you sure you want to remove mentor ${user.accountApiName} to the course?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Confirm'),
+              ),
+            ],
+          ),
+        );
 
-          if (confirmed == true) {
-            try {
-              await CourseMentorController().removeMentorFromCourse(
-                  courseMentor.courseMentorId, mentor.mentorId);
-              print('Remove mentor selected');
-              Navigator.pop(context);
-            } catch (e) {
-              print('Error removing mentor: $e');
-            }
+        if (confirmed == true) {
+          try {
+            await CourseMentorController().removeMentorFromCourse(
+                courseMentor.courseMentorId, mentor.mentorId);
+            print('Remove mentor selected');
+            Navigator.pop(context);
+          } catch (e) {
+            print('Error removing mentor: $e');
           }
         }
       }

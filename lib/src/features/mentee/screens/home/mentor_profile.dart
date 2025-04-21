@@ -7,8 +7,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:voyager/src/features/mentor/screens/input_information/mentor_info1.dart';
-import 'package:voyager/src/widgets/custom_page_route.dart';
 
 class MentorProfilePage extends StatelessWidget {
   final MentorModel mentorModel;

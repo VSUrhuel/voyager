@@ -7,7 +7,6 @@ import 'package:intl/intl.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:voyager/src/widgets/custom_button.dart';
 
 class CourseCard extends StatefulWidget {
   final CourseModel courseModel;
