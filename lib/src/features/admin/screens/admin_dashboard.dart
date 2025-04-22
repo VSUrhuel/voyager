@@ -32,6 +32,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
+      top: false,
+      bottom: true,
       child: Scaffold(
         body: IndexedStack(
           index: _selectedIndex,
