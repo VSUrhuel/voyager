@@ -114,8 +114,24 @@ class _CourseOfferedState extends State<CourseOffered> {
                       if (snapshot.hasError ||
                           !snapshot.hasData ||
                           snapshot.data!.isEmpty) {
-                        return Center(child: Text("No courses available"));
+                        return SingleChildScrollView(
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              top: 100.0,
+                              left: screenWidth * 0.05,
+                              right: screenWidth * 0.05,
+                            ),
+                            child: Center(
+                              child: Text(
+                                "No courses available",
+                                style: TextStyle(
+                                    fontSize: 16.0, color: Colors.grey),
+                              ),
+                            ),
+                          ),
+                        );
                       }
+
                       return Column(
                         children: List.generate(
                           snapshot.data!.length,
