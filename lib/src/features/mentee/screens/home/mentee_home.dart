@@ -7,6 +7,7 @@ import 'package:voyager/src/features/mentee/model/course_model.dart';
 import 'package:voyager/src/features/mentee/screens/home/course_offered.dart';
 import 'package:voyager/src/features/mentee/screens/home/mentors_list.dart';
 import 'package:voyager/src/features/mentee/screens/home/notification.dart';
+import 'package:voyager/src/features/mentee/screens/profile/mentee_profile.dart';
 import 'package:voyager/src/features/mentee/widgets/course_card.dart';
 import 'package:voyager/src/features/mentee/widgets/mentor_card.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
@@ -201,11 +202,19 @@ class _MenteeHomeState extends State<MenteeHome> {
         elevation: 0,
         title: Row(
           children: [
-            CircleAvatar(
-              radius: 25,
-              backgroundImage: user?.photoURL != null
-                  ? NetworkImage(profileImageURL)
-                  : AssetImage(profileImageURL) as ImageProvider,
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MenteeProfile()),
+                );
+              },
+              child: CircleAvatar(
+                radius: 25,
+                backgroundImage: user?.photoURL != null
+                    ? NetworkImage(profileImageURL)
+                    : AssetImage(profileImageURL) as ImageProvider,
+              ),
             ),
             SizedBox(width: 16),
             Column(
