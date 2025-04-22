@@ -12,7 +12,6 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
-    final auth = FirebaseAuthenticationRepository();
     return Scaffold(
       body: Center(
           child: Column(
@@ -22,12 +21,6 @@ class _SplashScreenState extends State<SplashScreen> {
               width: MediaQuery.of(context).size.width * 0.7),
           const SizedBox(height: 10),
           const CircularProgressIndicator(),
-          ElevatedButton(
-            onPressed: () async {
-              await auth.logout();
-            },
-            child: const Text('Go to Login'),
-          ),
         ],
       )),
     );

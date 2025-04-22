@@ -9,6 +9,7 @@ import 'package:voyager/src/repository/authentication_repository_firebase/authen
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
+import 'package:voyager/src/widgets/custom_page_route.dart';
 
 class AdminHome extends StatefulWidget {
   const AdminHome({super.key});
@@ -63,14 +64,15 @@ class _AdminHomeState extends State<AdminHome> {
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
+        foregroundColor: Colors.white,
+        forceMaterialTransparency: true,
         iconTheme: const IconThemeData(
-            color: Colors.black), // For back button if you have one
+            color: Colors.white), // For back button if you have one
         systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent, // Makes status bar transparent
+          statusBarColor: Colors.white, // Makes status bar transparent
           statusBarIconBrightness:
               Brightness.dark, // Dark icons for light status bar
           statusBarBrightness: Brightness.light, // Light status bar
-          systemNavigationBarColor: Colors.white, // Navigation bar color
           systemNavigationBarIconBrightness:
               Brightness.dark, // Navigation bar icons
         ),
@@ -169,7 +171,8 @@ class _AdminHomeState extends State<AdminHome> {
               subtitle: 'View and manage all mentors',
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const MentorList()),
+                CustomPageRoute(
+                    page: MentorList(), direction: AxisDirection.left),
               ),
               color: Colors.blue[50],
               iconColor: Colors.blue,
@@ -182,7 +185,8 @@ class _AdminHomeState extends State<AdminHome> {
               subtitle: 'View and manage all courses',
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const CourseList()),
+                CustomPageRoute(
+                    page: CourseList(), direction: AxisDirection.left),
               ),
               color: Colors.green[50],
               iconColor: Colors.green,

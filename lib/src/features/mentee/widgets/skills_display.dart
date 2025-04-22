@@ -13,8 +13,8 @@ class SkillsDisplay extends StatelessWidget {
     this.isPrimary = false,
     this.widthFactor = 0.4,
     this.heightFactor = 0.035,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

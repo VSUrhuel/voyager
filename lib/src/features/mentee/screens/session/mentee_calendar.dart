@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:voyager/src/features/mentee/controller/mentee_schedule_controller.dart';
-import 'package:voyager/src/features/mentee/screens/session/upcoming_card.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/features/mentor/model/schedule_model.dart';
 import 'package:voyager/src/features/mentor/widget/task.dart';

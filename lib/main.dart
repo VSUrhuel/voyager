@@ -55,8 +55,8 @@ class MyApp extends StatelessWidget {
       theme: VoyagerTheme.lightTheme,
       themeMode: ThemeMode.light,
       debugShowCheckedModeBanner: false,
-      initialRoute: MRoutes.onBoarding,
-      //initialRoute: initScreen == 0 ? MRoutes.onBoarding : MRoutes.welcome,
+      // initialRoute: MRoutes.onBoarding,
+      initialRoute: initScreen == 0 ? MRoutes.onBoarding : MRoutes.welcome,
       getPages: MAppRoutes.pages,
     );
   }
