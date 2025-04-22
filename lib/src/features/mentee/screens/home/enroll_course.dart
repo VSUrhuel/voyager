@@ -287,17 +287,6 @@ class _EnrollCourseState extends State<EnrollCourse> {
                               fontSize: screenHeight * 0.022,
                             ),
                           ),
-                          TextButton(
-                            onPressed: () {},
-                            child: Text(
-                              "View Mentors",
-                              style: TextStyle(
-                                color: Colors.blue,
-                                fontSize: screenHeight * 0.020,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                       SizedBox(height: screenHeight * 0.01),
