@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/controller/mentee_controller.dart';
@@ -26,6 +27,7 @@ class MenteeHome extends StatefulWidget {
 class _MenteeHomeState extends State<MenteeHome> {
   User? user = FirebaseAuth.instance.currentUser;
   FirestoreInstance firestoreInstance = FirestoreInstance();
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
   MenteeController menteeController = Get.put(MenteeController());
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
@@ -74,31 +76,94 @@ class _MenteeHomeState extends State<MenteeHome> {
     }
   }
 
+  Future<String?> getUserIdThroughEmail(String email) async {
+    try {
+      final userSnapshot = await _db
+          .collection('users')
+          .where('accountApiEmail', isEqualTo: email)
+          .get();
+
+      if (userSnapshot.docs.isEmpty) {
+        print("⚠️ No user found with email: $email");
+        return null;
+      }
+
+      final userId = userSnapshot.docs.first.id;
+
+      final menteeSnapshot = await _db
+          .collection('mentee')
+          .where('accountId', isEqualTo: userId)
+          .get();
+
+      if (menteeSnapshot.docs.isEmpty) {
+        print("⚠️ No mentee found with accountId: $userId");
+        return null;
+      }
+
+      return menteeSnapshot.docs.first.id;
+    } catch (e) {
+      print("❌ Error in getUserIdThroughEmail: $e");
+      return null;
+    }
+  }
+
+  Future<List<String>> getCourseMentorIdsForMentee(String menteeId) async {
+    try {
+      final allocations = await _db
+          .collection('menteeCourseAlloc')
+          .where('menteeId', isEqualTo: menteeId)
+          .where('mcaSoftDeleted', isEqualTo: false)
+          .get();
+
+      return allocations.docs
+          .map((doc) => doc.data()['courseMentorId'] as String)
+          .toList();
+    } catch (e) {
+      print("❌ Error getting course mentor IDs: $e");
+      return [];
+    }
+  }
+
   // Fetch courses with details (similar to fetching mentors)
   Future<List<CourseCard>> fetchCoursesWithDetails(String userEmail) async {
     try {
-      final notificationController = NotificationController();
-      final menteeId =
-          await notificationController.getUserIdThroughEmail(userEmail);
-      final enrolledCourseMentorIds =
-          await notificationController.getCourseMentorIdsForMentee(menteeId);
-      List<CourseModel> enrolledCourses = [];
-      for (String mentorId in enrolledCourseMentorIds) {
-        final course =
-            await firestoreInstance.getMentorCourseThroughId(mentorId);
-        if (course != null) {
-          enrolledCourses.add(course);
-        }
-      }
+      final menteeId = await getUserIdThroughEmail(userEmail);
       final List<CourseModel> allCourses = await firestoreInstance.getCourses();
-      final List<String> enrolledCourseNames =
-          enrolledCourses.map((course) => course.courseName).toList();
 
-      List<CourseModel> availableCourses = allCourses.where((course) {
-        return !enrolledCourseNames.contains(course.courseName) &&
-            course.courseSoftDelete == false &&
-            course.courseStatus == 'active';
-      }).toList();
+      List<CourseModel> availableCourses;
+
+      if (menteeId == null || menteeId.isEmpty) {
+        print("❌ I am still not a mentee");
+        // If no menteeId, return all active and non-soft-deleted courses
+        availableCourses = allCourses.where((course) {
+          return course.courseSoftDelete == false &&
+              course.courseStatus == 'active';
+        }).toList();
+      } else {
+        // Otherwise filter based on enrolled course mentor IDs
+        print("❌ I am now a mentee");
+        final enrolledCourseMentorIds =
+            await getCourseMentorIdsForMentee(menteeId);
+
+        //Problem
+        print("❌ Enrolled in: $enrolledCourseMentorIds");
+        List<CourseModel> enrolledCourses = [];
+        for (String mentorId in enrolledCourseMentorIds) {
+          final course =
+              await firestoreInstance.getMentorCourseThroughId(mentorId);
+          if (course != null) {
+            enrolledCourses.add(course);
+          }
+        }
+
+        final List<String> enrolledCourseNames =
+            enrolledCourses.map((course) => course.courseName).toList();
+        availableCourses = allCourses.where((course) {
+          return !enrolledCourseNames.contains(course.courseName) &&
+              course.courseSoftDelete == false &&
+              course.courseStatus == 'active';
+        }).toList();
+      }
 
       if (_isSearching && menteeController.searchCategory.text == 'Courses') {
         availableCourses = availableCourses.where((course) {
@@ -107,9 +172,7 @@ class _MenteeHomeState extends State<MenteeHome> {
       }
 
       return List.generate(availableCourses.length, (index) {
-        return CourseCard(
-          courseModel: availableCourses[index],
-        );
+        return CourseCard(courseModel: availableCourses[index]);
       });
     } catch (e) {
       print("❌ Error fetching courses with details: $e");
