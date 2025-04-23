@@ -277,7 +277,12 @@ class AddMentor extends StatelessWidget {
                                 ScaffoldMessenger.of(currentContext);
                             final navigator = Navigator.of(currentContext);
 
-                            try {
+                            if(createMentorController.studentID.text.isNotEmpty &&
+                                createMentorController.fullName.text.isNotEmpty &&
+                                createMentorController.email.text.isNotEmpty &&
+                                createMentorController.password.text.isNotEmpty) {
+                              
+                                  try {
                               showDialog(
                                 context: currentContext,
                                 barrierDismissible: false,
@@ -288,9 +293,10 @@ class AddMentor extends StatelessWidget {
                               if (await createMentorController.registerUser()) {
                                 courseMentorController.mentorId.text =
                                     createMentorController.email.text;
-
+                              if(courseMentorController.courseId.text.isNotEmpty){
                                 await courseMentorController
                                     .createInitialCourseMentor();
+                              }
                                 courseController.allCourses.clear();
                                 courseMentorController.courseId.clear();
                                 courseMentorController.mentorId.clear();
@@ -323,6 +329,15 @@ class AddMentor extends StatelessWidget {
                             } finally {
                               // Safely pop dialog if context is still valid
                             }
+                            } else {
+                              messenger.showSnackBar(
+                                SnackBar(
+                                    content: Text('Please fill in necessary fields')),
+
+                              );
+                              return;
+                            }
+                            
                           },
                         ),
                       ]),
