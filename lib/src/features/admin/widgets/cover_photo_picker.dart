@@ -5,7 +5,12 @@ import 'dart:io';
 
 class CoverPhotoPicker extends StatefulWidget {
     final Function(XFile?)? onImagePicked;
-  const CoverPhotoPicker({super.key, this.onImagePicked});
+    final XFile? initialImage;
+  const CoverPhotoPicker({
+    super.key, 
+    this.onImagePicked,
+    this.initialImage,
+    });
   
 
   @override
@@ -15,6 +20,14 @@ class CoverPhotoPicker extends StatefulWidget {
 class CoverPhotoPickerState extends State<CoverPhotoPicker> {
   XFile? _image;
   final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState(){
+    super.initState();
+    if (widget.initialImage != null) {
+      _image = widget.initialImage;
+    }
+  }
 
     void resetImage() {
     setState(() {
