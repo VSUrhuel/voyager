@@ -1,11 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/controller/mentee_controller.dart';
-import 'package:voyager/src/features/mentee/controller/notification_controller.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
 import 'package:voyager/src/features/mentee/screens/home/course_offered.dart';
 import 'package:voyager/src/features/mentee/screens/home/mentors_list.dart';
 import 'package:voyager/src/features/mentee/screens/home/notification.dart';
+import 'package:voyager/src/features/mentee/screens/profile/mentee_profile.dart';
 import 'package:voyager/src/features/mentee/widgets/course_card.dart';
 import 'package:voyager/src/features/mentee/widgets/mentor_card.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
@@ -26,6 +27,7 @@ class MenteeHome extends StatefulWidget {
 class _MenteeHomeState extends State<MenteeHome> {
   User? user = FirebaseAuth.instance.currentUser;
   FirestoreInstance firestoreInstance = FirestoreInstance();
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
   MenteeController menteeController = Get.put(MenteeController());
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
@@ -74,31 +76,94 @@ class _MenteeHomeState extends State<MenteeHome> {
     }
   }
 
+  Future<String?> getUserIdThroughEmail(String email) async {
+    try {
+      final userSnapshot = await _db
+          .collection('users')
+          .where('accountApiEmail', isEqualTo: email)
+          .get();
+
+      if (userSnapshot.docs.isEmpty) {
+        print("⚠️ No user found with email: $email");
+        return null;
+      }
+
+      final userId = userSnapshot.docs.first.id;
+
+      final menteeSnapshot = await _db
+          .collection('mentee')
+          .where('accountId', isEqualTo: userId)
+          .get();
+
+      if (menteeSnapshot.docs.isEmpty) {
+        print("⚠️ No mentee found with accountId: $userId");
+        return null;
+      }
+
+      return menteeSnapshot.docs.first.id;
+    } catch (e) {
+      print("❌ Error in getUserIdThroughEmail: $e");
+      return null;
+    }
+  }
+
+  Future<List<String>> getCourseMentorIdsForMentee(String menteeId) async {
+    try {
+      final allocations = await _db
+          .collection('menteeCourseAlloc')
+          .where('menteeId', isEqualTo: menteeId)
+          .where('mcaSoftDeleted', isEqualTo: false)
+          .get();
+
+      return allocations.docs
+          .map((doc) => doc.data()['courseMentorId'] as String)
+          .toList();
+    } catch (e) {
+      print("❌ Error getting course mentor IDs: $e");
+      return [];
+    }
+  }
+
   // Fetch courses with details (similar to fetching mentors)
   Future<List<CourseCard>> fetchCoursesWithDetails(String userEmail) async {
     try {
-      final notificationController = NotificationController();
-      final menteeId =
-          await notificationController.getUserIdThroughEmail(userEmail);
-      final enrolledCourseMentorIds =
-          await notificationController.getCourseMentorIdsForMentee(menteeId);
-      List<CourseModel> enrolledCourses = [];
-      for (String mentorId in enrolledCourseMentorIds) {
-        final course =
-            await firestoreInstance.getMentorCourseThroughId(mentorId);
-        if (course != null) {
-          enrolledCourses.add(course);
-        }
-      }
+      final menteeId = await getUserIdThroughEmail(userEmail);
       final List<CourseModel> allCourses = await firestoreInstance.getCourses();
-      final List<String> enrolledCourseNames =
-          enrolledCourses.map((course) => course.courseName).toList();
 
-      List<CourseModel> availableCourses = allCourses.where((course) {
-        return !enrolledCourseNames.contains(course.courseName) &&
-            course.courseSoftDelete == false &&
-            course.courseStatus == 'active';
-      }).toList();
+      List<CourseModel> availableCourses;
+
+      if (menteeId == null || menteeId.isEmpty) {
+        print("❌ I am still not a mentee");
+        // If no menteeId, return all active and non-soft-deleted courses
+        availableCourses = allCourses.where((course) {
+          return course.courseSoftDelete == false &&
+              course.courseStatus == 'active';
+        }).toList();
+      } else {
+        // Otherwise filter based on enrolled course mentor IDs
+        print("❌ I am now a mentee");
+        final enrolledCourseMentorIds =
+            await getCourseMentorIdsForMentee(menteeId);
+
+        //Problem
+        print("❌ Enrolled in: $enrolledCourseMentorIds");
+        List<CourseModel> enrolledCourses = [];
+        for (String mentorId in enrolledCourseMentorIds) {
+          final course =
+              await firestoreInstance.getMentorCourseThroughId(mentorId);
+          if (course != null) {
+            enrolledCourses.add(course);
+          }
+        }
+
+        final List<String> enrolledCourseNames =
+            enrolledCourses.map((course) => course.courseName).toList();
+        availableCourses = allCourses.where((course) {
+          return !enrolledCourseNames.contains(course.courseName) &&
+              course.courseSoftDelete == false &&
+              course.courseStatus == 'active';
+        }).toList();
+      }
 
       if (_isSearching && menteeController.searchCategory.text == 'Courses') {
         availableCourses = availableCourses.where((course) {
@@ -107,9 +172,7 @@ class _MenteeHomeState extends State<MenteeHome> {
       }
 
       return List.generate(availableCourses.length, (index) {
-        return CourseCard(
-          courseModel: availableCourses[index],
-        );
+        return CourseCard(courseModel: availableCourses[index]);
       });
     } catch (e) {
       print("❌ Error fetching courses with details: $e");
@@ -138,11 +201,19 @@ class _MenteeHomeState extends State<MenteeHome> {
         elevation: 0,
         title: Row(
           children: [
-            CircleAvatar(
-              radius: 25,
-              backgroundImage: user?.photoURL != null
-                  ? NetworkImage(profileImageURL)
-                  : AssetImage(profileImageURL) as ImageProvider,
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MenteeProfile()),
+                );
+              },
+              child: CircleAvatar(
+                radius: 25,
+                backgroundImage: user?.photoURL != null
+                    ? NetworkImage(profileImageURL)
+                    : AssetImage(profileImageURL) as ImageProvider,
+              ),
             ),
             SizedBox(width: 16),
             Column(
@@ -185,124 +256,136 @@ class _MenteeHomeState extends State<MenteeHome> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-          child: Center(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      'Discover',
-                      style: TextStyle(
-                        fontSize: screenHeight * 0.04,
-                        fontWeight: FontWeight.bold,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          setState(() {
+            fetchCoursesWithDetails(user?.email ?? '');
+            fetchMentorsWithDetails();
+          });
+        },
+        child: SingleChildScrollView(
+          physics:
+              AlwaysScrollableScrollPhysics(), // Ensures pull-to-refresh works even if content is short
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+            child: Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'Discover',
+                        style: TextStyle(
+                          fontSize: screenHeight * 0.04,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    SizedBox(width: screenWidth * 0.02),
-                    Text(
-                      'Courses',
-                      style: TextStyle(
-                        fontSize: screenHeight * 0.04,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF1877F2),
+                      SizedBox(width: screenWidth * 0.02),
+                      Text(
+                        'Courses',
+                        style: TextStyle(
+                          fontSize: screenHeight * 0.04,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF1877F2),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: screenHeight * 0.01),
-                SearchBarWithDropdown(
-                    onChanged: _onSearchChange,
-                    controller: menteeController,
-                    searchController: _searchController),
-                SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Featured Courses',
-                      style: TextStyle(
-                        fontSize: screenHeight * 0.02,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                    ],
+                  ),
+                  SizedBox(height: screenHeight * 0.01),
+                  SearchBarWithDropdown(
+                      onChanged: _onSearchChange,
+                      controller: menteeController,
+                      searchController: _searchController),
+                  SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Featured Courses',
+                        style: TextStyle(
+                          fontSize: screenHeight * 0.02,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
                       ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => CourseOffered()),
-                        );
-                      },
-                      style: TextButton.styleFrom(foregroundColor: Colors.blue),
-                      child: const Text('View All'),
-                    ),
-                  ],
-                ),
-                // Updated HorizontalWidgetSlider for Courses
-                FutureBuilder<List<CourseCard>>(
-                  future: fetchCoursesWithDetails(user?.email ?? ''),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                    if (snapshot.hasError ||
-                        !snapshot.hasData ||
-                        snapshot.data!.isEmpty) {
-                      return Center(child: Text("No courses available"));
-                    }
-                    return HorizontalWidgetSlider(
-                      widgets: snapshot.data!,
-                    );
-                  },
-                ),
-                SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Featured Mentors',
-                      style: TextStyle(
-                        fontSize: screenHeight * 0.02,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => CourseOffered()),
+                          );
+                        },
+                        style:
+                            TextButton.styleFrom(foregroundColor: Colors.blue),
+                        child: const Text('View All'),
                       ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => MentorsList()),
-                        );
-                      },
-                      style: TextButton.styleFrom(foregroundColor: Colors.blue),
-                      child: const Text('View All'),
-                    ),
-                  ],
-                ),
-                // HorizontalWidgetSliderMentor for Mentors
-                FutureBuilder<List<MentorCard>>(
-                  future: fetchMentorsWithDetails(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                    if (snapshot.hasError ||
-                        !snapshot.hasData ||
-                        snapshot.data!.isEmpty) {
-                      return Center(child: Text("No mentors available"));
-                    }
-                    return HorizontalWidgetSliderMentor(
-                      widgets: snapshot.data!,
-                    );
-                  },
-                ),
-                SizedBox(height: screenHeight * 0.02),
-              ],
+                    ],
+                  ),
+                  // Updated HorizontalWidgetSlider for Courses
+                  FutureBuilder<List<CourseCard>>(
+                    future: fetchCoursesWithDetails(user?.email ?? ''),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+                      if (snapshot.hasError ||
+                          !snapshot.hasData ||
+                          snapshot.data!.isEmpty) {
+                        return Center(child: Text("No courses available"));
+                      }
+                      return HorizontalWidgetSlider(
+                        widgets: snapshot.data!,
+                      );
+                    },
+                  ),
+                  SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Featured Mentors',
+                        style: TextStyle(
+                          fontSize: screenHeight * 0.02,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => MentorsList()),
+                          );
+                        },
+                        style:
+                            TextButton.styleFrom(foregroundColor: Colors.blue),
+                        child: const Text('View All'),
+                      ),
+                    ],
+                  ),
+                  // HorizontalWidgetSliderMentor for Mentors
+                  FutureBuilder<List<MentorCard>>(
+                    future: fetchMentorsWithDetails(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+                      if (snapshot.hasError ||
+                          !snapshot.hasData ||
+                          snapshot.data!.isEmpty) {
+                        return Center(child: Text("No mentors available"));
+                      }
+                      return HorizontalWidgetSliderMentor(
+                        widgets: snapshot.data!,
+                      );
+                    },
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                ],
+              ),
             ),
           ),
         ),

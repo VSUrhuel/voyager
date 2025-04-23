@@ -1,5 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:voyager/src/features/mentee/controller/notification_controller.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
 import 'package:voyager/src/features/mentee/widgets/normal_search_bar.dart';
 import 'package:voyager/src/features/mentee/widgets/small_course_card.dart';
@@ -17,6 +17,7 @@ class _CourseOfferedState extends State<CourseOffered> {
   final TextEditingController _searchController = TextEditingController();
   String _searchText = '';
   bool _isSearching = false;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   @override
   void initState() {
@@ -29,14 +30,63 @@ class _CourseOfferedState extends State<CourseOffered> {
     });
   }
 
+  Future<List<String>> getCourseMentorIdsForMentee(String menteeId) async {
+    try {
+      final allocations = await _db
+          .collection('menteeCourseAlloc')
+          .where('menteeId', isEqualTo: menteeId)
+          .where('mcaSoftDeleted', isEqualTo: false)
+          .where(
+        'mcaAllocStatus',
+        whereIn: ['pending', 'accepted'], // OR condition
+      ).get();
+
+      return allocations.docs
+          .map((doc) => doc.data()['courseMentorId'] as String)
+          .toList();
+    } catch (e) {
+      print("❌ Error getting course mentor IDs: $e");
+      return [];
+    }
+  }
+
+  Future<String?> getUserIdThroughEmail(String email) async {
+    try {
+      final userSnapshot = await _db
+          .collection('users')
+          .where('accountApiEmail', isEqualTo: email)
+          .get();
+
+      if (userSnapshot.docs.isEmpty) {
+        print("⚠️ No user found with email: $email");
+        return null;
+      }
+
+      final userId = userSnapshot.docs.first.id;
+
+      final menteeSnapshot = await _db
+          .collection('mentee')
+          .where('accountId', isEqualTo: userId)
+          .get();
+
+      if (menteeSnapshot.docs.isEmpty) {
+        print("⚠️ No mentee found with accountId: $userId");
+        return null;
+      }
+
+      return menteeSnapshot.docs.first.id;
+    } catch (e) {
+      print("❌ Error in getUserIdThroughEmail: $e");
+      return null;
+    }
+  }
+
   Future<List<CourseModel>> fetchCoursesWithDetails(String userEmail) async {
     try {
       FirestoreInstance firestoreInstance = FirestoreInstance();
-      final notificationController = NotificationController();
-      final menteeId =
-          await notificationController.getUserIdThroughEmail(userEmail);
+      final menteeId = await getUserIdThroughEmail(userEmail);
       final enrolledCourseMentorIds =
-          await notificationController.getCourseMentorIdsForMentee(menteeId);
+          await getCourseMentorIdsForMentee(menteeId!);
       List<CourseModel> enrolledCourses = [];
       for (String mentorId in enrolledCourseMentorIds) {
         final course =
@@ -114,8 +164,24 @@ class _CourseOfferedState extends State<CourseOffered> {
                       if (snapshot.hasError ||
                           !snapshot.hasData ||
                           snapshot.data!.isEmpty) {
-                        return Center(child: Text("No courses available"));
+                        return SingleChildScrollView(
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              top: 100.0,
+                              left: screenWidth * 0.05,
+                              right: screenWidth * 0.05,
+                            ),
+                            child: Center(
+                              child: Text(
+                                "No courses available",
+                                style: TextStyle(
+                                    fontSize: 16.0, color: Colors.grey),
+                              ),
+                            ),
+                          ),
+                        );
                       }
+
                       return Column(
                         children: List.generate(
                           snapshot.data!.length,

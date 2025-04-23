@@ -66,80 +66,87 @@ class _EnrollCourseState extends State<EnrollCourse> {
 
     try {
       final firestore = FirebaseFirestore.instance;
-      final Timestamp createdTimestamp = Timestamp.now();
+      final createdTimestamp = Timestamp.now();
 
-      // 1. Get courseMentorId using courseId and mentorId
-      final courseMentorSnapshot = await firestore
+      // 1. Get courseMentorId
+      final courseMentorQuery = await firestore
           .collection('courseMentor')
           .where('courseId', isEqualTo: widget.courseModel.docId)
           .where('courseMentorSoftDeleted', isEqualTo: false)
+          .limit(1)
           .get();
 
-      if (courseMentorSnapshot.docs.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Course is not available for enrollment')),
-        );
-        return;
+      if (courseMentorQuery.docs.isEmpty) {
+        throw 'Course is not available for enrollment';
       }
+      final courseMentorId = courseMentorQuery.docs.first.id;
 
-      final courseMentorId = courseMentorSnapshot.docs.first.id;
-
-      // 2. Check if mentee already exists
-      final existingMenteeSnapshot = await firestore
+      // 2. Get or create mentee
+      final menteeQuery = await firestore
           .collection('mentee')
           .where('accountId', isEqualTo: widget.userId)
           .where('menteeSoftDelete', isEqualTo: false)
+          .limit(1)
           .get();
 
-      DocumentReference menteeRef;
-      String menteeId;
+      final menteeRef = menteeQuery.docs.isNotEmpty
+          ? menteeQuery.docs.first.reference
+          : await firestore.collection('mentee').add({
+              'accountId': widget.userId,
+              'menteeMcaId': [],
+              'menteeSoftDelete': false,
+            });
 
-      if (existingMenteeSnapshot.docs.isNotEmpty) {
-        // Use existing mentee
-        menteeRef = existingMenteeSnapshot.docs.first.reference;
-        menteeId = existingMenteeSnapshot.docs.first.id;
-      } else {
-        // Create new mentee
-        final newMentee = await firestore.collection('mentee').add({
-          'accountId': widget.userId,
-          'menteeMcaId': [],
-          'menteeSoftDelete': false,
+      final menteeId = menteeQuery.docs.isNotEmpty
+          ? menteeQuery.docs.first.id
+          : menteeRef.id;
+
+      // 3. Check for existing allocation
+      final existingAllocQuery = await firestore
+          .collection('menteeCourseAlloc')
+          .where('courseMentorId', isEqualTo: courseMentorId)
+          .where('menteeId', isEqualTo: menteeId)
+          .where('mcaSoftDeleted', isEqualTo: false)
+          .limit(1)
+          .get();
+
+      if (existingAllocQuery.docs.isNotEmpty) {
+        // Update existing allocation
+        await existingAllocQuery.docs.first.reference.update({
+          'mcaAllocStatus': 'pending',
+          'mcaModifiedTimestamp': createdTimestamp,
         });
-        menteeRef = newMentee;
-        menteeId = newMentee.id;
+      } else {
+        // Create new allocation
+        final newAllocRef =
+            await firestore.collection('menteeCourseAlloc').add({
+          'courseMentorId': courseMentorId,
+          'mcaAllocStatus': 'pending',
+          'mcaCreatedTimestamp': createdTimestamp,
+          'mcaModifiedTimestamp': createdTimestamp,
+          'mcaSoftDeleted': false,
+          'menteeId': menteeId,
+        });
+
+        // Update mentee's mcaId list
+        await menteeRef.update({
+          'menteeMcaId': FieldValue.arrayUnion([newAllocRef.id])
+        });
       }
 
-      // 3. Add new menteeCourseAlloc document
-      final menteeCourseAllocRef =
-          await firestore.collection('menteeCourseAlloc').add({
-        'courseMentorId': courseMentorId,
-        'mcaAllocStatus': 'pending',
-        'mcaCreatedTimestamp': createdTimestamp,
-        'mcaSoftDeleted': false,
-        'menteeId': menteeId,
-      });
-
-      // 4. Append the new menteeMcaId to the mentee document
-      await menteeRef.update({
-        'menteeMcaId': FieldValue.arrayUnion([menteeCourseAllocRef.id])
-      });
-
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Successfully enrolled in the course!')),
+        const SnackBar(
+            content: Text('Course enrollment processed successfully!')),
       );
-
-      if (mounted) {
-        Navigator.pop(context);
-      }
+      Navigator.pop(context);
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error enrolling in the course: $e')),
+        SnackBar(content: Text('Error: ${e.toString()}')),
       );
     } finally {
-      if (mounted) {
-        setState(() => isLoading = false);
-      }
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
@@ -285,17 +292,6 @@ class _EnrollCourseState extends State<EnrollCourse> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: screenHeight * 0.022,
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () {},
-                            child: Text(
-                              "View Mentors",
-                              style: TextStyle(
-                                color: Colors.blue,
-                                fontSize: screenHeight * 0.020,
-                                fontWeight: FontWeight.bold,
-                              ),
                             ),
                           ),
                         ],

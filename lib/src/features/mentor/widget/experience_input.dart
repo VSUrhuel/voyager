@@ -129,7 +129,7 @@ class _ExperienceInputState extends State<ExperienceInput> {
             height: 12,
           ),
           Text(
-              "If you have any previous work experience and it is not displayed, please go back the previous page and proceed here again.",
+              "If you have any previous experience inputted and it is not displayed, please go back the previous page to reload the information.",
               style: TextStyle(
                 fontSize: 12,
                 color: Colors.black.withOpacity(0.6),

@@ -101,7 +101,21 @@ class _MentorsListState extends State<MentorsList> {
                 if (snapshot.hasError ||
                     !snapshot.hasData ||
                     snapshot.data!.isEmpty) {
-                  return Center(child: Text("No mentors available"));
+                  return SingleChildScrollView(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        top: 100.0,
+                        left: screenWidth * 0.05,
+                        right: screenWidth * 0.05,
+                      ),
+                      child: Center(
+                        child: Text(
+                          "No mentors available",
+                          style: TextStyle(fontSize: 16.0, color: Colors.grey),
+                        ),
+                      ),
+                    ),
+                  );
                 }
 
                 // In the build method, replace the rows building logic with this:

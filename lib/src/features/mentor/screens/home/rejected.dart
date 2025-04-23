@@ -110,7 +110,7 @@ class _RejectedListState extends State<RejectedList> {
                               .map((mentee) => UserCard(
                                     user: mentee,
                                     height: screenHeight * 0.80,
-                                    actions: ['Accept'],
+                                    actions: [],
                                     onActionCompleted: refreshRejectedMentees,
                                   ))
                               .toList(),
