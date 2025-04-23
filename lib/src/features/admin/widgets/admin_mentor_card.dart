@@ -97,7 +97,9 @@ class AdminMentorCard extends StatelessWidget {
               width: 0.5,
             ),
           ),
-          child: SizedBox(
+          child: Padding(
+            padding: EdgeInsets.only(left: screenWidth * 0.02),
+            child:SizedBox(
               height: screenHeight * 0.09,
               width: screenWidth * 0.9,
               child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
@@ -318,7 +320,9 @@ class AdminMentorCard extends StatelessWidget {
                       ],
                     ),
                   )
-              ]))),
+              ]))
+          ),
+          ),
     );
   }
 

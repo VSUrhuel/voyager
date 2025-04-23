@@ -4,18 +4,22 @@ import 'package:voyager/src/features/admin/controllers/course_controller.dart';
 import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/admin/screens/courses/course_details.dart';
 import 'package:voyager/src/features/admin/screens/courses/mentor_popup.dart';
+import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
+import 'package:voyager/src/features/mentee/screens/session/upcoming_card.dart';
 
 class AdminCourseCard extends StatelessWidget {
   final CourseModel course;
   final VoidCallback onUpdate;
   final List<CourseMentorModel> courseMentors;
+  // final Future<List<UserModel>>? allCourseMentees;
 
   const AdminCourseCard({
     super.key,
     required this.course,
     required this.onUpdate,
     required this.courseMentors,
+    // this.allCourseMentees,
   });
 
   @override
@@ -23,8 +27,19 @@ class AdminCourseCard extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final theme = Theme.of(context);
+    // final courseMentors = firestoreInstance.getMenteeAccountsForCourse(course.docId, 'accepted');
 
-    return Card(
+    return FutureBuilder<List<UserModel>>(
+      future: firestoreInstance.getMenteeAccountsForCourse(course.docId, 'accepted'),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const LinearProgressIndicator();
+        } else if (snapshot.hasError) {
+          return const Center(child: Text('Error loading mentees'));
+        }
+
+        final mentees = snapshot.data!;
+         return Card(
       elevation: 4,
       margin: EdgeInsets.symmetric(
         horizontal: screenWidth * 0.03,
@@ -149,7 +164,7 @@ class AdminCourseCard extends StatelessWidget {
                           _buildStatItem(
                             context,
                             icon: FontAwesomeIcons.peopleGroup,
-                            value: '1',
+                            value: '${mentees.length}',
                             label: 'Mentees',
                           ),
                           _buildStatItem(
@@ -249,6 +264,10 @@ class AdminCourseCard extends StatelessWidget {
         ),
       ),
     );
+      },
+    );
+
+   
   }
 
   Widget _buildStatItem(

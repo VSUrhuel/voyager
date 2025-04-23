@@ -104,16 +104,18 @@ class _MentorPopupState extends State<MentorPopup> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    return Scaffold(
+    return ClipRRect(
+       borderRadius: BorderRadius.vertical(
+        top: Radius.circular(20.0), 
+        bottom: Radius.circular(20.0), 
+      ),
+      child:  Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
+        automaticallyImplyLeading: false,
         title: Text(
           'Mentor List',
           style: TextStyle(
@@ -175,7 +177,7 @@ class _MentorPopupState extends State<MentorPopup> {
                               return Text('');
                             }
                             if (mentorCards.isEmpty) {
-                              return Text('No $show mentor');
+                              return Text('No available mentor');
                             }
                             return Text('Nothing follows');
                           },
@@ -189,6 +191,7 @@ class _MentorPopupState extends State<MentorPopup> {
           ),
         ],
       ),
+    )
     );
   }
 }
