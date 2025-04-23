@@ -297,7 +297,14 @@ class _AddCourseState extends State<AddCourse> {
                         final currentContext = context;
                         final messenger = ScaffoldMessenger.of(currentContext);
                         // final navigator = Navigator.of(currentContext);
-                        try {
+                        if (_courseController.courseCode.text.isNotEmpty &&
+                            _courseController.courseName.text.isNotEmpty &&
+                            _courseController.courseDescription.text
+                                .isNotEmpty &&
+                            _courseController.courseDeliverables.isNotEmpty &&
+                            _courseController.courseImage != null) {
+                          
+                          try {
                           showDialog(
                             context: currentContext,
                             barrierDismissible: false,
@@ -327,6 +334,16 @@ class _AddCourseState extends State<AddCourse> {
                               backgroundColor: Colors.red,
                             ),
                           );
+                        }
+                          
+                        } else {
+                          messenger.showSnackBar(
+                            SnackBar(
+                              content: Text('Please fill all fields'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return;
                         }
                       },
                     ),
