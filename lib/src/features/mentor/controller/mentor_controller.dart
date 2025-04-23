@@ -111,7 +111,7 @@ class MentorController extends GetxController {
         mentorRegEndTime: parseTime(
           mentorRegEndTime.text,
         ),
-        mentorStatus: "archived",
+        mentorStatus: "active",
         mentorSoftDeleted: false,
       );
       final firestore = FirestoreInstance();
@@ -151,7 +151,7 @@ class MentorController extends GetxController {
         mentorRegDay: selectedDays,
         mentorRegStartTime: parseTime(mentorRegStartTime.text),
         mentorRegEndTime: parseTime(mentorRegEndTime.text),
-        mentorStatus: mentorStatus.text,
+        mentorStatus: mentorStatus.text == '' ? 'active' : mentorStatus.text,
         mentorSoftDeleted: false,
       );
       final firestore = FirestoreInstance();

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:voyager/src/repository/authentication_repository_firebase/authentication_repository.dart';
+import 'package:lottie/lottie.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -17,10 +17,19 @@ class _SplashScreenState extends State<SplashScreen> {
           child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Image.asset('assets/images/splash_screen/loading.png',
-              width: MediaQuery.of(context).size.width * 0.7),
+          Lottie.asset(
+            'assets/images/empty-session.json',
+            width: MediaQuery.of(context).size.width * 0.7,
+            height: MediaQuery.of(context).size.width * 0.7,
+            repeat: true,
+          ),
           const SizedBox(height: 10),
-          const CircularProgressIndicator(),
+          Lottie.asset(
+            'assets/images/loading.json',
+            width: MediaQuery.of(context).size.width * 0.3,
+            height: MediaQuery.of(context).size.width * 0.3,
+            repeat: true,
+          ),
         ],
       )),
     );
