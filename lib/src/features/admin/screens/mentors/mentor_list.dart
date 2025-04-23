@@ -1,3 +1,4 @@
+import 'package:voyager/src/features/admin/widgets/admin_initial_mentor_draft.dart';
 import 'package:voyager/src/features/admin/widgets/admin_mentor_card.dart';
 import 'package:voyager/src/features/admin/widgets/admin_search_bar.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
@@ -17,6 +18,7 @@ class MentorList extends StatefulWidget {
 class _MentorListState extends State<MentorList> {
   final firestore = FirestoreInstance();
   List<AdminMentorCard> mentorCards = [];
+  List<MentorDraftCard> mentorDraftCards = [];
   List<AdminMentorCard> filteredMentorCards = [];
   bool isLoading = false;
   String show = '';
@@ -30,14 +32,21 @@ class _MentorListState extends State<MentorList> {
 
   Future<void> getMentors(show) async {
     List<MentorModel> mentors = [];
+    List<UserModel> initUser = [];
     isLoading = true;
     try {
-      mentors = await firestore.getMentorsThroughStatus(show);
+      if (show == 'archived'){
+        mentors = await firestore.getMentorsThroughStatus(show);
+        initUser = await firestore.getinitialMentorsCreated(mentors);
+      }else{
+        mentors = await firestore.getMentorsThroughStatus(show);
+      }
     } catch (e) {
       throw Exception('Failed to fetch mentors: $e');
     }
 
     List<AdminMentorCard> mCards = [];
+    List<MentorDraftCard> mDraftCards = [];
     try {
       List<Future<UserModel>> userFutures = mentors.map((mentor) {
         return firestore.getUserThroughAccId(mentor.accountId);
@@ -68,12 +77,22 @@ class _MentorListState extends State<MentorList> {
           onActionComplete: () => getMentors(show),
         ));
       }
+      if (show == 'archived'){
+
+        for (int i = 0; i < initUser.length; i++){
+          var user = initUser[i];
+          mDraftCards.add(MentorDraftCard(
+            userModel: user,
+          )); 
+        }
+      }
     } catch (e) {
       throw Exception('Failed to fetch user data: $e');
     }
 
     setState(() {
       mentorCards = mCards;
+      mentorDraftCards = mDraftCards;
       filteredMentorCards = mCards;
       isLoading = false;
     });
@@ -284,7 +303,7 @@ class _MentorListState extends State<MentorList> {
                   child: Center(
                     child: Column(
                       children: [
-                        if (isLoading) CircularProgressIndicator(),
+                        if (isLoading) LinearProgressIndicator(),
                         if (mentorCards.isNotEmpty)
                           for (var mentorCard in filteredMentorCards)
                             AdminMentorCard(
@@ -297,19 +316,80 @@ class _MentorListState extends State<MentorList> {
                               course: mentorCard.course,
                               onActionComplete: () => getMentors(show),
                             ),
+                        // if (show == 'archived' && mentorDraftCards.isNotEmpty)
+                        //   for (var mentorCard in mentorDraftCards)
+                        //     MentorDraftCard(
+                        //       userModel: mentorCard.userModel,
+                        //       // onActionComplete: () => getMentors(show),
+                        //     ),
                         SizedBox(height: 10),
                         Builder(
                           builder: (context) {
                             if (isLoading) {
                               return Text('');
                             }
-                            if (mentorCards.isEmpty) {
+                            if (mentorCards.isEmpty && show != 'archived') {
                               return Text('No $show mentor',
                                   style: TextStyle(
                                     color: Colors.grey,
                                     fontSize: screenWidth * 0.033,
                                   ));
                             }
+                            if (mentorDraftCards.isEmpty && mentorCards.isEmpty && show == 'archived') {
+                              return Text('No archived pending mentor',
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: screenWidth * 0.033,
+                                  ));
+                            }
+                            if(show != 'archived'){
+                              return Text('Nothing follows',
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: screenWidth * 0.033,
+                                  ));
+                            }
+                            return Text('',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: screenWidth * 0.01,
+                                ));
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+          if(show == 'archived')
+            SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: screenWidth * 0.05,
+                    right: screenWidth * 0.05,
+                  ),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        if (mentorDraftCards.isNotEmpty)
+                          for (var mentorCard in mentorDraftCards)
+                            MentorDraftCard(
+                              userModel: mentorCard.userModel,
+                              // onActionComplete: () => getMentors(show),
+                            ),
+                        SizedBox(height: 10),
+                        Builder(
+                          builder: (context) {
+                            if (isLoading) {
+                              return Text('');
+                            }
+                            // if (mentorDraftCards.isEmpty) {
+                            //   return Text('No archived pending mentor',
+                            //       style: TextStyle(
+                            //         color: Colors.grey,
+                            //         fontSize: screenWidth * 0.033,
+                            //       ));
+                            // }
                             return Text('Nothing follows',
                                 style: TextStyle(
                                   color: Colors.grey,
@@ -322,6 +402,7 @@ class _MentorListState extends State<MentorList> {
                   ),
                 ),
               ),
+
             ],
           ),
         ],

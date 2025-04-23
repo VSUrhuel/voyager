@@ -600,6 +600,26 @@ class FirestoreInstance {
     }
   }
 
+  Future<List<UserModel>> getinitialMentorsCreated(List<MentorModel> mentors) async {
+    try{
+
+      final ids = (await getMentors()).map((doc) => doc.accountApiID).toList();
+      print(ids);
+      final initialUsers = await _db
+          .collection('users')
+          .where('accountRole', isEqualTo: 'mentor')
+          .get();
+      final filteredUsers = initialUsers.docs
+          .where((doc) => !ids.contains(doc.data()['accountApiID']))
+          .map((doc) => UserModel.fromJson(doc.data()))
+          .toList();
+          print(filteredUsers[0].accountApiName);
+      return filteredUsers;
+    }catch (e){
+      rethrow;
+    }
+  }
+
   Future<void> deleteMentor(String mentorId) async {
     try {
       await _db.collection('mentors').doc(mentorId).update({
