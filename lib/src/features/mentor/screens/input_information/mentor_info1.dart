@@ -223,7 +223,7 @@ class _MentorInfo1State extends State<MentorInfo1> {
                         style: TextStyle(
                           fontSize: screenWidth * 0.04,
                         ),
-                        maxLength: 100,
+                        maxLength: 200,
                         maxLines: 6,
                         decoration: InputDecoration(
                           labelText: 'About information',
@@ -325,7 +325,7 @@ class _MentorInfo1State extends State<MentorInfo1> {
                   padding: EdgeInsets.only(top: screenHeight * 0.015),
                   child: TextFormField(
                     controller: MentorController.instance.mentorMotto,
-                    maxLength: 30,
+                    maxLength: 50,
                     maxLines: 3,
                     style: TextStyle(
                       fontSize: screenWidth * 0.04,

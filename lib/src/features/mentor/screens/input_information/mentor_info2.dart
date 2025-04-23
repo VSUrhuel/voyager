@@ -192,13 +192,21 @@ class _MentorInfo2State extends State<MentorInfo2> {
                   ),
                   Padding(
                     padding:
-                        EdgeInsets.only(top: screenHeight * 0.015, bottom: 10),
+                        EdgeInsets.only(top: screenHeight * 0.015, bottom: 2),
                     child: Text(
                       'Social Media Links',
                       style: TextStyle(
                         fontSize: screenWidth * 0.05,
                         fontWeight: FontWeight.bold,
                       ),
+                    ),
+                  ),
+                  Text(
+                    'Please ensure that the links are valid.',
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.03,
+                      color: Colors.grey[600],
+                      fontStyle: FontStyle.italic,
                     ),
                   ),
                   Padding(
@@ -347,6 +355,33 @@ class _MentorInfo2State extends State<MentorInfo2> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Please enter your Github link.'),
+                          ),
+                        );
+                        return;
+                      }
+                      final uri = Uri.tryParse(controller.mentorFbUrl.text);
+                      if (uri == null ||
+                          !uri.hasScheme ||
+                          !uri.host.contains('facebook.com')) {
+                        // Ensure it's a Facebook link
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'Please enter a valid Facebook link (e.g., https://facebook.com/username)'),
+                          ),
+                        );
+                        return;
+                      }
+
+                      final uri2 = Uri.tryParse(controller.mentorGitUrl.text);
+                      if (uri2 == null ||
+                          !uri2.hasScheme ||
+                          !uri2.host.contains('github.com')) {
+                        // Ensure it's a GitHub link
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'Please enter a valid GitHub link (e.g., https://github.com/username)'),
                           ),
                         );
                         return;
