@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:voyager/src/features/mentee/controller/notification_controller.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
 import 'package:voyager/src/features/mentee/widgets/normal_search_bar.dart';
 import 'package:voyager/src/features/mentee/widgets/small_course_card.dart';
@@ -37,7 +36,10 @@ class _CourseOfferedState extends State<CourseOffered> {
           .collection('menteeCourseAlloc')
           .where('menteeId', isEqualTo: menteeId)
           .where('mcaSoftDeleted', isEqualTo: false)
-          .get();
+          .where(
+        'mcaAllocStatus',
+        whereIn: ['pending', 'accepted'], // OR condition
+      ).get();
 
       return allocations.docs
           .map((doc) => doc.data()['courseMentorId'] as String)

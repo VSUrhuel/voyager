@@ -19,10 +19,35 @@ class MentorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     // Format name to show initials + last name
     String formatName(String fullName) {
-      final nameParts = fullName.split(" ");
-      if (nameParts.isEmpty) return "";
-      if (nameParts.length == 1) return nameParts[0];
-      return "${nameParts[0][0]}. ${nameParts.last[0]}${nameParts.last.substring(1, nameParts.last.length).toLowerCase()}";
+      if (fullName.isEmpty) return "John Doe";
+      // Trim and remove extra spaces
+      fullName = fullName.trim().replaceAll(RegExp(r'\s+'), ' ');
+      List<String> nameParts = fullName.split(" ");
+
+      if (nameParts.isEmpty) return "John Doe";
+
+      // Handle single name
+      if (nameParts.length == 1) {
+        return nameParts[0].isNotEmpty
+            ? nameParts[0][0].toUpperCase() +
+                nameParts[0].substring(1).toLowerCase()
+            : "John Doe";
+      }
+
+      // Format last name
+      String lastName = nameParts.last.isNotEmpty
+          ? nameParts.last[0].toUpperCase() +
+              nameParts.last.substring(1).toLowerCase()
+          : "";
+
+      // Format initials
+      String initials = nameParts
+          .sublist(0, nameParts.length - 1)
+          .where((name) => name.isNotEmpty)
+          .map((name) => name[0].toUpperCase())
+          .join("");
+
+      return "$initials $lastName".trim();
     }
 
     // Get profile image URL

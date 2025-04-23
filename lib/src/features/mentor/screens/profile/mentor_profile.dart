@@ -132,6 +132,8 @@ class _MentorProfileState extends State<MentorProfile> {
                     ),
                   ),
                   Text(
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     courseName.trim(),
                     textAlign: TextAlign.center,
                     style: TextStyle(

@@ -56,6 +56,9 @@ class UserCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final isRejected = actions.isEmpty;
+    final textColor = isRejected ? Colors.grey[600] : Colors.black;
+
     void showMessage(BuildContext context, String message) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message)),
@@ -64,28 +67,57 @@ class UserCard extends StatelessWidget {
 
     return Container(
       width: screenWidth * 0.85,
-      height: screenHeight * 0.11, // Slightly increased for better spacing
+      height: screenHeight * 0.11,
       padding: EdgeInsets.only(left: screenHeight * 0.007, top: 0),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(width: 1, color: const Color(0xFF9494A0)),
+        color: isRejected ? Colors.grey[200] : Colors.white,
+        border: Border.all(
+          width: 1,
+          color: isRejected ? Colors.grey[400]! : const Color(0xFF9494A0),
+        ),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
-          // Profile Image
-          ClipRRect(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(9),
-                bottomLeft: Radius.circular(9),
+          // Profile Image with rejected overlay
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(9),
+                  bottomLeft: Radius.circular(9),
+                ),
+                child: Image.network(
+                  user.accountApiPhoto,
+                  width: screenWidth * 0.20,
+                  height: screenHeight * 0.09,
+                  fit: BoxFit.cover,
+                  color: isRejected ? Colors.grey[400] : null,
+                  colorBlendMode: isRejected ? BlendMode.saturation : null,
+                ),
               ),
-              child: Image.network(
-                user.accountApiPhoto,
-                width: screenWidth * 0.20,
-                height: screenHeight * 0.09,
-                fit: BoxFit.cover,
-              )),
-          const SizedBox(width: 10), // Spacing
+              if (isRejected)
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(9),
+                        bottomLeft: Radius.circular(9),
+                      ),
+                      color: Colors.black.withOpacity(0.3),
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.block,
+                        color: Colors.white,
+                        size: 30,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(width: 10),
 
           // User Details
           Expanded(
@@ -96,7 +128,7 @@ class UserCard extends StatelessWidget {
                 Text(
                   user.accountApiName,
                   style: TextStyle(
-                    color: Colors.black,
+                    color: textColor,
                     fontSize: screenHeight * 0.02,
                     fontWeight: FontWeight.w700,
                   ),
@@ -104,7 +136,7 @@ class UserCard extends StatelessWidget {
                 Text(
                   user.accountApiEmail,
                   style: TextStyle(
-                    color: Colors.black,
+                    color: textColor,
                     fontSize: screenHeight * 0.016,
                     fontWeight: FontWeight.w400,
                     decoration: TextDecoration.underline,
@@ -113,28 +145,43 @@ class UserCard extends StatelessWidget {
                 Text(
                   user.accountStudentId,
                   style: TextStyle(
-                    color: Colors.black,
+                    color: textColor,
                     fontSize: screenHeight * 0.015,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
+                if (isRejected)
+                  Text(
+                    'Rejected',
+                    style: TextStyle(
+                      color: Colors.red[400],
+                      fontSize: screenHeight * 0.014,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
               ],
             ),
           ),
 
-          // More options button
+          // More options button or rejected icon
           actions.isEmpty
-              ? const SizedBox()
+              ? Padding(
+                  padding: const EdgeInsets.only(right: 12.0),
+                  child: Icon(
+                    Icons.block,
+                    color: Colors.red[400],
+                    size: screenHeight * 0.03,
+                  ),
+                )
               : PopupMenuButton<String>(
                   icon: Icon(
                     Icons.more_vert,
-                    color: Colors.black,
+                    color: textColor,
                     size: screenHeight * 0.035,
                   ),
                   onSelected: (value) async {
                     if (value == 'Accept') {
                       await updateStatus(user, 'accepted');
-
                       showMessage(context, 'Accepted');
                     } else if (value == 'Reject') {
                       await updateStatus(user, 'rejected');
@@ -143,14 +190,14 @@ class UserCard extends StatelessWidget {
                       await updateStatus(user, 'removed');
                       showMessage(context, 'Removed');
                     }
-                    onActionCompleted!.call();
+                    onActionCompleted?.call();
                   },
-                  itemBuilder: (BuildContext context) => List.generate(
-                      actions.length,
-                      (index) => PopupMenuItem<String>(
-                            value: actions[index],
-                            child: Text(actions[index]),
-                          )) as List<PopupMenuEntry<String>>,
+                  itemBuilder: (BuildContext context) => actions
+                      .map((action) => PopupMenuItem<String>(
+                            value: action,
+                            child: Text(action),
+                          ))
+                      .toList(),
                 ),
         ],
       ),

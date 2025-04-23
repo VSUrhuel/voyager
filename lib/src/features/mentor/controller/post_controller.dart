@@ -31,7 +31,7 @@ class PostController {
   final error = ''.obs;
   final int _limit = 10;
   DateTime? lastTimesTamp = DateTime.now();
-  bool _hasMore = true;
+  bool hasMore = true;
 
   // Future<PostsResult> getPosts(
   //     {required int limit, DocumentSnapshot? lastDocument}) async {
@@ -138,7 +138,7 @@ class PostController {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         posts.assignAll(postsResult.posts);
         lastTimesTamp = postsResult.lastTimestamp;
-        _hasMore = postsResult.hasMore;
+        hasMore = postsResult.hasMore;
       });
     } catch (e) {
       error.value = e.toString();
@@ -153,18 +153,20 @@ class PostController {
   }
 
   Future<bool> loadMorePosts() async {
-    if (!_hasMore || isLoading.value) return false;
+    if (!hasMore || isLoading.value) return false;
 
     try {
       isLoading.value = true;
       final result = await getPosts(
         limit: _limit,
-        lastPostTimestamp: lastTimesTamp, // Use timestamp for pagination
+        lastPostTimestamp: lastTimesTamp,
       );
+
+      // Use update() instead of direct assignment for GetX observables
       posts.addAll(result.posts);
       lastTimesTamp = result.lastTimestamp;
-      _hasMore = result.hasMore;
-      return _hasMore;
+      hasMore = result.hasMore;
+      return hasMore;
     } catch (e) {
       error.value = e.toString();
       return false;
@@ -173,9 +175,30 @@ class PostController {
     }
   }
 
+  // Future<bool> loadMorePosts() async {
+  //   if (!hasMore || isLoading.value) return false;
+
+  //   try {
+  //     isLoading.value = true;
+  //     final result = await getPosts(
+  //       limit: _limit,
+  //       lastPostTimestamp: lastTimesTamp, // Use timestamp for pagination
+  //     );
+  //     posts.addAll(result.posts);
+  //     lastTimesTamp = result.lastTimestamp;
+  //     hasMore = result.hasMore;
+  //     return hasMore;
+  //   } catch (e) {
+  //     error.value = e.toString();
+  //     return false;
+  //   } finally {
+  //     isLoading.value = false;
+  //   }
+  // }
+
   void resetPagination() {
     lastTimesTamp = DateTime.now();
-    _hasMore = true;
+    hasMore = true;
   }
 
   Future<String> getUsername() async {

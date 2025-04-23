@@ -72,27 +72,34 @@ class _ProfileState extends State<Profile> {
 
   String formatName(String fullName) {
     if (fullName.isEmpty) return "John Doe";
+    // Trim and remove extra spaces
+    fullName = fullName.trim().replaceAll(RegExp(r'\s+'), ' ');
     List<String> nameParts = fullName.split(" ");
 
-    if (nameParts.isEmpty) return "";
+    if (nameParts.isEmpty) return "John Doe";
 
+    // Handle single name
     if (nameParts.length == 1) {
-      // If there's only one name, capitalize the first letter and lowercase the rest
-      return nameParts[0][0].toUpperCase() +
-          nameParts[0].substring(1).toLowerCase();
+      return nameParts[0].isNotEmpty
+          ? nameParts[0][0].toUpperCase() +
+              nameParts[0].substring(1).toLowerCase()
+          : "John Doe";
     }
 
-    // Extract last name and format it (capitalize first letter, lowercase the rest)
-    String lastName = nameParts.last[0].toUpperCase() +
-        nameParts.last.substring(1).toLowerCase();
+    // Format last name
+    String lastName = nameParts.last.isNotEmpty
+        ? nameParts.last[0].toUpperCase() +
+            nameParts.last.substring(1).toLowerCase()
+        : "";
 
-    // Convert all given names (except last) to initials
+    // Format initials
     String initials = nameParts
         .sublist(0, nameParts.length - 1)
-        .map((name) => name[0].toUpperCase()) // Get first letter as uppercase
-        .join(""); // Join initials
+        .where((name) => name.isNotEmpty)
+        .map((name) => name[0].toUpperCase())
+        .join("");
 
-    return "$initials $lastName"; // Combine initials and formatted last name
+    return "$initials $lastName".trim();
   }
 
   String toCapitalize(String text) {
@@ -176,10 +183,11 @@ class _ProfileState extends State<Profile> {
       return _buildPlaceholderAvatar(isLoading: true);
     }
 
-    if (profileImage == null) {
+    if (profileImage == null ||
+        profileImage!.isEmpty ||
+        !Uri.parse(profileImage!).hasAbsolutePath) {
       return _buildPlaceholderAvatar();
     }
-
     return CachedNetworkImage(
       imageUrl: profileImage!,
       imageBuilder: (context, imageProvider) => CircleAvatar(

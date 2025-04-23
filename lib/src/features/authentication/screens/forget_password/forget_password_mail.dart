@@ -93,7 +93,7 @@ class _ForgetPasswordSCreenState extends State<ForgetPasswordSCreen> {
               Padding(
                   padding: EdgeInsets.only(top: screenHeight * 0.01),
                   child: DefaultButton(
-                    buttonText: 'Send Verification Email',
+                    buttonText: 'Send Reset Password Link',
                     bgColor: Colors.black,
                     textColor: Colors.white,
                     borderColor: Colors.transparent,

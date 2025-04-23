@@ -19,6 +19,69 @@ class ScheduleConrtoller extends GetxController {
   final scheduleDescription = TextEditingController();
   final scheduleTitle = TextEditingController();
 
+  String _format24HourTime(String timeInput) {
+    try {
+      // Remove all spaces and convert to uppercase
+      final time = timeInput.replaceAll(' ', '').toUpperCase();
+
+      // Check if it contains AM/PM marker
+      final is12HourFormat = time.contains('AM') || time.contains('PM');
+
+      // Extract the numeric part
+      final timePart = time.replaceAll('AM', '').replaceAll('PM', '');
+
+      if (!timePart.contains(':')) {
+        throw FormatException('Invalid time format - missing colon');
+      }
+
+      final parts = timePart.split(':');
+      if (parts.length != 2) throw FormatException('Invalid time format');
+
+      int hours = int.parse(parts[0]);
+      final int minutes = int.parse(parts[1]);
+
+      // Validate time components
+
+      if (minutes < 0 || minutes > 59) {
+        throw FormatException('Invalid minute value');
+      }
+
+      // Convert 12-hour to 24-hour format
+      if (is12HourFormat) {
+        if (time.contains('PM') && hours != 12) {
+          hours += 12;
+        } else if (time.contains('AM') && hours == 12) {
+          hours = 0;
+        }
+      }
+
+      // Format with leading zeros
+      return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+    } catch (e) {
+      throw FormatException(
+          'Invalid time format: $timeInput. Please use HH:mm or HH:mm AM/PM format');
+    }
+  }
+
+  DateTime _parseDateWithTime(String dateString, String timeString) {
+    try {
+      print(timeString);
+      final date = DateTime.parse(dateString);
+      final formattedTime = _format24HourTime(timeString);
+      final timeParts = formattedTime.split(':');
+
+      return DateTime(
+        date.year,
+        date.month,
+        date.day,
+        int.parse(timeParts[0]), // hours
+        int.parse(timeParts[1]), // minutes
+      );
+    } catch (e) {
+      throw FormatException('Failed to combine date and time: $e');
+    }
+  }
+
   FirestoreInstance firestore = Get.put(FirestoreInstance());
   Future<void> generateSchedule() async {
     try {
@@ -35,7 +98,8 @@ class ScheduleConrtoller extends GetxController {
         scheduleCreatedTimestamp: DateTime.now(),
         scheduleStartTime: scheduleStartTime.text,
         scheduleEndTime: scheduleEndTime.text,
-        scheduleDate: DateTime.parse(scheduleDate.text),
+        scheduleDate:
+            _parseDateWithTime(scheduleDate.text, scheduleStartTime.text),
         scheduleSoftDelete: false,
         scheduleRoomName: scheduleRoomName.text,
         scheduleDescription: scheduleDescription.text,

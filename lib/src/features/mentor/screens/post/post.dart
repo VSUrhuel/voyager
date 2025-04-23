@@ -7,6 +7,7 @@ import 'package:voyager/src/features/mentor/widget/post_content.dart';
 import 'package:voyager/src/widgets/custom_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lottie/lottie.dart';
 
 class Post extends StatefulWidget {
   const Post({super.key});
@@ -145,7 +146,7 @@ class _PostState extends State<Post> {
               return _buildLoadingState();
             }
 
-            if (posts.isEmpty) {
+            if (error.isNotEmpty) {
               return _buildErrorState(context, error);
             }
 
@@ -161,7 +162,11 @@ class _PostState extends State<Post> {
               ),
               itemCount: posts.length + (_hasMorePosts ? 1 : 0),
               itemBuilder: (context, index) {
-                if (index == posts.length) {
+                if (index >= posts.length) {
+                  // Trigger load more when we reach the end
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    postController.loadMorePosts();
+                  });
                   return _buildMoreIndicator();
                 }
                 return Column(
@@ -275,32 +280,90 @@ class _PostState extends State<Post> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-        Icon(Icons.feed_outlined, size: 50, color: Colors.grey[400]),
-        const SizedBox(height: 16),
-        Text(
-          'No posts available',
-          style: Theme.of(context).textTheme.titleMedium,
+    final theme = Theme.of(context);
+    final size = MediaQuery.of(context).size;
+    final isDarkMode = theme.brightness == Brightness.dark;
+
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: size.width * 0.05,
+          right: size.width * 0.05,
         ),
-        const SizedBox(height: 8),
-        Text(
-          'Be the first to create a post',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        const SizedBox(height: 16),
-        ElevatedButton(
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const CreatePost(),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Animated illustration
+            Lottie.asset(
+              'assets/images/empty-post.json',
+              fit: BoxFit.cover,
+              width: size.width * 0.6,
+              height: size.width * 0.4,
+              repeat: true,
             ),
-          ).then((_) => _refreshPosts()),
-          child: const Text('Create Post'),
+
+            const SizedBox(height: 24),
+
+            // Title with better typography
+            Text(
+              'No Posts Yet',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: isDarkMode ? Colors.white70 : Colors.grey[800],
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 8),
+
+            // More descriptive subtitle
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Text(
+                'The feed is empty right now. Start sharing your knowledge or questions with the community!',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: isDarkMode ? Colors.white60 : Colors.grey[600],
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Filled button with icon
+            FilledButton.icon(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CreatePost(),
+                ),
+              ).then((_) => _refreshPosts()),
+              icon: const Icon(Icons.add, size: 20),
+              label: const Text('Create First Post'),
+              style: FilledButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+
+            // Alternative action
+            const SizedBox(height: 16),
+            TextButton(
+              onPressed: _refreshPosts,
+              child: Text(
+                'Refresh Feed',
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
