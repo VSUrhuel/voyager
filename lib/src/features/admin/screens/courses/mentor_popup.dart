@@ -177,7 +177,7 @@ class _MentorPopupState extends State<MentorPopup> {
                               return Text('');
                             }
                             if (mentorCards.isEmpty) {
-                              return Text('No $show mentor');
+                              return Text('No available mentor');
                             }
                             return Text('Nothing follows');
                           },

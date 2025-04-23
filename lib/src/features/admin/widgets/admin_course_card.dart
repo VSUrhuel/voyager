@@ -36,8 +36,6 @@ class AdminCourseCard extends StatelessWidget {
           return const LinearProgressIndicator();
         } else if (snapshot.hasError) {
           return const Center(child: Text('Error loading mentees'));
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No mentees found'));
         }
 
         final mentees = snapshot.data!;
