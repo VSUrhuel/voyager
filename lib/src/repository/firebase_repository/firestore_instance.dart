@@ -1,15 +1,21 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
 import 'package:voyager/src/features/mentee/model/mentee_model.dart';
 import 'package:voyager/src/features/mentor/model/content_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:get/get.dart';
 import 'package:voyager/src/features/mentor/model/schedule_model.dart';
 import 'package:voyager/src/repository/authentication_repository_firebase/authentication_repository.dart';
+import 'package:voyager/src/repository/supabase_repository/supabase_instance.dart';
+import 'package:http/http.dart' as http;
 
 class FirestoreInstance {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -50,7 +56,7 @@ class FirestoreInstance {
     }
   }
 
-  Future<void> setUserFromGoogle(Rx<User>? user) async {
+  Future<void> setUserFromGoogle(Rx<firebase_auth.User>? user) async {
     try {
       if (user?.value == null) {
         throw Exception('User is null');
@@ -66,6 +72,30 @@ class FirestoreInstance {
 
       if ((await getAPIId()).contains(auth.firebaseUser.value?.uid)) {
         return;
+      }
+
+      SupabaseInstance supabase = SupabaseInstance(Supabase.instance.client);
+      String imageUrl = '';
+
+      if (auth.firebaseUser.value?.photoURL != null) {
+        // Download the image from Google API
+        final response =
+            await http.get(Uri.parse(auth.firebaseUser.value!.photoURL!));
+
+        if (response.statusCode == 200) {
+          // Create a temporary file
+          final directory = await getTemporaryDirectory();
+          final file = File('${directory.path}/temp_profile_image.jpg');
+          await file.writeAsBytes(response.bodyBytes);
+
+          // Upload the File to Supabase
+          imageUrl = await supabase.uploadProfileImage(file);
+
+          // Optionally: Delete the temporary file after upload
+          await file.delete();
+        } else {
+          throw Exception('Failed to download image from Google');
+        }
       }
 
       await _db.collection('users').doc(userUid).set({
@@ -505,8 +535,8 @@ class FirestoreInstance {
     }
   }
 
-  User getFirebaseUser() {
-    return FirebaseAuth.instance.currentUser!;
+  firebase_auth.User getFirebaseUser() {
+    return firebase_auth.FirebaseAuth.instance.currentUser!;
   }
 
   String generateUniqueId() {
@@ -758,8 +788,8 @@ class FirestoreInstance {
   Future<List<UserModel>> getMentees(String status) async {
     try {
       // 1. Get courseMentorId first (moved outside query for clarity)
-      final mentor =
-          await getMentorThroughAccId(FirebaseAuth.instance.currentUser!.uid);
+      final mentor = await getMentorThroughAccId(
+          firebase_auth.FirebaseAuth.instance.currentUser!.uid);
       final courseMentor = await getCourseMentorDocId(mentor.mentorId);
 
       // 2. Query mentee allocations with client-side soft delete filtering
@@ -1255,8 +1285,8 @@ class FirestoreInstance {
   Future<List<UserModel>> getEnrolledMentors(String courseId) async {
     try {
       // 1. Get current mentee ID
-      final menteeId =
-          await getMenteeId(FirebaseAuth.instance.currentUser!.uid);
+      final menteeId = await getMenteeId(
+          firebase_auth.FirebaseAuth.instance.currentUser!.uid);
 
       // 2. Get all accepted course allocations for this mentee
       final menteeAllocs = await _db

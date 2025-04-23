@@ -18,7 +18,7 @@ class _SplashScreenState extends State<SplashScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Lottie.asset(
-            'assets/images/empty-session.json',
+            'assets/images/loading-plane.json',
             width: MediaQuery.of(context).size.width * 0.7,
             height: MediaQuery.of(context).size.width * 0.7,
             repeat: true,
