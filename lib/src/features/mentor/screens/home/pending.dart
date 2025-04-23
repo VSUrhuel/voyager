@@ -3,6 +3,7 @@ import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/controller/mentee_list_controller.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/widgets/user_card.dart';
+import 'package:voyager/src/widgets/vertical_widget_slider.dart';
 
 class PendingList extends StatefulWidget {
   final bool isMentorHome;
@@ -126,9 +127,8 @@ class _PendingListState extends State<PendingList> {
                 } else {
                   return SizedBox(
                       height: screenHeight * _pendingMenteesHeight,
-                      child: Column(
-                        // Use Column to prevent overflow in ListView
-                        children: snapshot.data!
+                      child: VerticalWidgetSlider(
+                            widgets: snapshot.data!
                             .map((mentee) => UserCard(
                                   user: mentee,
                                   height: screenHeight * 0.80,

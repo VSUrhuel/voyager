@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/controller/mentee_controller.dart';
-import 'package:voyager/src/features/mentee/controller/notification_controller.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
 import 'package:voyager/src/features/mentee/screens/home/course_offered.dart';
 import 'package:voyager/src/features/mentee/screens/home/mentors_list.dart';
@@ -260,7 +259,8 @@ class _MenteeHomeState extends State<MenteeHome> {
       body: RefreshIndicator(
         onRefresh: () async {
           setState(() {
-            // Triggers rebuild to fetch data again
+            fetchCoursesWithDetails(user?.email ?? '');
+            fetchMentorsWithDetails();
           });
         },
         child: SingleChildScrollView(

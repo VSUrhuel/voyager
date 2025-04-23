@@ -3,7 +3,6 @@ import 'package:voyager/src/features/admin/controllers/course_mentor_controller.
 import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/admin/screens/mentors/mentor_list.dart';
 import 'package:voyager/src/features/admin/screens/mentors/mentor_profile.dart';
-import 'package:voyager/src/features/admin/widgets/view_remove.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
 import 'package:voyager/src/features/mentee/widgets/pick_mentor_card.dart';

@@ -636,11 +636,48 @@ class FirestoreInstance {
     }
   }
 
+  Future<void> removeMcaIdFromMentee({
+    required String menteeDocId, // Renamed for clarity
+    required String mcaIdToRemove,
+  }) async {
+    try {
+      // 1. Get the mentee document reference directly
+      final menteeRef =
+          FirebaseFirestore.instance.collection('mentee').doc(menteeDocId);
+
+      // 2. Remove the mcaId from the array
+      await menteeRef.update({
+        'menteeMcaId': FieldValue.arrayRemove([mcaIdToRemove])
+      });
+
+      debugPrint(
+          'Successfully removed mcaId $mcaIdToRemove from mentee $menteeDocId');
+    } catch (e) {
+      debugPrint('Error removing mcaId: $e');
+      rethrow;
+    }
+  }
+
   Future<void> updateMennteeAlocStatus(
       String courseAllocId, String menteeId, String status) async {
     try {
-      if (status == 'removed') {
-        status = 'rejected';
+      if (status == 'removed' || status == 'rejected') {
+        await _db
+            .collection('menteeCourseAlloc')
+            .where('courseMentorId', isEqualTo: courseAllocId)
+            .where('menteeId', isEqualTo: menteeId)
+            .get()
+            .then((querySnapshot) {
+          for (var doc in querySnapshot.docs) {
+            doc.reference.update({'mcaAllocStatus': status});
+            doc.reference.update({'mcaSoftDeleted': true});
+          }
+        });
+        await removeMcaIdFromMentee(
+          menteeDocId: menteeId,
+          mcaIdToRemove: courseAllocId,
+        );
+        return;
       }
       await _db
           .collection('menteeCourseAlloc')
@@ -720,26 +757,51 @@ class FirestoreInstance {
 
   Future<List<UserModel>> getMentees(String status) async {
     try {
-      final MentorModel mentor =
+      // 1. Get courseMentorId first (moved outside query for clarity)
+      final mentor =
           await getMentorThroughAccId(FirebaseAuth.instance.currentUser!.uid);
-      final String courseMentor = await getCourseMentorDocId(mentor.mentorId);
-      final menteeAllocations = await _db
+      final courseMentor = await getCourseMentorDocId(mentor.mentorId);
+
+      // 2. Query mentee allocations with client-side soft delete filtering
+      final allocationQuery = await _db
           .collection('menteeCourseAlloc')
           .where('mcaAllocStatus', isEqualTo: status)
           .where('courseMentorId', isEqualTo: courseMentor)
           .get();
 
-      List<UserModel> users = [];
-      for (var allocation in menteeAllocations.docs) {
-        final menteeId = allocation.data()['menteeId'];
+      // 1. First, properly type the validAllocations variable
+      final List<QueryDocumentSnapshot<Map<String, dynamic>>> validAllocations;
 
-        final menteeDoc = await _db.collection('mentee').doc(menteeId).get();
-        if (menteeDoc.exists) {
-          users.add(await getUser(menteeDoc.data()!['accountId']));
-        }
+// 2. Fix the logic for filtering allocations
+      if (status != 'rejected') {
+        validAllocations = allocationQuery.docs.where((doc) {
+          final data = doc.data();
+          return data['mcaSoftDeleted'] != true &&
+              data['mcaAllocStatus'] == status;
+        }).toList();
+      } else {
+        validAllocations = allocationQuery.docs.where((doc) {
+          final data = doc.data();
+          return data['mcaSoftDeleted'] == true ||
+              data['mcaAllocStatus'] == 'rejected';
+        }).toList();
       }
-      return users;
+
+      // 3. Batch fetch mentee data to reduce Firestore reads
+      final users = await Future.wait(
+        validAllocations.map((alloc) async {
+          final menteeId = alloc.data()['menteeId'];
+          final menteeDoc = await _db.collection('mentee').doc(menteeId).get();
+          if (menteeDoc.exists) {
+            return getUser(menteeDoc.data()!['accountId']);
+          }
+          return null;
+        }),
+      );
+      // 4. Filter out nulls and return
+      return users.whereType<UserModel>().toList();
     } catch (e) {
+      debugPrint('Error fetching mentees: $e');
       rethrow;
     }
   }

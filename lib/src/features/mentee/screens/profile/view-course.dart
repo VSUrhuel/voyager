@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:voyager/src/features/admin/controllers/course_mentor_controller.dart';
 import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
-import 'package:voyager/src/features/admin/screens/mentors/mentor_list.dart';
 import 'package:voyager/src/features/admin/screens/mentors/mentor_profile.dart';
-import 'package:voyager/src/features/admin/widgets/view_remove.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
 import 'package:voyager/src/features/mentee/screens/home/mentor_profile.dart';
