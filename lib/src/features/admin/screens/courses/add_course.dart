@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:voyager/src/features/admin/controllers/course_controller.dart';
 import 'package:voyager/src/features/admin/widgets/cover_photo_picker.dart';
 import 'package:voyager/src/widgets/custom_button.dart';
@@ -17,7 +18,8 @@ class _AddCourseState extends State<AddCourse> {
   final CourseController _courseController = Get.put(CourseController());
   // final List<String> _deliverables = [];
   final FocusNode _focusNode = FocusNode();
-  double height = 0;
+  double _height = 0;
+  XFile? _localImage;
 
   @override
   void initState() {
@@ -34,7 +36,7 @@ class _AddCourseState extends State<AddCourse> {
 
     setState(() {
       _courseController.courseDeliverables.add(_textController.text);
-      height = height + 0.07;
+      _height = _height + 0.07;
       _textController.clear();
     });
     FocusScope.of(context).requestFocus(_focusNode);
@@ -227,30 +229,27 @@ class _AddCourseState extends State<AddCourse> {
                                 ),
                               ),
                               SizedBox(
-                                height: screenHeight * height,
-                                child: Expanded(
-                                  child: ListView.builder(
-                                      itemCount: _courseController
-                                          .courseDeliverables.length,
-                                      itemBuilder: (context, index) {
-                                        return Card(
-                                          child: ListTile(
-                                            title: Text(_courseController
-                                                .courseDeliverables[index]),
-                                            trailing: IconButton(
-                                              icon: Icon(Icons.delete),
-                                              onPressed: () {
-                                                setState(() {
-                                                  _courseController
-                                                      .courseDeliverables
-                                                      .removeAt(index);
-                                                  height = height - 0.07;
-                                                });
-                                              },
-                                            ),
-                                          ),
-                                        );
-                                      }),
+                                height: screenHeight * _height.clamp(0.0, 1.0), // Prevents negative height
+                                child: ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: ClampingScrollPhysics(),
+                                  itemCount: _courseController.courseDeliverables.length,
+                                  itemBuilder: (context, index) {
+                                    return Card(
+                                      child: ListTile(
+                                        title: Text(_courseController.courseDeliverables[index]),
+                                        trailing: IconButton(
+                                          icon: Icon(Icons.delete),
+                                          onPressed: () {
+                                            setState(() {
+                                              _courseController.courseDeliverables.removeAt(index);
+                                              _height = (_height - 0.07).clamp(0.0, 1.0);
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 ),
                               ),
                               SizedBox(
@@ -270,9 +269,13 @@ class _AddCourseState extends State<AddCourse> {
                                   height: screenHeight * 0.23,
                                   width: screenWidth * 0.6,
                                   child: CoverPhotoPicker(
+                                    initialImage: _localImage,
                                     key: pickerKey,
                                     onImagePicked: (image) {
                                       _courseController.courseImage = image;
+                                      setState(() {
+                                        _localImage = image;
+                                      });
                                     },
                                   ),
                                 ),
