@@ -176,100 +176,104 @@ class _MentorProfileState extends State<MentorProfile> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.of(context).push(
-            CustomPageRoute(
-              page: MentorDashboard(index: 0),
-              direction: AxisDirection.right,
-            ),
-          ),
-        ),
-        title: const Text(
-          _appBarTitle,
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Profile(role: "mentor"),
-            SizedBox(height: screenHeight * 0.03),
-
-            // Settings Section
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(left: screenWidth * 0.04),
-                    child: Text(
-                      _settingsTitle,
-                      style: TextStyle(
-                        fontSize: screenWidth * 0.05,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: screenHeight * 0.01),
-
-                  // Profile Options
-                  ProfileListTile(
-                    iconData: Icons.person,
-                    text: "Personal Information",
-                    onTap: () => Navigator.push(
-                      context,
-                      CustomPageRoute(
-                        page: MentorPersonalInformation(
-                          mentorModel: mentorModel,
-                          userModel: userModel,
-                        ),
-                      ),
-                    ),
-                  ),
-                  ProfileListTile(
-                    iconData: Icons.lock,
-                    text: "Security and Password",
-                    onTap: () => Navigator.push(
-                      context,
-                      CustomPageRoute(page: SecuritySettingsScreen()),
-                    ),
-                  ),
-                  ProfileListTile(
-                    iconData: Icons.verified_user,
-                    text: "User agreement",
-                    onTap: () => Navigator.push(
-                      context,
-                      CustomPageRoute(page: UserAgreement()),
-                    ),
-                  ),
-                  ProfileListTile(
-                    iconData: Icons.info,
-                    text: "About",
-                    onTap: () => Navigator.push(
-                      context,
-                      CustomPageRoute(page: AboutScreen()),
-                    ),
-                  ),
-                ],
+    return SafeArea(
+        bottom: true,
+        top: false,
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () => Navigator.of(context).push(
+                CustomPageRoute(
+                  page: MentorDashboard(index: 0),
+                  direction: AxisDirection.right,
+                ),
               ),
             ),
+            title: const Text(
+              _appBarTitle,
+              style:
+                  TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+            ),
+            centerTitle: true,
+          ),
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                Profile(role: "mentor"),
+                SizedBox(height: screenHeight * 0.03),
 
-            SizedBox(height: screenHeight * 0.02),
+                // Settings Section
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(left: screenWidth * 0.04),
+                        child: Text(
+                          _settingsTitle,
+                          style: TextStyle(
+                            fontSize: screenWidth * 0.05,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
 
-            // Mentor Info Card
-            Center(child: _buildMentorInfoCard(context)),
-          ],
-        ),
-      ),
-    );
+                      SizedBox(height: screenHeight * 0.01),
+
+                      // Profile Options
+                      ProfileListTile(
+                        iconData: Icons.person,
+                        text: "Personal Information",
+                        onTap: () => Navigator.push(
+                          context,
+                          CustomPageRoute(
+                            page: MentorPersonalInformation(
+                              mentorModel: mentorModel,
+                              userModel: userModel,
+                            ),
+                          ),
+                        ),
+                      ),
+                      ProfileListTile(
+                        iconData: Icons.lock,
+                        text: "Security and Password",
+                        onTap: () => Navigator.push(
+                          context,
+                          CustomPageRoute(page: SecuritySettingsScreen()),
+                        ),
+                      ),
+                      ProfileListTile(
+                        iconData: Icons.verified_user,
+                        text: "User agreement",
+                        onTap: () => Navigator.push(
+                          context,
+                          CustomPageRoute(page: UserAgreement()),
+                        ),
+                      ),
+                      ProfileListTile(
+                        iconData: Icons.info,
+                        text: "About",
+                        onTap: () => Navigator.push(
+                          context,
+                          CustomPageRoute(page: AboutScreen()),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: screenHeight * 0.02),
+
+                // Mentor Info Card
+                Center(child: _buildMentorInfoCard(context)),
+              ],
+            ),
+          ),
+        ));
   }
 }

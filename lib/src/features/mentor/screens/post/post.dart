@@ -83,156 +83,160 @@ class _PostState extends State<Post> {
     final screenHeight = MediaQuery.of(context).size.height;
     final textTheme = Theme.of(context).textTheme;
 
-    return Scaffold(
-      appBar: AppBar(
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
-        scrolledUnderElevation: 0,
-        backgroundColor: Colors.transparent,
-        automaticallyImplyLeading: false,
-        toolbarHeight: screenHeight * 0.10,
-        titleTextStyle: textTheme.titleLarge?.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
-        elevation: 0,
-        title: Row(
-          children: [
-            Padding(
-              padding: EdgeInsets.only(
-                  top: screenHeight * 0.013, left: screenHeight * 0.01),
-              child: Text(
-                'Posts',
-                style: TextStyle(
-                    fontSize: screenWidth * 0.07, fontWeight: FontWeight.bold),
-              ),
+    return SafeArea(
+        bottom: true,
+        top: false,
+        child: Scaffold(
+          appBar: AppBar(
+            systemOverlayStyle: SystemUiOverlayStyle.dark,
+            scrolledUnderElevation: 0,
+            backgroundColor: Colors.transparent,
+            automaticallyImplyLeading: false,
+            toolbarHeight: screenHeight * 0.10,
+            titleTextStyle: textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
-          ],
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: IconButton(
-              icon: Container(
-                padding: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Theme.of(context).primaryColor.withOpacity(0.1),
-                ),
-                child: Icon(Icons.edit,
-                    color: Theme.of(context).primaryColor,
-                    size: screenWidth * 0.065),
-              ),
-              onPressed: () {
-                // Handle the button press here
-                Navigator.push(
-                  context,
-                  CustomPageRoute(
-                    page: CreatePost(),
-                    direction: AxisDirection.left,
+            elevation: 0,
+            title: Row(
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(
+                      top: screenHeight * 0.013, left: screenHeight * 0.01),
+                  child: Text(
+                    'Posts',
+                    style: TextStyle(
+                        fontSize: screenWidth * 0.07,
+                        fontWeight: FontWeight.bold),
                   ),
-                );
-              },
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
-      body: RefreshIndicator(
-          onRefresh: _refreshPosts,
-          child: Obx(() {
-            final posts = postController.posts;
-            final isLoading = postController.isLoading.value;
-            final error = postController.error.value;
-
-            if (isLoading && posts.isEmpty && !_isRefreshing) {
-              return _buildLoadingState();
-            }
-
-            if (error.isNotEmpty) {
-              return _buildErrorState(context, error);
-            }
-
-            if (posts.isEmpty) {
-              return _buildEmptyState(context);
-            }
-            return ListView.builder(
-              controller: _scrollController,
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.symmetric(
-                horizontal: screenWidth * 0.05,
-                vertical: screenHeight * 0.02,
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: IconButton(
+                  icon: Container(
+                    padding: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Theme.of(context).primaryColor.withOpacity(0.1),
+                    ),
+                    child: Icon(Icons.edit,
+                        color: Theme.of(context).primaryColor,
+                        size: screenWidth * 0.065),
+                  ),
+                  onPressed: () {
+                    // Handle the button press here
+                    Navigator.push(
+                      context,
+                      CustomPageRoute(
+                        page: CreatePost(),
+                        direction: AxisDirection.left,
+                      ),
+                    );
+                  },
+                ),
               ),
-              itemCount: posts.length + (_hasMorePosts ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index >= posts.length) {
-                  // Trigger load more when we reach the end
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    postController.loadMorePosts();
-                  });
-                  return _buildMoreIndicator();
-                }
-                return Column(
-                  children: [
-                    PostContent(post: posts[index]),
-                    SizedBox(height: screenHeight * 0.02),
-                  ],
-                );
-              },
-            );
-          })
-          // child: SingleChildScrollView(
-          //   physics: const AlwaysScrollableScrollPhysics(),
-          //   child: Padding(
-          //     padding: EdgeInsets.symmetric(
-          //       horizontal: screenWidth * 0.05,
-          //       vertical: screenHeight * 0.02,
-          //     ),
-          //     child: Column(
-          //       children: [
-          //         const Divider(thickness: 1),
-          //         SizedBox(height: screenHeight * 0.02),
-          //         FutureBuilder<List<PostContentModel>>(
-          //           future: postsFuture,
-          //           builder: (context, snapshot) {
-          //             if (_isRefreshing) {
-          //               return SizedBox(
-          //                 height: screenHeight * 0.5,
-          //                 child: Center(child: CircularProgressIndicator()),
-          //               );
-          //             }
-
-          //             if (snapshot.connectionState == ConnectionState.waiting) {
-          //               return SizedBox(
-          //                 child: const Center(child: CircularProgressIndicator()),
-          //               );
-          //             }
-
-          //             if (snapshot.hasError) {
-          //               debugPrint('Post loading error: ${snapshot.error}');
-          //               debugPrintStack(stackTrace: snapshot.stackTrace);
-          //               return _buildErrorState(context);
-          //             }
-
-          //             if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          //               return _buildEmptyState(context);
-          //             }
-
-          //             return Column(
-          //               children: snapshot.data!
-          //                   .map((post) => Column(
-          //                         children: [
-          //                           PostContent(post: post),
-          //                           SizedBox(height: screenHeight * 0.02),
-          //                         ],
-          //                       ))
-          //                   .toList(),
-          //             );
-          //           },
-          //         ),
-          //       ],
-          //     ),
-          //   ),
-          // ),
+            ],
           ),
-    );
+          body: RefreshIndicator(
+              onRefresh: _refreshPosts,
+              child: Obx(() {
+                final posts = postController.posts;
+                final isLoading = postController.isLoading.value;
+                final error = postController.error.value;
+
+                if (isLoading && posts.isEmpty && !_isRefreshing) {
+                  return _buildLoadingState();
+                }
+
+                if (error.isNotEmpty) {
+                  return _buildErrorState(context, error);
+                }
+
+                if (posts.isEmpty) {
+                  return _buildEmptyState(context);
+                }
+                return ListView.builder(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.05,
+                    vertical: screenHeight * 0.02,
+                  ),
+                  itemCount: posts.length + (_hasMorePosts ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index >= posts.length) {
+                      // Trigger load more when we reach the end
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        postController.loadMorePosts();
+                      });
+                      return _buildMoreIndicator();
+                    }
+                    return Column(
+                      children: [
+                        PostContent(post: posts[index]),
+                        SizedBox(height: screenHeight * 0.02),
+                      ],
+                    );
+                  },
+                );
+              })
+              // child: SingleChildScrollView(
+              //   physics: const AlwaysScrollableScrollPhysics(),
+              //   child: Padding(
+              //     padding: EdgeInsets.symmetric(
+              //       horizontal: screenWidth * 0.05,
+              //       vertical: screenHeight * 0.02,
+              //     ),
+              //     child: Column(
+              //       children: [
+              //         const Divider(thickness: 1),
+              //         SizedBox(height: screenHeight * 0.02),
+              //         FutureBuilder<List<PostContentModel>>(
+              //           future: postsFuture,
+              //           builder: (context, snapshot) {
+              //             if (_isRefreshing) {
+              //               return SizedBox(
+              //                 height: screenHeight * 0.5,
+              //                 child: Center(child: CircularProgressIndicator()),
+              //               );
+              //             }
+
+              //             if (snapshot.connectionState == ConnectionState.waiting) {
+              //               return SizedBox(
+              //                 child: const Center(child: CircularProgressIndicator()),
+              //               );
+              //             }
+
+              //             if (snapshot.hasError) {
+              //               debugPrint('Post loading error: ${snapshot.error}');
+              //               debugPrintStack(stackTrace: snapshot.stackTrace);
+              //               return _buildErrorState(context);
+              //             }
+
+              //             if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              //               return _buildEmptyState(context);
+              //             }
+
+              //             return Column(
+              //               children: snapshot.data!
+              //                   .map((post) => Column(
+              //                         children: [
+              //                           PostContent(post: post),
+              //                           SizedBox(height: screenHeight * 0.02),
+              //                         ],
+              //                       ))
+              //                   .toList(),
+              //             );
+              //           },
+              //         ),
+              //       ],
+              //     ),
+              //   ),
+              // ),
+              ),
+        ));
   }
 
   Widget _buildLoadingState() {

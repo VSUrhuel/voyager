@@ -5,7 +5,6 @@ import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/controller/schedule_conrtoller.dart';
 import 'package:voyager/src/features/mentor/model/schedule_model.dart';
-import 'package:voyager/src/features/mentor/screens/session/completed.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/widgets/upcoming_sched_card.dart';
 
