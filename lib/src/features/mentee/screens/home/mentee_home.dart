@@ -195,201 +195,206 @@ class _MenteeHomeState extends State<MenteeHome> {
     String profileImageURL =
         user?.photoURL ?? 'assets/images/application_images/profile.png';
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Row(
-          children: [
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => MenteeProfile()),
-                );
-              },
-              child: CircleAvatar(
-                radius: 25,
-                backgroundImage: user?.photoURL != null
-                    ? NetworkImage(profileImageURL)
-                    : AssetImage(profileImageURL) as ImageProvider,
-              ),
-            ),
-            SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return SafeArea(
+        bottom: true,
+        top: false,
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            title: Row(
               children: [
-                Text(
-                  'Hello, ${getName(user?.displayName)}!',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => MenteeProfile()),
+                    );
+                  },
+                  child: CircleAvatar(
+                    radius: 25,
+                    backgroundImage: user?.photoURL != null
+                        ? NetworkImage(profileImageURL)
+                        : AssetImage(profileImageURL) as ImageProvider,
                   ),
                 ),
-                Text(
-                  'Courses await you!',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 16,
-                  ),
+                SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Hello, ${getName(user?.displayName)}!',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      'Courses await you!',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-                backgroundColor: Colors.grey[200],
-                child: IconButton(
-                  icon: Icon(Icons.notifications_none, color: Colors.black),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => NotificationScreen()),
-                    );
-                  },
-                )),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: CircleAvatar(
+                    backgroundColor: Colors.grey[200],
+                    child: IconButton(
+                      icon: Icon(Icons.notifications_none, color: Colors.black),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => NotificationScreen()),
+                        );
+                      },
+                    )),
+              ),
+            ],
           ),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          setState(() {
-            fetchCoursesWithDetails(user?.email ?? '');
-            fetchMentorsWithDetails();
-          });
-        },
-        child: SingleChildScrollView(
-          physics:
-              AlwaysScrollableScrollPhysics(), // Ensures pull-to-refresh works even if content is short
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-            child: Center(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+          body: RefreshIndicator(
+            onRefresh: () async {
+              setState(() {
+                fetchCoursesWithDetails(user?.email ?? '');
+                fetchMentorsWithDetails();
+              });
+            },
+            child: SingleChildScrollView(
+              physics:
+                  AlwaysScrollableScrollPhysics(), // Ensures pull-to-refresh works even if content is short
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+                child: Center(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Discover',
-                        style: TextStyle(
-                          fontSize: screenHeight * 0.04,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            'Discover',
+                            style: TextStyle(
+                              fontSize: screenHeight * 0.04,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(width: screenWidth * 0.02),
+                          Text(
+                            'Courses',
+                            style: TextStyle(
+                              fontSize: screenHeight * 0.04,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF1877F2),
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(width: screenWidth * 0.02),
-                      Text(
-                        'Courses',
-                        style: TextStyle(
-                          fontSize: screenHeight * 0.04,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF1877F2),
-                        ),
+                      SizedBox(height: screenHeight * 0.01),
+                      SearchBarWithDropdown(
+                          onChanged: _onSearchChange,
+                          controller: menteeController,
+                          searchController: _searchController),
+                      SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Featured Courses',
+                            style: TextStyle(
+                              fontSize: screenHeight * 0.02,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => CourseOffered()),
+                              );
+                            },
+                            style: TextButton.styleFrom(
+                                foregroundColor: Colors.blue),
+                            child: const Text('View All'),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  SizedBox(height: screenHeight * 0.01),
-                  SearchBarWithDropdown(
-                      onChanged: _onSearchChange,
-                      controller: menteeController,
-                      searchController: _searchController),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Featured Courses',
-                        style: TextStyle(
-                          fontSize: screenHeight * 0.02,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => CourseOffered()),
+                      // Updated HorizontalWidgetSlider for Courses
+                      FutureBuilder<List<CourseCard>>(
+                        future: fetchCoursesWithDetails(user?.email ?? ''),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(child: CircularProgressIndicator());
+                          }
+                          if (snapshot.hasError ||
+                              !snapshot.hasData ||
+                              snapshot.data!.isEmpty) {
+                            return Center(child: Text("No courses available"));
+                          }
+                          return HorizontalWidgetSlider(
+                            widgets: snapshot.data!,
                           );
                         },
-                        style:
-                            TextButton.styleFrom(foregroundColor: Colors.blue),
-                        child: const Text('View All'),
                       ),
-                    ],
-                  ),
-                  // Updated HorizontalWidgetSlider for Courses
-                  FutureBuilder<List<CourseCard>>(
-                    future: fetchCoursesWithDetails(user?.email ?? ''),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      }
-                      if (snapshot.hasError ||
-                          !snapshot.hasData ||
-                          snapshot.data!.isEmpty) {
-                        return Center(child: Text("No courses available"));
-                      }
-                      return HorizontalWidgetSlider(
-                        widgets: snapshot.data!,
-                      );
-                    },
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Featured Mentors',
-                        style: TextStyle(
-                          fontSize: screenHeight * 0.02,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
+                      SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Featured Mentors',
+                            style: TextStyle(
+                              fontSize: screenHeight * 0.02,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => MentorsList()),
+                              );
+                            },
+                            style: TextButton.styleFrom(
+                                foregroundColor: Colors.blue),
+                            child: const Text('View All'),
+                          ),
+                        ],
                       ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => MentorsList()),
+                      // HorizontalWidgetSliderMentor for Mentors
+                      FutureBuilder<List<MentorCard>>(
+                        future: fetchMentorsWithDetails(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(child: CircularProgressIndicator());
+                          }
+                          if (snapshot.hasError ||
+                              !snapshot.hasData ||
+                              snapshot.data!.isEmpty) {
+                            return Center(child: Text("No mentors available"));
+                          }
+                          return HorizontalWidgetSliderMentor(
+                            widgets: snapshot.data!,
                           );
                         },
-                        style:
-                            TextButton.styleFrom(foregroundColor: Colors.blue),
-                        child: const Text('View All'),
                       ),
+                      SizedBox(height: screenHeight * 0.02),
                     ],
                   ),
-                  // HorizontalWidgetSliderMentor for Mentors
-                  FutureBuilder<List<MentorCard>>(
-                    future: fetchMentorsWithDetails(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      }
-                      if (snapshot.hasError ||
-                          !snapshot.hasData ||
-                          snapshot.data!.isEmpty) {
-                        return Center(child: Text("No mentors available"));
-                      }
-                      return HorizontalWidgetSliderMentor(
-                        widgets: snapshot.data!,
-                      );
-                    },
-                  ),
-                  SizedBox(height: screenHeight * 0.02),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 }

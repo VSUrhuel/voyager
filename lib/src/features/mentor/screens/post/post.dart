@@ -257,12 +257,19 @@ class _PostState extends State<Post> {
   }
 
   Widget _buildErrorState(BuildContext context, String error) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-        Icon(Icons.error_outline, size: 50, color: Colors.red[300]),
+        Lottie.asset(
+          'assets/images/error.json',
+          fit: BoxFit.cover,
+          width: screenWidth * 0.6,
+          height: screenWidth * 0.4,
+          repeat: true,
+        ),
         const SizedBox(height: 16),
         Center(
             child: Text(
@@ -270,10 +277,6 @@ class _PostState extends State<Post> {
           style: Theme.of(context).textTheme.titleMedium,
         )),
         const SizedBox(height: 8),
-        Text(
-          error,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
         const SizedBox(height: 16),
         ElevatedButton(
           onPressed: _refreshPosts,

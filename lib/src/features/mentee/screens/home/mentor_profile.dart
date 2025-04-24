@@ -49,6 +49,7 @@ class MentorProfilePage extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Colors.white,
         body: SafeArea(
+            bottom: true,
             top: false,
             child: CustomScrollView(
               slivers: [

@@ -68,91 +68,95 @@ class _MentorsListState extends State<MentorsList> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 1.0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: Text(
-          'Mentors List',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.normal,
-            fontSize: 18.0,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          NormalSearchbar(searchController: _searchController),
-          Expanded(
-            child: FutureBuilder<List<MentorCard>>(
-              future: fetchMentorsWithDetails(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError ||
-                    !snapshot.hasData ||
-                    snapshot.data!.isEmpty) {
-                  return SingleChildScrollView(
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        top: 100.0,
-                        left: screenWidth * 0.05,
-                        right: screenWidth * 0.05,
-                      ),
-                      child: Center(
-                        child: Text(
-                          "No mentors available",
-                          style: TextStyle(fontSize: 16.0, color: Colors.grey),
-                        ),
-                      ),
-                    ),
-                  );
-                }
-
-                // In the build method, replace the rows building logic with this:
-                List<Widget> rows = [];
-                int itemCount = snapshot.data!.length;
-
-// Build the rows of mentor cards
-                for (int i = 0; i < itemCount; i += 2) {
-                  // Always create a row with two Expanded widgets
-                  rows.add(
-                    Row(
-                      children: [
-                        Expanded(child: snapshot.data![i]),
-                        if (i + 1 <
-                            itemCount) // Only add second card if it exists
-                          Expanded(child: snapshot.data![i + 1]),
-                        if (i + 1 >=
-                            itemCount) // If odd card, add an empty Expanded
-                          Expanded(child: Container()),
-                      ],
-                    ),
-                  );
-                  rows.add(SizedBox(height: 8.0));
-                }
-
-                return SingleChildScrollView(
-                  child: Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-                    child: Column(children: rows),
-                  ),
-                );
+    return SafeArea(
+        bottom: true,
+        top: false,
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 1.0,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () {
+                Navigator.pop(context);
               },
             ),
+            title: Text(
+              'Mentors List',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.normal,
+                fontSize: 18.0,
+              ),
+            ),
+            centerTitle: true,
           ),
-        ],
-      ),
-    );
+          body: Column(
+            children: [
+              NormalSearchbar(searchController: _searchController),
+              Expanded(
+                child: FutureBuilder<List<MentorCard>>(
+                  future: fetchMentorsWithDetails(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError ||
+                        !snapshot.hasData ||
+                        snapshot.data!.isEmpty) {
+                      return SingleChildScrollView(
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            top: 100.0,
+                            left: screenWidth * 0.05,
+                            right: screenWidth * 0.05,
+                          ),
+                          child: Center(
+                            child: Text(
+                              "No mentors available",
+                              style:
+                                  TextStyle(fontSize: 16.0, color: Colors.grey),
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+
+                    // In the build method, replace the rows building logic with this:
+                    List<Widget> rows = [];
+                    int itemCount = snapshot.data!.length;
+
+// Build the rows of mentor cards
+                    for (int i = 0; i < itemCount; i += 2) {
+                      // Always create a row with two Expanded widgets
+                      rows.add(
+                        Row(
+                          children: [
+                            Expanded(child: snapshot.data![i]),
+                            if (i + 1 <
+                                itemCount) // Only add second card if it exists
+                              Expanded(child: snapshot.data![i + 1]),
+                            if (i + 1 >=
+                                itemCount) // If odd card, add an empty Expanded
+                              Expanded(child: Container()),
+                          ],
+                        ),
+                      );
+                      rows.add(SizedBox(height: 8.0));
+                    }
+
+                    return SingleChildScrollView(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.05),
+                        child: Column(children: rows),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ));
   }
 }
