@@ -5,8 +5,28 @@ import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 
-class MentorsList extends StatelessWidget {
+class MentorsList extends StatefulWidget {
   const MentorsList({super.key});
+
+  @override
+  State<MentorsList> createState() => _MentorsListState();
+}
+
+class _MentorsListState extends State<MentorsList> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchText = '';
+  bool _isSearching = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      setState(() {
+        _searchText = _searchController.text;
+        _isSearching = _searchText.isNotEmpty;
+      });
+    });
+  }
 
   Future<List<MentorCard>> fetchMentorsWithDetails() async {
     FirestoreInstance firestoreInstance = FirestoreInstance();
@@ -19,12 +39,25 @@ class MentorsList extends StatelessWidget {
           firestoreInstance.getMentorThroughAccId(user.accountApiID)));
 
       // Return list of MentorCard widgets with fetched data
-      return List.generate(users.length, (index) {
+      List<MentorCard> mentors = List.generate(users.length, (index) {
         return MentorCard(
           mentorModel: mentorDetails[index],
           user: users[index],
+          isSmallCard: true,
         );
       });
+
+      if (_isSearching) {
+        mentors = mentors.where((mentor) {
+          return mentor.user.accountApiName
+                  .toLowerCase()
+                  .contains(_searchText.toLowerCase()) ||
+              mentor.user.accountApiName
+                  .toLowerCase()
+                  .contains(_searchText.toLowerCase());
+        }).toList();
+      }
+      return mentors;
     } catch (e) {
       print("Error fetching mentors: $e");
       return []; // Return an empty list in case of an error
@@ -35,85 +68,95 @@ class MentorsList extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 1.0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: Text(
-          'Mentors List',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.normal,
-            fontSize: 18.0,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          NormalSearchbar(),
-          Expanded(
-            child: FutureBuilder<List<MentorCard>>(
-              future: fetchMentorsWithDetails(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError ||
-                    !snapshot.hasData ||
-                    snapshot.data!.isEmpty) {
-                  return Center(child: Text("No mentors available"));
-                }
-
-                List<Widget> rows = [];
-                int itemCount = snapshot.data!.length;
-
-                // Build the rows of mentor cards
-                for (int i = 0; i < itemCount; i += 2) {
-                  var mentorCard = snapshot.data![i];
-
-                  if (i + 1 < itemCount) {
-                    var mentorCard2 = snapshot.data![i + 1];
-
-                    rows.add(
-                      Row(
-                        children: [
-                          Expanded(child: mentorCard),
-                          SizedBox(width: 8.0),
-                          Expanded(child: mentorCard2),
-                        ],
-                      ),
-                    );
-                  } else {
-                    rows.add(
-                      Row(
-                        children: [
-                          Expanded(child: mentorCard),
-                        ],
-                      ),
-                    );
-                  }
-                  rows.add(SizedBox(height: 8.0));
-                }
-
-                return SingleChildScrollView(
-                  child: Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-                    child: Column(children: rows),
-                  ),
-                );
+    return SafeArea(
+        bottom: true,
+        top: false,
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 1.0,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () {
+                Navigator.pop(context);
               },
             ),
+            title: Text(
+              'Mentors List',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.normal,
+                fontSize: 18.0,
+              ),
+            ),
+            centerTitle: true,
           ),
-        ],
-      ),
-    );
+          body: Column(
+            children: [
+              NormalSearchbar(searchController: _searchController),
+              Expanded(
+                child: FutureBuilder<List<MentorCard>>(
+                  future: fetchMentorsWithDetails(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError ||
+                        !snapshot.hasData ||
+                        snapshot.data!.isEmpty) {
+                      return SingleChildScrollView(
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            top: 100.0,
+                            left: screenWidth * 0.05,
+                            right: screenWidth * 0.05,
+                          ),
+                          child: Center(
+                            child: Text(
+                              "No mentors available",
+                              style:
+                                  TextStyle(fontSize: 16.0, color: Colors.grey),
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+
+                    // In the build method, replace the rows building logic with this:
+                    List<Widget> rows = [];
+                    int itemCount = snapshot.data!.length;
+
+// Build the rows of mentor cards
+                    for (int i = 0; i < itemCount; i += 2) {
+                      // Always create a row with two Expanded widgets
+                      rows.add(
+                        Row(
+                          children: [
+                            Expanded(child: snapshot.data![i]),
+                            if (i + 1 <
+                                itemCount) // Only add second card if it exists
+                              Expanded(child: snapshot.data![i + 1]),
+                            if (i + 1 >=
+                                itemCount) // If odd card, add an empty Expanded
+                              Expanded(child: Container()),
+                          ],
+                        ),
+                      );
+                      rows.add(SizedBox(height: 8.0));
+                    }
+
+                    return SingleChildScrollView(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.05),
+                        child: Column(children: rows),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ));
   }
 }

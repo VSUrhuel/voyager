@@ -40,4 +40,19 @@ Future<List<CourseMentorModel>> getCourseMentors(String courseId) async {
   List<CourseMentorModel> courseMentors = await firestoreInstance.getCourseMentorsThroughCourseId(courseId);
   return courseMentors;
 }
+
+Future<bool> removeMentorFromCourse( String courseMentorId, String mentorId)async{
+  FirestoreInstance firestoreInstance = FirestoreInstance();
+  try{
+    await firestoreInstance.softDeleteCourseMentor(courseMentorId);
+    await firestoreInstance.softDeleteCourseAllocatedMentee(courseMentorId);
+    await firestoreInstance.updateMentorStatus(mentorId, 'archived');
+    return true;
+  }catch(e){
+    return false;
+  }
+ 
+
+}
+
 }

@@ -103,6 +103,7 @@ class _CreatePostState extends State<CreatePost> {
       );
       return;
     }
+
     // Create post content
     final postContent = PostContentModel(
       contentCategory: _category.text == '0' ? 'Announcement' : 'Resources',
@@ -170,113 +171,116 @@ class _CreatePostState extends State<CreatePost> {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            Navigator.of(context).push(
-              CustomPageRoute(
-                page: widget.fromHome
-                    ? MentorDashboard(index: 1)
-                    : MentorDashboard(),
-                direction: AxisDirection.right,
-              ),
-            );
-          },
-          icon: const Icon(Icons.arrow_back),
-        ),
-        actions: [
-          Padding(
-            padding: EdgeInsets.only(right: screenSize.height * 0.02),
-            child: ElevatedButton(
-              onPressed: () async {
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) => const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-                await postContent();
+    return SafeArea(
+        bottom: true,
+        top: false,
+        child: Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              onPressed: () {
                 Navigator.of(context).push(
                   CustomPageRoute(
-                    page: MentorDashboard(),
+                    page: widget.fromHome
+                        ? MentorDashboard(index: 1)
+                        : MentorDashboard(),
                     direction: AxisDirection.right,
                   ),
                 );
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1A73E8),
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Post', style: TextStyle(fontSize: 16)),
+              icon: const Icon(Icons.arrow_back),
             ),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: screenSize.height * 0.01,
-            horizontal: screenSize.height * 0.03,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Post Content",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+            actions: [
+              Padding(
+                padding: EdgeInsets.only(right: screenSize.height * 0.02),
+                child: ElevatedButton(
+                  onPressed: () async {
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) => const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                    await postContent();
+                    Navigator.of(context).push(
+                      CustomPageRoute(
+                        page: MentorDashboard(),
+                        direction: AxisDirection.right,
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1A73E8),
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Post', style: TextStyle(fontSize: 16)),
                 ),
-              ),
-              SizedBox(height: screenSize.height * 0.01),
-              PostEditor(
-                screenHeight: screenSize.height,
-                onPickImage: _pickImage,
-                onPickVideo: _pickVideo,
-                onPickFile: _pickFile,
-                onAddLink: _addLink,
-                titleController: _titlePostController,
-                descriptionController: _descriptionPostController,
-              ),
-              SizedBox(height: screenSize.height * 0.01),
-              const Text(
-                "Category",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: screenSize.height * 0.01),
-              ToggleButtonIcons(category: _category),
-              SizedBox(height: screenSize.height * 0.01),
-              ImagePreviewSection(
-                images: _images,
-                screenHeight: screenSize.height,
-                screenWidth: screenSize.width,
-                onAddImage: _pickImage,
-                onRemoveImage: _removeImage,
-              ),
-              if (_video != null)
-                DisplayVideo(
-                  video: _video!,
-                  onDelete: () => setState(() => _video = null),
-                ),
-              if (_platformFiles.isNotEmpty)
-                SizedBox(
-                  height: 200,
-                  child: DisplayFiles(platformFiles: _platformFiles),
-                ),
-              LinksSection(
-                links: _links,
-                onRemoveLink: _removeLink,
               ),
             ],
           ),
-        ),
-      ),
-    );
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: screenSize.height * 0.01,
+                horizontal: screenSize.height * 0.03,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Post Content",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: screenSize.height * 0.01),
+                  PostEditor(
+                    screenHeight: screenSize.height,
+                    onPickImage: _pickImage,
+                    onPickVideo: _pickVideo,
+                    onPickFile: _pickFile,
+                    onAddLink: _addLink,
+                    titleController: _titlePostController,
+                    descriptionController: _descriptionPostController,
+                  ),
+                  SizedBox(height: screenSize.height * 0.01),
+                  const Text(
+                    "Category",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: screenSize.height * 0.01),
+                  ToggleButtonIcons(category: _category),
+                  SizedBox(height: screenSize.height * 0.01),
+                  ImagePreviewSection(
+                    images: _images,
+                    screenHeight: screenSize.height,
+                    screenWidth: screenSize.width,
+                    onAddImage: _pickImage,
+                    onRemoveImage: _removeImage,
+                  ),
+                  if (_video != null)
+                    DisplayVideo(
+                      video: _video!,
+                      onDelete: () => setState(() => _video = null),
+                    ),
+                  if (_platformFiles.isNotEmpty)
+                    SizedBox(
+                      height: 200,
+                      child: DisplayFiles(platformFiles: _platformFiles),
+                    ),
+                  LinksSection(
+                    links: _links,
+                    onRemoveLink: _removeLink,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ));
   }
 }

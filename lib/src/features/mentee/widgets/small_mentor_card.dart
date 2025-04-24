@@ -17,7 +17,7 @@ class SmallMentorCard extends StatelessWidget {
     List<String> nameParts = fullName.split(" ");
     if (nameParts.isEmpty) return "";
     if (nameParts.length == 1) return nameParts[0];
-    return "${nameParts[0][0]}. ${nameParts.last}";
+    return "${nameParts[0][0]}. ${nameParts[1][1]}";
   }
 
   String shortenMotto(String mentorMotto) {
@@ -35,103 +35,112 @@ class SmallMentorCard extends StatelessWidget {
         ? mentorModel.mentorExpertise[0].split(" ").first
         : null;
 
-    return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => MentorProfilePage(
-            mentorModel: mentorModel,
-            user: user,
-          ),
+    return ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: screenWidth * 0.45,
+          minHeight: screenWidth * 0.5,
+          maxHeight: 300,
         ),
-      ),
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: SizedBox(
-          height: 300,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Profile Image
-              Container(
-                height: 135,
-                decoration: BoxDecoration(
-                  image: const DecorationImage(
-                    image: AssetImage(
-                        'assets/images/application_images/profile.png'),
-                    fit: BoxFit.cover,
-                  ),
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(10),
-                  ),
-                  color: Colors.grey[300],
-                ),
+        child: GestureDetector(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MentorProfilePage(
+                mentorModel: mentorModel,
+                user: user,
               ),
-              // Details Section
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Year Badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
+            ),
+          ),
+          child: Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: SizedBox(
+              height: 300,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Profile Image
+                  Container(
+                    height: 135,
+                    decoration: BoxDecoration(
+                      image: const DecorationImage(
+                        image: AssetImage(
+                            'assets/images/application_images/profile.png'),
+                        fit: BoxFit.cover,
                       ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF52CA82),
-                        borderRadius: BorderRadius.circular(20),
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(10),
                       ),
-                      child: Text(
-                        mentorModel.mentorYearLvl,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
+                      color: Colors.grey[300],
+                    ),
+                  ),
+                  // Details Section
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Year Badge
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF52CA82),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            mentorModel.mentorYearLvl,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
                         ),
-                      ),
+                        const SizedBox(height: 8),
+                        // Name
+                        Text(
+                          mentorName,
+                          style: TextStyle(
+                            fontSize: screenWidth * 0.045,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        // Motto
+                        SizedBox(
+                          height: 32, // Fixed height for motto (2 lines max)
+                          child: Text(
+                            motto,
+                            style: TextStyle(
+                              fontSize: screenWidth * 0.035,
+                              color: Colors.grey[600],
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        // Single Skill
+                        if (primarySkill != null)
+                          SkillsDisplay(
+                            color: Colors.blue[300]!,
+                            text: primarySkill,
+                            widthFactor: 0.4,
+                          ),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    // Name
-                    Text(
-                      mentorName,
-                      style: TextStyle(
-                        fontSize: screenWidth * 0.045,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    // Motto
-                    Text(
-                      motto,
-                      style: TextStyle(
-                        fontSize: screenWidth * 0.03,
-                        fontWeight: FontWeight.w300,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 12),
-                    // Single Skill
-                    if (primarySkill != null)
-                      SkillsDisplay(
-                        color: Colors.blue[300]!,
-                        text: primarySkill,
-                        widthFactor: 0.4,
-                      ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 }

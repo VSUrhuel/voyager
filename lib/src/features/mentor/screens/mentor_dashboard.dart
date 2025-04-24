@@ -43,7 +43,10 @@ class _MentorDashboardState extends State<MentorDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+      top: false,
+      bottom: true,
+      child: Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
         children: _screens,
@@ -52,6 +55,7 @@ class _MentorDashboardState extends State<MentorDashboard> {
         currentIndex: _selectedIndex,
         onTabChange: _onItemTapped,
       ),
+    )
     );
   }
 }

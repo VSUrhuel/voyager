@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/controller/mentee_post_controller.dart';
 import 'package:voyager/src/features/mentee/screens/home/notification.dart';
@@ -99,60 +100,29 @@ class _PostState extends State<Post> {
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
-          title: Row(
-            children: [
-              CircleAvatar(
-                radius: 25,
-                backgroundImage: user?.photoURL != null
-                    ? NetworkImage(profileImageURL)
-                    : AssetImage(profileImageURL) as ImageProvider,
-              ),
-              SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Hello, ${getName(user?.displayName)}!',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    'Courses awaits you!',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+          title: Text(
+            'Posts',
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: screenWidth * 0.07,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          centerTitle: false,
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 16.0),
               child: CircleAvatar(
                   backgroundColor: Colors.grey[200],
-                  child: TextButton(
+                  child: IconButton(
+                    icon: Icon(Icons.notifications_none, color: Colors.black),
                     onPressed: () {
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => NotificationScreen()));
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => NotificationScreen()),
+                      );
                     },
-                    style: TextButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      foregroundColor: Colors.blue,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 8),
-                      textStyle: const TextStyle(fontSize: 16),
-                    ),
-                    child: Center(
-                      child:
-                          Icon(Icons.notifications_none, color: Colors.black),
-                    ),
                   )),
             ),
           ],
@@ -222,21 +192,22 @@ class _PostState extends State<Post> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-        const SizedBox(height: 16),
         Center(
           child: Padding(
-            padding: EdgeInsets.all(screenWidth * 0.05),
+            padding: EdgeInsets.symmetric(vertical: screenWidth * 0.05),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.error_outline,
-                  size: screenWidth * 0.1,
-                  color: Colors.grey[400],
+                Lottie.asset(
+                  'assets/images/empty-post.json',
+                  fit: BoxFit.cover,
+                  width: screenWidth * 0.6,
+                  height: screenWidth * 0.4,
+                  repeat: true,
                 ),
-                SizedBox(height: screenWidth * 0.03),
+                SizedBox(height: screenWidth * 0.05),
                 Text(
-                  'Failed to load posts!',
+                  'No Posts!',
                   style: TextStyle(
                     color: Colors.grey[700],
                     fontSize: screenWidth * 0.04,
@@ -258,12 +229,6 @@ class _PostState extends State<Post> {
             ),
           ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          error,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        const SizedBox(height: 16),
         ElevatedButton(
           onPressed: _refreshPosts,
           child: const Text('Retry'),

@@ -113,123 +113,164 @@ class _MentorInfo1State extends State<MentorInfo1> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return Scaffold(
-      appBar: AppBar(
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
-        scrolledUnderElevation: 0,
-        automaticallyImplyLeading: true,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            dispose();
-            Navigator.pop(context);
-          },
-        ),
-        backgroundColor: Colors.transparent,
-        actionsIconTheme: IconThemeData(color: Colors.black),
-      ),
-      body: SingleChildScrollView(
-          child: Center(
-        child: Padding(
-          padding: EdgeInsets.only(
-              left: screenWidth * 0.05, right: screenWidth * 0.05),
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Input information',
-                  style: TextStyle(
-                    fontSize: screenWidth * 0.06,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  'Kindly provide the needed information',
-                  style: TextStyle(
-                    fontSize: screenWidth * 0.04,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(top: screenHeight * 0.015),
-                  child: Text(
-                    'General Information',
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.04,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.only(top: screenHeight * 0.015),
-                  width: screenWidth * 0.4,
-                  height: screenWidth * 0.20,
-                  child: DropdownButtonFormField(
-                    decoration: InputDecoration(
-                      labelText: 'Year level',
-                      hintText: controller.mentorYearLvl.text.isEmpty
-                          ? null
-                          : controller.mentorYearLvl.text,
-                      hintStyle: TextStyle(
-                        fontSize: screenWidth * 0.04,
-                        fontWeight: FontWeight.normal,
-                        fontStyle: FontStyle.italic,
-                        color: Colors.black,
-                      ),
-                      labelStyle: TextStyle(
-                        fontSize: screenWidth * 0.04,
-                        fontWeight: FontWeight.normal,
-                        fontStyle: FontStyle.normal,
-                        color: Colors.black,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+    return SafeArea(
+        bottom: true,
+        top: false,
+        child: Scaffold(
+          appBar: AppBar(
+            systemOverlayStyle: SystemUiOverlayStyle.dark,
+            scrolledUnderElevation: 0,
+            automaticallyImplyLeading: true,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back),
+              onPressed: () {
+                dispose();
+                Navigator.pop(context);
+              },
+            ),
+            backgroundColor: Colors.transparent,
+            actionsIconTheme: IconThemeData(color: Colors.black),
+          ),
+          body: SingleChildScrollView(
+              child: Center(
+            child: Padding(
+              padding: EdgeInsets.only(
+                  left: screenWidth * 0.05, right: screenWidth * 0.05),
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Input information',
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.06,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    items: <String>[
-                      '1st Year',
-                      '2nd Year',
-                      '3rd Year',
-                      '4th Year',
-                      '5th Year',
-                    ].map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(
-                          value,
-                          style: TextStyle(
-                              fontSize: screenWidth * 0.04,
-                              fontWeight: FontWeight.normal,
-                              fontStyle: FontStyle.normal,
-                              color: Colors.black),
+                    Text(
+                      'Kindly provide the needed information',
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.04,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: screenHeight * 0.015),
+                      child: Text(
+                        'General Information',
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.04,
+                          fontWeight: FontWeight.bold,
                         ),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      controller.mentorYearLvl.text = value.toString();
-                    },
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.only(top: 5),
-                  width: screenWidth,
-                  height: screenWidth * 0.40,
-                  child: Stack(
-                    alignment: Alignment.topRight,
-                    children: [
-                      TextFormField(
-                        controller: MentorController.instance.mentorAbout,
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(top: screenHeight * 0.015),
+                      width: screenWidth * 0.4,
+                      height: screenWidth * 0.20,
+                      child: DropdownButtonFormField(
+                        decoration: InputDecoration(
+                          labelText: 'Year level',
+                          hintText: controller.mentorYearLvl.text.isEmpty
+                              ? null
+                              : controller.mentorYearLvl.text,
+                          hintStyle: TextStyle(
+                            fontSize: screenWidth * 0.04,
+                            fontWeight: FontWeight.normal,
+                            fontStyle: FontStyle.italic,
+                            color: Colors.black,
+                          ),
+                          labelStyle: TextStyle(
+                            fontSize: screenWidth * 0.04,
+                            fontWeight: FontWeight.normal,
+                            fontStyle: FontStyle.normal,
+                            color: Colors.black,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        items: <String>[
+                          '1st Year',
+                          '2nd Year',
+                          '3rd Year',
+                          '4th Year',
+                          '5th Year',
+                        ].map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(
+                              value,
+                              style: TextStyle(
+                                  fontSize: screenWidth * 0.04,
+                                  fontWeight: FontWeight.normal,
+                                  fontStyle: FontStyle.normal,
+                                  color: Colors.black),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          controller.mentorYearLvl.text = value.toString();
+                        },
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(top: 5),
+                      width: screenWidth,
+                      height: screenWidth * 0.40,
+                      child: Stack(
+                        alignment: Alignment.topRight,
+                        children: [
+                          TextFormField(
+                            controller: MentorController.instance.mentorAbout,
+                            style: TextStyle(
+                              fontSize: screenWidth * 0.04,
+                            ),
+                            maxLength: 200,
+                            maxLines: 6,
+                            decoration: InputDecoration(
+                              labelText: 'About information',
+                              hintText: controller.mentorAbout.text.isEmpty
+                                  ? null
+                                  : controller.mentorAbout.text,
+                              hintStyle: TextStyle(
+                                fontSize: screenWidth * 0.04,
+                                height: 1,
+                                color: Colors.grey[600],
+                                fontStyle: FontStyle.italic,
+                              ),
+                              labelStyle: TextStyle(
+                                fontSize: screenWidth * 0.04,
+                                height: 1,
+                                color: Colors.grey[600],
+                                fontStyle: FontStyle.italic,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              counterStyle: TextStyle(
+                                fontSize: screenWidth * 0.035,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(top: screenHeight * 0.015),
+                      child: TextFormField(
+                        controller: MentorController.instance.mentorUserName,
                         style: TextStyle(
                           fontSize: screenWidth * 0.04,
                         ),
-                        maxLength: 100,
-                        maxLines: 6,
                         decoration: InputDecoration(
-                          labelText: 'About information',
-                          hintText: controller.mentorAbout.text.isEmpty
+                          icon: Icon(Icons.person_2_rounded,
+                              size: screenWidth * 0.08),
+                          labelText: 'Username',
+                          hintText: controller.mentorUserName.text.isEmpty
                               ? null
-                              : controller.mentorAbout.text,
+                              : controller.mentorUserName.text,
                           hintStyle: TextStyle(
                             fontSize: screenWidth * 0.04,
                             height: 1,
@@ -245,236 +286,201 @@ class _MentorInfo1State extends State<MentorInfo1> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(top: screenHeight * 0.015),
+                      child: TextFormField(
+                        controller:
+                            MentorController.instance.mentorSessionCompleted,
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.04,
+                        ),
+                        decoration: InputDecoration(
+                          icon: FaIcon(
+                            FontAwesomeIcons.clock,
+                            size: screenWidth * 0.08,
+                          ),
+                          labelText: 'Number of mentorship sessions completed',
+                          labelStyle: TextStyle(
+                            fontSize: screenWidth * 0.04,
+                            height: 1,
+                            color: Colors.grey[600],
+                            fontStyle: FontStyle.italic,
+                          ),
+                          hintText:
+                              controller.mentorSessionCompleted.text.isEmpty
+                                  ? null
+                                  : controller.mentorSessionCompleted.text,
+                          hintStyle: TextStyle(
+                            fontSize: screenWidth * 0.04,
+                            height: 1,
+                            color: Colors.grey[600],
+                            fontStyle: FontStyle.italic,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(top: screenHeight * 0.015),
+                      child: TextFormField(
+                        controller: MentorController.instance.mentorMotto,
+                        maxLength: 50,
+                        maxLines: 3,
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.04,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: controller.mentorMotto.text.isEmpty
+                              ? null
+                              : controller.mentorMotto.text,
+                          helperStyle: TextStyle(
+                            fontSize: screenWidth * 0.04,
+                            height: 1,
+                            color: Colors.grey[600],
+                            fontStyle: FontStyle.italic,
+                          ),
+                          labelText: 'Motto or Quote',
+                          labelStyle: TextStyle(
+                            fontSize: screenWidth * 0.04,
+                            height: 1,
+                            color: Colors.grey[600],
+                            fontStyle: FontStyle.italic,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                           counterStyle: TextStyle(
                             fontSize: screenWidth * 0.035,
                             color: Colors.grey[600],
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.only(top: screenHeight * 0.015),
-                  child: TextFormField(
-                    controller: MentorController.instance.mentorUserName,
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.04,
                     ),
-                    decoration: InputDecoration(
-                      icon: Icon(Icons.person_2_rounded,
-                          size: screenWidth * 0.08),
-                      labelText: 'Username',
-                      hintText: controller.mentorUserName.text.isEmpty
-                          ? null
-                          : controller.mentorUserName.text,
-                      hintStyle: TextStyle(
-                        fontSize: screenWidth * 0.04,
-                        height: 1,
-                        color: Colors.grey[600],
-                        fontStyle: FontStyle.italic,
-                      ),
-                      labelStyle: TextStyle(
-                        fontSize: screenWidth * 0.04,
-                        height: 1,
-                        color: Colors.grey[600],
-                        fontStyle: FontStyle.italic,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                    SizedBox(
+                      height: screenHeight * 0.02,
                     ),
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.only(top: screenHeight * 0.015),
-                  child: TextFormField(
-                    controller:
-                        MentorController.instance.mentorSessionCompleted,
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.04,
-                    ),
-                    decoration: InputDecoration(
-                      icon: FaIcon(
-                        FontAwesomeIcons.clock,
-                        size: screenWidth * 0.08,
-                      ),
-                      labelText: 'Number of mentorship sessions completed',
-                      labelStyle: TextStyle(
-                        fontSize: screenWidth * 0.04,
-                        height: 1,
-                        color: Colors.grey[600],
-                        fontStyle: FontStyle.italic,
-                      ),
-                      hintText: controller.mentorSessionCompleted.text.isEmpty
-                          ? null
-                          : controller.mentorSessionCompleted.text,
-                      hintStyle: TextStyle(
-                        fontSize: screenWidth * 0.04,
-                        height: 1,
-                        color: Colors.grey[600],
-                        fontStyle: FontStyle.italic,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.only(top: screenHeight * 0.015),
-                  child: TextFormField(
-                    controller: MentorController.instance.mentorMotto,
-                    maxLength: 30,
-                    maxLines: 3,
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.04,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: controller.mentorMotto.text.isEmpty
-                          ? null
-                          : controller.mentorMotto.text,
-                      helperStyle: TextStyle(
-                        fontSize: screenWidth * 0.04,
-                        height: 1,
-                        color: Colors.grey[600],
-                        fontStyle: FontStyle.italic,
-                      ),
-                      labelText: 'Motto or Quote',
-                      labelStyle: TextStyle(
-                        fontSize: screenWidth * 0.04,
-                        height: 1,
-                        color: Colors.grey[600],
-                        fontStyle: FontStyle.italic,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      counterStyle: TextStyle(
-                        fontSize: screenWidth * 0.035,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: screenHeight * 0.02,
-                ),
-                if (hasParam)
-                  Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Profile Picture',
-                          style: TextStyle(
-                            fontSize: screenWidth * 0.04,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        if (imageUrl.isNotEmpty && _image.path.isEmpty)
-                          Center(
-                              child: Padding(
-                            padding: EdgeInsets.only(top: screenHeight * 0.02),
-                            child: Padding(
-                              padding:
-                                  EdgeInsets.only(right: screenHeight * 0.01),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(5),
-                                child: GestureDetector(
-                                  onTap: _pickImage,
-                                  child: CachedNetworkImage(
-                                    imageUrl: imageUrl,
-                                    imageBuilder: (context, imageProvider) =>
-                                        SizedBox(
-                                      height: screenWidth * 0.4,
-                                      width: screenWidth * 0.4,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          image: DecorationImage(
-                                            image: imageProvider,
-                                            fit: BoxFit.cover,
+                    if (hasParam)
+                      Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Profile Picture',
+                              style: TextStyle(
+                                fontSize: screenWidth * 0.04,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            if (imageUrl.isNotEmpty && _image.path.isEmpty)
+                              Center(
+                                  child: Padding(
+                                padding:
+                                    EdgeInsets.only(top: screenHeight * 0.02),
+                                child: Padding(
+                                  padding: EdgeInsets.only(
+                                      right: screenHeight * 0.01),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(5),
+                                    child: GestureDetector(
+                                      onTap: _pickImage,
+                                      child: CachedNetworkImage(
+                                        imageUrl: imageUrl,
+                                        imageBuilder:
+                                            (context, imageProvider) =>
+                                                SizedBox(
+                                          height: screenWidth * 0.4,
+                                          width: screenWidth * 0.4,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              image: DecorationImage(
+                                                image: imageProvider,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
                                           ),
+                                        ),
+                                        placeholder: (context, url) =>
+                                            _buildPlaceholderAvatar(
+                                                isLoading: true),
+                                        errorWidget: (context, url, error) =>
+                                            _buildPlaceholderAvatar(),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              )),
+                            if (_image.path.isNotEmpty)
+                              Center(
+                                child: Padding(
+                                  padding:
+                                      EdgeInsets.only(top: screenHeight * 0.02),
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                        right: screenHeight * 0.01),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(5),
+                                      child: GestureDetector(
+                                        onTap: _pickImage,
+                                        child: Image.file(
+                                          _image,
+                                          width: screenWidth * 0.4,
+                                          height: screenWidth * 0.4,
+                                          fit: BoxFit.cover,
                                         ),
                                       ),
                                     ),
-                                    placeholder: (context, url) =>
-                                        _buildPlaceholderAvatar(
-                                            isLoading: true),
-                                    errorWidget: (context, url, error) =>
-                                        _buildPlaceholderAvatar(),
                                   ),
                                 ),
                               ),
-                            ),
-                          )),
-                        if (_image.path.isNotEmpty)
-                          Center(
-                            child: Padding(
-                              padding:
-                                  EdgeInsets.only(top: screenHeight * 0.02),
-                              child: Padding(
-                                padding:
-                                    EdgeInsets.only(right: screenHeight * 0.01),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(5),
-                                  child: GestureDetector(
-                                    onTap: _pickImage,
-                                    child: Image.file(
-                                      _image,
-                                      width: screenWidth * 0.4,
-                                      height: screenWidth * 0.4,
-                                      fit: BoxFit.cover,
-                                    ),
+                            if (imageUrl.isEmpty && _image.path.isEmpty)
+                              DefaultButton(
+                                buttonText: 'Choose a Profile Picture',
+                                bgColor: Colors.grey[300]!,
+                                textColor: Colors.black,
+                                isLoading: false,
+                                borderColor: Colors.transparent,
+                                onPressed: () async {
+                                  await _pickImage();
+                                },
+                              ),
+                          ]),
+                    SizedBox(
+                      height: screenHeight * 0.02,
+                    ),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: DefaultButton(
+                        buttonText: 'Proceed',
+                        bgColor: Color(0xFF1877F2),
+                        textColor: Colors.white,
+                        isLoading: false,
+                        borderColor: Colors.transparent,
+                        onPressed: () async {
+                          Navigator.push(
+                              context,
+                              CustomPageRoute(
+                                  page: MentorInfo2(
+                                    userModel: widget.userModel,
+                                    mentorModel: widget.mentorModel,
+                                    controller: controller,
+                                    image: _image,
                                   ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        if (imageUrl.isEmpty && _image.path.isEmpty)
-                          DefaultButton(
-                            buttonText: 'Choose a Profile Picture',
-                            bgColor: Colors.grey[300]!,
-                            textColor: Colors.black,
-                            isLoading: false,
-                            borderColor: Colors.transparent,
-                            onPressed: () async {
-                              await _pickImage();
-                            },
-                          ),
-                      ]),
-                SizedBox(
-                  height: screenHeight * 0.02,
-                ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: DefaultButton(
-                    buttonText: 'Proceed',
-                    bgColor: Color(0xFF1877F2),
-                    textColor: Colors.white,
-                    isLoading: false,
-                    borderColor: Colors.transparent,
-                    onPressed: () async {
-                      Navigator.push(
-                          context,
-                          CustomPageRoute(
-                              page: MentorInfo2(
-                                userModel: widget.userModel,
-                                mentorModel: widget.mentorModel,
-                                controller: controller,
-                                image: _image,
-                              ),
-                              direction: AxisDirection.left));
-                    },
-                  ),
-                ),
-                SizedBox(
-                  height: screenHeight * 0.03,
-                ),
-              ]),
-        ),
-      )),
-    );
+                                  direction: AxisDirection.left));
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      height: screenHeight * 0.03,
+                    ),
+                  ]),
+            ),
+          )),
+        ));
   }
 
   Widget _buildPlaceholderAvatar({bool isLoading = false}) {

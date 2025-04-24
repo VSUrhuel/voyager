@@ -12,7 +12,6 @@ import 'package:voyager/src/features/mentor/screens/home/pending.dart';
 import 'package:voyager/src/features/mentor/screens/home/request_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:voyager/src/features/mentor/screens/post/create_post.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/widgets/custom_page_route.dart';
@@ -81,180 +80,183 @@ class _MentorHomeState extends State<MentorHome> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      appBar: AppBar(
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
-        scrolledUnderElevation: 0,
-        backgroundColor: Colors.transparent,
-        automaticallyImplyLeading: false,
-        toolbarHeight: screenHeight * 0.10,
-        titleTextStyle: TextStyle(
-          color: Colors.black,
-          fontSize: screenWidth * 0.06,
-          fontWeight: FontWeight.bold,
-        ),
-        elevation: 0,
-        title: Row(
-          children: [
-            _buildProfileImage(screenWidth),
-            const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return SafeArea(
+        bottom: true,
+        top: false,
+        child: Scaffold(
+          appBar: AppBar(
+            systemOverlayStyle: SystemUiOverlayStyle.dark,
+            scrolledUnderElevation: 0,
+            backgroundColor: Colors.transparent,
+            automaticallyImplyLeading: false,
+            toolbarHeight: screenHeight * 0.10,
+            titleTextStyle: TextStyle(
+              color: Colors.black,
+              fontSize: screenWidth * 0.06,
+              fontWeight: FontWeight.bold,
+            ),
+            elevation: 0,
+            title: Row(
               children: [
-                Text(
-                  'Hello, $profileUserName',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                Text(
-                  'Courses awaits you!',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 16,
-                  ),
+                _buildProfileImage(screenWidth),
+                const SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Hello, $profileUserName',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      'Courses awaits you!',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: IconButton(
-              icon: Container(
-                padding: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Theme.of(context).primaryColor.withOpacity(0.1),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: IconButton(
+                  icon: Container(
+                    padding: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Theme.of(context).primaryColor.withOpacity(0.1),
+                    ),
+                    child: Icon(Icons.edit,
+                        color: Theme.of(context).primaryColor,
+                        size: screenWidth * 0.065),
+                  ),
+                  onPressed: () {
+                    // Handle the button press here
+                    Navigator.push(
+                      context,
+                      CustomPageRoute(
+                        page: CreatePost(),
+                        direction: AxisDirection.left,
+                      ),
+                    ).then((_) => _refreshIndicatorKey.currentState?.show());
+                  },
                 ),
-                child: Icon(Icons.edit,
-                    color: Theme.of(context).primaryColor,
-                    size: screenWidth * 0.065),
               ),
-              onPressed: () {
-                // Handle the button press here
-                Navigator.push(
-                  context,
-                  CustomPageRoute(
-                    page: CreatePost(),
-                    direction: AxisDirection.left,
-                  ),
-                ).then((_) => _refreshIndicatorKey.currentState?.show());
-              },
-            ),
+            ],
           ),
-        ],
-      ),
-      body: RefreshIndicator(
-        key: _refreshIndicatorKey,
-        onRefresh: _handleRefresh,
-        child: SingleChildScrollView(
-          physics:
-              const AlwaysScrollableScrollPhysics(), // Needed for RefreshIndicator
-          child: Center(
-            child: Padding(
-              padding: EdgeInsets.only(
-                left: screenWidth * 0.06,
-                right: screenWidth * 0.05,
-                top: screenHeight * 0.01,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          body: RefreshIndicator(
+            key: _refreshIndicatorKey,
+            onRefresh: _handleRefresh,
+            child: SingleChildScrollView(
+              physics:
+                  const AlwaysScrollableScrollPhysics(), // Needed for RefreshIndicator
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: screenWidth * 0.06,
+                    right: screenWidth * 0.05,
+                    top: screenHeight * 0.01,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Pending Requests',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: screenWidth * 0.04,
-                          fontWeight: FontWeight.bold,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Pending Requests',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: screenWidth * 0.04,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                CustomPageRoute(
+                                  page: const RequestList(),
+                                  direction: AxisDirection.left,
+                                ),
+                              ).then((_) =>
+                                  _refreshIndicatorKey.currentState?.show());
+                            },
+                            child: Text(
+                              'View All',
+                              style: TextStyle(
+                                color: Colors.blue,
+                                fontSize: screenWidth * 0.033,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                      SizedBox(
+                        height: screenHeight * 0.26,
+                        child: PendingList(
+                          menteeListController: menteeListController,
+                          key: _pendingListKey,
+                          isMentorHome: true,
                         ),
                       ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            CustomPageRoute(
-                              page: const RequestList(),
-                              direction: AxisDirection.left,
+                      SizedBox(height: screenHeight * 0.02),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Mentee List',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: screenWidth * 0.04,
+                              fontWeight: FontWeight.bold,
                             ),
-                          ).then(
-                              (_) => _refreshIndicatorKey.currentState?.show());
-                        },
-                        child: Text(
-                          'View All',
-                          style: TextStyle(
-                            color: Colors.blue,
-                            fontSize: screenWidth * 0.033,
-                            fontWeight: FontWeight.bold,
                           ),
-                        ),
-                      )
-                    ],
-                  ),
-                  SizedBox(
-                    height: screenHeight * 0.26,
-                    child: PendingList(
-                      menteeListController: menteeListController,
-                      key: _pendingListKey,
-                      isMentorHome: true,
-                    ),
-                  ),
-                  SizedBox(height: screenHeight * 0.02),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Mentee List',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: screenWidth * 0.04,
-                          fontWeight: FontWeight.bold,
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                CustomPageRoute(
+                                  page: MenteeList(),
+                                  direction: AxisDirection.left,
+                                ),
+                              ).then((_) =>
+                                  _refreshIndicatorKey.currentState?.show());
+                            },
+                            child: Text(
+                              'View All',
+                              style: TextStyle(
+                                color: Colors.blue,
+                                fontSize: screenWidth * 0.033,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                      SizedBox(
+                        height: screenHeight * 0.35,
+                        child: AcceptedList(
+                          menteeListController: menteeListController,
+                          key: _acceptedListKey,
+                          isMentorHome: true,
                         ),
                       ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            CustomPageRoute(
-                              page: MenteeList(),
-                              direction: AxisDirection.left,
-                            ),
-                          ).then(
-                              (_) => _refreshIndicatorKey.currentState?.show());
-                        },
-                        child: Text(
-                          'View All',
-                          style: TextStyle(
-                            color: Colors.blue,
-                            fontSize: screenWidth * 0.033,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      )
                     ],
                   ),
-                  SizedBox(
-                    height: screenHeight * 0.35,
-                    child: AcceptedList(
-                      menteeListController: menteeListController,
-                      key: _acceptedListKey,
-                      isMentorHome: true,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 
   Widget _buildProfileImage(double screenWidth) {

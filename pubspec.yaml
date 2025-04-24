@@ -47,6 +47,7 @@ dependencies:
   device_info_plus: ^11.3.0
   cached_network_image: ^3.4.1
   infinite_scroll_pagination: ^5.0.0
+  lottie: ^3.3.1
 
 dev_dependencies:
   flutter_test:

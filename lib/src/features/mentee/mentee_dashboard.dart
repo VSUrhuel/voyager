@@ -30,7 +30,10 @@ class _MenteeDashboardState extends State<MenteeDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+      top: false,
+      bottom: true,
+      child: Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
         children: _screens,
@@ -39,6 +42,8 @@ class _MenteeDashboardState extends State<MenteeDashboard> {
         currentIndex: _selectedIndex,
         onTabChange: _onItemTapped,
       ),
+    ),
     );
+    
   }
 }

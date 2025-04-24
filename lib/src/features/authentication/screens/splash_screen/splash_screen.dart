@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:voyager/src/repository/authentication_repository_firebase/authentication_repository.dart';
+import 'package:lottie/lottie.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -12,24 +12,29 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
-    final auth = FirebaseAuthenticationRepository();
-    return Scaffold(
-      body: Center(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Image.asset('assets/images/splash_screen/loading.png',
-              width: MediaQuery.of(context).size.width * 0.7),
-          const SizedBox(height: 10),
-          const CircularProgressIndicator(),
-          ElevatedButton(
-            onPressed: () async {
-              await auth.logout();
-            },
-            child: const Text('Go to Login'),
-          ),
-        ],
-      )),
-    );
+    return SafeArea(
+        bottom: true,
+        top: false,
+        child: Scaffold(
+          body: Center(
+              child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Lottie.asset(
+                'assets/images/loading-plane.json',
+                width: MediaQuery.of(context).size.width * 0.7,
+                height: MediaQuery.of(context).size.width * 0.7,
+                repeat: true,
+              ),
+              const SizedBox(height: 10),
+              Lottie.asset(
+                'assets/images/loading.json',
+                width: MediaQuery.of(context).size.width * 0.3,
+                height: MediaQuery.of(context).size.width * 0.3,
+                repeat: true,
+              ),
+            ],
+          )),
+        ));
   }
 }

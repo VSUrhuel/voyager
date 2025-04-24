@@ -1,0 +1,2 @@
+C:/Users/Administrator/Desktop/voyager/android/app/.cxx/RelWithDebInfo/51t6s641/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/Administrator/Desktop/voyager/android/app/.cxx/RelWithDebInfo/51t6s641/arm64-v8a/CMakeFiles/rebuild_cache.dir

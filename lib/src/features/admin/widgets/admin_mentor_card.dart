@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:voyager/src/features/admin/controllers/course_mentor_controller.dart';
 import 'package:voyager/src/features/admin/controllers/create_mentor_controller.dart';
+import 'package:voyager/src/features/admin/controllers/admin_mentor_controller.dart';
 import 'package:voyager/src/features/admin/screens/mentors/mentor_profile.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
@@ -60,8 +61,12 @@ class AdminMentorCard extends StatelessWidget {
           if (confirmed == true) {
             await CourseMentorController()
                 .createCourseMentor(courseId!, mentorModel.mentorId);
+            await AdminMentorController().updateMentorStatus(mentorModel.mentorId, 'active');
             Navigator.pop(context);
-          } else {
+          } else if (confirmed == false) {
+            // Navigator.pop(context);
+          } 
+          else {
             Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -92,17 +97,34 @@ class AdminMentorCard extends StatelessWidget {
               width: 0.5,
             ),
           ),
-          child: SizedBox(
+          child: Padding(
+            padding: EdgeInsets.only(left: screenWidth * 0.02),
+            child:SizedBox(
               height: screenHeight * 0.09,
               width: screenWidth * 0.9,
               child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
                 SizedBox(
                   width: screenWidth * 0.2,
-                  child: Icon(
-                    Icons.person,
-                    size: screenWidth * 0.1,
-                  ),
+                  child: userModel.accountApiPhoto.isNotEmpty?
+
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10), // Adjust for desired roundness
+                    child: Image.network(
+                      userModel.accountApiPhoto,
+                      fit: BoxFit.cover, // Ensures the image covers the space
+                      width: screenWidth * 0.15,
+                      height: screenWidth * 0.15,
+                    ),
+                  )
+                  : CircleAvatar(
+                      radius: screenWidth * 0.05,
+                      child: Icon(
+                        Icons.person,
+                        size: screenWidth * 0.05,
+                      ),
+                    ),
                 ),
+                SizedBox(width: screenWidth * 0.02),
                 Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -198,18 +220,18 @@ class AdminMentorCard extends StatelessWidget {
                       icon: Icon(Icons.more_vert, color: Colors.black),
                       onSelected: (String value) async {
                         switch (value) {
-                          case 'archive':
-                            if (mentorModel.mentorStatus == 'archived') {
-                              await CreateMentorController().updateMentorStatus(
-                                  mentorModel.mentorId, 'active');
-                              onActionComplete!();
-                            } else {
-                              await CreateMentorController().updateMentorStatus(
-                                  mentorModel.mentorId, 'archived');
-                              onActionComplete!();
-                            }
+                          // case 'archive':
+                          //   if (mentorModel.mentorStatus == 'archived') {
+                          //     await CreateMentorController().updateMentorStatus(
+                          //         mentorModel.mentorId, 'active');
+                          //     onActionComplete!();
+                          //   } else {
+                          //     await CreateMentorController().updateMentorStatus(
+                          //         mentorModel.mentorId, 'archived');
+                          //     onActionComplete!();
+                          //   }
 
-                            break;
+                          //   break;
 
                           case 'suspend':
                             if (mentorModel.mentorStatus == 'suspended') {
@@ -284,12 +306,12 @@ class AdminMentorCard extends StatelessWidget {
                               ? 'Lift Suspension'
                               : 'Suspend Mentor'),
                         ),
-                        PopupMenuItem<String>(
-                          value: 'archive',
-                          child: Text(mentorModel.mentorStatus == 'archived'
-                              ? 'Unarchive Mentor'
-                              : 'Archive Mentor'),
-                        ),
+                        // PopupMenuItem<String>(
+                        //   value: 'archive',
+                        //   child: Text(mentorModel.mentorStatus == 'archived'
+                        //       ? 'Unarchive Mentor'
+                        //       : 'Archive Mentor'),
+                        // ),
                         const PopupMenuItem<String>(
                           value: 'delete',
                           child: Text('Delete Mentor',
@@ -298,7 +320,9 @@ class AdminMentorCard extends StatelessWidget {
                       ],
                     ),
                   )
-              ]))),
+              ]))
+          ),
+          ),
     );
   }
 

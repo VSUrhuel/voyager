@@ -31,6 +31,81 @@ class _AdminProfileState extends State<AdminProfile> {
     userModel = await firestore.getUser(FirebaseAuth.instance.currentUser!.uid);
   }
 
+  Widget _buildCapabilityItem(
+    BuildContext context,
+    IconData icon,
+    String text,
+    double screenWidth,
+  ) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: screenWidth * 0.01),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            icon,
+            size: screenWidth * 0.05,
+            color: Theme.of(context).primaryColor.withOpacity(0.7),
+          ),
+          SizedBox(width: screenWidth * 0.03),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: screenWidth * 0.038,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAdminCardInfo(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Column(
+      children: [
+        // Admin badge with icon
+        Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: screenWidth * 0.05,
+            vertical: screenHeight * 0.01,
+          ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).primaryColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.admin_panel_settings,
+                color: Theme.of(context).primaryColor,
+                size: screenWidth * 0.06,
+              ),
+              SizedBox(width: screenWidth * 0.02),
+              Text(
+                "Application Administrator",
+                style: TextStyle(
+                  fontSize: screenWidth * 0.045,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        SizedBox(height: screenHeight * 0.02),
+
+        // Admin capabilities in a card
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -47,10 +122,12 @@ class _AdminProfileState extends State<AdminProfile> {
           ),
           centerTitle: true,
         ),
-        body: Column(
+        body: SingleChildScrollView(
+            child: Column(
           children: [
             Profile(role: 'Admin'),
             SizedBox(height: screenHeight * 0.03),
+            _buildAdminCardInfo(context),
             Row(
               children: [
                 Padding(
@@ -69,7 +146,7 @@ class _AdminProfileState extends State<AdminProfile> {
             //Add ProfileListTile widget
             ProfileListTile(
               iconData: Icons.person,
-              text: "Personal Information",
+              text: "Administrative Privileges",
               onTap: () async {
                 Navigator.push(
                   context,
@@ -109,6 +186,6 @@ class _AdminProfileState extends State<AdminProfile> {
               },
             ),
           ],
-        ));
+        )));
   }
 }

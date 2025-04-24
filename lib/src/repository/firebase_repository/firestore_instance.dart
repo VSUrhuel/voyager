@@ -1,15 +1,21 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
 import 'package:voyager/src/features/mentee/model/mentee_model.dart';
 import 'package:voyager/src/features/mentor/model/content_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:get/get.dart';
 import 'package:voyager/src/features/mentor/model/schedule_model.dart';
 import 'package:voyager/src/repository/authentication_repository_firebase/authentication_repository.dart';
+import 'package:voyager/src/repository/supabase_repository/supabase_instance.dart';
+import 'package:http/http.dart' as http;
 
 class FirestoreInstance {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -50,7 +56,7 @@ class FirestoreInstance {
     }
   }
 
-  Future<void> setUserFromGoogle(Rx<User>? user) async {
+  Future<void> setUserFromGoogle(Rx<firebase_auth.User>? user) async {
     try {
       if (user?.value == null) {
         throw Exception('User is null');
@@ -66,6 +72,30 @@ class FirestoreInstance {
 
       if ((await getAPIId()).contains(auth.firebaseUser.value?.uid)) {
         return;
+      }
+
+      SupabaseInstance supabase = SupabaseInstance(Supabase.instance.client);
+      String imageUrl = '';
+
+      if (auth.firebaseUser.value?.photoURL != null) {
+        // Download the image from Google API
+        final response =
+            await http.get(Uri.parse(auth.firebaseUser.value!.photoURL!));
+
+        if (response.statusCode == 200) {
+          // Create a temporary file
+          final directory = await getTemporaryDirectory();
+          final file = File('${directory.path}/temp_profile_image.jpg');
+          await file.writeAsBytes(response.bodyBytes);
+
+          // Upload the File to Supabase
+          imageUrl = await supabase.uploadProfileImage(file);
+
+          // Optionally: Delete the temporary file after upload
+          await file.delete();
+        } else {
+          throw Exception('Failed to download image from Google');
+        }
       }
 
       await _db.collection('users').doc(userUid).set({
@@ -505,8 +535,8 @@ class FirestoreInstance {
     }
   }
 
-  User getFirebaseUser() {
-    return FirebaseAuth.instance.currentUser!;
+  firebase_auth.User getFirebaseUser() {
+    return firebase_auth.FirebaseAuth.instance.currentUser!;
   }
 
   String generateUniqueId() {
@@ -533,8 +563,10 @@ class FirestoreInstance {
 
   Future<UserModel> getUserThroughEmail(String email) async {
     try {
-      final user =
-          await _db.collection('users').where('email', isEqualTo: email).get();
+      final user = await _db
+          .collection('users')
+          .where('accountApiEmail', isEqualTo: email)
+          .get();
       return UserModel.fromJson(user.docs.first.data());
     } catch (e) {
       rethrow;
@@ -598,6 +630,26 @@ class FirestoreInstance {
     }
   }
 
+  Future<List<UserModel>> getinitialMentorsCreated(
+      List<MentorModel> mentors) async {
+    try {
+      final ids = (await getMentors()).map((doc) => doc.accountApiID).toList();
+      print(ids);
+      final initialUsers = await _db
+          .collection('users')
+          .where('accountRole', isEqualTo: 'mentor')
+          .get();
+      final filteredUsers = initialUsers.docs
+          .where((doc) => !ids.contains(doc.data()['accountApiID']))
+          .map((doc) => UserModel.fromJson(doc.data()))
+          .toList();
+      print(filteredUsers[0].accountApiName);
+      return filteredUsers;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> deleteMentor(String mentorId) async {
     try {
       await _db.collection('mentors').doc(mentorId).update({
@@ -634,11 +686,48 @@ class FirestoreInstance {
     }
   }
 
+  Future<void> removeMcaIdFromMentee({
+    required String menteeDocId, // Renamed for clarity
+    required String mcaIdToRemove,
+  }) async {
+    try {
+      // 1. Get the mentee document reference directly
+      final menteeRef =
+          FirebaseFirestore.instance.collection('mentee').doc(menteeDocId);
+
+      // 2. Remove the mcaId from the array
+      await menteeRef.update({
+        'menteeMcaId': FieldValue.arrayRemove([mcaIdToRemove])
+      });
+
+      debugPrint(
+          'Successfully removed mcaId $mcaIdToRemove from mentee $menteeDocId');
+    } catch (e) {
+      debugPrint('Error removing mcaId: $e');
+      rethrow;
+    }
+  }
+
   Future<void> updateMennteeAlocStatus(
       String courseAllocId, String menteeId, String status) async {
     try {
-      if (status == 'removed') {
-        status = 'rejected';
+      if (status == 'removed' || status == 'rejected') {
+        await _db
+            .collection('menteeCourseAlloc')
+            .where('courseMentorId', isEqualTo: courseAllocId)
+            .where('menteeId', isEqualTo: menteeId)
+            .get()
+            .then((querySnapshot) {
+          for (var doc in querySnapshot.docs) {
+            doc.reference.update({'mcaAllocStatus': status});
+            doc.reference.update({'mcaSoftDeleted': true});
+          }
+        });
+        await removeMcaIdFromMentee(
+          menteeDocId: menteeId,
+          mcaIdToRemove: courseAllocId,
+        );
+        return;
       }
       await _db
           .collection('menteeCourseAlloc')
@@ -649,6 +738,32 @@ class FirestoreInstance {
         for (var doc in querySnapshot.docs) {
           doc.reference.update({'mcaAllocStatus': status});
         }
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> softDeleteCourseAllocatedMentee(String courseMentorId) async {
+    try {
+      final docRef = await _db
+          .collection('menteeCourseAlloc')
+          .where('courseMentorId', isEqualTo: courseMentorId)
+          .get();
+      if (docRef.docs.isNotEmpty) {
+        _db.collection('menteeCourseAlloc').doc(docRef.docs[0].id).update({
+          'mcaSoftDeleted': true,
+        });
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> softDeleteCourseMentor(String courseMentorId) async {
+    try {
+      await _db.collection('courseMentor').doc(courseMentorId).update({
+        'courseMentorSoftDeleted': true,
       });
     } catch (e) {
       rethrow;
@@ -692,26 +807,51 @@ class FirestoreInstance {
 
   Future<List<UserModel>> getMentees(String status) async {
     try {
-      final MentorModel mentor =
-          await getMentorThroughAccId(FirebaseAuth.instance.currentUser!.uid);
-      final String courseMentor = await getCourseMentorDocId(mentor.mentorId);
-      final menteeAllocations = await _db
+      // 1. Get courseMentorId first (moved outside query for clarity)
+      final mentor = await getMentorThroughAccId(
+          firebase_auth.FirebaseAuth.instance.currentUser!.uid);
+      final courseMentor = await getCourseMentorDocId(mentor.mentorId);
+
+      // 2. Query mentee allocations with client-side soft delete filtering
+      final allocationQuery = await _db
           .collection('menteeCourseAlloc')
           .where('mcaAllocStatus', isEqualTo: status)
           .where('courseMentorId', isEqualTo: courseMentor)
           .get();
 
-      List<UserModel> users = [];
-      for (var allocation in menteeAllocations.docs) {
-        final menteeId = allocation.data()['menteeId'];
+      // 1. First, properly type the validAllocations variable
+      final List<QueryDocumentSnapshot<Map<String, dynamic>>> validAllocations;
 
-        final menteeDoc = await _db.collection('mentee').doc(menteeId).get();
-        if (menteeDoc.exists) {
-          users.add(await getUser(menteeDoc.data()!['accountId']));
-        }
+// 2. Fix the logic for filtering allocations
+      if (status != 'rejected') {
+        validAllocations = allocationQuery.docs.where((doc) {
+          final data = doc.data();
+          return data['mcaSoftDeleted'] != true &&
+              data['mcaAllocStatus'] == status;
+        }).toList();
+      } else {
+        validAllocations = allocationQuery.docs.where((doc) {
+          final data = doc.data();
+          return data['mcaSoftDeleted'] == true ||
+              data['mcaAllocStatus'] == 'rejected';
+        }).toList();
       }
-      return users;
+
+      // 3. Batch fetch mentee data to reduce Firestore reads
+      final users = await Future.wait(
+        validAllocations.map((alloc) async {
+          final menteeId = alloc.data()['menteeId'];
+          final menteeDoc = await _db.collection('mentee').doc(menteeId).get();
+          if (menteeDoc.exists) {
+            return getUser(menteeDoc.data()!['accountId']);
+          }
+          return null;
+        }),
+      );
+      // 4. Filter out nulls and return
+      return users.whereType<UserModel>().toList();
     } catch (e) {
+      debugPrint('Error fetching mentees: $e');
       rethrow;
     }
   }
@@ -791,6 +931,15 @@ class FirestoreInstance {
             CourseModel.fromJson(course.data(), course.id)); //l Pass doc.id
       }
       return courseList;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<CourseModel> getCourse(String courseId) async {
+    try {
+      final course = await _db.collection('course').doc(courseId).get();
+      return CourseModel.fromJson(course.data()!, course.id);
     } catch (e) {
       rethrow;
     }
@@ -1128,6 +1277,7 @@ class FirestoreInstance {
       final courseMentorQuery = await _db
           .collection('courseMentor')
           .where('courseId', isEqualTo: courseId)
+          .where('courseMentorSoftDeleted', isEqualTo: false)
           .get();
 
       List<UserModel> users = [];
@@ -1153,6 +1303,57 @@ class FirestoreInstance {
     }
   }
 
+  Future<List<UserModel>> getEnrolledMentors(String courseId) async {
+    try {
+      // 1. Get current mentee ID
+      final menteeId = await getMenteeId(
+          firebase_auth.FirebaseAuth.instance.currentUser!.uid);
+
+      // 2. Get all accepted course allocations for this mentee
+      final menteeAllocs = await _db
+          .collection('menteeCourseAlloc')
+          .where('menteeId', isEqualTo: menteeId)
+          .where('mcaAllocStatus',
+              isEqualTo: 'accepted') // Only accepted allocations
+          .where('mcaSoftDeleted', isEqualTo: false) // Not soft-deleted
+          .get();
+
+      // 3. Get all courseMentor references from these allocations
+      final courseMentorIds = menteeAllocs.docs
+          .map((doc) => doc.data()['courseMentorId'] as String)
+          .toList();
+
+      // 4. Get all courseMentor documents for these IDs
+      final courseMentors = await Future.wait(courseMentorIds
+          .map((id) => _db.collection('courseMentor').doc(id).get()));
+
+      // 5. Filter courseMentors by the specific courseId and get mentor details
+      final users = await Future.wait(
+        courseMentors.where((doc) => doc.exists).map((doc) async {
+          final courseMentorData = doc.data()!;
+
+          // Verify this courseMentor is for the requested course
+          if (courseMentorData['courseId'] == courseId) {
+            final mentorId = courseMentorData['mentorId'] as String;
+            final mentorDoc =
+                await _db.collection('mentors').doc(mentorId).get();
+
+            if (mentorDoc.exists) {
+              final accountId = mentorDoc.data()!['accountId'] as String;
+              return await getUser(accountId);
+            }
+          }
+          return null;
+        }),
+      );
+
+      // 6. Remove nulls and return the list of UserModel
+      return users.whereType<UserModel>().toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<String> getUserDocIdThroughEmail(String email) async {
     try {
       final userSnapshot = await _db
@@ -1167,6 +1368,41 @@ class FirestoreInstance {
       return userSnapshot.docs.first.id;
     } catch (e) {
       rethrow;
+    }
+  }
+
+  Future<CourseModel?> getMentorCourseThroughId(String courseMentorId) async {
+    try {
+      final courseMentorSnap = await FirebaseFirestore.instance
+          .collection('courseMentor')
+          .doc(courseMentorId)
+          .get();
+
+      if (!courseMentorSnap.exists) {
+        print("❌ courseMentor not found.");
+        return null;
+      }
+
+      final courseId = courseMentorSnap.data()?['courseId'];
+      if (courseId == null) {
+        print("❌ courseId not found in courseMentor.");
+        return null;
+      }
+
+      final courseSnap = await FirebaseFirestore.instance
+          .collection('course')
+          .doc(courseId)
+          .get();
+
+      if (!courseSnap.exists) {
+        print("❌ Course not found for courseId: $courseId");
+        return null;
+      }
+
+      return CourseModel.fromJson(courseSnap.data()!, courseSnap.id);
+    } catch (e) {
+      print("❌ Error in getMentorCourseThroughId: $e");
+      return null;
     }
   }
 }

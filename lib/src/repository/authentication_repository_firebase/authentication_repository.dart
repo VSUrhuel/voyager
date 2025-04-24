@@ -147,53 +147,65 @@ class FirebaseAuthenticationRepository extends GetxController {
         if (!user.emailVerified) {
           await user.sendEmailVerification();
         } else {
-          throw AuthenticationExceptions("Verification email already sent.");
+          throw AuthenticationExceptions("Email already verified.");
         }
 
-        ScaffoldMessenger.of(Get.context!).showSnackBar(
-          SnackBar(
-            content: AwesomeSnackbarContent(
-              title: 'Verify Account!',
-              message:
-                  "A verification email has been sent to your email address",
-              contentType: ContentType.help,
+        // Check if context is still available before showing snackbar
+        if (Get.context != null && Get.context!.mounted) {
+          ScaffoldMessenger.of(Get.context!).showSnackBar(
+            SnackBar(
+              content: AwesomeSnackbarContent(
+                title: 'Verify Account!',
+                message:
+                    "A verification email has been sent to your email address",
+                contentType: ContentType.help,
+              ),
+              width: MediaQuery.of(Get.context!).size.width,
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
             ),
-            width: MediaQuery.of(Get.context!).size.width,
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.transparent, // Makes it seamless
-            elevation: 0,
-          ),
-        );
-        //Get.offAllNamed(MRoutes.splash);
+          );
+        }
       } else {
         throw AuthenticationExceptions("User not found or already verified.");
       }
     } on FirebaseAuthException catch (e) {
       final ex = AuthenticationExceptions.code(e.code);
-      AwesomeSnackbarContent(
-          title: convertCodeToTitle(e.code),
-          message: ex.message,
-          contentType: ContentType.failure,
-          color: Colors.red);
-
+      if (Get.context != null && Get.context!.mounted) {
+        ScaffoldMessenger.of(Get.context!).showSnackBar(
+          SnackBar(
+            content: AwesomeSnackbarContent(
+                title: convertCodeToTitle(e.code),
+                message: ex.message,
+                contentType: ContentType.failure,
+                color: Colors.red),
+            width: MediaQuery.of(Get.context!).size.width,
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+          ),
+        );
+      }
       throw ex;
     } catch (e) {
       const ex = AuthenticationExceptions();
-      ScaffoldMessenger.of(Get.context!).showSnackBar(
-        SnackBar(
-          content: AwesomeSnackbarContent(
-              title: 'Oh Snap!',
-              message:
-                  "Error sending verification email. Please try again later!",
-              contentType: ContentType.failure,
-              color: Colors.red),
-          width: MediaQuery.of(Get.context!).size.width,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent, // Makes it seamless
-          elevation: 0,
-        ),
-      );
-
+      if (Get.context != null && Get.context!.mounted) {
+        ScaffoldMessenger.of(Get.context!).showSnackBar(
+          SnackBar(
+            content: AwesomeSnackbarContent(
+                title: 'Oh Snap!',
+                message:
+                    "Error sending verification email. Please try again later!",
+                contentType: ContentType.failure,
+                color: Colors.red),
+            width: MediaQuery.of(Get.context!).size.width,
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+          ),
+        );
+      }
       throw ex;
     }
   }
@@ -230,12 +242,13 @@ class FirebaseAuthenticationRepository extends GetxController {
 
       throw ex;
     } catch (e) {
-      const ex = AuthenticationExceptions();
+      final ex = AuthenticationExceptions.code(e.toString());
+
       ScaffoldMessenger.of(Get.context!).showSnackBar(
         SnackBar(
           content: AwesomeSnackbarContent(
               title: 'Oh Snap!',
-              message: e.toString(),
+              message: ex.message,
               contentType: ContentType.failure,
               color: Colors.red),
           width: MediaQuery.of(Get.context!).size.width,
@@ -339,12 +352,12 @@ class FirebaseAuthenticationRepository extends GetxController {
 
       throw ex;
     } catch (e) {
-      const ex = AuthenticationExceptions();
+      final ex = AuthenticationExceptions.code(e.toString());
       ScaffoldMessenger.of(Get.context!).showSnackBar(
         SnackBar(
           content: AwesomeSnackbarContent(
               title: 'Error!',
-              message: e.toString(),
+              message: ex.message,
               contentType: ContentType.failure,
               color: Colors.red),
           width: MediaQuery.of(Get.context!).size.width,
@@ -409,7 +422,7 @@ class FirebaseAuthenticationRepository extends GetxController {
           // If custom token fails, try to sign in with original credentials
           // You'll need to have stored these somewhere secure
           // Alternatively, you could sign in anonymously here if appropriate
-          print("Failed to restore session with custom token: $e");
+
           return null;
         }
       }

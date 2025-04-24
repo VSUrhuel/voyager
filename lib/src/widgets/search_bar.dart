@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:voyager/src/features/mentee/controller/mentee_controller.dart';
 
 class SearchBarWithDropdown extends StatefulWidget {
-  const SearchBarWithDropdown({super.key});
+  const SearchBarWithDropdown(
+      {super.key, this.controller, this.searchController, this.onChanged});
+  final MenteeController? controller;
+  final Function? onChanged;
+  final TextEditingController? searchController;
 
   @override
   State<SearchBarWithDropdown> createState() => _SearchBarWithDropdownState();
 }
 
 class _SearchBarWithDropdownState extends State<SearchBarWithDropdown> {
-  String? _selectedCourse = 'Courses';
+  String? _selectedCourse = 'Courses'; // Default value for the dropdown
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +27,9 @@ class _SearchBarWithDropdownState extends State<SearchBarWithDropdown> {
       ),
       child: Row(
         children: [
-          // Dropdown Button - now with matched height
+          // Dropdown Button
           Container(
-            height: 48, // Match container height
+            height: 48,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
               color: Colors.blue,
@@ -46,7 +51,9 @@ class _SearchBarWithDropdownState extends State<SearchBarWithDropdown> {
                   ),
                   onChanged: (String? newValue) {
                     setState(() {
-                      _selectedCourse = newValue;
+                      _selectedCourse = newValue!;
+                      widget.controller?.updateSearchCategory(newValue);
+                      widget.onChanged?.call();
                     });
                   },
                   selectedItemBuilder: (BuildContext context) {
@@ -54,7 +61,8 @@ class _SearchBarWithDropdownState extends State<SearchBarWithDropdown> {
                       return Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          value,
+                          _selectedCourse
+                              as String, // Show currently selected value
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -63,15 +71,14 @@ class _SearchBarWithDropdownState extends State<SearchBarWithDropdown> {
                       );
                     }).toList();
                   },
-                  items: <String>[
-                    if (_selectedCourse == 'Mentors') 'Mentors',
-                    if (_selectedCourse == 'Courses') 'Courses',
-                    if (_selectedCourse != 'Courses') 'Courses',
-                    if (_selectedCourse != 'Mentors') 'Mentors',
-                  ].map<DropdownMenuItem<String>>((String value) {
+                  items: ['Courses', 'Mentors'].map((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
-                      child: Text(value),
+                      child: Text(
+                        value,
+                        style: const TextStyle(
+                            color: Colors.white), // Dropdown items (black text)
+                      ),
                     );
                   }).toList(),
                 ),
@@ -89,7 +96,8 @@ class _SearchBarWithDropdownState extends State<SearchBarWithDropdown> {
                   bottomRight: Radius.circular(30),
                 ),
               ),
-              child: const TextField(
+              child: TextField(
+                controller: widget.searchController,
                 decoration: InputDecoration(
                   hintText: 'Search',
                   hintStyle: TextStyle(color: Colors.grey),

@@ -40,6 +40,7 @@ class NotificationController {
           .collection('menteeCourseAlloc')
           .where('menteeId', isEqualTo: menteeId)
           .where('mcaSoftDeleted', isEqualTo: false)
+          .where('mcaAllocStatus', isEqualTo: 'accepted')
           .get();
 
       return allocations.docs

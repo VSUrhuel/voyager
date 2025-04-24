@@ -7,7 +7,7 @@ import 'package:voyager/src/features/mentor/widget/post_content.dart';
 import 'package:voyager/src/widgets/custom_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:lottie/lottie.dart';
 
 class Post extends StatefulWidget {
   const Post({super.key});
@@ -83,152 +83,160 @@ class _PostState extends State<Post> {
     final screenHeight = MediaQuery.of(context).size.height;
     final textTheme = Theme.of(context).textTheme;
 
-    return Scaffold(
-      appBar: AppBar(
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
-        scrolledUnderElevation: 0,
-        backgroundColor: Colors.transparent,
-        automaticallyImplyLeading: false,
-        toolbarHeight: screenHeight * 0.10,
-        titleTextStyle: textTheme.titleLarge?.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
-        elevation: 0,
-        title: Row(
-          children: [
-            Padding(
-              padding: EdgeInsets.only(
-                  top: screenHeight * 0.013, left: screenHeight * 0.01),
-              child: Text(
-                'Posts',
-                style: TextStyle(
-                    fontSize: screenWidth * 0.07, fontWeight: FontWeight.bold),
-              ),
+    return SafeArea(
+        bottom: true,
+        top: false,
+        child: Scaffold(
+          appBar: AppBar(
+            systemOverlayStyle: SystemUiOverlayStyle.dark,
+            scrolledUnderElevation: 0,
+            backgroundColor: Colors.transparent,
+            automaticallyImplyLeading: false,
+            toolbarHeight: screenHeight * 0.10,
+            titleTextStyle: textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
-          ],
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: IconButton(
-              icon: Container(
-                padding: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Theme.of(context).primaryColor.withOpacity(0.1),
-                ),
-                child: Icon(Icons.edit,
-                    color: Theme.of(context).primaryColor,
-                    size: screenWidth * 0.065),
-              ),
-              onPressed: () {
-                // Handle the button press here
-                Navigator.push(
-                  context,
-                  CustomPageRoute(
-                    page: CreatePost(),
-                    direction: AxisDirection.left,
+            elevation: 0,
+            title: Row(
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(
+                      top: screenHeight * 0.013, left: screenHeight * 0.01),
+                  child: Text(
+                    'Posts',
+                    style: TextStyle(
+                        fontSize: screenWidth * 0.07,
+                        fontWeight: FontWeight.bold),
                   ),
-                );
-              },
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
-      body: RefreshIndicator(
-          onRefresh: _refreshPosts,
-          child: Obx(() {
-            final posts = postController.posts;
-            final isLoading = postController.isLoading.value;
-            final error = postController.error.value;
-
-            if (isLoading && posts.isEmpty && !_isRefreshing) {
-              return _buildLoadingState();
-            }
-
-            if (posts.isEmpty) {
-              return _buildErrorState(context, error);
-            }
-
-            if (posts.isEmpty) {
-              return _buildEmptyState(context);
-            }
-            return ListView.builder(
-              controller: _scrollController,
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.symmetric(
-                horizontal: screenWidth * 0.05,
-                vertical: screenHeight * 0.02,
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: IconButton(
+                  icon: Container(
+                    padding: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Theme.of(context).primaryColor.withOpacity(0.1),
+                    ),
+                    child: Icon(Icons.edit,
+                        color: Theme.of(context).primaryColor,
+                        size: screenWidth * 0.065),
+                  ),
+                  onPressed: () {
+                    // Handle the button press here
+                    Navigator.push(
+                      context,
+                      CustomPageRoute(
+                        page: CreatePost(),
+                        direction: AxisDirection.left,
+                      ),
+                    );
+                  },
+                ),
               ),
-              itemCount: posts.length + (_hasMorePosts ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index == posts.length) {
-                  return _buildMoreIndicator();
-                }
-                return Column(
-                  children: [
-                    PostContent(post: posts[index]),
-                    SizedBox(height: screenHeight * 0.02),
-                  ],
-                );
-              },
-            );
-          })
-          // child: SingleChildScrollView(
-          //   physics: const AlwaysScrollableScrollPhysics(),
-          //   child: Padding(
-          //     padding: EdgeInsets.symmetric(
-          //       horizontal: screenWidth * 0.05,
-          //       vertical: screenHeight * 0.02,
-          //     ),
-          //     child: Column(
-          //       children: [
-          //         const Divider(thickness: 1),
-          //         SizedBox(height: screenHeight * 0.02),
-          //         FutureBuilder<List<PostContentModel>>(
-          //           future: postsFuture,
-          //           builder: (context, snapshot) {
-          //             if (_isRefreshing) {
-          //               return SizedBox(
-          //                 height: screenHeight * 0.5,
-          //                 child: Center(child: CircularProgressIndicator()),
-          //               );
-          //             }
-
-          //             if (snapshot.connectionState == ConnectionState.waiting) {
-          //               return SizedBox(
-          //                 child: const Center(child: CircularProgressIndicator()),
-          //               );
-          //             }
-
-          //             if (snapshot.hasError) {
-          //               debugPrint('Post loading error: ${snapshot.error}');
-          //               debugPrintStack(stackTrace: snapshot.stackTrace);
-          //               return _buildErrorState(context);
-          //             }
-
-          //             if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          //               return _buildEmptyState(context);
-          //             }
-
-          //             return Column(
-          //               children: snapshot.data!
-          //                   .map((post) => Column(
-          //                         children: [
-          //                           PostContent(post: post),
-          //                           SizedBox(height: screenHeight * 0.02),
-          //                         ],
-          //                       ))
-          //                   .toList(),
-          //             );
-          //           },
-          //         ),
-          //       ],
-          //     ),
-          //   ),
-          // ),
+            ],
           ),
-    );
+          body: RefreshIndicator(
+              onRefresh: _refreshPosts,
+              child: Obx(() {
+                final posts = postController.posts;
+                final isLoading = postController.isLoading.value;
+                final error = postController.error.value;
+
+                if (isLoading && posts.isEmpty && !_isRefreshing) {
+                  return _buildLoadingState();
+                }
+
+                if (error.isNotEmpty) {
+                  return _buildErrorState(context, error);
+                }
+
+                if (posts.isEmpty) {
+                  return _buildEmptyState(context);
+                }
+                return ListView.builder(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.05,
+                    vertical: screenHeight * 0.02,
+                  ),
+                  itemCount: posts.length + (_hasMorePosts ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index >= posts.length) {
+                      // Trigger load more when we reach the end
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        postController.loadMorePosts();
+                      });
+                      return _buildMoreIndicator();
+                    }
+                    return Column(
+                      children: [
+                        PostContent(post: posts[index]),
+                        SizedBox(height: screenHeight * 0.02),
+                      ],
+                    );
+                  },
+                );
+              })
+              // child: SingleChildScrollView(
+              //   physics: const AlwaysScrollableScrollPhysics(),
+              //   child: Padding(
+              //     padding: EdgeInsets.symmetric(
+              //       horizontal: screenWidth * 0.05,
+              //       vertical: screenHeight * 0.02,
+              //     ),
+              //     child: Column(
+              //       children: [
+              //         const Divider(thickness: 1),
+              //         SizedBox(height: screenHeight * 0.02),
+              //         FutureBuilder<List<PostContentModel>>(
+              //           future: postsFuture,
+              //           builder: (context, snapshot) {
+              //             if (_isRefreshing) {
+              //               return SizedBox(
+              //                 height: screenHeight * 0.5,
+              //                 child: Center(child: CircularProgressIndicator()),
+              //               );
+              //             }
+
+              //             if (snapshot.connectionState == ConnectionState.waiting) {
+              //               return SizedBox(
+              //                 child: const Center(child: CircularProgressIndicator()),
+              //               );
+              //             }
+
+              //             if (snapshot.hasError) {
+              //               debugPrint('Post loading error: ${snapshot.error}');
+              //               debugPrintStack(stackTrace: snapshot.stackTrace);
+              //               return _buildErrorState(context);
+              //             }
+
+              //             if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              //               return _buildEmptyState(context);
+              //             }
+
+              //             return Column(
+              //               children: snapshot.data!
+              //                   .map((post) => Column(
+              //                         children: [
+              //                           PostContent(post: post),
+              //                           SizedBox(height: screenHeight * 0.02),
+              //                         ],
+              //                       ))
+              //                   .toList(),
+              //             );
+              //           },
+              //         ),
+              //       ],
+              //     ),
+              //   ),
+              // ),
+              ),
+        ));
   }
 
   Widget _buildLoadingState() {
@@ -249,12 +257,19 @@ class _PostState extends State<Post> {
   }
 
   Widget _buildErrorState(BuildContext context, String error) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-        Icon(Icons.error_outline, size: 50, color: Colors.red[300]),
+        Lottie.asset(
+          'assets/images/error.json',
+          fit: BoxFit.cover,
+          width: screenWidth * 0.6,
+          height: screenWidth * 0.4,
+          repeat: true,
+        ),
         const SizedBox(height: 16),
         Center(
             child: Text(
@@ -262,10 +277,6 @@ class _PostState extends State<Post> {
           style: Theme.of(context).textTheme.titleMedium,
         )),
         const SizedBox(height: 8),
-        Text(
-          error,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
         const SizedBox(height: 16),
         ElevatedButton(
           onPressed: _refreshPosts,
@@ -276,32 +287,90 @@ class _PostState extends State<Post> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-        Icon(Icons.feed_outlined, size: 50, color: Colors.grey[400]),
-        const SizedBox(height: 16),
-        Text(
-          'No posts available',
-          style: Theme.of(context).textTheme.titleMedium,
+    final theme = Theme.of(context);
+    final size = MediaQuery.of(context).size;
+    final isDarkMode = theme.brightness == Brightness.dark;
+
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: size.width * 0.05,
+          right: size.width * 0.05,
         ),
-        const SizedBox(height: 8),
-        Text(
-          'Be the first to create a post',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        const SizedBox(height: 16),
-        ElevatedButton(
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const CreatePost(),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Animated illustration
+            Lottie.asset(
+              'assets/images/empty-post.json',
+              fit: BoxFit.cover,
+              width: size.width * 0.6,
+              height: size.width * 0.4,
+              repeat: true,
             ),
-          ).then((_) => _refreshPosts()),
-          child: const Text('Create Post'),
+
+            const SizedBox(height: 24),
+
+            // Title with better typography
+            Text(
+              'No Posts Yet',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: isDarkMode ? Colors.white70 : Colors.grey[800],
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 8),
+
+            // More descriptive subtitle
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Text(
+                'The feed is empty right now. Start sharing your knowledge or questions with the community!',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: isDarkMode ? Colors.white60 : Colors.grey[600],
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Filled button with icon
+            FilledButton.icon(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CreatePost(),
+                ),
+              ).then((_) => _refreshPosts()),
+              icon: const Icon(Icons.add, size: 20),
+              label: const Text('Create First Post'),
+              style: FilledButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+
+            // Alternative action
+            const SizedBox(height: 16),
+            TextButton(
+              onPressed: _refreshPosts,
+              child: Text(
+                'Refresh Feed',
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

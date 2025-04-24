@@ -26,7 +26,6 @@ class _EnrollCourseState extends State<EnrollCourse> {
   String? selectedMentorId;
   bool isLoading = false;
 
-
   List<UserModel> fetchedUsers = [];
 
   Future<List<PickMentorCard>> fetchMentorsWithDetails() async {
@@ -67,83 +66,87 @@ class _EnrollCourseState extends State<EnrollCourse> {
 
     try {
       final firestore = FirebaseFirestore.instance;
-      final Timestamp createdTimestamp = Timestamp.now();
+      final createdTimestamp = Timestamp.now();
 
-
-      // 1. Get courseMentorId using courseId and mentorId
-      final courseMentorSnapshot = await firestore
+      // 1. Get courseMentorId
+      final courseMentorQuery = await firestore
           .collection('courseMentor')
           .where('courseId', isEqualTo: widget.courseModel.docId)
           .where('courseMentorSoftDeleted', isEqualTo: false)
+          .limit(1)
           .get();
 
-      if (courseMentorSnapshot.docs.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Course is not available for enrollment')),
-        );
-        return;
+      if (courseMentorQuery.docs.isEmpty) {
+        throw 'Course is not available for enrollment';
       }
+      final courseMentorId = courseMentorQuery.docs.first.id;
 
-      final courseMentorId = courseMentorSnapshot.docs.first.id;
-
-      // 2. Check if mentee already exists
-      final existingMenteeSnapshot = await firestore
+      // 2. Get or create mentee
+      final menteeQuery = await firestore
           .collection('mentee')
           .where('accountId', isEqualTo: widget.userId)
           .where('menteeSoftDelete', isEqualTo: false)
+          .limit(1)
           .get();
 
-      DocumentReference menteeRef;
-      String menteeId;
+      final menteeRef = menteeQuery.docs.isNotEmpty
+          ? menteeQuery.docs.first.reference
+          : await firestore.collection('mentee').add({
+              'accountId': widget.userId,
+              'menteeMcaId': [],
+              'menteeSoftDelete': false,
+            });
 
-      if (existingMenteeSnapshot.docs.isNotEmpty) {
-        // Use existing mentee
-        menteeRef = existingMenteeSnapshot.docs.first.reference;
-        menteeId = existingMenteeSnapshot.docs.first.id;
-      } else {
-        // Create new mentee
-        final newMentee = await firestore.collection('mentee').add({
-          'accountId': widget.userId,
-          'menteeMcaId': [],
-          'menteeSoftDelete': false,
+      final menteeId = menteeQuery.docs.isNotEmpty
+          ? menteeQuery.docs.first.id
+          : menteeRef.id;
+
+      // 3. Check for existing allocation
+      final existingAllocQuery = await firestore
+          .collection('menteeCourseAlloc')
+          .where('courseMentorId', isEqualTo: courseMentorId)
+          .where('menteeId', isEqualTo: menteeId)
+          .where('mcaSoftDeleted', isEqualTo: false)
+          .limit(1)
+          .get();
+
+      if (existingAllocQuery.docs.isNotEmpty) {
+        // Update existing allocation
+        await existingAllocQuery.docs.first.reference.update({
+          'mcaAllocStatus': 'pending',
+          'mcaModifiedTimestamp': createdTimestamp,
         });
-        menteeRef = newMentee;
-        menteeId = newMentee.id;
+      } else {
+        // Create new allocation
+        final newAllocRef =
+            await firestore.collection('menteeCourseAlloc').add({
+          'courseMentorId': courseMentorId,
+          'mcaAllocStatus': 'pending',
+          'mcaCreatedTimestamp': createdTimestamp,
+          'mcaModifiedTimestamp': createdTimestamp,
+          'mcaSoftDeleted': false,
+          'menteeId': menteeId,
+        });
+
+        // Update mentee's mcaId list
+        await menteeRef.update({
+          'menteeMcaId': FieldValue.arrayUnion([newAllocRef.id])
+        });
       }
 
-      // 3. Add new menteeCourseAlloc document
-      final menteeCourseAllocRef =
-          await firestore.collection('menteeCourseAlloc').add({
-        'courseMentorId': courseMentorId,
-        'mcaAllocStatus': 'pending',
-        'mcaCreatedTimestamp': createdTimestamp,
-        'mcaSoftDeleted': false,
-        'menteeId': menteeId,
-      });
-
-      // 4. Append the new menteeMcaId to the mentee document
-      await menteeRef.update({
-        'menteeMcaId': FieldValue.arrayUnion([menteeCourseAllocRef.id])
-
-      });
-
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Successfully enrolled in the course!')),
+        const SnackBar(
+            content: Text('Course enrollment processed successfully!')),
       );
-
-      if (mounted) {
-
-        Navigator.pop(context);
-      }
+      Navigator.pop(context);
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error enrolling in the course: $e')),
+        SnackBar(content: Text('Error: ${e.toString()}')),
       );
     } finally {
-      if (mounted) {
-        setState(() => isLoading = false);
-      }
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
@@ -159,200 +162,204 @@ class _EnrollCourseState extends State<EnrollCourse> {
                 .from('course-picture')
                 .getPublicUrl(widget.courseModel.courseImgUrl))
         : 'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/course-picture/linear-algebra.png';
-
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 1.0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Enroll Course',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.normal,
-            fontSize: 18.0,
+    final courseName = widget.courseModel.courseName;
+    return SafeArea(
+        bottom: true,
+        top: false,
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 1.0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: Text(
+              courseName,
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.normal,
+                fontSize: 18.0,
+              ),
+            ),
+            centerTitle: true,
           ),
-        ),
-        centerTitle: true,
-      ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : FutureBuilder<List<PickMentorCard>>(
-              future: fetchMentorsWithDetails(),
-              builder: (context, mentorCardSnapshot) {
-                if (mentorCardSnapshot.connectionState ==
-                    ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+          body: isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : FutureBuilder<List<PickMentorCard>>(
+                  future: fetchMentorsWithDetails(),
+                  builder: (context, mentorCardSnapshot) {
+                    if (mentorCardSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-                final mentorCards = mentorCardSnapshot.data ?? [];
+                    final mentorCards = mentorCardSnapshot.data ?? [];
 
-                return SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        height: screenHeight * 0.25,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: NetworkImage(imageUrl),
-                            fit: BoxFit.cover,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      SizedBox(height: screenHeight * 0.02),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          vertical: screenHeight * 0.015,
-                          horizontal: screenWidth * 0.05,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black12),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: FutureBuilder<int>(
-                          future: firestoreInstance.getTotalMenteeForCourse(
-                              widget.courseModel.docId),
-                          builder: (context, menteeSnapshot) {
-
-                            final totalMentee = menteeSnapshot.data ?? 0;
-
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                _infoItem(Icons.access_time, '1 Semester',
-                                    screenHeight),
-                                _infoItem(
-                                    Icons.groups,
-                                    "${fetchedUsers.length} Mentors",
-                                    screenHeight),
-                                _infoItem(Icons.people, "$totalMentee Mentees",
-                                    screenHeight),
-                              ],
-                            );
-                          },
-                        ),
-                      ),
-                      SizedBox(height: screenHeight * 0.03),
-                      Text(
-                        "Description",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: screenHeight * 0.022,
-                        ),
-                      ),
-                      SizedBox(height: screenHeight * 0.005),
-                      Text(
-                        widget.courseModel.courseDescription,
-                        style: TextStyle(fontSize: screenHeight * 0.018),
-                      ),
-                      SizedBox(height: screenHeight * 0.03),
-                      Text(
-                        "What You'll Learn:",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: screenHeight * 0.022,
-                        ),
-                      ),
-                      SizedBox(height: screenHeight * 0.005),
-                      Column(
+                    return SingleChildScrollView(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          for (final deliverable
-                              in widget.courseModel.courseDeliverables)
-                            _bulletPoint(deliverable, screenHeight),
-                        ],
-                      ),
-                      SizedBox(height: screenHeight * 0.03),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              height: screenHeight * 0.25,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                              ),
+                              child: widget.courseModel.courseImgUrl.isEmpty
+                                  ? Image.asset(
+                                      'assets/images/application_images/code.jpg',
+                                      fit: BoxFit.cover)
+                                  : Image.network(imageUrl, fit: BoxFit.cover),
+                            ),
+                          ),
+                          SizedBox(height: screenHeight * 0.02),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 16, horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.07),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: FutureBuilder<int>(
+                              future: firestoreInstance.getTotalMenteeForCourse(
+                                  widget.courseModel.docId),
+                              builder: (context, menteeSnapshot) {
+                                final totalMentee = menteeSnapshot.data ?? 0;
+
+                                return Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    _infoItem(Icons.access_time, '1 Semester',
+                                        screenHeight),
+                                    _infoItem(
+                                        Icons.groups,
+                                        "${fetchedUsers.length} ${fetchedUsers.length == 1 ? 'Mentor' : 'Mentors'}",
+                                        screenHeight),
+                                    _infoItem(
+                                        Icons.people,
+                                        "$totalMentee ${totalMentee == 1 ? 'Mentee' : 'Mentees'}",
+                                        screenHeight),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                          SizedBox(height: screenHeight * 0.03),
                           Text(
-                            "Pick your Mentor",
+                            "Description",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: screenHeight * 0.022,
                             ),
                           ),
-                          TextButton(
-                            onPressed: () {},
-                            child: Text(
-                              "View Mentors",
-                              style: TextStyle(
-                                color: Colors.blue,
-                                fontSize: screenHeight * 0.020,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          SizedBox(height: screenHeight * 0.005),
+                          Text(
+                            widget.courseModel.courseDescription,
+                            style: TextStyle(fontSize: screenHeight * 0.018),
+                          ),
+                          SizedBox(height: screenHeight * 0.03),
+                          Text(
+                            "What You'll Learn:",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: screenHeight * 0.022,
                             ),
                           ),
+                          SizedBox(height: screenHeight * 0.005),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              for (final deliverable
+                                  in widget.courseModel.courseDeliverables)
+                                _bulletPoint(deliverable, screenHeight),
+                            ],
+                          ),
+                          SizedBox(height: screenHeight * 0.03),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Pick your Mentor",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: screenHeight * 0.022,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: screenHeight * 0.01),
+                          mentorCards.isEmpty
+                              ? const Center(
+                                  child: Text('No mentors available'))
+                              : Column(children: mentorCards),
+                          SizedBox(height: screenHeight * 0.02),
                         ],
                       ),
-                      SizedBox(height: screenHeight * 0.02),
-                      mentorCards.isEmpty
-                          ? const Center(child: Text('No mentors available'))
-                          : Column(children: mentorCards),
-                      SizedBox(height: screenHeight * 0.03),
-                    ],
+                    );
+                  },
+                ),
+          bottomNavigationBar: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            color: Colors.white,
+            child: SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: isLoading ? null : enrollThisCourse,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                );
-              },
-            ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        color: Colors.white,
-        child: SizedBox(
-          width: double.infinity,
-          height: 50,
-          child: ElevatedButton(
-            onPressed: isLoading ? null : enrollThisCourse,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                child: isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text(
+                        "Enroll this Course",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
               ),
-              padding: const EdgeInsets.symmetric(vertical: 12),
             ),
-            child: isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
-                : const Text(
-                    "Enroll this Course",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 
   Widget _infoItem(IconData icon, String text, double screenHeight) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: screenHeight * 0.04),
-        SizedBox(height: screenHeight * 0.005),
+        Icon(icon, color: Colors.blue[600], size: 24),
+        SizedBox(height: 6),
         Text(
           text,
           style: TextStyle(
-            fontSize: screenHeight * 0.018,
-            fontWeight: FontWeight.normal,
+            fontSize: screenHeight * 0.016,
+            color: Colors.grey[700],
           ),
         ),
       ],
@@ -361,15 +368,22 @@ class _EnrollCourseState extends State<EnrollCourse> {
 
   Widget _bulletPoint(String text, double screenHeight) {
     return Padding(
-      padding: EdgeInsets.only(bottom: screenHeight * 0.005),
+      padding: EdgeInsets.symmetric(vertical: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("\u2022 ", style: TextStyle(fontSize: screenHeight * 0.018)),
+          Padding(
+            padding: EdgeInsets.only(top: 4, right: 8),
+            child: Icon(Icons.circle, size: 6, color: Colors.blue[600]),
+          ),
           Expanded(
             child: Text(
               text,
-              style: TextStyle(fontSize: screenHeight * 0.018),
+              style: TextStyle(
+                fontSize: screenHeight * 0.018,
+                color: Colors.black87,
+                height: 1.5,
+              ),
             ),
           ),
         ],
