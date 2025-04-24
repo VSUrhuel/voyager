@@ -56,6 +56,8 @@ class _AddCourseState extends State<AddCourse> {
     final GlobalKey<CoverPhotoPickerState> pickerKey = GlobalKey();
 
     return SafeArea(
+      bottom: true,
+      top: false,
         child: Scaffold(
             resizeToAvoidBottomInset: false,
             appBar: AppBar(

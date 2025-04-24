@@ -28,6 +28,8 @@ class AddMentor extends StatelessWidget {
     final GlobalKey<ProfilePickerState> profilePickerKey = GlobalKey();
 
     return SafeArea(
+      bottom: true,
+      top: false,
         child: Scaffold(
             resizeToAvoidBottomInset: false,
             appBar: AppBar(

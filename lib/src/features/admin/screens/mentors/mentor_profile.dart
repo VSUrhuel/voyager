@@ -60,7 +60,10 @@ class _MentorProfileState extends State<MentorProfile> {
 
     final theme = Theme.of(context);
     final formattedName = toTitleCase(userModel.accountApiName);
-    return AnnotatedRegion<SystemUiOverlayStyle>(
+    return SafeArea(
+      bottom: true,
+      top: false,
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
         statusBarColor: Colors.white,
         statusBarIconBrightness: Brightness.dark,
@@ -111,27 +114,27 @@ class _MentorProfileState extends State<MentorProfile> {
                                     fontWeight: FontWeight.bold),
                               ),
                             ),
-                            IconButton(
-                              icon: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: theme.primaryColor.withOpacity(0.1),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(Icons.edit,
-                                    color: theme.primaryColor,
-                                    size: screenHeight * 0.03),
-                              ),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  CustomPageRoute(
-                                      page: MentorInfo1(
-                                          mentorModel: mentorModel,
-                                          userModel: userModel)),
-                                );
-                              },
-                            ),
+                            // IconButton(
+                            //   icon: Container(
+                            //     padding: const EdgeInsets.all(8),
+                            //     decoration: BoxDecoration(
+                            //       color: theme.primaryColor.withOpacity(0.1),
+                            //       shape: BoxShape.circle,
+                            //     ),
+                            //     child: Icon(Icons.edit,
+                            //         color: theme.primaryColor,
+                            //         size: screenHeight * 0.03),
+                            //   ),
+                            //   onPressed: () {
+                            //     Navigator.push(
+                            //       context,
+                            //       CustomPageRoute(
+                            //           page: MentorInfo1(
+                            //               mentorModel: mentorModel,
+                            //               userModel: userModel)),
+                            //     );
+                            //   },
+                            // ),
                           ],
                         ),
 
@@ -268,6 +271,7 @@ class _MentorProfileState extends State<MentorProfile> {
               )
             ],
           )),
+    )
     );
   }
 

@@ -37,7 +37,10 @@ class _AdminProfileState extends State<AdminProfile> {
     String text,
     double screenWidth,
   ) {
-    return Padding(
+    return SafeArea(
+      bottom: true,
+      top: false,
+      child: Padding(
       padding: EdgeInsets.symmetric(vertical: screenWidth * 0.01),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,6 +62,7 @@ class _AdminProfileState extends State<AdminProfile> {
           ),
         ],
       ),
+    ),
     );
   }
 

@@ -54,7 +54,10 @@ class _CourseListState extends State<CourseList> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
+    return SafeArea(
+      top: false,
+      bottom: true,
+      child: Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle.dark,
@@ -257,6 +260,7 @@ class _CourseListState extends State<CourseList> {
           ),
         ],
       ),
-    );
+    )
+  );
   }
 }

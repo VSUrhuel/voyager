@@ -79,41 +79,6 @@ class _CourseDetailsState extends State<CourseDetails> {
     }
   }
 
-  // Future<void> _loadData() async {
-  //   setState(() => isLoading = true);
-  //   try {
-  //     // 1. Get all mentees for this course (accepted status)
-  //     final menteeList = await firestoreInstance.getMenteeAccountsForCourse(
-  //         widget.courseModel.docId, 'accepted');
-
-  //     // 2. For each courseMentor, get their specific mentees
-  //     List<MenteesOfMentor> mentorMenteesList = [];
-
-  //     for (var courseMentor in widget.courseMentors) {
-  //       // Get the mentor's user data
-  //       final mentorAccountId = await firestoreInstance.getMentorAccountId(courseMentor.mentorId);
-  //       final mentorUser = await firestoreInstance.getUserThroughAccId(mentorAccountId);
-
-  //       // Get mentees assigned to this specific courseMentor relationship
-  //       final mentees = await firestoreInstance.getMenteesThroughCourseMentor(courseMentor.courseMentorId);
-
-  //       mentorMenteesList.add(MenteesOfMentor(
-  //         mentees: mentees,
-  //         courseMentorId: courseMentor.courseMentorId,
-  //         mentorUser: mentorUser,
-  //       ));
-  //     }
-  //     setState(() {
-  //       allCourseMentees = menteeList;
-  //       menteesByMentor = mentorMenteesList;
-  //       isLoading = false;
-  //     });
-  //   } catch (e) {
-  //     setState(() => isLoading = false);
-  //     print('Error loading data: $e');
-  //   }
-  // }
-
   Future<void> _showCustomDialog(BuildContext context, MentorModel mentor,
       UserModel user, String courseId) async {
     final courseMentor = widget.courseMentors.firstWhere(
@@ -273,241 +238,15 @@ class _CourseDetailsState extends State<CourseDetails> {
     }
   }
 
-  // @override
-  // Widget build(BuildContext context) {
-  //   final screenWidth = MediaQuery.of(context).size.width;
-  //   final screenHeight = MediaQuery.of(context).size.height;
-
-  //   return Scaffold(
-  //     backgroundColor: Colors.white,
-  //     appBar: AppBar(
-  //       backgroundColor: Colors.white,
-  //       elevation: 1.0,
-  //       leading: IconButton(
-  //         icon: const Icon(Icons.arrow_back, color: Colors.black),
-  //         onPressed: () => Navigator.pop(context),
-  //       ),
-  //       title: const Text(
-  //         'Course Details',
-  //         style: TextStyle(
-  //           color: Colors.black,
-  //           fontWeight: FontWeight.normal,
-  //           fontSize: 18.0,
-  //         ),
-  //       ),
-  //       centerTitle: true,
-  //     ),
-  //     body: isLoading
-  //         ? const Center(child: CircularProgressIndicator())
-  //         : FutureBuilder<List<PickMentorCard>>(
-  //           future: fetchMentorsWithDetails(),
-  //           builder: (context, mentorCardSnapshot) {
-  //             if(mentorCardSnapshot.connectionState == ConnectionState.waiting) {
-  //               return const Center(child: CircularProgressIndicator());
-  //             }
-  //             final mentorCards = mentorCardSnapshot.data ?? [];
-  //         return SingleChildScrollView(
-  //             padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-  //             child: Column(
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: [
-  //                 Container(
-  //                   height: screenHeight * 0.25,
-  //                   width: double.infinity,
-  //                   decoration: BoxDecoration(
-  //                     image: DecorationImage(
-  //                       image: widget.courseModel.courseImgUrl.isEmpty
-  //                           ? AssetImage(
-  //                                   'assets/images/application_images/code.jpg')
-  //                               as ImageProvider
-  //                           : NetworkImage(widget.courseModel.courseImgUrl),
-  //                       fit: BoxFit.cover,
-  //                     ),
-  //                     borderRadius: BorderRadius.circular(10),
-  //                   ),
-  //                 ),
-  //                 SizedBox(height: screenHeight * 0.02),
-  //                 Container(
-  //                   padding: EdgeInsets.symmetric(
-  //                       vertical: screenHeight * 0.015,
-  //                       horizontal: screenWidth * 0.05),
-  //                   decoration: BoxDecoration(
-  //                     border: Border.all(color: Colors.black12),
-  //                     borderRadius: BorderRadius.circular(16),
-  //                   ),
-  //                   child: Row(
-  //                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                     children: [
-  //                       _infoItem(Icons.access_time, '1 Semester', screenHeight),
-  //                       _infoItem(
-  //                           Icons.groups,
-  //                           "${widget.courseMentors.length} Mentor(s)",
-  //                           screenHeight),
-  //                       _infoItem(Icons.people, "${allCourseMentees.length} Mentee(s)",
-  //                           screenHeight),
-  //                     ],
-  //                   ),
-  //                 ),
-  //                 SizedBox(height: screenHeight * 0.03),
-  //                 Text(
-  //                   "Course Title",
-  //                   style: TextStyle(
-  //                     fontWeight: FontWeight.bold,
-  //                     fontSize: screenHeight * 0.022,
-  //                   ),
-  //                 ),
-  //                 SizedBox(height: screenHeight * 0.005),
-  //                 Text(
-  //                   "${widget.courseModel.courseCode}: ${widget.courseModel.courseName}",
-  //                   style: TextStyle(fontSize: screenHeight * 0.018),
-  //                 ),
-  //                 SizedBox(height: screenHeight * 0.03),
-  //                 Text(
-  //                   "Description",
-  //                   style: TextStyle(
-  //                     fontWeight: FontWeight.bold,
-  //                     fontSize: screenHeight * 0.022,
-  //                   ),
-  //                 ),
-  //                 SizedBox(height: screenHeight * 0.005),
-  //                 Text(
-  //                   widget.courseModel.courseDescription,
-  //                   style: TextStyle(fontSize: screenHeight * 0.018),
-  //                 ),
-  //                 SizedBox(height: screenHeight * 0.03),
-  //                 Text(
-  //                   "What Mentees will Learn:",
-  //                   style: TextStyle(
-  //                     fontWeight: FontWeight.bold,
-  //                     fontSize: screenHeight * 0.022,
-  //                   ),
-  //                 ),
-  //                 SizedBox(height: screenHeight * 0.005),
-  //                 Column(
-  //                   crossAxisAlignment: CrossAxisAlignment.start,
-  //                   children: [
-  //                     for (int i = 0;
-  //                         widget.courseModel.courseDeliverables.length > i;
-  //                         i++)
-  //                       _bulletPoint(
-  //                           widget.courseModel.courseDeliverables[i], screenHeight),
-  //                   ],
-  //                 ),
-  //                 SizedBox(height: screenHeight * 0.03),
-  //                 Row(
-  //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                   children: [
-  //                     Text(
-  //                       "Assigned Mentors",
-  //                       style: TextStyle(
-  //                         fontWeight: FontWeight.bold,
-  //                         fontSize: screenHeight * 0.022,
-  //                       ),
-  //                     ),
-  //                     TextButton(
-  //                       onPressed: () {
-  //                         Navigator.push(context, MaterialPageRoute(
-  //                           builder: (context) => MentorList(),
-  //                         ));
-  //                       },
-  //                       child: Text(
-  //                         "Edit Mentors",
-  //                         style: TextStyle(
-  //                           color: Colors.blue,
-  //                           fontSize: screenHeight * 0.020,
-  //                           fontWeight: FontWeight.bold,
-  //                         ),
-  //                       ),
-  //                     ),
-  //                   ],
-  //                 ),
-  //                 SizedBox(height: screenHeight * 0.02),
-  //                  mentorCards.isEmpty
-  //                         ? const Center(child: Text('No mentors available'))
-  //                         : Column(children: mentorCards),
-  //                 // SingleChildScrollView(
-  //                 //   child: Padding(
-  //                 //     padding: EdgeInsets.only(
-  //                 //       left: screenWidth * 0.05,
-  //                 //       right: screenWidth * 0.05,
-  //                 //     ),
-  //                 //     child: Column(
-  //                 //       children: [
-  //                 //         if (widget.courseMentors.isEmpty)
-  //                 //           const Text('No mentors available')
-  //                 //         else
-  //                 //           for (var mentorData in menteesByMentor)
-  //                 //             Column(
-  //                 //               crossAxisAlignment: CrossAxisAlignment.start,
-  //                 //               children: [
-  //                 //                 PickMentorCard(mentorModel: mentorModel, user: user, isSelected: isSelected, onTap: onTap)
-  //                 //                 Row(
-  //                 //                   children: [
-  //                 //                     Text(
-  //                 //                       "Mentor: ",
-  //                 //                       style: TextStyle(
-  //                 //                         fontWeight: FontWeight.w800,
-  //                 //                         fontSize: screenHeight * 0.017,
-  //                 //                       ),
-  //                 //                     ),
-  //                 //                     Text(
-  //                 //                       mentorData.mentorUser.accountApiName,
-  //                 //                       style: TextStyle(
-  //                 //                         fontWeight: FontWeight.w500,
-  //                 //                         fontSize: screenHeight * 0.017,
-  //                 //                       ),
-  //                 //                     ),
-  //                 //                   ],
-  //                 //                 ),
-  //                 //                 SizedBox(height: screenHeight * 0.005),
-  //                 //                 Column(
-  //                 //                   crossAxisAlignment: CrossAxisAlignment.start,
-  //                 //                   children: [
-  //                 //                     Text(
-  //                 //                       "Mentees:",
-  //                 //                       style: TextStyle(
-  //                 //                         fontWeight: FontWeight.w800,
-  //                 //                         fontSize: screenHeight * 0.017,
-  //                 //                       ),
-  //                 //                     ),
-  //                 //                     if (mentorData.mentees.isEmpty)
-  //                 //                       Text(
-  //                 //                         'No mentees assigned',
-  //                 //                         style: TextStyle(fontSize: screenHeight * 0.017),
-  //                 //                       )
-  //                 //                     else
-  //                 //                       Column(
-  //                 //                         crossAxisAlignment: CrossAxisAlignment.start,
-  //                 //                         children: [
-  //                 //                           for (var mentee in mentorData.mentees)
-  //                 //                             _bulletPoint(mentee.accountApiName, screenHeight),
-  //                 //                         ],
-  //                 //                       ),
-  //                 //                   ],
-  //                 //                 ),
-  //                 //                 SizedBox(height: screenHeight * 0.02),
-  //                 //               ],
-  //                 //             ),
-  //                 //         SizedBox(height: 10),
-  //                 //       ],
-  //                 //     ),
-  //                 //   ),
-  //                 // ),
-  //                 SizedBox(height: screenHeight * 0.03),
-  //               ],
-  //             ),
-  //           );
-  //           }
-  //         ),
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
+    return SafeArea(
+      top: false,
+      bottom: true,
+      child: Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -696,6 +435,7 @@ class _CourseDetailsState extends State<CourseDetails> {
                 );
               },
             ),
+    )
     );
   }
 

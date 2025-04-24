@@ -10,7 +10,10 @@ class AdminSettings extends StatefulWidget {
 class _AdminSettingsState extends State<AdminSettings> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+      bottom: true,
+      top: false,
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Admin Settings'),
       ),
@@ -23,6 +26,7 @@ class _AdminSettingsState extends State<AdminSettings> {
           ],
         ),
       ),
+    )
     );
   }
 }
