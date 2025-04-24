@@ -12,26 +12,29 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Lottie.asset(
-            'assets/images/loading-plane.json',
-            width: MediaQuery.of(context).size.width * 0.7,
-            height: MediaQuery.of(context).size.width * 0.7,
-            repeat: true,
-          ),
-          const SizedBox(height: 10),
-          Lottie.asset(
-            'assets/images/loading.json',
-            width: MediaQuery.of(context).size.width * 0.3,
-            height: MediaQuery.of(context).size.width * 0.3,
-            repeat: true,
-          ),
-        ],
-      )),
-    );
+    return SafeArea(
+        bottom: true,
+        top: false,
+        child: Scaffold(
+          body: Center(
+              child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Lottie.asset(
+                'assets/images/loading-plane.json',
+                width: MediaQuery.of(context).size.width * 0.7,
+                height: MediaQuery.of(context).size.width * 0.7,
+                repeat: true,
+              ),
+              const SizedBox(height: 10),
+              Lottie.asset(
+                'assets/images/loading.json',
+                width: MediaQuery.of(context).size.width * 0.3,
+                height: MediaQuery.of(context).size.width * 0.3,
+                repeat: true,
+              ),
+            ],
+          )),
+        ));
   }
 }

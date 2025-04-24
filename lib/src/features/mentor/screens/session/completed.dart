@@ -5,11 +5,8 @@ import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/controller/schedule_conrtoller.dart';
 import 'package:voyager/src/features/mentor/model/schedule_model.dart';
-import 'package:voyager/src/features/mentor/screens/session/upcoming.dart';
-import 'package:voyager/src/features/mentor/widget/toggle_button.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/widgets/completed_sched_card.dart';
-import 'package:voyager/src/widgets/custom_page_route.dart';
 
 class CompletedSession extends StatefulWidget {
   const CompletedSession({super.key});

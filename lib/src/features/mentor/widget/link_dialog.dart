@@ -64,6 +64,24 @@ class LinkDialog extends StatelessWidget {
                   ElevatedButton(
                     child: const Text('Save'),
                     onPressed: () {
+                      if (urlController.text.contains('http') == false) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please enter a valid URL'),
+                          ),
+                        );
+                        return;
+                      }
+
+                      final uri = Uri.tryParse(urlController.text);
+                      if (uri == null || !uri.hasScheme) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please enter a valid URL'),
+                          ),
+                        );
+                        return;
+                      }
                       if (titleController.text.isNotEmpty &&
                           urlController.text.isNotEmpty) {
                         Navigator.of(context).pop(true);
