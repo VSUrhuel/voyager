@@ -11,6 +11,34 @@ Development of a Mobile-based Mentorship Application using Flutter for Computer 
 | VG.010.005            | 2025-04-12    |
 | VG.010.006            | 2025-04-15    |
 | VG.010.007            | 2025-04-21    |
+| VG.010.008            | 2025-04-24    |
+
+## VG.010.008 Release Notes
+**Admin Features**  
+- Added custome photos for admin's mentor card
+- Added safearea on dashboard for three interfaces
+- Fix bugs on coverphot, create of empty course, mentor pop-up, and number of mentees bugs
+- Improve UI in admin interface
+- Implemented darft view in mentors list
+  
+**Mentor Features**
+- UI improvement in mentor screen
+- Improve the native splash
+- Ensurve valid link and input checking
+- Added lottie files to improve UI
+- Fix bugs in the update of mentor information
+- Update mentee home interface
+- Improve UI of the splash screen when transitioning
+- Fix the functionality in the reject feature of a mentee
+- Add interface for error and encapsulate the screens on the scaffold
+
+ **Mentee Features**
+- Update course list and mentor list
+- Add refresh functionality on mentee home
+- Update course display logic
+- Improve interface in mentee UI
+- Update course card
+
 
 ## VG.010.007 Release Notes
 **Admin Features**  
