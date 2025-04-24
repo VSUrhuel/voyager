@@ -126,77 +126,81 @@ class _CourseOfferedState extends State<CourseOffered> {
     FirestoreInstance firestoreInstance = FirestoreInstance();
     User? user = FirebaseAuth.instance.currentUser;
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 1.0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: Text(
-          'Courses Offered',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.normal,
-            fontSize: 18.0,
+    return SafeArea(
+        bottom: true,
+        top: false,
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 1.0,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            title: Text(
+              'Courses Offered',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.normal,
+                fontSize: 18.0,
+              ),
+            ),
+            centerTitle: true,
           ),
-        ),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          NormalSearchbar(searchController: _searchController),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.only(
-                    left: screenWidth * 0.05, right: screenWidth * 0.05),
-                child: Center(
-                  child: FutureBuilder<List<CourseModel>>(
-                    future: fetchCoursesWithDetails(user?.email ?? ''),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      }
-                      if (snapshot.hasError ||
-                          !snapshot.hasData ||
-                          snapshot.data!.isEmpty) {
-                        return SingleChildScrollView(
-                          child: Padding(
-                            padding: EdgeInsets.only(
-                              top: 100.0,
-                              left: screenWidth * 0.05,
-                              right: screenWidth * 0.05,
-                            ),
-                            child: Center(
-                              child: Text(
-                                "No courses available",
-                                style: TextStyle(
-                                    fontSize: 16.0, color: Colors.grey),
+          body: Column(
+            children: [
+              NormalSearchbar(searchController: _searchController),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                        left: screenWidth * 0.05, right: screenWidth * 0.05),
+                    child: Center(
+                      child: FutureBuilder<List<CourseModel>>(
+                        future: fetchCoursesWithDetails(user?.email ?? ''),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(child: CircularProgressIndicator());
+                          }
+                          if (snapshot.hasError ||
+                              !snapshot.hasData ||
+                              snapshot.data!.isEmpty) {
+                            return SingleChildScrollView(
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                  top: 100.0,
+                                  left: screenWidth * 0.05,
+                                  right: screenWidth * 0.05,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    "No courses available",
+                                    style: TextStyle(
+                                        fontSize: 16.0, color: Colors.grey),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        );
-                      }
+                            );
+                          }
 
-                      return Column(
-                        children: List.generate(
-                          snapshot.data!.length,
-                          (index) => SmallCourseCard(
-                              courseModel: snapshot.data![index]),
-                        ),
-                      );
-                    },
+                          return Column(
+                            children: List.generate(
+                              snapshot.data!.length,
+                              (index) => SmallCourseCard(
+                                  courseModel: snapshot.data![index]),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
-    );
+        ));
   }
 }

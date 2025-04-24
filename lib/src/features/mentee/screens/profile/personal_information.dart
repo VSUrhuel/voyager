@@ -250,94 +250,97 @@ class _MenteePersonalInformationState extends State<MenteePersonalInformation> {
         : 'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/profile-picture/profile.png';
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.white,
-        statusBarIconBrightness: Brightness.dark,
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: CustomScrollView(
-          slivers: [
-            // Profile Header
-            SliverAppBar(
-              expandedHeight: screenHeight * 0.3,
-              floating: false,
-              pinned: true,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Image.network(
-                  imageUrl,
-                  fit: BoxFit.cover,
+        value: SystemUiOverlayStyle.dark.copyWith(
+          statusBarColor: Colors.white,
+          statusBarIconBrightness: Brightness.dark,
+        ),
+        child: SafeArea(
+          bottom: true,
+          top: false,
+          child: Scaffold(
+            backgroundColor: Colors.white,
+            body: CustomScrollView(
+              slivers: [
+                // Profile Header
+                SliverAppBar(
+                  expandedHeight: screenHeight * 0.3,
+                  floating: false,
+                  pinned: true,
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  backgroundColor: Colors.transparent,
                 ),
-              ),
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () => Navigator.pop(context),
-              ),
-              backgroundColor: Colors.transparent,
-            ),
 
-            // Main Content
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.all(screenWidth * 0.06),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Header with name and role
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                // Main Content
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.all(screenWidth * 0.06),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                userModel.accountApiName,
+                        // Header with name and role
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    userModel.accountApiName,
+                                    style: TextStyle(
+                                      fontSize: screenHeight * 0.028,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    userModel.accountApiEmail,
+                                    style: TextStyle(
+                                      color: Colors.grey[500],
+                                      fontSize: screenHeight * 0.018,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.indigo.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Text(
+                                "Mentee",
                                 style: TextStyle(
-                                  fontSize: screenHeight * 0.028,
+                                  color: Color(0xFF1877F2),
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              Text(
-                                userModel.accountApiEmail,
-                                style: TextStyle(
-                                  color: Colors.grey[500],
-                                  fontSize: screenHeight * 0.018,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.indigo.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: const Text(
-                            "Mentee",
-                            style: TextStyle(
-                              color: Color(0xFF1877F2),
-                              fontWeight: FontWeight.bold,
                             ),
-                          ),
+                          ],
                         ),
+
+                        SizedBox(height: screenHeight * 0.02),
+
+                        _buildAdminCardInfo(context),
+
+                        SizedBox(height: screenHeight * 0.04),
                       ],
                     ),
-
-                    SizedBox(height: screenHeight * 0.02),
-
-                    _buildAdminCardInfo(context),
-
-                    SizedBox(height: screenHeight * 0.04),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+          ),
+        ));
   }
 }

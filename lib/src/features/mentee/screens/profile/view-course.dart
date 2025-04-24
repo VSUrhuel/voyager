@@ -512,179 +512,185 @@ class _ViewCourseState extends State<ViewCourse> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: Colors.black87),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Course Details',
-          style: TextStyle(
-            color: Colors.black87,
-            fontWeight: FontWeight.w600,
-            fontSize: 18.0,
+    return SafeArea(
+        bottom: true,
+        top: false,
+        child: Scaffold(
+          backgroundColor: Colors.grey[50],
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_rounded, color: Colors.black87),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: Text(
+              'Course Details',
+              style: TextStyle(
+                color: Colors.black87,
+                fontWeight: FontWeight.w600,
+                fontSize: 18.0,
+              ),
+            ),
+            centerTitle: true,
           ),
-        ),
-        centerTitle: true,
-      ),
-      body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blue)))
-          : FutureBuilder<List<PickMentorCard>>(
-              future: fetchMentorsWithDetails(),
-              builder: (context, mentorCardSnapshot) {
-                if (mentorCardSnapshot.connectionState ==
-                    ConnectionState.waiting) {
-                  return const Center(
-                      child: CircularProgressIndicator(
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.blue)));
-                }
-                final mentorCards = mentorCardSnapshot.data ?? [];
-                return SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.04, vertical: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Course Image
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          height: screenHeight * 0.25,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                          ),
-                          child: widget.courseModel.courseImgUrl.isEmpty
-                              ? Image.asset(
-                                  'assets/images/application_images/code.jpg',
-                                  fit: BoxFit.cover)
-                              : Image.network(widget.courseModel.courseImgUrl,
-                                  fit: BoxFit.cover),
-                        ),
-                      ),
-
-                      SizedBox(height: screenHeight * 0.025),
-
-                      // Stats Card
-                      Container(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 8,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _infoItem(Icons.schedule_rounded, '1 Semester',
-                                screenHeight),
-                            _infoItem(
-                                Icons.groups_rounded,
-                                "${widget.courseMentors.length} ${widget.courseMentors.length > 1 ? 'Mentors' : 'Mentor'}",
-                                screenHeight),
-                            _infoItem(
-                                Icons.people_alt_rounded,
-                                "${allCourseMentees.length} ${allCourseMentees.length > 1 ? 'Mentees' : 'Mentee'}",
-                                screenHeight),
-                          ],
-                        ),
-                      ),
-
-                      SizedBox(height: screenHeight * 0.03),
-
-                      // Course Title Section
-                      _buildSectionTitle("Course Title"),
-                      SizedBox(height: 8),
-                      Text(
-                        "${widget.courseModel.courseCode}: ${widget.courseModel.courseName}",
-                        style: TextStyle(
-                          fontSize: screenHeight * 0.018,
-                          color: Colors.black87,
-                        ),
-                      ),
-
-                      SizedBox(height: screenHeight * 0.03),
-
-                      // Description Section
-                      _buildSectionTitle("Description"),
-                      SizedBox(height: 8),
-                      Text(
-                        widget.courseModel.courseDescription,
-                        style: TextStyle(
-                          fontSize: screenHeight * 0.018,
-                          color: Colors.black87,
-                          height: 1.5,
-                        ),
-                      ),
-
-                      SizedBox(height: screenHeight * 0.03),
-
-                      // Learning Outcomes Section
-                      _buildSectionTitle("What Mentees will Learn"),
-                      SizedBox(height: 8),
-                      Column(
+          body: isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.blue)))
+              : FutureBuilder<List<PickMentorCard>>(
+                  future: fetchMentorsWithDetails(),
+                  builder: (context, mentorCardSnapshot) {
+                    if (mentorCardSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const Center(
+                          child: CircularProgressIndicator(
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.blue)));
+                    }
+                    final mentorCards = mentorCardSnapshot.data ?? [];
+                    return SingleChildScrollView(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: screenWidth * 0.04, vertical: 16),
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          for (int i = 0;
-                              i < widget.courseModel.courseDeliverables.length;
-                              i++)
-                            _bulletPoint(
-                                widget.courseModel.courseDeliverables[i],
-                                screenHeight),
-                        ],
-                      ),
-
-                      SizedBox(height: screenHeight * 0.03),
-
-                      // Mentors Section Header
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _buildSectionTitle("Your Mentor"),
-                        ],
-                      ),
-
-                      SizedBox(height: screenHeight * 0.02),
-
-                      // Mentors List
-                      mentorCards.isEmpty
-                          ? Container(
-                              padding: EdgeInsets.symmetric(vertical: 24),
+                          // Course Image
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              height: screenHeight * 0.25,
+                              width: double.infinity,
                               decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
+                                color: Colors.grey[200],
                               ),
-                              child: Center(
-                                child: Text(
-                                  'No mentors available',
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 16,
-                                  ),
+                              child: widget.courseModel.courseImgUrl.isEmpty
+                                  ? Image.asset(
+                                      'assets/images/application_images/code.jpg',
+                                      fit: BoxFit.cover)
+                                  : Image.network(
+                                      widget.courseModel.courseImgUrl,
+                                      fit: BoxFit.cover),
+                            ),
+                          ),
+
+                          SizedBox(height: screenHeight * 0.025),
+
+                          // Stats Card
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 16, horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 2),
                                 ),
-                              ),
-                            )
-                          : Column(children: mentorCards),
-                    ],
-                  ),
-                );
-              },
-            ),
-    );
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                _infoItem(Icons.schedule_rounded, '1 Semester',
+                                    screenHeight),
+                                _infoItem(
+                                    Icons.groups_rounded,
+                                    "${widget.courseMentors.length} ${widget.courseMentors.length > 1 ? 'Mentors' : 'Mentor'}",
+                                    screenHeight),
+                                _infoItem(
+                                    Icons.people_alt_rounded,
+                                    "${allCourseMentees.length} ${allCourseMentees.length > 1 ? 'Mentees' : 'Mentee'}",
+                                    screenHeight),
+                              ],
+                            ),
+                          ),
+
+                          SizedBox(height: screenHeight * 0.03),
+
+                          // Course Title Section
+                          _buildSectionTitle("Course Title"),
+                          SizedBox(height: 8),
+                          Text(
+                            "${widget.courseModel.courseCode}: ${widget.courseModel.courseName}",
+                            style: TextStyle(
+                              fontSize: screenHeight * 0.018,
+                              color: Colors.black87,
+                            ),
+                          ),
+
+                          SizedBox(height: screenHeight * 0.03),
+
+                          // Description Section
+                          _buildSectionTitle("Description"),
+                          SizedBox(height: 8),
+                          Text(
+                            widget.courseModel.courseDescription,
+                            style: TextStyle(
+                              fontSize: screenHeight * 0.018,
+                              color: Colors.black87,
+                              height: 1.5,
+                            ),
+                          ),
+
+                          SizedBox(height: screenHeight * 0.03),
+
+                          // Learning Outcomes Section
+                          _buildSectionTitle("What Mentees will Learn"),
+                          SizedBox(height: 8),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              for (int i = 0;
+                                  i <
+                                      widget.courseModel.courseDeliverables
+                                          .length;
+                                  i++)
+                                _bulletPoint(
+                                    widget.courseModel.courseDeliverables[i],
+                                    screenHeight),
+                            ],
+                          ),
+
+                          SizedBox(height: screenHeight * 0.03),
+
+                          // Mentors Section Header
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _buildSectionTitle("Your Mentor"),
+                            ],
+                          ),
+
+                          SizedBox(height: screenHeight * 0.02),
+
+                          // Mentors List
+                          mentorCards.isEmpty
+                              ? Container(
+                                  padding: EdgeInsets.symmetric(vertical: 24),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      'No mentors available',
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : Column(children: mentorCards),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+        ));
   }
 
   Widget _buildSectionTitle(String text) {

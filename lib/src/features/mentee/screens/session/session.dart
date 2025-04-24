@@ -10,55 +10,58 @@ class Session extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    return Scaffold(
-      appBar: AppBar(
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
-        scrolledUnderElevation: 0,
-        backgroundColor: Colors.transparent,
-        automaticallyImplyLeading: false,
-        toolbarHeight: screenHeight * 0.10,
-        titleTextStyle: TextStyle(
-          color: Colors.black,
-          fontSize: screenWidth * 0.06,
-          fontWeight: FontWeight.bold,
-        ),
-        elevation: 0, // No shadow
-        title: Text(
-          'My Sessions',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: screenWidth * 0.07,
-            fontWeight: FontWeight.bold,
+    return SafeArea(
+        bottom: true,
+        top: false,
+        child: Scaffold(
+          appBar: AppBar(
+            systemOverlayStyle: SystemUiOverlayStyle.dark,
+            scrolledUnderElevation: 0,
+            backgroundColor: Colors.transparent,
+            automaticallyImplyLeading: false,
+            toolbarHeight: screenHeight * 0.10,
+            titleTextStyle: TextStyle(
+              color: Colors.black,
+              fontSize: screenWidth * 0.06,
+              fontWeight: FontWeight.bold,
+            ),
+            elevation: 0, // No shadow
+            title: Text(
+              'My Sessions',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: screenWidth * 0.07,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(
+                    right: 16.0), // Add padding to the right
+                child: CircleAvatar(
+                    backgroundColor: Colors.grey[200],
+                    child: IconButton(
+                      icon: Icon(Icons.calendar_month, color: Colors.black),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MenteeCalendarView()),
+                        );
+                      },
+                    )),
+              ),
+            ],
           ),
-        ),
-        actions: [
-          Padding(
-            padding:
-                const EdgeInsets.only(right: 16.0), // Add padding to the right
-            child: CircleAvatar(
-                backgroundColor: Colors.grey[200],
-                child: IconButton(
-                  icon: Icon(Icons.calendar_month, color: Colors.black),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => MenteeCalendarView()),
-                    );
-                  },
-                )),
-          ),
-        ],
-      ),
-      body: Center(
-          child: Padding(
-              padding: EdgeInsets.only(
-                  left: screenWidth * 0.06,
-                  right: screenWidth * 0.05,
-                  top: screenHeight * 0.00),
-              child: Column(children: [
-                MenteeToggle(), // Updated to use MenteeToggle
-              ]))),
-    );
+          body: Center(
+              child: Padding(
+                  padding: EdgeInsets.only(
+                      left: screenWidth * 0.06,
+                      right: screenWidth * 0.05,
+                      top: screenHeight * 0.00),
+                  child: Column(children: [
+                    MenteeToggle(), // Updated to use MenteeToggle
+                  ]))),
+        ));
   }
 }
