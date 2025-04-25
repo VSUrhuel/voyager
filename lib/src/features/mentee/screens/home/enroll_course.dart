@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:lottie/lottie.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
@@ -321,6 +322,12 @@ class _EnrollCourseState extends State<EnrollCourse> {
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
             child: isLoading
+                ? Lottie.asset(
+                    'assets/images/loading.json',
+                    fit: BoxFit.cover,
+                    width: screenHeight * 0.08,
+                    height: screenWidth * 0.04,
+                    repeat: true,
                 ? Lottie.asset(
                     'assets/images/loading.json',
                     fit: BoxFit.cover,
