@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lottie/lottie.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
@@ -7,7 +8,7 @@ import 'package:voyager/src/features/mentee/controller/notification_controller.d
 import 'package:voyager/src/features/mentee/model/course_model.dart';
 import 'package:voyager/src/features/mentee/screens/profile/view-course.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
-import 'package:voyager/src/widgets/custom_page_route.dart'; // Make sure this is correct
+import 'package:voyager/src/widgets/custom_page_route.dart';
 
 class MenteePersonalInformation extends StatefulWidget {
   const MenteePersonalInformation({
@@ -23,9 +24,10 @@ class MenteePersonalInformation extends StatefulWidget {
 
 class _MenteePersonalInformationState extends State<MenteePersonalInformation> {
   late UserModel userModel;
-  final firestore = FirestoreInstance(); // Add this if you have not already
+  final firestore = FirestoreInstance();
   List<CourseModel> enrolledCourses = [];
   List<CourseMentorModel> courseMentorModels = [];
+  bool isLoadingCourses = true;
 
   @override
   void initState() {
@@ -47,10 +49,43 @@ class _MenteePersonalInformationState extends State<MenteePersonalInformation> {
     }
   }
 
+  String formatName(String fullName) {
+    if (fullName.isEmpty) return "John Doe";
+
+    fullName = fullName.trim().replaceAll(RegExp(r'\s+'), ' ');
+    List<String> nameParts = fullName.split(" ");
+
+    if (nameParts.isEmpty) return "John Doe";
+
+    List<String> givenNames =
+        nameParts.length >= 2 ? nameParts.sublist(0, 2) : [nameParts.first];
+
+    String? lastName = nameParts.length > 1 ? nameParts.last : null;
+
+    List<String> formattedParts = givenNames
+        .map((name) => name.isNotEmpty
+            ? name[0].toUpperCase() + name.substring(1).toLowerCase()
+            : "")
+        .toList();
+
+    if (lastName != null && !givenNames.contains(lastName)) {
+      formattedParts.add(
+        lastName[0].toUpperCase() + lastName.substring(1).toLowerCase(),
+      );
+    }
+
+    String formattedName = formattedParts.join(" ").trim();
+
+    return formattedName.isNotEmpty ? formattedName : "John Doe";
+  }
+
   Future<void> fetchEnrolledCourses() async {
+    setState(() {
+      isLoadingCourses = true;
+    });
+
     try {
       final userEmail = userModel.accountApiEmail;
-      print("❌ Error fetching enrolled courses: $userEmail");
       final notificationController = NotificationController();
       final userId =
           await notificationController.getUserIdThroughEmail(userEmail);
@@ -60,6 +95,7 @@ class _MenteePersonalInformationState extends State<MenteePersonalInformation> {
       if (courseMentorIds.isEmpty) {
         setState(() {
           enrolledCourses = [];
+          isLoadingCourses = false;
         });
         return;
       }
@@ -74,16 +110,19 @@ class _MenteePersonalInformationState extends State<MenteePersonalInformation> {
         }
       }
 
-      // Remove duplicates, if any
       final uniqueCourses = {
         for (var course in fetchedCourses) course.docId: course
       }.values.toList();
 
       setState(() {
         enrolledCourses = uniqueCourses;
+        isLoadingCourses = false;
       });
     } catch (e) {
       print("❌ Error fetching enrolled courses: $e");
+      setState(() {
+        isLoadingCourses = false;
+      });
     }
   }
 
@@ -154,10 +193,8 @@ class _MenteePersonalInformationState extends State<MenteePersonalInformation> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Header
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Icon(
                   Icons.school,
@@ -175,9 +212,18 @@ class _MenteePersonalInformationState extends State<MenteePersonalInformation> {
                 ),
               ],
             ),
-
-            // Course List
-            if (enrolledCourses.isEmpty)
+            if (isLoadingCourses)
+              Padding(
+                padding: EdgeInsets.only(top: screenHeight * 0.03),
+                child: Lottie.asset(
+                  'assets/images/loading.json',
+                  fit: BoxFit.cover,
+                  width: screenHeight * 0.08,
+                  height: screenWidth * 0.2,
+                  repeat: true,
+                ),
+              )
+            else if (enrolledCourses.isEmpty)
               Padding(
                 padding: EdgeInsets.only(top: screenHeight * 0.02),
                 child: Text(
@@ -194,7 +240,6 @@ class _MenteePersonalInformationState extends State<MenteePersonalInformation> {
               ConstrainedBox(
                 constraints: BoxConstraints(
                   maxHeight: screenHeight * 0.4,
-                  minHeight: screenHeight * 0,
                 ),
                 child: ListView.separated(
                   itemCount: enrolledCourses.length,
@@ -211,7 +256,7 @@ class _MenteePersonalInformationState extends State<MenteePersonalInformation> {
                       ),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(30), // Oval shape
+                        borderRadius: BorderRadius.circular(30),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.3),
@@ -250,97 +295,92 @@ class _MenteePersonalInformationState extends State<MenteePersonalInformation> {
         : 'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/profile-picture/profile.png';
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.dark.copyWith(
-          statusBarColor: Colors.white,
-          statusBarIconBrightness: Brightness.dark,
-        ),
-        child: SafeArea(
-          bottom: true,
-          top: false,
-          child: Scaffold(
-            backgroundColor: Colors.white,
-            body: CustomScrollView(
-              slivers: [
-                // Profile Header
-                SliverAppBar(
-                  expandedHeight: screenHeight * 0.3,
-                  floating: false,
-                  pinned: true,
-                  flexibleSpace: FlexibleSpaceBar(
-                    background: Image.network(
-                      imageUrl,
-                      fit: BoxFit.cover,
-                    ),
+      value: SystemUiOverlayStyle.dark.copyWith(
+        statusBarColor: Colors.white,
+        statusBarIconBrightness: Brightness.dark,
+      ),
+      child: SafeArea(
+        bottom: true,
+        top: false,
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                expandedHeight: screenHeight * 0.3,
+                floating: false,
+                pinned: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
                   ),
-                  leading: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  backgroundColor: Colors.transparent,
                 ),
-
-                // Main Content
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.all(screenWidth * 0.06),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Header with name and role
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    userModel.accountApiName,
-                                    style: TextStyle(
-                                      fontSize: screenHeight * 0.028,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                backgroundColor: Colors.transparent,
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.all(screenWidth * 0.06),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  formatName(
+                                      userModel.accountApiName.toUpperCase()),
+                                  style: TextStyle(
+                                    fontSize: screenHeight * 0.028,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  Text(
-                                    userModel.accountApiEmail,
-                                    style: TextStyle(
-                                      color: Colors.grey[500],
-                                      fontSize: screenHeight * 0.018,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: Colors.indigo.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: const Text(
-                                "Mentee",
-                                style: TextStyle(
-                                  color: Color(0xFF1877F2),
-                                  fontWeight: FontWeight.bold,
                                 ),
+                                Text(
+                                  userModel.accountApiEmail,
+                                  style: TextStyle(
+                                    color: Colors.grey[500],
+                                    fontSize: screenHeight * 0.018,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.indigo.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text(
+                              "Mentee",
+                              style: TextStyle(
+                                color: Color(0xFF1877F2),
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ],
-                        ),
-
-                        SizedBox(height: screenHeight * 0.02),
-
-                        _buildAdminCardInfo(context),
-
-                        SizedBox(height: screenHeight * 0.04),
-                      ],
-                    ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: screenHeight * 0.02),
+                      _buildAdminCardInfo(context),
+                      SizedBox(height: screenHeight * 0.04),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

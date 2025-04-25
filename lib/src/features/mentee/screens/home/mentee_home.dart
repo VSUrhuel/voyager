@@ -183,11 +183,35 @@ class _MenteeHomeState extends State<MenteeHome> {
   }
 
   String getName(String? name) {
+    print("❌ Name: $name");
     if (name == null || name.isEmpty) return "User";
     List<String> names = name.split(' ');
     return names.length > 1
         ? names.sublist(0, names.length - 1).join(' ')
         : name;
+  }
+
+  String formatName(String fullName) {
+    if (fullName.isEmpty) return "John Doe";
+
+    // Trim and remove extra spaces
+    fullName = fullName.trim().replaceAll(RegExp(r'\s+'), ' ');
+    List<String> nameParts = fullName.split(" ");
+
+    if (nameParts.isEmpty) return "John Doe";
+
+    // Take only the first one or two given names
+    List<String> givenNames =
+        nameParts.length >= 2 ? nameParts.sublist(0, 2) : [nameParts.first];
+
+    // Format: Capitalize first letter only
+    String formattedName = givenNames
+        .map((name) => name.isNotEmpty
+            ? name[0].toUpperCase() + name.substring(1).toLowerCase()
+            : "")
+        .join(" ");
+
+    return formattedName.trim().isNotEmpty ? formattedName.trim() : "John Doe";
   }
 
   @override
@@ -225,7 +249,7 @@ class _MenteeHomeState extends State<MenteeHome> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Hello, ${getName(user?.displayName)}!',
+                      'Hello, ${formatName(getName(user?.displayName))}!',
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 18,
@@ -307,7 +331,7 @@ class _MenteeHomeState extends State<MenteeHome> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Featured Courses',
+                            'Courses',
                             style: TextStyle(
                               fontSize: screenHeight * 0.02,
                               fontWeight: FontWeight.bold,
@@ -334,7 +358,15 @@ class _MenteeHomeState extends State<MenteeHome> {
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return Center(child: CircularProgressIndicator());
+                            return Center(
+                              child: Lottie.asset(
+                                'assets/images/loading.json',
+                                fit: BoxFit.cover,
+                                width: screenHeight * 0.08,
+                                height: screenWidth * 0.04,
+                                repeat: true,
+                              ),
+                            );
                           }
                           if (snapshot.hasError ||
                               !snapshot.hasData ||
@@ -351,7 +383,7 @@ class _MenteeHomeState extends State<MenteeHome> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Featured Mentors',
+                            'Mentors',
                             style: TextStyle(
                               fontSize: screenHeight * 0.02,
                               fontWeight: FontWeight.bold,
@@ -378,7 +410,15 @@ class _MenteeHomeState extends State<MenteeHome> {
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return Center(child: CircularProgressIndicator());
+                            return Center(
+                              child: Lottie.asset(
+                                'assets/images/loading.json',
+                                fit: BoxFit.cover,
+                                width: screenHeight * 0.08,
+                                height: screenWidth * 0.04,
+                                repeat: true,
+                              ),
+                            );
                           }
                           if (snapshot.hasError ||
                               !snapshot.hasData ||

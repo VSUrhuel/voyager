@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/mentee/screens/profile/mentee_about.dart';
 import 'package:voyager/src/features/mentee/screens/profile/mentee_security_password.dart';
@@ -50,12 +51,15 @@ class _MenteeProfileState extends State<MenteeProfile> {
         child: Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
+            systemOverlayStyle: SystemUiOverlayStyle.dark,
+            scrolledUnderElevation: 0,
+            toolbarHeight: screenHeight * 0.08,
             backgroundColor: Colors.white,
             elevation: 0,
+            automaticallyImplyLeading: false,
             title: Padding(
               padding: EdgeInsets.only(
-                top: screenHeight * 0.035,
-                left: screenHeight * 0.01,
+                top: screenHeight * 0.02,
               ),
               child: Text(
                 'My Profile',
@@ -80,7 +84,7 @@ class _MenteeProfileState extends State<MenteeProfile> {
               : SingleChildScrollView(
                   child: Column(
                   children: [
-                    SizedBox(height: screenHeight * 0.025),
+                    SizedBox(height: screenHeight * 0.01),
                     Profile(role: 'mentee'),
                     SizedBox(height: screenHeight * 0.03),
                     Row(

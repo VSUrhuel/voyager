@@ -98,7 +98,7 @@ class _MenteeSessionCompletedState extends State<MenteeSessionCompleted> {
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Lottie.asset(
                 'assets/images/empty-session.json',
@@ -177,7 +177,7 @@ class _MenteeSessionCompletedState extends State<MenteeSessionCompleted> {
     }
 
     return SizedBox(
-      height: screenHeight * 0.65,
+      height: screenHeight * 0.53,
       child: content,
     );
   }
