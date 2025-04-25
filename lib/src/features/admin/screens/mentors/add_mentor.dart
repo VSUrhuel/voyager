@@ -288,73 +288,63 @@ class AddMentor extends StatelessWidget {
                           isLoading: false,
                           borderColor: Colors.transparent,
                           onPressed: () async {
-                            // Capture context and other needed references at the start
                             final currentContext = context;
-                            final messenger =
-                                ScaffoldMessenger.of(currentContext);
-                            final navigator = Navigator.of(currentContext);
-
+                            final messenger = ScaffoldMessenger.of(currentContext);
+                            
                             if(createMentorController.studentID.text.isNotEmpty &&
-                                createMentorController.fullName.text.isNotEmpty &&
-                                createMentorController.email.text.isNotEmpty &&
-                                createMentorController.password.text.isNotEmpty) {
+                              createMentorController.fullName.text.isNotEmpty &&
+                              createMentorController.email.text.isNotEmpty &&
+                              createMentorController.password.text.isNotEmpty) {
                               
-                                  try {
-                              showDialog(
-                                context: currentContext,
-                                barrierDismissible: false,
-                                builder: (_) => const Center(
-                                    child: CircularProgressIndicator()),
-                              );
+                              try {
+                                // Show loading dialog
+                                showDialog(
+                                  context: currentContext,
+                                  barrierDismissible: false,
+                                  builder: (_) => const Center(child: CircularProgressIndicator()),
+                                );
 
-                              if (await createMentorController.registerUser()) {
-                                courseMentorController.mentorId.text =
-                                    createMentorController.email.text;
-                              if(courseMentorController.courseId.text.isNotEmpty){
-                                await courseMentorController
-                                    .createInitialCourseMentor();
-                              }
-                                courseController.allCourses.clear();
-                                courseMentorController.courseId.clear();
-                                courseMentorController.mentorId.clear();
-                                createMentorController.studentID.clear();
-                                createMentorController.fullName.clear();
-                                createMentorController.email.clear();
-                                createMentorController.password.clear();
-                                profilePickerKey.currentState?.resetImage();
+                                if (await createMentorController.registerUser()) {
+                                  courseMentorController.mentorId.text = createMentorController.email.text;
+                                  
+                                  if(courseMentorController.courseId.text.isNotEmpty) {
+                                    await courseMentorController.createInitialCourseMentor();
+                                  }
+                                  
+                                  // Clear all fields
+                                  courseController.allCourses.clear();
+                                  courseMentorController.courseId.clear();
+                                  courseMentorController.mentorId.clear();
+                                  createMentorController.studentID.clear();
+                                  createMentorController.fullName.clear();
+                                  createMentorController.email.clear();
+                                  createMentorController.password.clear();
+                                  profilePickerKey.currentState?.resetImage();
 
+                                  if (currentContext.mounted) {
+                                    Navigator.of(currentContext).pop();
+                                    
+                                    messenger.showSnackBar(
+                                      SnackBar(content: Text('Mentor added successfully')),
+                                    );
+                                    
+                                    Navigator.of(currentContext).pop(); 
+                                  }
+                                }
+                              } catch (e) {
                                 if (currentContext.mounted) {
-                                  messenger.showSnackBar(
-                                    SnackBar(
-                                        content:
-                                            Text('Mentor added successfully')),
-                                  );
-
                                   Navigator.of(currentContext).pop();
                                 }
+                                
+                                messenger.showSnackBar(
+                                  SnackBar(content: Text('Error: ${e.toString()}')),
+                                );
                               }
-
-                              // navigator.pushAndRemoveUntil(
-                              //   MaterialPageRoute(builder: (_) => AdminDashboard()),
-                              //   (route) => false,
-                              // );
-                            } catch (e) {
-                              messenger.showSnackBar(
-                                SnackBar(
-                                    content: Text('Error: ${e.toString()}')),
-                              );
-                            } finally {
-                              // Safely pop dialog if context is still valid
-                            }
                             } else {
                               messenger.showSnackBar(
-                                SnackBar(
-                                    content: Text('Please fill in necessary fields')),
-
+                                SnackBar(content: Text('Please fill in necessary fields')),
                               );
-                              return;
                             }
-                            
                           },
                         ),
                       ]),
