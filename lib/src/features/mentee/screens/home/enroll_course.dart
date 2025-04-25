@@ -234,112 +234,114 @@ class _EnrollCourseState extends State<EnrollCourse> {
                               builder: (context, menteeSnapshot) {
                                 final totalMentee = menteeSnapshot.data ?? 0;
 
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                _infoItem(Icons.access_time, '1 Semester',
-                                    screenHeight),
-                                _infoItem(
-                                    Icons.groups,
-                                    "${fetchedUsers.length} ${fetchedUsers.length == 1 ? 'Mentor' : 'Mentors'}",
-                                    screenHeight),
-                                _infoItem(
-                                    Icons.people,
-                                    "$totalMentee ${totalMentee == 1 ? 'Mentee' : 'Mentees'}",
-                                    screenHeight),
-                              ],
-                            );
-                          },
-                        ),
-                      ),
-                      SizedBox(height: screenHeight * 0.03),
-                      Text(
-                        "Description",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: screenHeight * 0.022,
-                        ),
-                      ),
-                      SizedBox(height: screenHeight * 0.005),
-                      Text(
-                        widget.courseModel.courseDescription,
-                        style: TextStyle(fontSize: screenHeight * 0.018),
-                      ),
-                      SizedBox(height: screenHeight * 0.03),
-                      Text(
-                        "What You'll Learn:",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: screenHeight * 0.022,
-                        ),
-                      ),
-                      SizedBox(height: screenHeight * 0.005),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          for (final deliverable
-                              in widget.courseModel.courseDeliverables)
-                            _bulletPoint(deliverable, screenHeight),
-                        ],
-                      ),
-                      SizedBox(height: screenHeight * 0.03),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
+                                return Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    _infoItem(Icons.access_time, '1 Semester',
+                                        screenHeight),
+                                    _infoItem(
+                                        Icons.groups,
+                                        "${fetchedUsers.length} ${fetchedUsers.length == 1 ? 'Mentor' : 'Mentors'}",
+                                        screenHeight),
+                                    _infoItem(
+                                        Icons.people,
+                                        "$totalMentee ${totalMentee == 1 ? 'Mentee' : 'Mentees'}",
+                                        screenHeight),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                          SizedBox(height: screenHeight * 0.03),
                           Text(
-                            "Pick your Mentor",
+                            "Description",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: screenHeight * 0.022,
                             ),
                           ),
+                          SizedBox(height: screenHeight * 0.005),
+                          Text(
+                            widget.courseModel.courseDescription,
+                            style: TextStyle(fontSize: screenHeight * 0.018),
+                          ),
+                          SizedBox(height: screenHeight * 0.03),
+                          Text(
+                            "What You'll Learn:",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: screenHeight * 0.022,
+                            ),
+                          ),
+                          SizedBox(height: screenHeight * 0.005),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              for (final deliverable
+                                  in widget.courseModel.courseDeliverables)
+                                _bulletPoint(deliverable, screenHeight),
+                            ],
+                          ),
+                          SizedBox(height: screenHeight * 0.03),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Pick your Mentor",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: screenHeight * 0.022,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: screenHeight * 0.01),
+                          mentorCards.isEmpty
+                              ? const Center(
+                                  child: Text('No mentors available'))
+                              : Column(children: mentorCards),
+                          SizedBox(height: screenHeight * 0.02),
                         ],
                       ),
-                      SizedBox(height: screenHeight * 0.01),
-                      mentorCards.isEmpty
-                          ? const Center(child: Text('No mentors available'))
-                          : Column(children: mentorCards),
-                      SizedBox(height: screenHeight * 0.02),
-                    ],
+                    );
+                  },
+                ),
+          bottomNavigationBar: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            color: Colors.white,
+            child: SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: isLoading ? null : enrollThisCourse,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                );
-              },
-            ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        color: Colors.white,
-        child: SizedBox(
-          width: double.infinity,
-          height: 50,
-          child: ElevatedButton(
-            onPressed: isLoading ? null : enrollThisCourse,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                child: isLoading
+                    ? Lottie.asset(
+                        'assets/images/loading.json',
+                        fit: BoxFit.cover,
+                        width: screenHeight * 0.08,
+                        height: screenWidth * 0.04,
+                        repeat: true,
+                      )
+                    : const Text(
+                        "Enroll this Course",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
               ),
-              padding: const EdgeInsets.symmetric(vertical: 12),
             ),
-            child: isLoading
-                ? Lottie.asset(
-                    'assets/images/loading.json',
-                    fit: BoxFit.cover,
-                    width: screenHeight * 0.08,
-                    height: screenWidth * 0.04,
-                    repeat: true,
-                  )
-                : const Text(
-                    "Enroll this Course",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 
   Widget _infoItem(IconData icon, String text, double screenHeight) {
