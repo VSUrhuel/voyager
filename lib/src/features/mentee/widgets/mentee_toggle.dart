@@ -64,7 +64,7 @@ class _MenteeToggleState extends State<MenteeToggle> {
       ),
       const SizedBox(height: 5),
       Text(
-        'Regular schedule is not yet included in this list. To view your regular schedule, please check the calendar.',
+        'Please note that your regular schedule is not included in this list. To view your regular schedule, kindly check the calendar..',
         style: TextStyle(
           color: Colors.black,
           fontSize: screenWidth * 0.025,
