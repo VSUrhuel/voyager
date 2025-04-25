@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/admin/controllers/course_controller.dart';
 import 'package:voyager/src/features/admin/controllers/course_mentor_controller.dart';
 import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
@@ -106,6 +107,7 @@ class _CourseListState extends State<CourseList> {
                       child: OutlinedButton(
                         onPressed: () {
                           setState(() {
+                            refreshCourses();
                             show = 'active';
                           });
                         },
@@ -135,6 +137,7 @@ class _CourseListState extends State<CourseList> {
                       child: OutlinedButton(
                         onPressed: () {
                           setState(() {
+                            refreshCourses();
                             show = 'archived';
                           });
                         },
@@ -185,7 +188,15 @@ class _CourseListState extends State<CourseList> {
           Expanded(
             child: Obx(() {
               if (courseController.isLoading.value) {
-                return const Center(child: CircularProgressIndicator());
+                return  Center(
+                  child: Lottie.asset(
+                    'assets/images/loading.json',
+                    fit: BoxFit.cover,
+                    width: screenWidth * 0.6,
+                    height: screenWidth * 0.4,
+                    repeat: true,
+                  ),
+                  );
               }
 
               final courses = show == 'active'

@@ -26,6 +26,10 @@ class AddMentor extends StatelessWidget {
     final CourseMentorController courseMentorController =
         Get.put(CourseMentorController());
     final GlobalKey<ProfilePickerState> profilePickerKey = GlobalKey();
+    
+     Future<void> initializeData() async {
+      await courseController.fetchActiveCourses();
+    }
 
     return SafeArea(
       bottom: true,
@@ -50,7 +54,18 @@ class AddMentor extends StatelessWidget {
               ),
               centerTitle: true,
             ),
-            body: Padding(
+            body: FutureBuilder(
+              future: initializeData(),
+              builder: (context, snapshot){
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+
+                return Padding(
                 padding: EdgeInsets.only(
                   left: screenWidth * 0.08,
                   right: screenWidth * 0.08,
@@ -343,6 +358,9 @@ class AddMentor extends StatelessWidget {
                           },
                         ),
                       ]),
-                ))));
+                ));
+              },
+            ) 
+            ));
   }
 }
