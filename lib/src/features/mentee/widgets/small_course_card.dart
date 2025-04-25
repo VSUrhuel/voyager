@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:lottie/lottie.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
@@ -28,7 +29,8 @@ class SmallCourseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final currentUser = FirebaseAuth.instance.currentUser;
-
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     final startDate =
         DateFormat('MMM dd').format(courseModel.courseCreatedTimestamp);
     final endDate =
@@ -47,7 +49,7 @@ class SmallCourseCard extends StatelessWidget {
       future: fetchTotalMentors(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return Center();
         }
 
         final totalMentor = snapshot.data ?? 0;

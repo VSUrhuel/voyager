@@ -164,7 +164,7 @@ class _MentorsListState extends State<MentorsList> {
                     return SingleChildScrollView(
                       child: Padding(
                         padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.05),
+                            horizontal: screenWidth * 0.005),
                         child: Column(children: rows),
                       ),
                     );

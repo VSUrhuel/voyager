@@ -182,13 +182,29 @@ class _EnrollCourseState extends State<EnrollCourse> {
             centerTitle: true,
           ),
           body: isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? Center(
+                  child: Lottie.asset(
+                    'assets/images/loading.json',
+                    fit: BoxFit.cover,
+                    width: screenHeight * 0.08,
+                    height: screenWidth * 0.04,
+                    repeat: true,
+                  ),
+                )
               : FutureBuilder<List<PickMentorCard>>(
                   future: fetchMentorsWithDetails(),
                   builder: (context, mentorCardSnapshot) {
                     if (mentorCardSnapshot.connectionState ==
                         ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
+                      return Center(
+                        child: Lottie.asset(
+                          'assets/images/loading.json',
+                          fit: BoxFit.cover,
+                          width: screenHeight * 0.08,
+                          height: screenWidth * 0.04,
+                          repeat: true,
+                        ),
+                      );
                     }
 
                     final mentorCards = mentorCardSnapshot.data ?? [];
@@ -323,22 +339,41 @@ class _EnrollCourseState extends State<EnrollCourse> {
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
-                child: isLoading
-                    ? Lottie.asset(
-                        'assets/images/loading.json',
-                        fit: BoxFit.cover,
-                        width: screenHeight * 0.08,
-                        height: screenWidth * 0.04,
-                        repeat: true,
-                      )
-                    : const Text(
-                        "Enroll this Course",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                child: SizedBox(
+                  height: 24,
+                  child: isLoading
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2.5,
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            Text(
+                              "Enrolling...",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        )
+                      : const Text(
+                          "Enroll this Course",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
+                ),
               ),
             ),
           ),
