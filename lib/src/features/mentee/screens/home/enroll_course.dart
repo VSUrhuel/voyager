@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
@@ -68,7 +69,6 @@ class _EnrollCourseState extends State<EnrollCourse> {
       final firestore = FirebaseFirestore.instance;
       final createdTimestamp = Timestamp.now();
 
-      // 1. Get courseMentorId
       final courseMentorQuery = await firestore
           .collection('courseMentor')
           .where('courseId', isEqualTo: widget.courseModel.docId)
@@ -81,7 +81,6 @@ class _EnrollCourseState extends State<EnrollCourse> {
       }
       final courseMentorId = courseMentorQuery.docs.first.id;
 
-      // 2. Get or create mentee
       final menteeQuery = await firestore
           .collection('mentee')
           .where('accountId', isEqualTo: widget.userId)
@@ -101,7 +100,6 @@ class _EnrollCourseState extends State<EnrollCourse> {
           ? menteeQuery.docs.first.id
           : menteeRef.id;
 
-      // 3. Check for existing allocation
       final existingAllocQuery = await firestore
           .collection('menteeCourseAlloc')
           .where('courseMentorId', isEqualTo: courseMentorId)
@@ -111,13 +109,11 @@ class _EnrollCourseState extends State<EnrollCourse> {
           .get();
 
       if (existingAllocQuery.docs.isNotEmpty) {
-        // Update existing allocation
         await existingAllocQuery.docs.first.reference.update({
           'mcaAllocStatus': 'pending',
           'mcaModifiedTimestamp': createdTimestamp,
         });
       } else {
-        // Create new allocation
         final newAllocRef =
             await firestore.collection('menteeCourseAlloc').add({
           'courseMentorId': courseMentorId,
@@ -128,7 +124,6 @@ class _EnrollCourseState extends State<EnrollCourse> {
           'menteeId': menteeId,
         });
 
-        // Update mentee's mcaId list
         await menteeRef.update({
           'menteeMcaId': FieldValue.arrayUnion([newAllocRef.id])
         });
@@ -163,6 +158,7 @@ class _EnrollCourseState extends State<EnrollCourse> {
                 .getPublicUrl(widget.courseModel.courseImgUrl))
         : 'https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/course-picture/linear-algebra.png';
     final courseName = widget.courseModel.courseName;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -183,13 +179,29 @@ class _EnrollCourseState extends State<EnrollCourse> {
         centerTitle: true,
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+              child: Lottie.asset(
+                'assets/images/loading.json',
+                fit: BoxFit.cover,
+                width: screenHeight * 0.08,
+                height: screenWidth * 0.04,
+                repeat: true,
+              ),
+            )
           : FutureBuilder<List<PickMentorCard>>(
               future: fetchMentorsWithDetails(),
               builder: (context, mentorCardSnapshot) {
                 if (mentorCardSnapshot.connectionState ==
                     ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(
+                    child: Lottie.asset(
+                      'assets/images/loading.json',
+                      fit: BoxFit.cover,
+                      width: screenHeight * 0.08,
+                      height: screenWidth * 0.04,
+                      repeat: true,
+                    ),
+                  );
                 }
 
                 final mentorCards = mentorCardSnapshot.data ?? [];
@@ -322,13 +334,12 @@ class _EnrollCourseState extends State<EnrollCourse> {
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
             child: isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
+                ? Lottie.asset(
+                    'assets/images/loading.json',
+                    fit: BoxFit.cover,
+                    width: screenHeight * 0.08,
+                    height: screenWidth * 0.04,
+                    repeat: true,
                   )
                 : const Text(
                     "Enroll this Course",
@@ -382,30 +393,6 @@ class _EnrollCourseState extends State<EnrollCourse> {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _InfoItemShimmer extends StatelessWidget {
-  const _InfoItemShimmer();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 24,
-          height: 24,
-          color: Colors.grey[200],
-        ),
-        const SizedBox(height: 4),
-        Container(
-          width: 60,
-          height: 16,
-          color: Colors.grey[200],
-        ),
-      ],
     );
   }
 }

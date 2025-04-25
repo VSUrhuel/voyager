@@ -1,3 +1,4 @@
+import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/mentee/widgets/mentor_card.dart';
 import 'package:voyager/src/features/mentee/widgets/normal_search_bar.dart';
 import 'package:flutter/material.dart';
@@ -67,7 +68,7 @@ class _MentorsListState extends State<MentorsList> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-
+    final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -96,8 +97,23 @@ class _MentorsListState extends State<MentorsList> {
               future: fetchMentorsWithDetails(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
+                  return Column(
+                    children: [
+                      SizedBox(
+                          height: 24.0), // space between searchbar and loader
+                      Center(
+                        child: Lottie.asset(
+                          'assets/images/loading.json',
+                          fit: BoxFit.cover,
+                          width: screenHeight * 0.08,
+                          height: screenWidth * 0.04,
+                          repeat: true,
+                        ),
+                      ),
+                    ],
+                  );
                 }
+
                 if (snapshot.hasError ||
                     !snapshot.hasData ||
                     snapshot.data!.isEmpty) {
@@ -118,23 +134,17 @@ class _MentorsListState extends State<MentorsList> {
                   );
                 }
 
-                // In the build method, replace the rows building logic with this:
                 List<Widget> rows = [];
                 int itemCount = snapshot.data!.length;
 
-// Build the rows of mentor cards
                 for (int i = 0; i < itemCount; i += 2) {
-                  // Always create a row with two Expanded widgets
                   rows.add(
                     Row(
                       children: [
                         Expanded(child: snapshot.data![i]),
-                        if (i + 1 <
-                            itemCount) // Only add second card if it exists
+                        if (i + 1 < itemCount)
                           Expanded(child: snapshot.data![i + 1]),
-                        if (i + 1 >=
-                            itemCount) // If odd card, add an empty Expanded
-                          Expanded(child: Container()),
+                        if (i + 1 >= itemCount) Expanded(child: Container()),
                       ],
                     ),
                   );

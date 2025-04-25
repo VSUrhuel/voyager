@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/controller/mentee_controller.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
@@ -328,7 +329,15 @@ class _MenteeHomeState extends State<MenteeHome> {
                     future: fetchCoursesWithDetails(user?.email ?? ''),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
+                        return Center(
+                          child: Lottie.asset(
+                            'assets/images/loading.json',
+                            fit: BoxFit.cover,
+                            width: screenHeight * 0.08,
+                            height: screenWidth * 0.04,
+                            repeat: true,
+                          ),
+                        );
                       }
                       if (snapshot.hasError ||
                           !snapshot.hasData ||
@@ -371,7 +380,15 @@ class _MenteeHomeState extends State<MenteeHome> {
                     future: fetchMentorsWithDetails(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
+                        return Center(
+                          child: Lottie.asset(
+                            'assets/images/loading.json',
+                            fit: BoxFit.cover,
+                            width: screenHeight * 0.08,
+                            height: screenWidth * 0.04,
+                            repeat: true,
+                          ),
+                        );
                       }
                       if (snapshot.hasError ||
                           !snapshot.hasData ||
