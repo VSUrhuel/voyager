@@ -51,9 +51,9 @@ class _MentorProfileState extends State<MentorProfile> {
 
       mentorModel = await firestore.getMentorThroughAccId(currentUser.uid);
       userModel = await firestore.getUser(currentUser.uid);
-      courseMentorModel =
-          await firestore.getCourseMentorThroughMentor(mentorModel.mentorId);
-
+      
+         var cm = await firestore.getCourseMentorThroughMentor(mentorModel.mentorId);
+        courseMentorModel = cm!;
       final courseModel = await firestore.getCourse(courseMentorModel.courseId);
 
       if (mounted) {

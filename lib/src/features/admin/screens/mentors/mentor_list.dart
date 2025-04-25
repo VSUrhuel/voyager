@@ -77,7 +77,7 @@ class _MentorListState extends State<MentorList> {
           onActionComplete: () => getMentors(show),
         ));
       }
-      if (show == 'archived'){
+      if (show == 'archived' && initUser.isNotEmpty) {
 
         for (int i = 0; i < initUser.length; i++){
           var user = initUser[i];
@@ -114,7 +114,10 @@ class _MentorListState extends State<MentorList> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    return Scaffold(
+    return SafeArea(
+      bottom: true,
+      top: false,
+      child: Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle.dark,
@@ -361,7 +364,7 @@ class _MentorListState extends State<MentorList> {
                   ),
                 ),
               ),
-          if(show == 'archived')
+          if(show == 'archived' && mentorDraftCards.isNotEmpty)
             SingleChildScrollView(
                 child: Padding(
                   padding: EdgeInsets.only(
@@ -407,6 +410,7 @@ class _MentorListState extends State<MentorList> {
           ),
         ],
       ),
+    ),
     );
   }
 }
