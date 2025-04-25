@@ -43,96 +43,100 @@ class _MenteeProfileState extends State<MenteeProfile> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Padding(
-          padding: EdgeInsets.only(
-            top: screenHeight * 0.035,
-            left: screenHeight * 0.01,
-          ),
-          child: Text(
-            'My Profile',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: screenWidth * 0.07,
-              fontWeight: FontWeight.bold,
+    return SafeArea(
+        bottom: true,
+        top: false,
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            title: Padding(
+              padding: EdgeInsets.only(
+                top: screenHeight * 0.035,
+                left: screenHeight * 0.01,
+              ),
+              child: Text(
+                'My Profile',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: screenWidth * 0.07,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
+            centerTitle: false,
           ),
-        ),
-        centerTitle: false,
-      ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Column(
-              children: [
-                SizedBox(height: screenHeight * 0.025),
-                Profile(role: 'mentee'),
-                SizedBox(height: screenHeight * 0.03),
-                Row(
+          body: isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                  child: Column(
                   children: [
-                    Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
-                      child: Text(
-                        "Settings",
-                        style: TextStyle(
-                          fontSize: screenWidth * 0.05,
-                          fontWeight: FontWeight.bold,
+                    SizedBox(height: screenHeight * 0.025),
+                    Profile(role: 'mentee'),
+                    SizedBox(height: screenHeight * 0.03),
+                    Row(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.04),
+                          child: Text(
+                            "Settings",
+                            style: TextStyle(
+                              fontSize: screenWidth * 0.05,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
                         ),
-                        textAlign: TextAlign.left,
-                      ),
+                      ],
+                    ),
+                    SizedBox(height: screenHeight * 0.01),
+                    ProfileListTile(
+                      iconData: Icons.person,
+                      text: "Personal Information",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          CustomPageRoute(
+                            page:
+                                MenteePersonalInformation(userModel: userModel),
+                          ),
+                        );
+                      },
+                    ),
+                    ProfileListTile(
+                      iconData: Icons.lock,
+                      text: "Security and Password",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          CustomPageRoute(page: MenteeSecurityPassword()),
+                        );
+                      },
+                    ),
+                    ProfileListTile(
+                      iconData: Icons.verified_user,
+                      text: "User agreement",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          CustomPageRoute(page: MenteeUserAgreement()),
+                        );
+                      },
+                    ),
+                    ProfileListTile(
+                      iconData: Icons.info,
+                      text: "About",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          CustomPageRoute(page: MenteeAbout()),
+                        );
+                      },
                     ),
                   ],
-                ),
-                SizedBox(height: screenHeight * 0.01),
-                ProfileListTile(
-                  iconData: Icons.person,
-                  text: "Personal Information",
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      CustomPageRoute(
-                        page: MenteePersonalInformation(userModel: userModel),
-                      ),
-                    );
-                  },
-                ),
-                ProfileListTile(
-                  iconData: Icons.lock,
-                  text: "Security and Password",
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      CustomPageRoute(page: MenteeSecurityPassword()),
-                    );
-                  },
-                ),
-                ProfileListTile(
-                  iconData: Icons.verified_user,
-                  text: "User agreement",
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      CustomPageRoute(page: MenteeUserAgreement()),
-                    );
-                  },
-                ),
-                ProfileListTile(
-                  iconData: Icons.info,
-                  text: "About",
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      CustomPageRoute(page: MenteeAbout()),
-                    );
-                  },
-                ),
-              ],
-            )),
-    );
+                )),
+        ));
   }
 }

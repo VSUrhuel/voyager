@@ -630,9 +630,9 @@ class FirestoreInstance {
     }
   }
 
-  Future<List<UserModel>> getinitialMentorsCreated(List<MentorModel> mentors) async {
-    try{
-
+  Future<List<UserModel>> getinitialMentorsCreated(
+      List<MentorModel> mentors) async {
+    try {
       final ids = (await getMentors()).map((doc) => doc.accountApiID).toList();
       print(ids);
       final initialUsers = await _db
@@ -648,8 +648,7 @@ class FirestoreInstance {
             return [];
           }
       return filteredUsers;
-      
-    }catch (e){
+    } catch (e) {
       rethrow;
     }
   }
@@ -1283,6 +1282,7 @@ class FirestoreInstance {
       final courseMentorQuery = await _db
           .collection('courseMentor')
           .where('courseId', isEqualTo: courseId)
+          .where('courseMentorSoftDeleted', isEqualTo: false)
           .get();
 
       List<UserModel> users = [];

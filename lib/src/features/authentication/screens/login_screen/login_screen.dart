@@ -32,139 +32,143 @@ class _SigninScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    return Scaffold(
-        resizeToAvoidBottomInset: true,
-        appBar: AppBar(
-          systemOverlayStyle: SystemUiOverlayStyle.dark,
-          automaticallyImplyLeading: false,
-          backgroundColor: Colors.transparent,
-          scrolledUnderElevation: 0,
-          elevation: 0,
-          foregroundColor: Colors.black,
-        ),
-        extendBodyBehindAppBar: true,
-        body: SingleChildScrollView(
-            child: Padding(
-                padding: EdgeInsets.only(
-                    top: screenHeight * 0.07,
-                    left: screenWidth * 0.07,
-                    right: screenWidth * 0.05),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SvgPicture.asset(
-                      'assets/images/login_images/log_in.svg',
-                      width: screenWidth * 0.3,
-                    ),
-                    Text.rich(
-                      TextSpan(
-                        children: [
+    return SafeArea(
+        bottom: true,
+        top: false,
+        child: Scaffold(
+            resizeToAvoidBottomInset: true,
+            appBar: AppBar(
+              systemOverlayStyle: SystemUiOverlayStyle.dark,
+              automaticallyImplyLeading: false,
+              backgroundColor: Colors.transparent,
+              scrolledUnderElevation: 0,
+              elevation: 0,
+              foregroundColor: Colors.black,
+            ),
+            extendBodyBehindAppBar: true,
+            body: SingleChildScrollView(
+                child: Padding(
+                    padding: EdgeInsets.only(
+                        top: screenHeight * 0.07,
+                        left: screenWidth * 0.07,
+                        right: screenWidth * 0.05),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/images/login_images/log_in.svg',
+                          width: screenWidth * 0.3,
+                        ),
+                        Text.rich(
                           TextSpan(
-                            text: 'Welcome back to ',
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineMedium
-                                ?.copyWith(
-                                  fontSize: screenWidth * 0.06,
-                                ),
+                            children: [
+                              TextSpan(
+                                text: 'Welcome back to ',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium
+                                    ?.copyWith(
+                                      fontSize: screenWidth * 0.06,
+                                    ),
+                              ),
+                              TextSpan(
+                                text: 'eduvate',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium
+                                    ?.copyWith(
+                                      color: Color(0xFF1877F2),
+                                      fontSize: screenWidth * 0.06,
+                                    ),
+                              ),
+                            ],
                           ),
-                          TextSpan(
-                            text: 'eduvate',
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineMedium
-                                ?.copyWith(
-                                  color: Color(0xFF1877F2),
-                                  fontSize: screenWidth * 0.06,
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Text(
-                      'Login to you account',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontSize: screenWidth * 0.04,
-                          ),
-                    ),
-                    SizedBox(
-                      height: screenHeight * 0.02,
-                    ),
-                    Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          LoginForm(
-                              formKey: _formKey,
-                              controller: controller,
-                              textValues: textValues,
-                              leadingIcons: leadingIcons,
-                              screenWidth: screenWidth,
-                              screenHeight: screenHeight),
-                          SizedBox(
-                            height: screenHeight * 0.01,
-                          ),
-                          DividerWithText(screenWidth: screenWidth),
-                          SizedBox(
-                            height: screenHeight * 0.01,
-                          ),
-                          Obx(() => DefaultIconButton(
-                                buttonText: 'Log In with Google',
-                                image:
-                                    'assets/images/login_images/google-icon.png',
-                                direction: null,
-                                bgColor: Colors.white,
-                                textColor: Color(0xFF455A64),
-                                borderColor: Color(0xFF455A64),
-                                prefixIcon: null,
-                                isLoading: controller.isGoogleLoading.value
-                                    ? true
-                                    : false,
-                                onPressed: controller.isGoogleLoading.value
-                                    ? () {}
-                                    : () => controller.googleSignIn(),
-                              )),
-                          Center(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Don\'t have an account? ',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(
-                                        fontSize: screenWidth * 0.04,
-                                      ),
-                                ),
-                                TextButton(
-                                  onPressed: () => {
-                                    Navigator.push(
-                                      context,
-                                      CustomPageRoute(
-                                        page: SignupScreen(),
-                                        direction: AxisDirection.left,
-                                      ),
-                                    )
-                                  },
-                                  child: Text(
-                                    'Register',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
-                                        ?.copyWith(
-                                          color: Color(0xFF1877F2),
-                                          fontSize: screenWidth * 0.04,
-                                        ),
+                        ),
+                        Text(
+                          'Login to you account',
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontSize: screenWidth * 0.04,
                                   ),
+                        ),
+                        SizedBox(
+                          height: screenHeight * 0.02,
+                        ),
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              LoginForm(
+                                  formKey: _formKey,
+                                  controller: controller,
+                                  textValues: textValues,
+                                  leadingIcons: leadingIcons,
+                                  screenWidth: screenWidth,
+                                  screenHeight: screenHeight),
+                              SizedBox(
+                                height: screenHeight * 0.01,
+                              ),
+                              DividerWithText(screenWidth: screenWidth),
+                              SizedBox(
+                                height: screenHeight * 0.01,
+                              ),
+                              Obx(() => DefaultIconButton(
+                                    buttonText: 'Log In with Google',
+                                    image:
+                                        'assets/images/login_images/google-icon.png',
+                                    direction: null,
+                                    bgColor: Colors.white,
+                                    textColor: Color(0xFF455A64),
+                                    borderColor: Color(0xFF455A64),
+                                    prefixIcon: null,
+                                    isLoading: controller.isGoogleLoading.value
+                                        ? true
+                                        : false,
+                                    onPressed: controller.isGoogleLoading.value
+                                        ? () {}
+                                        : () => controller.googleSignIn(),
+                                  )),
+                              Center(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Don\'t have an account? ',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            fontSize: screenWidth * 0.04,
+                                          ),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => {
+                                        Navigator.push(
+                                          context,
+                                          CustomPageRoute(
+                                            page: SignupScreen(),
+                                            direction: AxisDirection.left,
+                                          ),
+                                        )
+                                      },
+                                      child: Text(
+                                        'Register',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: Color(0xFF1877F2),
+                                              fontSize: screenWidth * 0.04,
+                                            ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    )
-                  ],
-                ))));
+                              )
+                            ],
+                          ),
+                        )
+                      ],
+                    )))));
   }
 }

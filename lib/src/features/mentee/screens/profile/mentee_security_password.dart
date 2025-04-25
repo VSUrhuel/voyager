@@ -90,168 +90,171 @@ class _SecuritySettingsScreenState extends State<MenteeSecurityPassword> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Security & Password'),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Security Tips
-            const Text(
-              'Security Tips',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            const Card(
-              child: Padding(
-                padding: EdgeInsets.all(12),
-                child: Column(
-                  children: [
-                    _SecurityTipItem(
-                      icon: Icons.lock_outline,
-                      text: 'Use a strong, unique password',
-                    ),
-                    _SecurityTipItem(
-                      icon: Icons.update,
-                      text: 'Change your password regularly',
-                    ),
-                    _SecurityTipItem(
-                      icon: Icons.devices_other,
-                      text: 'Log out from unused devices',
-                    ),
-                    _SecurityTipItem(
-                      icon: Icons.email_outlined,
-                      text: 'Never share your credentials',
-                    ),
-                  ],
+    return SafeArea(
+        bottom: true,
+        top: false,
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Security & Password'),
+            centerTitle: true,
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Security Tips
+                const Text(
+                  'Security Tips',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 30),
+                const SizedBox(height: 10),
+                const Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Column(
+                      children: [
+                        _SecurityTipItem(
+                          icon: Icons.lock_outline,
+                          text: 'Use a strong, unique password',
+                        ),
+                        _SecurityTipItem(
+                          icon: Icons.update,
+                          text: 'Change your password regularly',
+                        ),
+                        _SecurityTipItem(
+                          icon: Icons.devices_other,
+                          text: 'Log out from unused devices',
+                        ),
+                        _SecurityTipItem(
+                          icon: Icons.email_outlined,
+                          text: 'Never share your credentials',
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30),
 
-            // Change Password Section
-            const Text(
-              'Change Password',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 15),
-            if (_errorMessage != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Text(
-                  _errorMessage!,
-                  style: const TextStyle(color: Colors.red),
+                // Change Password Section
+                const Text(
+                  'Change Password',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-            if (_successMessage != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Text(
-                  _successMessage!,
-                  style: const TextStyle(color: Colors.green),
+                const SizedBox(height: 15),
+                if (_errorMessage != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Text(
+                      _errorMessage!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
+                if (_successMessage != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Text(
+                      _successMessage!,
+                      style: const TextStyle(color: Colors.green),
+                    ),
+                  ),
+                TextField(
+                  controller: _currentPasswordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Current Password',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.lock_outline),
+                  ),
                 ),
-              ),
-            TextField(
-              controller: _currentPasswordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Current Password',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.lock_outline),
-              ),
-            ),
-            const SizedBox(height: 15),
-            TextField(
-              controller: _newPasswordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'New Password',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.lock_reset),
-              ),
-            ),
-            const SizedBox(height: 15),
-            TextField(
-              controller: _confirmPasswordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Confirm New Password',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.lock_reset),
-              ),
-            ),
-            const SizedBox(height: 20),
+                const SizedBox(height: 15),
+                TextField(
+                  controller: _newPasswordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'New Password',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.lock_reset),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                TextField(
+                  controller: _confirmPasswordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Confirm New Password',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.lock_reset),
+                  ),
+                ),
+                const SizedBox(height: 20),
 
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _changePassword,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _changePassword,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator()
+                        : const Text('Update Password'),
+                  ),
                 ),
-                child: _isLoading
-                    ? const CircularProgressIndicator()
-                    : const Text('Update Password'),
-              ),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Update password only works for email/password sign-in method.',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 30),
+                SizedBox(height: 10),
+                Text(
+                  'Update password only works for email/password sign-in method.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 30),
 
-            // Session Management
-            const Text(
-              'Session Management',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+                // Session Management
+                const Text(
+                  'Session Management',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 15),
+                ListTile(
+                  leading: const Icon(Icons.devices),
+                  title: const Text('Active Sessions'),
+                  subtitle: const Text('Manage your logged-in devices'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    // Implement session management
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Session management coming soon')),
+                    );
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.logout),
+                  title: const Text('Log Out All Devices'),
+                  subtitle: const Text('Sign out from all other sessions'),
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Log out all devices coming soon')),
+                    );
+                  },
+                ),
+              ],
             ),
-            const SizedBox(height: 15),
-            ListTile(
-              leading: const Icon(Icons.devices),
-              title: const Text('Active Sessions'),
-              subtitle: const Text('Manage your logged-in devices'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                // Implement session management
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Session management coming soon')),
-                );
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Log Out All Devices'),
-              subtitle: const Text('Sign out from all other sessions'),
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Log out all devices coming soon')),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
+          ),
+        ));
   }
 }
 

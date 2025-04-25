@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
+import 'package:voyager/src/features/mentee/screens/session/upcoming_card.dart';
+import 'package:voyager/src/features/mentee/widgets/course_card.dart';
 import 'package:voyager/src/features/mentee/widgets/normal_search_bar.dart';
 import 'package:voyager/src/features/mentee/widgets/small_course_card.dart';
 import 'package:flutter/material.dart';
@@ -28,26 +30,6 @@ class _CourseOfferedState extends State<CourseOffered> {
         _isSearching = _searchText.isNotEmpty;
       });
     });
-  }
-
-  Future<List<String>> getCourseMentorIdsForMentee(String menteeId) async {
-    try {
-      final allocations = await _db
-          .collection('menteeCourseAlloc')
-          .where('menteeId', isEqualTo: menteeId)
-          .where('mcaSoftDeleted', isEqualTo: false)
-          .where(
-        'mcaAllocStatus',
-        whereIn: ['pending', 'accepted'], // OR condition
-      ).get();
-
-      return allocations.docs
-          .map((doc) => doc.data()['courseMentorId'] as String)
-          .toList();
-    } catch (e) {
-      print("❌ Error getting course mentor IDs: $e");
-      return [];
-    }
   }
 
   Future<String?> getUserIdThroughEmail(String email) async {
@@ -81,38 +63,63 @@ class _CourseOfferedState extends State<CourseOffered> {
     }
   }
 
+  Future<List<String>> getCourseMentorIdsForMentee(String menteeId) async {
+    try {
+      final allocations = await _db
+          .collection('menteeCourseAlloc')
+          .where('menteeId', isEqualTo: menteeId)
+          .where('mcaSoftDeleted', isEqualTo: false)
+          .get();
+
+      return allocations.docs
+          .map((doc) => doc.data()['courseMentorId'] as String)
+          .toList();
+    } catch (e) {
+      print("❌ Error getting course mentor IDs: $e");
+      return [];
+    }
+  }
+
+  // Fetch courses with details (similar to fetching mentors)
   Future<List<CourseModel>> fetchCoursesWithDetails(String userEmail) async {
     try {
-      FirestoreInstance firestoreInstance = FirestoreInstance();
       final menteeId = await getUserIdThroughEmail(userEmail);
-      final enrolledCourseMentorIds =
-          await getCourseMentorIdsForMentee(menteeId!);
-      List<CourseModel> enrolledCourses = [];
-      for (String mentorId in enrolledCourseMentorIds) {
-        final course =
-            await firestoreInstance.getMentorCourseThroughId(mentorId);
-        if (course != null) {
-          enrolledCourses.add(course);
-        }
-      }
       final List<CourseModel> allCourses = await firestoreInstance.getCourses();
-      final List<String> enrolledCourseNames =
-          enrolledCourses.map((course) => course.courseName).toList();
 
-      List<CourseModel> availableCourses = allCourses.where((course) {
-        return !enrolledCourseNames.contains(course.courseName) &&
-            course.courseSoftDelete == false &&
-            course.courseStatus == 'active';
-      }).toList();
+      List<CourseModel> availableCourses;
 
-      if (_isSearching) {
-        availableCourses = availableCourses.where((course) {
-          return course.courseName
-              .toLowerCase()
-              .contains(_searchText.toLowerCase());
+      if (menteeId == null || menteeId.isEmpty) {
+        print("❌ I am still not a mentee");
+        // If no menteeId, return all active and non-soft-deleted courses
+        availableCourses = allCourses.where((course) {
+          return course.courseSoftDelete == false &&
+              course.courseStatus == 'active';
+        }).toList();
+      } else {
+        // Otherwise filter based on enrolled course mentor IDs
+        print("❌ I am now a mentee");
+        final enrolledCourseMentorIds =
+            await getCourseMentorIdsForMentee(menteeId);
+
+        //Problem
+        print("❌ Enrolled in: $enrolledCourseMentorIds");
+        List<CourseModel> enrolledCourses = [];
+        for (String mentorId in enrolledCourseMentorIds) {
+          final course =
+              await firestoreInstance.getMentorCourseThroughId(mentorId);
+          if (course != null) {
+            enrolledCourses.add(course);
+          }
+        }
+
+        final List<String> enrolledCourseNames =
+            enrolledCourses.map((course) => course.courseName).toList();
+        availableCourses = allCourses.where((course) {
+          return !enrolledCourseNames.contains(course.courseName) &&
+              course.courseSoftDelete == false &&
+              course.courseStatus == 'active';
         }).toList();
       }
-
       return availableCourses;
     } catch (e) {
       print("❌ Error fetching courses with details: $e");
@@ -126,77 +133,81 @@ class _CourseOfferedState extends State<CourseOffered> {
     FirestoreInstance firestoreInstance = FirestoreInstance();
     User? user = FirebaseAuth.instance.currentUser;
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 1.0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: Text(
-          'Courses Offered',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.normal,
-            fontSize: 18.0,
+    return SafeArea(
+        bottom: true,
+        top: false,
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 1.0,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            title: Text(
+              'Courses Offered',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.normal,
+                fontSize: 18.0,
+              ),
+            ),
+            centerTitle: true,
           ),
-        ),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          NormalSearchbar(searchController: _searchController),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.only(
-                    left: screenWidth * 0.05, right: screenWidth * 0.05),
-                child: Center(
-                  child: FutureBuilder<List<CourseModel>>(
-                    future: fetchCoursesWithDetails(user?.email ?? ''),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      }
-                      if (snapshot.hasError ||
-                          !snapshot.hasData ||
-                          snapshot.data!.isEmpty) {
-                        return SingleChildScrollView(
-                          child: Padding(
-                            padding: EdgeInsets.only(
-                              top: 100.0,
-                              left: screenWidth * 0.05,
-                              right: screenWidth * 0.05,
-                            ),
-                            child: Center(
-                              child: Text(
-                                "No courses available",
-                                style: TextStyle(
-                                    fontSize: 16.0, color: Colors.grey),
+          body: Column(
+            children: [
+              NormalSearchbar(searchController: _searchController),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                        left: screenWidth * 0.05, right: screenWidth * 0.05),
+                    child: Center(
+                      child: FutureBuilder<List<CourseModel>>(
+                        future: fetchCoursesWithDetails(user?.email ?? ''),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(child: CircularProgressIndicator());
+                          }
+                          if (snapshot.hasError ||
+                              !snapshot.hasData ||
+                              snapshot.data!.isEmpty) {
+                            return SingleChildScrollView(
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                  top: 100.0,
+                                  left: screenWidth * 0.05,
+                                  right: screenWidth * 0.05,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    "No courses available",
+                                    style: TextStyle(
+                                        fontSize: 16.0, color: Colors.grey),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        );
-                      }
+                            );
+                          }
 
-                      return Column(
-                        children: List.generate(
-                          snapshot.data!.length,
-                          (index) => SmallCourseCard(
-                              courseModel: snapshot.data![index]),
-                        ),
-                      );
-                    },
+                          return Column(
+                            children: List.generate(
+                              snapshot.data!.length,
+                              (index) => SmallCourseCard(
+                                  courseModel: snapshot.data![index]),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
-    );
+        ));
   }
 }

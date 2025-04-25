@@ -147,7 +147,8 @@ class _MenteeSessionUpcomingState extends State<MenteeSessionUpcoming> {
         onRefresh: _loadData,
         child: ListView.builder(
           physics: const AlwaysScrollableScrollPhysics(),
-          itemCount: upcomingSched.length,
+          //  padding: const EdgeInsets.all(7),
+          itemCount: upcomingSched.isEmpty ? 0 : upcomingSched.length,
           itemBuilder: (context, index) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 2),

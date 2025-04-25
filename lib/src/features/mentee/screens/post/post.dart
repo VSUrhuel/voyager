@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/controller/mentee_post_controller.dart';
 import 'package:voyager/src/features/mentee/screens/home/notification.dart';
@@ -191,21 +192,22 @@ class _PostState extends State<Post> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-        const SizedBox(height: 16),
         Center(
           child: Padding(
-            padding: EdgeInsets.all(screenWidth * 0.05),
+            padding: EdgeInsets.symmetric(vertical: screenWidth * 0.05),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.error_outline,
-                  size: screenWidth * 0.1,
-                  color: Colors.grey[400],
+                Lottie.asset(
+                  'assets/images/empty-post.json',
+                  fit: BoxFit.cover,
+                  width: screenWidth * 0.6,
+                  height: screenWidth * 0.4,
+                  repeat: true,
                 ),
-                SizedBox(height: screenWidth * 0.03),
+                SizedBox(height: screenWidth * 0.05),
                 Text(
-                  'Failed to load posts!',
+                  'No Posts!',
                   style: TextStyle(
                     color: Colors.grey[700],
                     fontSize: screenWidth * 0.04,
@@ -227,12 +229,6 @@ class _PostState extends State<Post> {
             ),
           ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          error,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        const SizedBox(height: 16),
         ElevatedButton(
           onPressed: _refreshPosts,
           child: const Text('Retry'),
