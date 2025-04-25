@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/admin/controllers/course_mentor_controller.dart';
 import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/admin/screens/mentors/mentor_profile.dart';
@@ -535,9 +536,14 @@ class _ViewCourseState extends State<ViewCourse> {
             centerTitle: true,
           ),
           body: isLoading
-              ? const Center(
-                  child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.blue)))
+              ? Center(
+                  child: Lottie.asset(
+                  'assets/images/loading.json',
+                  fit: BoxFit.cover,
+                  width: screenHeight * 0.08,
+                  height: screenWidth * 0.04,
+                  repeat: true,
+                ))
               : FutureBuilder<List<PickMentorCard>>(
                   future: fetchMentorsWithDetails(),
                   builder: (context, mentorCardSnapshot) {

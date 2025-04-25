@@ -142,9 +142,6 @@ class _PostState extends State<Post> {
                 return _buildErrorState(context, error);
               }
 
-              if (posts.isEmpty) {
-                return _buildEmptyState(context);
-              }
               return ListView.builder(
                 controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -170,7 +167,13 @@ class _PostState extends State<Post> {
 
   Widget _buildLoadingState() {
     return Center(
-      child: CircularProgressIndicator(),
+      child: Lottie.asset(
+        'assets/images/loading.json',
+        fit: BoxFit.cover,
+        width: 40,
+        height: 40,
+        repeat: true,
+      ),
     );
   }
 
@@ -179,7 +182,13 @@ class _PostState extends State<Post> {
       padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: Center(
         child: _isLoadingMore
-            ? CircularProgressIndicator()
+            ? Lottie.asset(
+                'assets/images/loading.json',
+                fit: BoxFit.cover,
+                width: 40,
+                height: 40,
+                repeat: true,
+              )
             : Text('No more posts available'),
       ),
     );
@@ -233,22 +242,6 @@ class _PostState extends State<Post> {
           onPressed: _refreshPosts,
           child: const Text('Retry'),
         ),
-      ],
-    );
-  }
-
-  Widget _buildEmptyState(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-        Icon(Icons.feed_outlined, size: 50, color: Colors.grey[400]),
-        const SizedBox(height: 16),
-        Text(
-          'No posts available!',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: 8),
       ],
     );
   }

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/mentee/screens/profile/mentee_about.dart';
 import 'package:voyager/src/features/mentee/screens/profile/mentee_security_password.dart';
 import 'package:voyager/src/features/mentee/screens/profile/mentee_user_agreement.dart';
@@ -68,7 +69,14 @@ class _MenteeProfileState extends State<MenteeProfile> {
             centerTitle: false,
           ),
           body: isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? Center(
+                  child: Lottie.asset(
+                  'assets/images/loading.json',
+                  fit: BoxFit.cover,
+                  width: screenHeight * 0.08,
+                  height: screenWidth * 0.04,
+                  repeat: true,
+                ))
               : SingleChildScrollView(
                   child: Column(
                   children: [

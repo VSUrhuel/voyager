@@ -36,10 +36,10 @@ class _MentorListState extends State<MentorList> {
     List<UserModel> initUser = [];
     isLoading = true;
     try {
-      if (show == 'archived'){
+      if (show == 'archived') {
         mentors = await firestore.getMentorsThroughStatus(show);
         initUser = await firestore.getinitialMentorsCreated(mentors);
-      }else{
+      } else {
         mentors = await firestore.getMentorsThroughStatus(show);
       }
     } catch (e) {
@@ -79,12 +79,11 @@ class _MentorListState extends State<MentorList> {
         ));
       }
       if (show == 'archived' && initUser.isNotEmpty) {
-
-        for (int i = 0; i < initUser.length; i++){
+        for (int i = 0; i < initUser.length; i++) {
           var user = initUser[i];
           mDraftCards.add(MentorDraftCard(
             userModel: user,
-          )); 
+          ));
         }
       }
     } catch (e) {
@@ -119,308 +118,310 @@ class _MentorListState extends State<MentorList> {
       bottom: true,
       top: false,
       child: Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Mentor List',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: screenWidth * 0.05,
-            fontWeight: FontWeight.bold,
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(
+          systemOverlayStyle: SystemUiOverlayStyle.dark,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () => Navigator.pop(context),
           ),
+          title: Text(
+            'Mentor List',
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: screenWidth * 0.05,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          centerTitle: true,
         ),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // NormalSearchbar widget
-              SizedBox(
-                height: screenHeight * 0.09,
-                child: AdminSearchbar(
-                  onSearchChanged: (query) {
-                    setState(() {
-                      if (query.isNotEmpty) {
-                        search = query;
-                        filteredMentorCards = filter(mentorCards);
-                      }
-                    });
-                  },
-                ),
-              ),
-
-              // Buttons to filter mentors by status (active, archived, suspended)
-              Padding(
-                padding: EdgeInsets.only(
-                    left: screenWidth * 0.05, right: screenWidth * 0.05),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Active Button
-                    SizedBox(
-                      height: screenHeight * 0.038,
-                      width: screenWidth * 0.22,
-                      child: Builder(
-                        builder: (context) {
-                          String bg = '0xFFa6a2a2';
-                          String txt = '0xFF4A4A4A';
-
-                          if (show == 'active') {
-                            bg = '0xFF7eb3f7';
-                            txt = '0xFF0765e0';
-                          }
-                          return OutlinedButton(
-                            onPressed: () {
-                              setState(() {
-                                mentorCards = [];
-                                show = 'active';
-                                getMentors(show);
-                              });
-                            },
-                            style: OutlinedButton.styleFrom(
-                              backgroundColor: Color(int.parse(bg)),
-                              padding: EdgeInsets.only(top: 5, bottom: 5),
-                              textStyle: TextStyle(
-                                fontSize: screenWidth * 0.04,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              side: BorderSide.none,
-                              foregroundColor: Color(int.parse(txt)),
-                            ),
-                            child: Text('Active'),
-                          );
-                        },
-                      ),
-                    ),
-                    SizedBox(width: screenWidth * 0.03),
-
-                    // Archived Button
-                    SizedBox(
-                      height: screenHeight * 0.038,
-                      width: screenWidth * 0.22,
-                      child: Builder(
-                        builder: (context) {
-                          String bg = '0xFFa6a2a2';
-                          String txt = '0xFF4A4A4A';
-
-                          if (show == 'archived') {
-                            bg = '0xFF7eb3f7';
-                            txt = '0xFF0765e0';
-                          }
-                          return OutlinedButton(
-                            onPressed: () {
-                              setState(() {
-                                mentorCards=[];
-                                show = 'archived';
-                                getMentors(show);
-                              });
-                            },
-                            style: OutlinedButton.styleFrom(
-                              backgroundColor: Color(int.parse(bg)),
-                              padding: EdgeInsets.only(top: 5, bottom: 5),
-                              textStyle: TextStyle(
-                                fontSize: screenWidth * 0.04,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              side: BorderSide.none,
-                              foregroundColor: Color(int.parse(txt)),
-                            ),
-                            child: Text('Archived'),
-                          );
-                        },
-                      ),
-                    ),
-                    SizedBox(width: screenWidth * 0.03),
-
-                    // Suspended Button
-                    SizedBox(
-                      height: screenHeight * 0.038,
-                      width: screenWidth * 0.27,
-                      child: Builder(
-                        builder: (context) {
-                          String bg = '0xFFa6a2a2';
-                          String txt = '0xFF4A4A4A';
-
-                          if (show == 'suspended') {
-                            bg = '0xFF7eb3f7';
-                            txt = '0xFF0765e0';
-                          }
-                          return OutlinedButton(
-                            onPressed: () {
-                              setState(() {
-                                mentorCards = [];
-                                show = 'suspended';
-                                getMentors(show);
-                              });
-                            },
-                            style: OutlinedButton.styleFrom(
-                              backgroundColor: Color(int.parse(bg)),
-                              padding: EdgeInsets.only(top: 5, bottom: 5),
-                              textStyle: TextStyle(
-                                fontSize: screenWidth * 0.04,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              side: BorderSide.none,
-                              foregroundColor: Color(int.parse(txt)),
-                            ),
-                            child: Text('Suspended'),
-                          );
-                        },
-                      ),
-                    ),
-                    Spacer(),
-
-                    // Add Mentor Button
-                    SizedBox(
-                      height: screenHeight * 0.035,
-                      child: IconButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const AddMentor()),
-                          );
-                        },
-                        padding: EdgeInsets.all(0),
-                        icon: Icon(Icons.add),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 10),
-
-              // List of Mentor Cards in Scrollable View
-              SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    left: screenWidth * 0.05,
-                    right: screenWidth * 0.05,
+        body: Column(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // NormalSearchbar widget
+                SizedBox(
+                  height: screenHeight * 0.09,
+                  child: AdminSearchbar(
+                    onSearchChanged: (query) {
+                      setState(() {
+                        if (query.isNotEmpty) {
+                          search = query;
+                          filteredMentorCards = filter(mentorCards);
+                        }
+                      });
+                    },
                   ),
-                  child: Center(
-                    child: Column(
-                      children: [
-                        if (isLoading) Lottie.asset(
-                          'assets/images/loading.json',
-                          fit: BoxFit.cover,
-                          width: screenWidth * 0.6,
-                          height: screenWidth * 0.4,
-                          repeat: true,
-                        ),
-                        if (mentorCards.isNotEmpty)
-                          for (var mentorCard in filteredMentorCards)
-                            AdminMentorCard(
-                              mentorModel: mentorCard.mentorModel,
-                              userModel: mentorCard.userModel,
-                              mentor: mentorCard.mentor,
-                              email: mentorCard.email,
-                              studentId: mentorCard.studentId,
-                              schedule: mentorCard.schedule,
-                              course: mentorCard.course,
-                              onActionComplete: () => getMentors(show),
-                            ),
-                        // if (show == 'archived' && mentorDraftCards.isNotEmpty)
-                        //   for (var mentorCard in mentorDraftCards)
-                        //     MentorDraftCard(
-                        //       userModel: mentorCard.userModel,
-                        //       // onActionComplete: () => getMentors(show),
-                        //     ),
-                        SizedBox(height: 10),
-                        Builder(
+                ),
+
+                // Buttons to filter mentors by status (active, archived, suspended)
+                Padding(
+                  padding: EdgeInsets.only(
+                      left: screenWidth * 0.05, right: screenWidth * 0.05),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Active Button
+                      SizedBox(
+                        height: screenHeight * 0.038,
+                        width: screenWidth * 0.22,
+                        child: Builder(
                           builder: (context) {
-                            if (isLoading) {
-                              return Text('');
+                            String bg = '0xFFa6a2a2';
+                            String txt = '0xFF4A4A4A';
+
+                            if (show == 'active') {
+                              bg = '0xFF7eb3f7';
+                              txt = '0xFF0765e0';
                             }
-                            if (mentorCards.isEmpty && show != 'archived') {
-                              return Text('No $show mentor',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: screenWidth * 0.033,
-                                  ));
-                            }
-                            if (mentorDraftCards.isEmpty && mentorCards.isEmpty && show == 'archived') {
-                              return Text('No archived pending mentor',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: screenWidth * 0.033,
-                                  ));
-                            }
-                            if(show != 'archived'){
-                              return Text('Nothing follows',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: screenWidth * 0.033,
-                                  ));
-                            }
-                            return Text('',
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: screenWidth * 0.01,
-                                ));
+                            return OutlinedButton(
+                              onPressed: () {
+                                setState(() {
+                                  mentorCards = [];
+                                  show = 'active';
+                                  getMentors(show);
+                                });
+                              },
+                              style: OutlinedButton.styleFrom(
+                                backgroundColor: Color(int.parse(bg)),
+                                padding: EdgeInsets.only(top: 5, bottom: 5),
+                                textStyle: TextStyle(
+                                  fontSize: screenWidth * 0.04,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                side: BorderSide.none,
+                                foregroundColor: Color(int.parse(txt)),
+                              ),
+                              child: Text('Active'),
+                            );
                           },
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-          if(show == 'archived' && mentorDraftCards.isNotEmpty)
-            SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    left: screenWidth * 0.05,
-                    right: screenWidth * 0.05,
-                  ),
-                  child: Center(
-                    child: Column(
-                      children: [
-                        if (mentorDraftCards.isNotEmpty)
-                          for (var mentorCard in mentorDraftCards)
-                            MentorDraftCard(
-                              userModel: mentorCard.userModel,
-                              // onActionComplete: () => getMentors(show),
-                            ),
-                        SizedBox(height: 10),
-                        Builder(
+                      ),
+                      SizedBox(width: screenWidth * 0.03),
+
+                      // Archived Button
+                      SizedBox(
+                        height: screenHeight * 0.038,
+                        width: screenWidth * 0.22,
+                        child: Builder(
                           builder: (context) {
-                            if (isLoading) {
-                              return Text('');
+                            String bg = '0xFFa6a2a2';
+                            String txt = '0xFF4A4A4A';
+
+                            if (show == 'archived') {
+                              bg = '0xFF7eb3f7';
+                              txt = '0xFF0765e0';
                             }
-                            // if (mentorDraftCards.isEmpty) {
-                            //   return Text('No archived pending mentor',
-                            //       style: TextStyle(
-                            //         color: Colors.grey,
-                            //         fontSize: screenWidth * 0.033,
-                            //       ));
-                            // }
-                            return Text('Nothing follows',
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: screenWidth * 0.033,
-                                ));
+                            return OutlinedButton(
+                              onPressed: () {
+                                setState(() {
+                                  mentorCards = [];
+                                  show = 'archived';
+                                  getMentors(show);
+                                });
+                              },
+                              style: OutlinedButton.styleFrom(
+                                backgroundColor: Color(int.parse(bg)),
+                                padding: EdgeInsets.only(top: 5, bottom: 5),
+                                textStyle: TextStyle(
+                                  fontSize: screenWidth * 0.04,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                side: BorderSide.none,
+                                foregroundColor: Color(int.parse(txt)),
+                              ),
+                              child: Text('Archived'),
+                            );
                           },
                         ),
-                      ],
+                      ),
+                      SizedBox(width: screenWidth * 0.03),
+
+                      // Suspended Button
+                      SizedBox(
+                        height: screenHeight * 0.038,
+                        width: screenWidth * 0.27,
+                        child: Builder(
+                          builder: (context) {
+                            String bg = '0xFFa6a2a2';
+                            String txt = '0xFF4A4A4A';
+
+                            if (show == 'suspended') {
+                              bg = '0xFF7eb3f7';
+                              txt = '0xFF0765e0';
+                            }
+                            return OutlinedButton(
+                              onPressed: () {
+                                setState(() {
+                                  mentorCards = [];
+                                  show = 'suspended';
+                                  getMentors(show);
+                                });
+                              },
+                              style: OutlinedButton.styleFrom(
+                                backgroundColor: Color(int.parse(bg)),
+                                padding: EdgeInsets.only(top: 5, bottom: 5),
+                                textStyle: TextStyle(
+                                  fontSize: screenWidth * 0.04,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                side: BorderSide.none,
+                                foregroundColor: Color(int.parse(txt)),
+                              ),
+                              child: Text('Suspended'),
+                            );
+                          },
+                        ),
+                      ),
+                      Spacer(),
+
+                      // Add Mentor Button
+                      SizedBox(
+                        height: screenHeight * 0.035,
+                        child: IconButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const AddMentor()),
+                            );
+                          },
+                          padding: EdgeInsets.all(0),
+                          icon: Icon(Icons.add),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 10),
+
+                // List of Mentor Cards in Scrollable View
+                SingleChildScrollView(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      left: screenWidth * 0.05,
+                      right: screenWidth * 0.05,
+                    ),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          if (isLoading)
+                            Lottie.asset(
+                              'assets/images/loading.json',
+                              fit: BoxFit.cover,
+                              width: screenHeight * 0.08,
+                              height: screenWidth * 0.04,
+                              repeat: true,
+                            ),
+                          if (mentorCards.isNotEmpty)
+                            for (var mentorCard in filteredMentorCards)
+                              AdminMentorCard(
+                                mentorModel: mentorCard.mentorModel,
+                                userModel: mentorCard.userModel,
+                                mentor: mentorCard.mentor,
+                                email: mentorCard.email,
+                                studentId: mentorCard.studentId,
+                                schedule: mentorCard.schedule,
+                                course: mentorCard.course,
+                                onActionComplete: () => getMentors(show),
+                              ),
+                          // if (show == 'archived' && mentorDraftCards.isNotEmpty)
+                          //   for (var mentorCard in mentorDraftCards)
+                          //     MentorDraftCard(
+                          //       userModel: mentorCard.userModel,
+                          //       // onActionComplete: () => getMentors(show),
+                          //     ),
+                          SizedBox(height: 10),
+                          Builder(
+                            builder: (context) {
+                              if (isLoading) {
+                                return Text('');
+                              }
+                              if (mentorCards.isEmpty && show != 'archived') {
+                                return Text('No $show mentor',
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: screenWidth * 0.033,
+                                    ));
+                              }
+                              if (mentorDraftCards.isEmpty &&
+                                  mentorCards.isEmpty &&
+                                  show == 'archived') {
+                                return Text('No archived pending mentor',
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: screenWidth * 0.033,
+                                    ));
+                              }
+                              if (show != 'archived') {
+                                return Text('Nothing follows',
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: screenWidth * 0.033,
+                                    ));
+                              }
+                              return Text('',
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: screenWidth * 0.01,
+                                  ));
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-
-            ],
-          ),
-        ],
+                if (show == 'archived' && mentorDraftCards.isNotEmpty)
+                  SingleChildScrollView(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        left: screenWidth * 0.05,
+                        right: screenWidth * 0.05,
+                      ),
+                      child: Center(
+                        child: Column(
+                          children: [
+                            if (mentorDraftCards.isNotEmpty)
+                              for (var mentorCard in mentorDraftCards)
+                                MentorDraftCard(
+                                  userModel: mentorCard.userModel,
+                                  // onActionComplete: () => getMentors(show),
+                                ),
+                            SizedBox(height: 10),
+                            Builder(
+                              builder: (context) {
+                                if (isLoading) {
+                                  return Text('');
+                                }
+                                // if (mentorDraftCards.isEmpty) {
+                                //   return Text('No archived pending mentor',
+                                //       style: TextStyle(
+                                //         color: Colors.grey,
+                                //         fontSize: screenWidth * 0.033,
+                                //       ));
+                                // }
+                                return Text('Nothing follows',
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: screenWidth * 0.033,
+                                    ));
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
       ),
-    ),
     );
   }
 }
