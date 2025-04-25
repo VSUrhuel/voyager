@@ -214,7 +214,7 @@ class FirestoreInstance {
     }
   }
 
-  Future<CourseMentorModel> getCourseMentorThroughMentor(
+  Future<CourseMentorModel?> getCourseMentorThroughMentor(
       String mentorId) async {
     try {
       final courseMentor = await _db
@@ -223,11 +223,11 @@ class FirestoreInstance {
           .where('courseMentorSoftDeleted', isEqualTo: false)
           .limit(1)
           .get();
-      if (courseMentor.docs.isEmpty) {
-        throw Exception('No mentor found with ID: $mentorId');
-      }
+      // if (courseMentor.docs.isEmpty) {
+      //   throw Exception('No mentor found with ID: $mentorId');
+      // }
 
-      return CourseMentorModel.fromJson(courseMentor.docs.first.data());
+      return courseMentor.docs.isNotEmpty? CourseMentorModel.fromJson(courseMentor.docs.first.data()): null;
     } catch (e) {
       rethrow;
     }
@@ -643,7 +643,10 @@ class FirestoreInstance {
           .where((doc) => !ids.contains(doc.data()['accountApiID']))
           .map((doc) => UserModel.fromJson(doc.data()))
           .toList();
-      print(filteredUsers[0].accountApiName);
+          // print(filteredUsers[0].accountApiName);
+          if(filteredUsers.isEmpty){ 
+            return [];
+          }
       return filteredUsers;
     } catch (e) {
       rethrow;
@@ -1046,14 +1049,16 @@ class FirestoreInstance {
   Future<void> updateInitialCourseMentor(
       String email, String newMentorId) async {
     try {
-      CourseMentorModel courseMentor =
+      CourseMentorModel? courseMentor =
           await getCourseMentorThroughMentor(email);
+          if (courseMentor != null) {
       await _db
           .collection('courseMentor')
           .doc(courseMentor.courseMentorId)
           .update({
         'mentorId': newMentorId,
       });
+      }
     } catch (e) {
       rethrow;
     }

@@ -56,6 +56,8 @@ class _AddCourseState extends State<AddCourse> {
     final GlobalKey<CoverPhotoPickerState> pickerKey = GlobalKey();
 
     return SafeArea(
+      bottom: true,
+      top: false,
         child: Scaffold(
             resizeToAvoidBottomInset: false,
             appBar: AppBar(
@@ -164,17 +166,20 @@ class _AddCourseState extends State<AddCourse> {
                                 padding:
                                     EdgeInsets.only(top: screenHeight * 0.02),
                                 child: TextFormField(
-                                  controller:
-                                      _courseController.courseDescription,
+                                  controller: _courseController.courseDescription,
                                   style: TextStyle(
                                     fontSize: screenWidth * 0.04,
                                   ),
+                                  keyboardType: TextInputType.multiline,
+                                  maxLines: null, 
+                                  minLines: 1,  
                                   decoration: InputDecoration(
                                     contentPadding: EdgeInsets.only(
-                                        left: screenWidth * 0.05,
-                                        top: screenHeight * 0.016,
-                                        bottom: screenHeight * 0.016),
-                                    labelText: 'Enter Course Description ',
+                                      left: screenWidth * 0.05,
+                                      top: screenHeight * 0.016,
+                                      bottom: screenHeight * 0.016,
+                                    ),
+                                    labelText: 'Enter Course Description',
                                     labelStyle: TextStyle(
                                       fontSize: screenWidth * 0.04,
                                       height: 1,
@@ -186,6 +191,7 @@ class _AddCourseState extends State<AddCourse> {
                                     ),
                                   ),
                                 ),
+
                               ),
                               Container(
                                 padding:
@@ -239,7 +245,7 @@ class _AddCourseState extends State<AddCourse> {
                                       child: ListTile(
                                         title: Text(_courseController.courseDeliverables[index]),
                                         trailing: IconButton(
-                                          icon: Icon(Icons.delete),
+                                          icon: Icon(Icons.delete, color: Colors.red,),
                                           onPressed: () {
                                             setState(() {
                                               _courseController.courseDeliverables.removeAt(index);

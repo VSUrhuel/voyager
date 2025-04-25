@@ -124,7 +124,8 @@ class _NotificationContentCardState extends State<NotificationContentCard> {
     final mentor = await firestoreInstance.getMentor(mentorId);
     final courseMentor =
         await firestoreInstance.getCourseMentorThroughMentor(mentor.mentorId);
-    final course = await firestoreInstance.getCourse(courseMentor.courseId);
+    
+    final course = await firestoreInstance.getCourse(courseMentor!.courseId);
     final user = await firestoreInstance.getUser(mentor.accountId);
     setState(() {
       mentorName = _formatMentorName(user.accountApiName);

@@ -1,3 +1,4 @@
+import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/admin/widgets/admin_initial_mentor_draft.dart';
 import 'package:voyager/src/features/admin/widgets/admin_mentor_card.dart';
 import 'package:voyager/src/features/admin/widgets/admin_search_bar.dart';
@@ -77,7 +78,7 @@ class _MentorListState extends State<MentorList> {
           onActionComplete: () => getMentors(show),
         ));
       }
-      if (show == 'archived'){
+      if (show == 'archived' && initUser.isNotEmpty) {
 
         for (int i = 0; i < initUser.length; i++){
           var user = initUser[i];
@@ -114,7 +115,10 @@ class _MentorListState extends State<MentorList> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    return Scaffold(
+    return SafeArea(
+      bottom: true,
+      top: false,
+      child: Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle.dark,
@@ -178,6 +182,7 @@ class _MentorListState extends State<MentorList> {
                           return OutlinedButton(
                             onPressed: () {
                               setState(() {
+                                mentorCards = [];
                                 show = 'active';
                                 getMentors(show);
                               });
@@ -215,6 +220,7 @@ class _MentorListState extends State<MentorList> {
                           return OutlinedButton(
                             onPressed: () {
                               setState(() {
+                                mentorCards=[];
                                 show = 'archived';
                                 getMentors(show);
                               });
@@ -252,6 +258,7 @@ class _MentorListState extends State<MentorList> {
                           return OutlinedButton(
                             onPressed: () {
                               setState(() {
+                                mentorCards = [];
                                 show = 'suspended';
                                 getMentors(show);
                               });
@@ -303,7 +310,13 @@ class _MentorListState extends State<MentorList> {
                   child: Center(
                     child: Column(
                       children: [
-                        if (isLoading) LinearProgressIndicator(),
+                        if (isLoading) Lottie.asset(
+                          'assets/images/loading.json',
+                          fit: BoxFit.cover,
+                          width: screenWidth * 0.6,
+                          height: screenWidth * 0.4,
+                          repeat: true,
+                        ),
                         if (mentorCards.isNotEmpty)
                           for (var mentorCard in filteredMentorCards)
                             AdminMentorCard(
@@ -361,7 +374,7 @@ class _MentorListState extends State<MentorList> {
                   ),
                 ),
               ),
-          if(show == 'archived')
+          if(show == 'archived' && mentorDraftCards.isNotEmpty)
             SingleChildScrollView(
                 child: Padding(
                   padding: EdgeInsets.only(
@@ -407,6 +420,7 @@ class _MentorListState extends State<MentorList> {
           ),
         ],
       ),
+    ),
     );
   }
 }
