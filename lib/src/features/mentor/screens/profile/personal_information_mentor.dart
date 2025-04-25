@@ -239,7 +239,59 @@ class _MentorPersonalInformationState extends State<MentorPersonalInformation> {
                             // Experience Section with New UI
 
                             const SizedBox(height: 20),
-
+                            const SizedBox(height: 20),
+                            _sectionTitle("Regular Schedule"),
+                            Wrap(
+                              spacing: 8.0,
+                              runSpacing: 8.0,
+                              children: mentorModel.mentorRegDay.map((day) {
+                                return Chip(
+                                  label: Text(
+                                    day,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                  ),
+                                  backgroundColor: Theme.of(context)
+                                      .primaryColor
+                                      .withOpacity(0.1),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  side: BorderSide(
+                                    color: Theme.of(context)
+                                        .primaryColor
+                                        .withOpacity(0.3),
+                                    width: 1,
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 12.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Icon(
+                                    Icons.access_time,
+                                    size: 20,
+                                    color: Colors.grey[600],
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '${mentorModel.mentorRegStartTime.format(context)} - ${mentorModel.mentorRegEndTime.format(context)}',
+                                    style: TextStyle(
+                                      fontSize: 17,
+                                      color: Colors.grey[800],
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 20),
                             // Language Known
                             _sectionTitle("Language Known"),
                             Wrap(

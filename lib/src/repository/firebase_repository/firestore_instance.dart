@@ -824,16 +824,38 @@ class FirestoreInstance {
 
 // 2. Fix the logic for filtering allocations
       if (status != 'rejected') {
+        final Set<String> uniqueMenteeIds = {};
         validAllocations = allocationQuery.docs.where((doc) {
           final data = doc.data();
-          return data['mcaSoftDeleted'] != true &&
+          final menteeId = data['menteeId'];
+          if (menteeId == null || uniqueMenteeIds.contains(menteeId)) {
+            return false;
+          }
+          final meetsConditions = data['mcaSoftDeleted'] != true &&
               data['mcaAllocStatus'] == status;
+
+          if (meetsConditions) {
+            uniqueMenteeIds.add(menteeId);
+          }
+
+          return meetsConditions;
         }).toList();
       } else {
+        final Set<String> uniqueMenteeIds = {};
         validAllocations = allocationQuery.docs.where((doc) {
           final data = doc.data();
-          return data['mcaSoftDeleted'] == true ||
-              data['mcaAllocStatus'] == 'rejected';
+          final menteeId = data['menteeId'];
+          if (menteeId == null || uniqueMenteeIds.contains(menteeId)) {
+            return false;
+          }
+          final meetsConditions = data['mcaSoftDeleted'] != true ||
+              data['mcaAllocStatus'] == status;
+
+          if (meetsConditions) {
+            uniqueMenteeIds.add(menteeId);
+          }
+
+          return meetsConditions;
         }).toList();
       }
 
@@ -1193,10 +1215,10 @@ class FirestoreInstance {
   Future<String> getMenteeStatus(String mcaId) async {
     try {
       final mentee = await _db.collection('menteeCourseAlloc').doc(mcaId).get();
-      if (mentee.exists) {
+      if (mentee.exists && mentee.data()?['mcaSoftDeleted'] == false) {
         return mentee.data()!['mcaAllocStatus'];
       } else {
-        throw Exception('Mentee not found');
+        return 'rejected';
       }
     } catch (e) {
       rethrow;
