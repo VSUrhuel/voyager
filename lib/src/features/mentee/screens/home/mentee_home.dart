@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
+import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/controller/mentee_controller.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
