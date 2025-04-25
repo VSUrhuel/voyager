@@ -2,6 +2,7 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:voyager/src/features/mentor/screens/profile/mentor_profile.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
@@ -23,7 +24,8 @@ class MentorHome extends StatefulWidget {
   _MentorHomeState createState() => _MentorHomeState();
 }
 
-class _MentorHomeState extends State<MentorHome> {
+class _MentorHomeState extends State<MentorHome>
+    with SingleTickerProviderStateMixin {
   MenteeListController menteeListController = MenteeListController();
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
@@ -123,29 +125,55 @@ class _MentorHomeState extends State<MentorHome> {
               ],
             ),
             actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 16.0),
-                child: IconButton(
-                  icon: Container(
-                    padding: const EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Theme.of(context).primaryColor.withOpacity(0.1),
-                    ),
-                    child: Icon(Icons.edit,
-                        color: Theme.of(context).primaryColor,
-                        size: screenWidth * 0.065),
-                  ),
-                  onPressed: () {
-                    // Handle the button press here
-                    Navigator.push(
-                      context,
-                      CustomPageRoute(
-                        page: CreatePost(),
-                        direction: AxisDirection.left,
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 1.0, end: 1.0),
+                duration: Duration(milliseconds: 200),
+                builder: (context, scale, child) {
+                  return Transform.scale(
+                    scale: scale,
+                    child: child,
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: IconButton(
+                    icon: Container(
+                      padding: const EdgeInsets.all(10.0),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [
+                            Theme.of(context).primaryColor.withOpacity(0.15),
+                            Theme.of(context).primaryColor.withOpacity(0.25),
+                          ],
+                        ),
                       ),
-                    ).then((_) => _refreshIndicatorKey.currentState?.show());
-                  },
+                      child: Icon(
+                        FontAwesomeIcons
+                            .solidPenToSquare, // Alternative solid version
+                        color: Theme.of(context).primaryColor,
+                        size: screenWidth * 0.05,
+                      ),
+                    ),
+                    onPressed: () {
+                      // Scale animation on press
+                      final animationController = AnimationController(
+                        vsync: this,
+                        duration: Duration(milliseconds: 100),
+                      );
+                      animationController
+                          .forward()
+                          .then((_) => animationController.reverse());
+
+                      Navigator.push(
+                        context,
+                        CustomPageRoute(
+                          page: CreatePost(),
+                          direction: AxisDirection.left,
+                        ),
+                      ).then((_) => _refreshIndicatorKey.currentState?.show());
+                    },
+                  ),
                 ),
               ),
             ],

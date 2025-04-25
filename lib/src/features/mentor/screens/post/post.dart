@@ -1,3 +1,4 @@
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:voyager/src/features/mentor/controller/post_controller.dart';
 import 'package:voyager/src/features/mentor/controller/video_controller.dart';
@@ -16,7 +17,7 @@ class Post extends StatefulWidget {
   State<Post> createState() => _PostState();
 }
 
-class _PostState extends State<Post> {
+class _PostState extends State<Post> with SingleTickerProviderStateMixin {
   final PostController postController = Get.put(PostController());
   final ScrollController _scrollController = ScrollController();
   bool _isLoadingMore = false;
@@ -112,29 +113,55 @@ class _PostState extends State<Post> {
               ],
             ),
             actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 16.0),
-                child: IconButton(
-                  icon: Container(
-                    padding: const EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Theme.of(context).primaryColor.withOpacity(0.1),
-                    ),
-                    child: Icon(Icons.edit,
-                        color: Theme.of(context).primaryColor,
-                        size: screenWidth * 0.065),
-                  ),
-                  onPressed: () {
-                    // Handle the button press here
-                    Navigator.push(
-                      context,
-                      CustomPageRoute(
-                        page: CreatePost(),
-                        direction: AxisDirection.left,
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 1.0, end: 1.0),
+                duration: Duration(milliseconds: 200),
+                builder: (context, scale, child) {
+                  return Transform.scale(
+                    scale: scale,
+                    child: child,
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: IconButton(
+                    icon: Container(
+                      padding: const EdgeInsets.all(10.0),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [
+                            Theme.of(context).primaryColor.withOpacity(0.15),
+                            Theme.of(context).primaryColor.withOpacity(0.25),
+                          ],
+                        ),
                       ),
-                    );
-                  },
+                      child: Icon(
+                        FontAwesomeIcons
+                            .solidPenToSquare, // Alternative solid version
+                        color: Theme.of(context).primaryColor,
+                        size: screenWidth * 0.05,
+                      ),
+                    ),
+                    onPressed: () {
+                      // Scale animation on press
+                      final animationController = AnimationController(
+                        vsync: this,
+                        duration: Duration(milliseconds: 100),
+                      );
+                      animationController
+                          .forward()
+                          .then((_) => animationController.reverse());
+
+                      Navigator.push(
+                        context,
+                        CustomPageRoute(
+                          page: CreatePost(),
+                          direction: AxisDirection.left,
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
