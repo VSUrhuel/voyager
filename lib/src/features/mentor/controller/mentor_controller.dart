@@ -93,12 +93,13 @@ class MentorController extends GetxController {
         mentorID = FirestoreInstance().generateUniqueId();
       }
 
-    String status = 'archived';
-      final CourseMentorModel? courseMentor =
-          await FirestoreInstance().getCourseMentorThroughMentor(FirestoreInstance().getFirebaseUser().email.toString());
+      String status = 'archived';
+      final CourseMentorModel? courseMentor = await FirestoreInstance()
+          .getCourseMentorThroughMentor(
+              FirestoreInstance().getFirebaseUser().email.toString());
       if (courseMentor != null) {
-            status = 'active';
-        }
+        status = 'active';
+      }
 
       final mentor = MentorModel(
         mentorId: mentorID,
@@ -160,7 +161,7 @@ class MentorController extends GetxController {
         mentorRegDay: selectedDays,
         mentorRegStartTime: parseTime(mentorRegStartTime.text),
         mentorRegEndTime: parseTime(mentorRegEndTime.text),
-        mentorStatus: mentorStatus.text == '' ? 'archived' : mentorStatus.text,
+        mentorStatus: 'active',
         mentorSoftDeleted: false,
       );
       final firestore = FirestoreInstance();
