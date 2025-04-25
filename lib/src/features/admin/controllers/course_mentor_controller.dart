@@ -31,8 +31,8 @@ Future<void> updateCourseMentor(String courseMentorId) async {
 
 Future<CourseMentorModel> findCourseMentorByMentorId(String mentorId) async {
   FirestoreInstance firestoreInstance = FirestoreInstance();
-  CourseMentorModel courseMentor = await firestoreInstance.getCourseMentorThroughMentor(mentorId);
-  return courseMentor;
+  CourseMentorModel? courseMentor = await firestoreInstance.getCourseMentorThroughMentor(mentorId);
+  return courseMentor!;
 }
 
 Future<List<CourseMentorModel>> getCourseMentors(String courseId) async {

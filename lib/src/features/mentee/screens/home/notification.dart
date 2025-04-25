@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/mentee/controller/notification_controller.dart';
 import 'package:voyager/src/features/mentee/widgets/notification_content_card.dart';
 import 'package:voyager/src/features/mentor/model/content_model.dart';
@@ -96,32 +97,39 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       ),
                     ),
 
-                    /// Today's Notifications
-                    FutureBuilder<List<PostContentModel>>(
-                      future: todayPostsFuture,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const SliverToBoxAdapter(
-                            child: Center(child: CircularProgressIndicator()),
-                          );
-                        }
-                        if (snapshot.hasError) {
-                          return const SliverToBoxAdapter(
-                            child: Text("Error loading today's notifications."),
-                          );
-                        }
-                        if (snapshot.data == null || snapshot.data!.isEmpty) {
-                          return const SliverToBoxAdapter(
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: 20),
-                              child: Text(
-                                "No new notifications today",
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                            ),
-                          );
-                        }
+                /// Today's Notifications
+                FutureBuilder<List<PostContentModel>>(
+                  future: todayPostsFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return SliverToBoxAdapter(
+                        child: Center(
+                          child: Lottie.asset(
+                            'assets/images/loading.json',
+                            fit: BoxFit.cover,
+                            width: screenHeight * 0.08,
+                            height: screenWidth * 0.04,
+                            repeat: true,
+                          ),
+                        ),
+                      );
+                    }
+                    if (snapshot.hasError) {
+                      return const SliverToBoxAdapter(
+                        child: Text("Error loading today's notifications."),
+                      );
+                    }
+                    if (snapshot.data == null || snapshot.data!.isEmpty) {
+                      return const SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20),
+                          child: Text(
+                            "No new notifications today",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ),
+                      );
+                    }
 
                         return SliverList(
                           delegate: SliverChildBuilderDelegate(
@@ -151,33 +159,39 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       ),
                     ),
 
-                    /// Previous Notifications with Pagination
-                    FutureBuilder<List<PostContentModel>>(
-                      future: previousPostsFuture,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const SliverToBoxAdapter(
-                            child: Center(child: CircularProgressIndicator()),
-                          );
-                        }
-                        if (snapshot.hasError) {
-                          return const SliverToBoxAdapter(
-                            child:
-                                Text("Error loading previous notifications."),
-                          );
-                        }
-                        if (snapshot.data == null || snapshot.data!.isEmpty) {
-                          return const SliverToBoxAdapter(
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: 20),
-                              child: Text(
-                                "No earlier notifications",
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                            ),
-                          );
-                        }
+                /// Previous Notifications with Pagination
+                FutureBuilder<List<PostContentModel>>(
+                  future: previousPostsFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return SliverToBoxAdapter(
+                        child: Center(
+                          child: Lottie.asset(
+                            'assets/images/loading.json',
+                            fit: BoxFit.cover,
+                            width: screenHeight * 0.08,
+                            height: screenWidth * 0.04,
+                            repeat: true,
+                          ),
+                        ),
+                      );
+                    }
+                    if (snapshot.hasError) {
+                      return const SliverToBoxAdapter(
+                        child: Text("Error loading previous notifications."),
+                      );
+                    }
+                    if (snapshot.data == null || snapshot.data!.isEmpty) {
+                      return const SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20),
+                          child: Text(
+                            "No earlier notifications",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ),
+                      );
+                    }
 
                         final allPrevious = snapshot.data!;
                         final visible =

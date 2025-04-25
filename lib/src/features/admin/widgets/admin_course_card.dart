@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/admin/controllers/course_controller.dart';
 import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/admin/screens/courses/course_details.dart';
@@ -33,7 +34,13 @@ class AdminCourseCard extends StatelessWidget {
       future: firestoreInstance.getMenteeAccountsForCourse(course.docId, 'accepted'),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const LinearProgressIndicator();
+          return Lottie.asset(
+          'assets/images/loading.json',
+          fit: BoxFit.cover,
+          width: screenWidth * 0.6,
+          height: screenWidth * 0.4,
+          repeat: true,
+        );
         } else if (snapshot.hasError) {
           return const Center(child: Text('Error loading mentees'));
         }
