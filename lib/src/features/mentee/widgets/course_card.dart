@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
@@ -65,7 +66,7 @@ class _CourseCardState extends State<CourseCard> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     final endDate = DateFormat('MMM dd, yyyy')
-        .format(widget.courseModel.courseModifiedTimestamp);
+        .format(widget.courseModel.courseModifiedTimestamp as DateTime);
 
     return FutureBuilder<int>(
       future: totalMentorsFuture,
@@ -160,7 +161,8 @@ class _CourseCardState extends State<CourseCard> {
                                   _buildStatItem(
                                     icon: Icons.group,
                                     value: '$totalMentor',
-                                    label: 'Mentors',
+                                    label:
+                                        totalMentor > 1 ? 'Mentors' : 'Mentor',
                                     theme: theme,
                                   ),
                                   FutureBuilder<int>(
@@ -171,7 +173,9 @@ class _CourseCardState extends State<CourseCard> {
                                       return _buildStatItem(
                                         icon: FontAwesomeIcons.users,
                                         value: '$menteeCount',
-                                        label: 'Mentee',
+                                        label: menteeCount > 1
+                                            ? 'Mentees'
+                                            : 'Mentee',
                                         theme: theme,
                                       );
                                     },

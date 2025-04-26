@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/admin/controllers/course_controller.dart';
 import 'package:voyager/src/features/admin/widgets/cover_photo_picker.dart';
 import 'package:voyager/src/widgets/custom_button.dart';
@@ -314,8 +315,15 @@ class _AddCourseState extends State<AddCourse> {
                           showDialog(
                             context: currentContext,
                             barrierDismissible: false,
-                            builder: (_) => const Center(
-                                child: CircularProgressIndicator()),
+                            builder: (_) => Center(
+                                child: Lottie.asset(
+                                  'assets/images/loading.json',
+                                  fit: BoxFit.cover,
+                                  width: screenHeight * 0.08,
+                                  height: screenWidth * 0.04,
+                                  repeat: true,
+                                ),
+                              ),
                           );
                           await _courseController.createCourse();
                           _courseController.courseCode.clear();

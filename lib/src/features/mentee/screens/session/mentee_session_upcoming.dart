@@ -163,7 +163,7 @@ class _MenteeSessionUpcomingState extends State<MenteeSessionUpcoming> {
     }
 
     return SizedBox(
-      height: screenHeight * 0.65,
+      height: screenHeight * 0.55,
       child: content,
     );
   }

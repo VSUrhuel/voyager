@@ -1046,6 +1046,22 @@ class FirestoreInstance {
     }
   }
 
+    Future<void> setInitCourseMentor(String courseId, String mentorId) async {
+    try {
+      String uniqueID = generateUniqueId();
+      final cm = CourseMentorModel(
+        courseMentorId: uniqueID,
+        courseId: courseId,
+        mentorId: mentorId,
+        courseMentorCreatedTimestamp: DateTime.now(),
+        courseMentorSoftDeleted: true,
+      );
+      await _db.collection('courseMentor').doc(uniqueID).set(cm.toJson());
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> updateInitialCourseMentor(
       String email, String newMentorId) async {
     try {
@@ -1057,6 +1073,7 @@ class FirestoreInstance {
           .doc(courseMentor.courseMentorId)
           .update({
         'mentorId': newMentorId,
+        'courseMentorSoftDeleted': false,
       });
       }
     } catch (e) {
@@ -1069,6 +1086,7 @@ class FirestoreInstance {
     try {
       final courseMentors = await _db
           .collection('courseMentor')
+          .where('courseMentorSoftDeleted', isEqualTo: false)
           .where('courseId', isEqualTo: courseId)
           .get();
       return courseMentors.docs

@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/controller/mentee_controller.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
@@ -20,7 +19,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class MenteeHome extends StatefulWidget {
-  const MenteeHome({super.key});
+  final VoidCallback onProfileTap; // 👈 Accepts callback for profile tap
+  const MenteeHome({super.key, required this.onProfileTap});
 
   @override
   _MenteeHomeState createState() => _MenteeHomeState();
@@ -147,7 +147,6 @@ class _MenteeHomeState extends State<MenteeHome> {
         final enrolledCourseMentorIds =
             await getCourseMentorIdsForMentee(menteeId);
 
-        //Problem
         print("❌ Enrolled in: $enrolledCourseMentorIds");
         List<CourseModel> enrolledCourses = [];
         for (String mentorId in enrolledCourseMentorIds) {
@@ -183,11 +182,32 @@ class _MenteeHomeState extends State<MenteeHome> {
   }
 
   String getName(String? name) {
+    print("❌ Name: $name");
     if (name == null || name.isEmpty) return "User";
     List<String> names = name.split(' ');
     return names.length > 1
         ? names.sublist(0, names.length - 1).join(' ')
         : name;
+  }
+
+  String formatName(String fullName) {
+    if (fullName.isEmpty) return "John Doe";
+
+    fullName = fullName.trim().replaceAll(RegExp(r'\s+'), ' ');
+    List<String> nameParts = fullName.split(" ");
+
+    if (nameParts.isEmpty) return "John Doe";
+
+    List<String> givenNames =
+        nameParts.length >= 2 ? nameParts.sublist(0, 2) : [nameParts.first];
+
+    String formattedName = givenNames
+        .map((name) => name.isNotEmpty
+            ? name[0].toUpperCase() + name.substring(1).toLowerCase()
+            : "")
+        .join(" ");
+
+    return formattedName.trim().isNotEmpty ? formattedName.trim() : "John Doe";
   }
 
   @override
@@ -207,12 +227,8 @@ class _MenteeHomeState extends State<MenteeHome> {
             title: Row(
               children: [
                 GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => MenteeProfile()),
-                    );
-                  },
+                  onTap: widget
+                      .onProfileTap, // 👈 Taps Profile, switches to MenteeProfile tab
                   child: CircleAvatar(
                     radius: 25,
                     backgroundImage: user?.photoURL != null
@@ -225,7 +241,7 @@ class _MenteeHomeState extends State<MenteeHome> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Hello, ${getName(user?.displayName)}!',
+                      'Hello, ${formatName(getName(user?.displayName))}!',
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 18,
@@ -269,10 +285,11 @@ class _MenteeHomeState extends State<MenteeHome> {
               });
             },
             child: SingleChildScrollView(
-              physics:
-                  AlwaysScrollableScrollPhysics(), // Ensures pull-to-refresh works even if content is short
+              physics: AlwaysScrollableScrollPhysics(),
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+                padding: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.05,
+                    vertical: screenHeight * 0.02),
                 child: Center(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -307,7 +324,7 @@ class _MenteeHomeState extends State<MenteeHome> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Featured Courses',
+                            'Courses',
                             style: TextStyle(
                               fontSize: screenHeight * 0.02,
                               fontWeight: FontWeight.bold,
@@ -328,13 +345,20 @@ class _MenteeHomeState extends State<MenteeHome> {
                           ),
                         ],
                       ),
-                      // Updated HorizontalWidgetSlider for Courses
                       FutureBuilder<List<CourseCard>>(
                         future: fetchCoursesWithDetails(user?.email ?? ''),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return Center(child: CircularProgressIndicator());
+                            return Center(
+                              child: Lottie.asset(
+                                'assets/images/loading.json',
+                                fit: BoxFit.cover,
+                                width: screenHeight * 0.08,
+                                height: screenWidth * 0.04,
+                                repeat: true,
+                              ),
+                            );
                           }
                           if (snapshot.hasError ||
                               !snapshot.hasData ||
@@ -351,7 +375,7 @@ class _MenteeHomeState extends State<MenteeHome> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Featured Mentors',
+                            'Mentors',
                             style: TextStyle(
                               fontSize: screenHeight * 0.02,
                               fontWeight: FontWeight.bold,
@@ -372,13 +396,20 @@ class _MenteeHomeState extends State<MenteeHome> {
                           ),
                         ],
                       ),
-                      // HorizontalWidgetSliderMentor for Mentors
                       FutureBuilder<List<MentorCard>>(
                         future: fetchMentorsWithDetails(),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return Center(child: CircularProgressIndicator());
+                            return Center(
+                              child: Lottie.asset(
+                                'assets/images/loading.json',
+                                fit: BoxFit.cover,
+                                width: screenHeight * 0.08,
+                                height: screenWidth * 0.04,
+                                repeat: true,
+                              ),
+                            );
                           }
                           if (snapshot.hasError ||
                               !snapshot.hasData ||
@@ -390,7 +421,6 @@ class _MenteeHomeState extends State<MenteeHome> {
                           );
                         },
                       ),
-                      SizedBox(height: screenHeight * 0.02),
                     ],
                   ),
                 ),

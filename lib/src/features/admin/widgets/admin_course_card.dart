@@ -34,14 +34,22 @@ class AdminCourseCard extends StatelessWidget {
       future: firestoreInstance.getMenteeAccountsForCourse(course.docId, 'accepted'),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Lottie.asset(
-          'assets/images/loading.json',
-          fit: BoxFit.cover,
-          width: screenWidth * 0.6,
-          height: screenWidth * 0.4,
-          repeat: true,
-        );
-        } else if (snapshot.hasError) {
+          return Column(
+            children: [
+              SizedBox( height: screenHeight * 0.05,),
+               Lottie.asset(
+                'assets/images/loading.json',
+                fit: BoxFit.cover,
+                width: screenHeight * 0.08,
+                height: screenWidth * 0.04,
+                repeat: true,
+              ),
+              SizedBox( height: screenHeight * 0.1,)
+            ],
+          );
+         
+        } else 
+        if (snapshot.hasError ) {
           return const Center(child: Text('Error loading mentees'));
         }
 
