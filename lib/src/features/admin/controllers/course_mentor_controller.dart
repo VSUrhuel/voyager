@@ -12,7 +12,7 @@ final mentorId = TextEditingController();
 
 Future<void> createInitialCourseMentor() async {
   FirestoreInstance firestoreInstance = FirestoreInstance();
-  await firestoreInstance.setCourseMentor(courseId.text, mentorId.text);
+  await firestoreInstance.setInitCourseMentor(courseId.text, mentorId.text);
   courseId.clear();
   mentorId.clear();
 }
