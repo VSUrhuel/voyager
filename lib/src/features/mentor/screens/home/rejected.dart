@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/controller/mentee_list_controller.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
@@ -83,8 +84,15 @@ class _RejectedListState extends State<RejectedList> {
                             ConnectionState.waiting) {
                           return SizedBox(
                               height: screenHeight * 0.25,
-                              child: const Center(
-                                  child: CircularProgressIndicator()));
+                              child: Center(
+                                  child: Center(
+                                      child: Lottie.asset(
+                                'assets/images/loading.json',
+                                fit: BoxFit.cover,
+                                width: screenWidth * 0.2,
+                                height: screenWidth * 0.2,
+                                repeat: true,
+                              ))));
                         }
                         refreshRejectedMentees(); // Refresh accepted mentees after loading
                         return const Center(
@@ -94,13 +102,39 @@ class _RejectedListState extends State<RejectedList> {
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Text(
-                      'No rejected mentees',
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: screenWidth * 0.033,
-                      ),
-                    );
+                    return Center(
+                        child: SingleChildScrollView(
+                            child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Lottie.asset(
+                          'assets/images/empty-list.json', // Consider adding a dedicated empty state animation
+                          width: screenWidth * 0.25,
+                          height: screenWidth * 0.25,
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'No Rejected Mentees',
+                          style: TextStyle(
+                            fontSize: screenWidth * 0.04,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[800],
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'When there are rejected requests,\nthey will appear here',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: screenWidth * 0.033,
+                            color: Colors.grey[600],
+                            height: 1.4,
+                          ),
+                        ),
+                        SizedBox(height: 24),
+                      ],
+                    )));
                   } else {
                     return SizedBox(
                         height: screenHeight *

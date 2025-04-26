@@ -227,7 +227,9 @@ class FirestoreInstance {
       //   throw Exception('No mentor found with ID: $mentorId');
       // }
 
-      return courseMentor.docs.isNotEmpty? CourseMentorModel.fromJson(courseMentor.docs.first.data()): null;
+      return courseMentor.docs.isNotEmpty
+          ? CourseMentorModel.fromJson(courseMentor.docs.first.data())
+          : null;
     } catch (e) {
       rethrow;
     }
@@ -242,7 +244,7 @@ class FirestoreInstance {
           .limit(1)
           .get();
       if (courseMentor.docs.isEmpty) {
-        throw Exception('No mentor found with ID: $mentorId');
+        return '';
       }
 
       return courseMentor.docs.first.id;
@@ -643,10 +645,10 @@ class FirestoreInstance {
           .where((doc) => !ids.contains(doc.data()['accountApiID']))
           .map((doc) => UserModel.fromJson(doc.data()))
           .toList();
-          // print(filteredUsers[0].accountApiName);
-          if(filteredUsers.isEmpty){ 
-            return [];
-          }
+      // print(filteredUsers[0].accountApiName);
+      if (filteredUsers.isEmpty) {
+        return [];
+      }
       return filteredUsers;
     } catch (e) {
       rethrow;
@@ -814,7 +816,9 @@ class FirestoreInstance {
       final mentor = await getMentorThroughAccId(
           firebase_auth.FirebaseAuth.instance.currentUser!.uid);
       final courseMentor = await getCourseMentorDocId(mentor.mentorId);
-
+      if (courseMentor == '') {
+        return [];
+      }
       // 2. Query mentee allocations with client-side soft delete filtering
       final allocationQuery = await _db
           .collection('menteeCourseAlloc')
@@ -877,6 +881,24 @@ class FirestoreInstance {
       return users.whereType<UserModel>().toList();
     } catch (e) {
       debugPrint('Error fetching mentees: $e');
+      rethrow;
+    }
+  }
+
+  Future<bool> checkCourseAllocation() async {
+    try {
+      final mentor = await getMentorThroughAccId(
+          firebase_auth.FirebaseAuth.instance.currentUser!.uid);
+      final courseMentor = await getCourseMentorDocId(mentor.mentorId);
+      if (courseMentor == '') {
+        return false;
+      }
+      final allocationQuery = await _db
+          .collection('menteeCourseAlloc')
+          .where('courseMentorId', isEqualTo: courseMentor)
+          .get();
+      return allocationQuery.docs.isNotEmpty;
+    } catch (e) {
       rethrow;
     }
   }
@@ -1046,7 +1068,7 @@ class FirestoreInstance {
     }
   }
 
-    Future<void> setInitCourseMentor(String courseId, String mentorId) async {
+  Future<void> setInitCourseMentor(String courseId, String mentorId) async {
     try {
       String uniqueID = generateUniqueId();
       final cm = CourseMentorModel(
@@ -1067,14 +1089,14 @@ class FirestoreInstance {
     try {
       CourseMentorModel? courseMentor =
           await getCourseMentorThroughMentor(email);
-          if (courseMentor != null) {
-      await _db
-          .collection('courseMentor')
-          .doc(courseMentor.courseMentorId)
-          .update({
-        'mentorId': newMentorId,
-        'courseMentorSoftDeleted': false,
-      });
+      if (courseMentor != null) {
+        await _db
+            .collection('courseMentor')
+            .doc(courseMentor.courseMentorId)
+            .update({
+          'mentorId': newMentorId,
+          'courseMentorSoftDeleted': false,
+        });
       }
     } catch (e) {
       rethrow;
