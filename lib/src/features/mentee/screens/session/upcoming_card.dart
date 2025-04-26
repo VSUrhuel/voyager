@@ -3,13 +3,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart'; // Import Lottie
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/model/schedule_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 
 class UpcomingCard extends StatefulWidget {
-  const UpcomingCard(
-      {super.key, required this.email, required this.scheduleModel});
+  const UpcomingCard({
+    super.key,
+    required this.email,
+    required this.scheduleModel,
+  });
+
   final String email;
   final ScheduleModel scheduleModel;
 
@@ -24,22 +29,29 @@ class _UpcomingCardState extends State<UpcomingCard> {
   Widget build(BuildContext context) {
     final Future<UserModel> userName =
         firestoreInstance.getUserThroughEmail(widget.email);
+
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: FutureBuilder<UserModel>(
         future: userName,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator(); // Show a loading indicator
+            return Center(
+              child: Lottie.asset(
+                'assets/images/loading.json',
+                width: MediaQuery.of(context).size.width * 0.3,
+                height: MediaQuery.of(context).size.width * 0.3,
+              ),
+            );
           } else if (snapshot.hasError) {
-            return const Text('Error loading user data'); // Handle error
+            return const Text('Error loading user data');
           } else if (snapshot.hasData) {
             return MeetingCard(
               scheduleModel: widget.scheduleModel,
               email: snapshot.data!.accountApiName,
             );
           } else {
-            return const Text('No user data available'); // Handle no data
+            return const Text('No user data available');
           }
         },
       ),
@@ -49,27 +61,19 @@ class _UpcomingCardState extends State<UpcomingCard> {
 
 String formatName(String fullName) {
   if (fullName.isEmpty) return "John Doe";
-  // Trim and remove extra spaces
   fullName = fullName.trim().replaceAll(RegExp(r'\s+'), ' ');
   List<String> nameParts = fullName.split(" ");
 
   if (nameParts.isEmpty) return "John Doe";
 
-  // Handle single name
   if (nameParts.length == 1) {
-    return nameParts[0].isNotEmpty
-        ? nameParts[0][0].toUpperCase() +
-            nameParts[0].substring(1).toLowerCase()
-        : "John Doe";
+    return nameParts[0][0].toUpperCase() +
+        nameParts[0].substring(1).toLowerCase();
   }
 
-  // Format last name
-  String lastName = nameParts.last.isNotEmpty
-      ? nameParts.last[0].toUpperCase() +
-          nameParts.last.substring(1).toLowerCase()
-      : "";
+  String lastName = nameParts.last[0].toUpperCase() +
+      nameParts.last.substring(1).toLowerCase();
 
-  // Format initials
   String initials = nameParts
       .sublist(0, nameParts.length - 1)
       .where((name) => name.isNotEmpty)
@@ -80,8 +84,12 @@ String formatName(String fullName) {
 }
 
 class MeetingCard extends StatefulWidget {
-  const MeetingCard(
-      {super.key, required this.scheduleModel, required this.email});
+  const MeetingCard({
+    super.key,
+    required this.scheduleModel,
+    required this.email,
+  });
+
   final ScheduleModel scheduleModel;
   final String email;
 
@@ -93,6 +101,7 @@ class _MeetingCardState extends State<MeetingCard> {
   var profileImageURL = '';
   bool _isLoading = true;
   bool _hasError = false;
+
   @override
   void initState() {
     super.initState();
@@ -144,7 +153,7 @@ class _MeetingCardState extends State<MeetingCard> {
         ],
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min, // Prevent infinite height issue
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
@@ -179,35 +188,20 @@ class _MeetingCardState extends State<MeetingCard> {
                   ],
                 ),
               ),
-              Column(
-                children: [],
-              )
             ],
           ),
           SizedBox(height: screenHeight * 0.02),
-          Divider(),
-          SizedBox(height: screenHeight * 0.0),
+          const Divider(),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                getRemainingTime(widget.scheduleModel.scheduleStartTime,
-                    widget.scheduleModel.scheduleDate),
-                style: TextStyle(color: Colors.blue),
+                getRemainingTime(
+                  widget.scheduleModel.scheduleStartTime,
+                  widget.scheduleModel.scheduleDate,
+                ),
+                style: const TextStyle(color: Colors.blue),
               ),
-              // ElevatedButton(
-              //   onPressed: () {
-              //     // Handle view action
-              //   },
-              //   style: ElevatedButton.styleFrom(
-              //     backgroundColor: Colors.blue,
-              //     shape: RoundedRectangleBorder(
-              //       borderRadius: BorderRadius.circular(8),
-              //     ),
-              //   ),
-              //   child:
-              //       const Text("View", style: TextStyle(color: Colors.white)),
-              // ),
             ],
           ),
         ],
@@ -269,6 +263,7 @@ class _MeetingCardState extends State<MeetingCard> {
       convertedTime.minute,
     );
     final difference = newDate.difference(now);
+
     if (difference.isNegative) {
       return "Session has ended";
     } else if (difference.inMinutes == 0) {
@@ -280,11 +275,11 @@ class _MeetingCardState extends State<MeetingCard> {
     } else if (difference.inHours == 1) {
       return "1 hour to go";
     } else if (difference.inHours < 24) {
-      return "${(difference.inHours).toString()} hours to go";
+      return "${difference.inHours} hours to go";
     } else if (difference.inDays == 1) {
-      return "${(difference.inDays).toString()} day to go";
+      return "1 day to go";
     } else {
-      return "${(difference.inDays).toString()} days to go";
+      return "${difference.inDays} days to go";
     }
   }
 }

@@ -1,3 +1,4 @@
+import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/admin/widgets/admin_mentor_card.dart';
 import 'package:voyager/src/features/admin/widgets/admin_search_bar.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
@@ -157,7 +158,13 @@ class _MentorPopupState extends State<MentorPopup> {
                   child: Center(
                     child: Column(
                       children: [
-                        if (isLoading) CircularProgressIndicator(),
+                        if (isLoading) Lottie.asset(
+                            'assets/images/loading.json',
+                            fit: BoxFit.cover,
+                            width: screenHeight * 0.08,
+                            height: screenWidth * 0.04,
+                            repeat: true,
+                          ),
                         if (mentorCards.isNotEmpty)
                           for (var mentorCard in filteredMentorCards)
                             AdminMentorCard(

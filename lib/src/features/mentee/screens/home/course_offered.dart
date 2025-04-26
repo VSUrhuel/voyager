@@ -167,7 +167,9 @@ class _CourseOfferedState extends State<CourseOffered> {
                 child: SingleChildScrollView(
                   child: Padding(
                     padding: EdgeInsets.only(
-                        left: screenWidth * 0.05, right: screenWidth * 0.05),
+                        left: screenWidth * 0.05,
+                        right: screenWidth * 0.05,
+                        bottom: screenHeight * 0.04),
                     child: Center(
                       child: FutureBuilder<List<CourseModel>>(
                         future: fetchCoursesWithDetails(user?.email ?? ''),
