@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
@@ -98,32 +99,46 @@ class _PostState extends State<Post> {
         user?.photoURL ?? 'assets/images/application_images/profile.png';
     return Scaffold(
         appBar: AppBar(
+          systemOverlayStyle: SystemUiOverlayStyle.dark,
+          scrolledUnderElevation: 0,
+          toolbarHeight: screenHeight * 0.07,
           backgroundColor: Colors.white,
           elevation: 0,
-          title: Text(
-            'Posts',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: screenWidth * 0.07,
-              fontWeight: FontWeight.bold,
+          automaticallyImplyLeading: false,
+          title: Padding(
+            padding: EdgeInsets.only(
+              top: screenHeight * 0.02,
+            ),
+            child: Text(
+              'Posts',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: screenWidth * 0.07,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           centerTitle: false,
           actions: [
             Padding(
-              padding: const EdgeInsets.only(right: 16.0),
+              padding: EdgeInsets.only(
+                top: screenHeight * 0.035,
+                right: screenWidth * 0.04,
+              ),
               child: CircleAvatar(
-                  backgroundColor: Colors.grey[200],
-                  child: IconButton(
-                    icon: Icon(Icons.notifications_none, color: Colors.black),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => NotificationScreen()),
-                      );
-                    },
-                  )),
+                backgroundColor: Colors.grey[200],
+                child: IconButton(
+                  icon: Icon(Icons.notifications_none, color: Colors.black),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => NotificationScreen(),
+                      ),
+                    );
+                  },
+                ),
+              ),
             ),
           ],
         ),

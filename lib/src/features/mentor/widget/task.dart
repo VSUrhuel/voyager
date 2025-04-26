@@ -35,7 +35,7 @@ class Task extends StatelessWidget {
               ),
               Padding(
                   padding: EdgeInsets.only(
-                      left: screenHeight * 0.02, right: screenHeight * 0.02),
+                      left: screenHeight * 0.01, right: screenHeight * 0.01),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,

@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/model/schedule_model.dart';
@@ -12,12 +13,12 @@ class CompletedCard extends StatefulWidget {
     super.key,
     required this.email,
     required this.scheduleModel,
-    required this.courseName, // Add course name
+    required this.courseName,
   });
 
   final String email;
   final ScheduleModel scheduleModel;
-  final String courseName; // Add this line
+  final String courseName;
 
   @override
   State<CompletedCard> createState() => _CompletedCardState();
@@ -60,7 +61,11 @@ class _CompletedCardState extends State<CompletedCard> {
       return Center(
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
-          child: const CircularProgressIndicator(),
+          child: Lottie.asset(
+            'assets/images/loading.json',
+            width: screenWidth * 0.25,
+            height: screenWidth * 0.25,
+          ),
         ),
       );
     }
@@ -89,7 +94,7 @@ class _CompletedCardState extends State<CompletedCard> {
       child: CompletedMeetingCard(
         scheduleModel: widget.scheduleModel,
         user: _user!,
-        courseName: widget.courseName, // Pass course name here
+        courseName: widget.courseName,
       ),
     );
   }
@@ -100,7 +105,7 @@ class CompletedMeetingCard extends StatelessWidget {
     super.key,
     required this.scheduleModel,
     required this.user,
-    required this.courseName, // Receive course name
+    required this.courseName,
   });
 
   final ScheduleModel scheduleModel;
@@ -120,27 +125,19 @@ class CompletedMeetingCard extends StatelessWidget {
 
   String formatName(String fullName) {
     if (fullName.isEmpty) return "John Doe";
-    // Trim and remove extra spaces
     fullName = fullName.trim().replaceAll(RegExp(r'\s+'), ' ');
     List<String> nameParts = fullName.split(" ");
 
     if (nameParts.isEmpty) return "John Doe";
 
-    // Handle single name
     if (nameParts.length == 1) {
-      return nameParts[0].isNotEmpty
-          ? nameParts[0][0].toUpperCase() +
-              nameParts[0].substring(1).toLowerCase()
-          : "John Doe";
+      return nameParts[0][0].toUpperCase() +
+          nameParts[0].substring(1).toLowerCase();
     }
 
-    // Format last name
-    String lastName = nameParts.last.isNotEmpty
-        ? nameParts.last[0].toUpperCase() +
-            nameParts.last.substring(1).toLowerCase()
-        : "";
+    String lastName = nameParts.last[0].toUpperCase() +
+        nameParts.last.substring(1).toLowerCase();
 
-    // Format initials
     String initials = nameParts
         .sublist(0, nameParts.length - 1)
         .where((name) => name.isNotEmpty)
@@ -163,7 +160,6 @@ class CompletedMeetingCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Course name at the top
           Text(
             courseName,
             style: const TextStyle(
@@ -173,7 +169,6 @@ class CompletedMeetingCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: screenHeight * 0.015),
-
           Row(
             children: [
               CachedNetworkImage(
