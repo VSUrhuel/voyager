@@ -24,12 +24,12 @@ class MentorHome extends StatefulWidget {
   _MentorHomeState createState() => _MentorHomeState();
 }
 
-class _MentorHomeState extends State<MentorHome>
-    with SingleTickerProviderStateMixin {
+class _MentorHomeState extends State<MentorHome> {
   MenteeListController menteeListController = MenteeListController();
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
   final isChanged = false;
+  bool _hasCourseAllocation = false;
 
   // Keys to access the list states
   final GlobalKey _pendingListKey = GlobalKey();
@@ -56,7 +56,17 @@ class _MentorHomeState extends State<MentorHome>
   @override
   void initState() {
     super.initState();
+    _updateCourseAllocationStatus();
     fetchData();
+  }
+
+  void _updateCourseAllocationStatus() async {
+    // Check if the user has a course allocation
+    FirestoreInstance firestoreInstance = Get.put(FirestoreInstance());
+    final val = await firestoreInstance.checkCourseAllocation();
+    setState(() {
+      _hasCourseAllocation = val;
+    });
   }
 
   void fetchData() async {
@@ -156,14 +166,17 @@ class _MentorHomeState extends State<MentorHome>
                       ),
                     ),
                     onPressed: () {
+                      if (_hasCourseAllocation == false) {
+                        Get.snackbar(
+                          'No Course Allocation',
+                          'You need to allocate a course before creating a post.',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.red,
+                          colorText: Colors.white,
+                        );
+                        return;
+                      }
                       // Scale animation on press
-                      final animationController = AnimationController(
-                        vsync: this,
-                        duration: Duration(milliseconds: 100),
-                      );
-                      animationController
-                          .forward()
-                          .then((_) => animationController.reverse());
 
                       Navigator.push(
                         context,

@@ -109,7 +109,9 @@ class _CreatePostState extends State<CreatePost> {
 
       setState(() => _video = pickedVideoFile);
       Navigator.pop(context);
-    } finally {}
+    } finally {
+      Navigator.pop(context);
+    }
   }
 
   Future<void> _pickFile() async {
@@ -150,7 +152,9 @@ class _CreatePostState extends State<CreatePost> {
         });
       }
       Navigator.pop(context);
-    } finally {}
+    } finally {
+      Navigator.pop(context);
+    }
   }
 
   Future<void> postContent() async {
@@ -183,6 +187,10 @@ class _CreatePostState extends State<CreatePost> {
             content: Text('Title and description cannot be empty'),
           ),
         );
+        setState(() {
+          _isPosting = false;
+          Navigator.pop(context);
+        });
         return;
       }
 
@@ -202,6 +210,12 @@ class _CreatePostState extends State<CreatePost> {
       );
 
       await firestore.uploadPostContent(postContent);
+      Navigator.of(context).push(
+        CustomPageRoute(
+          page: MentorDashboard(),
+          direction: AxisDirection.right,
+        ),
+      );
       //await uploadPostContent(postContent);
     } finally {
       setState(() {
@@ -334,12 +348,6 @@ class _CreatePostState extends State<CreatePost> {
                             ),
                           );
                           await postContent();
-                          Navigator.of(context).push(
-                            CustomPageRoute(
-                              page: MentorDashboard(),
-                              direction: AxisDirection.right,
-                            ),
-                          );
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1A73E8),
