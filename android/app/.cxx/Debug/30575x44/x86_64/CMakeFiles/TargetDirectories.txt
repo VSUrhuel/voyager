@@ -1,0 +1,2 @@
+C:/Users/johnr/OneDrive/Documents/Academe/BSCS-III/2nd Sem/Soft Eng II/Laboratory/voyager/android/app/.cxx/Debug/30575x44/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/johnr/OneDrive/Documents/Academe/BSCS-III/2nd Sem/Soft Eng II/Laboratory/voyager/android/app/.cxx/Debug/30575x44/x86_64/CMakeFiles/rebuild_cache.dir

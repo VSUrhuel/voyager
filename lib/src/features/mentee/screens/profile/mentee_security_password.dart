@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:voyager/src/features/authentication/widgets/password_text_field.dart';
+import 'package:voyager/src/widgets/custom_button.dart';
 
 class MenteeSecurityPassword extends StatefulWidget {
   const MenteeSecurityPassword({super.key});
@@ -164,49 +166,36 @@ class _SecuritySettingsScreenState extends State<MenteeSecurityPassword> {
                       style: const TextStyle(color: Colors.green),
                     ),
                   ),
-                TextField(
-                  controller: _currentPasswordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Current Password',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.lock_outline),
-                  ),
+                PasswordTextField(
+                  controllerParam: _currentPasswordController,
+                  labelText: 'Current Password',
+                  fontSize: 16,
+                  leadingIcon: Icons.lock_outline,
                 ),
                 const SizedBox(height: 15),
-                TextField(
-                  controller: _newPasswordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'New Password',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.lock_reset),
-                  ),
+                PasswordTextField(
+                  controllerParam: _newPasswordController,
+                  labelText: 'New Password',
+                  fontSize: 16,
+                  leadingIcon: Icons.lock_reset,
                 ),
                 const SizedBox(height: 15),
-                TextField(
-                  controller: _confirmPasswordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Confirm New Password',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.lock_reset),
-                  ),
+                PasswordTextField(
+                  controllerParam: _confirmPasswordController,
+                  labelText: 'Confirm New Password',
+                  fontSize: 16,
+                  leadingIcon: Icons.lock_reset,
                 ),
                 const SizedBox(height: 20),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _changePassword,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                    ),
-                    child: _isLoading
-                        ? const CircularProgressIndicator()
-                        : const Text('Update Password'),
-                  ),
+                DefaultButton(
+                  buttonText: 'Update Password',
+                  bgColor: Theme.of(context).colorScheme.primary,
+                  textColor: Colors.white,
+                  borderColor: Colors.transparent,
+                  isLoading: _isLoading,
+                  onPressed: _isLoading ? null : _changePassword,
                 ),
+
                 SizedBox(height: 10),
                 Text(
                   'Update password only works for email/password sign-in method.',

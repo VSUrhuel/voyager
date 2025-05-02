@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:voyager/src/features/mentor/model/content_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 
@@ -16,6 +16,7 @@ class NotificationContentCard extends StatefulWidget {
 class _NotificationContentCardState extends State<NotificationContentCard> {
   String mentorName = '';
   String courseName = '';
+  bool isExpanded = false;
 
   @override
   void initState() {
@@ -31,7 +32,12 @@ class _NotificationContentCardState extends State<NotificationContentCard> {
     required String description,
     required String buttonText,
     required VoidCallback onPressed,
-  }) {
+  }) async {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    if (mentorName == '' || courseName == '') {
+      await _fetchMentorName();
+    }
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -48,6 +54,8 @@ class _NotificationContentCardState extends State<NotificationContentCard> {
               children: [
                 Text(
                   title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -85,11 +93,88 @@ class _NotificationContentCardState extends State<NotificationContentCard> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Text(
-                  description,
-                  style: const TextStyle(fontSize: 16),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: screenHeight * 0.01,
+                    vertical: screenHeight * 0.01,
+                  ),
+                  child: StatefulBuilder(
+                    builder: (context, setState) {
+                      // Move isExpanded outside the builder or make it persistent
+
+                      return Builder(
+                        builder: (context) {
+                          final textSpan = TextSpan(
+                            text: description,
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: screenHeight * 0.019,
+                            ),
+                          );
+
+                          final textPainter = TextPainter(
+                            text: textSpan,
+                            maxLines: 3,
+                            textDirection: TextDirection.ltr,
+                          );
+                          textPainter.layout(maxWidth: screenWidth * 0.9);
+
+                          final hasOverflow = textPainter.didExceedMaxLines;
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: screenWidth * 0.9,
+                                child: AnimatedSize(
+                                  duration: Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                  child: isExpanded
+                                      ? SizedBox(
+                                          height: screenHeight * 0.5,
+                                          child: SingleChildScrollView(
+                                              child: Text(
+                                            description,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: screenHeight * 0.019,
+                                            ),
+                                          )))
+                                      : Text(
+                                          description,
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: screenHeight * 0.019,
+                                          ),
+                                          maxLines: 3,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                ),
+                              ),
+                              if (hasOverflow)
+                                GestureDetector(
+                                  onTap: () => setState(() {
+                                    if (isExpanded) {
+                                      isExpanded = false;
+                                    } else {
+                                      isExpanded = true;
+                                    }
+                                  }),
+                                  child: Text(
+                                    isExpanded ? 'See Less' : 'See More',
+                                    style: TextStyle(
+                                      color: Colors.blue,
+                                      fontSize: screenHeight * 0.018,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
                 ),
-                const SizedBox(height: 24),
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
@@ -97,14 +182,14 @@ class _NotificationContentCardState extends State<NotificationContentCard> {
                     style: TextButton.styleFrom(
                       foregroundColor: Theme.of(context).primaryColor,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 8),
+                          horizontal: 24, vertical: 2),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
                     child: Text(
                       buttonText,
-                      style: const TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: screenHeight * 0.018),
                     ),
                   ),
                 ),
@@ -116,7 +201,7 @@ class _NotificationContentCardState extends State<NotificationContentCard> {
     );
   }
 
-  void _fetchMentorName() async {
+  Future<void> _fetchMentorName() async {
     await Future.delayed(const Duration(seconds: 1));
     FirestoreInstance firestoreInstance = FirestoreInstance();
     final mentorId = await firestoreInstance
@@ -124,7 +209,7 @@ class _NotificationContentCardState extends State<NotificationContentCard> {
     final mentor = await firestoreInstance.getMentor(mentorId);
     final courseMentor =
         await firestoreInstance.getCourseMentorThroughMentor(mentor.mentorId);
-    
+
     final course = await firestoreInstance.getCourse(courseMentor!.courseId);
     final user = await firestoreInstance.getUser(mentor.accountId);
     setState(() {
@@ -135,13 +220,19 @@ class _NotificationContentCardState extends State<NotificationContentCard> {
 
   String _formatMentorName(String fullName) {
     if (fullName.isEmpty) return '';
+    fullName = fullName.trim();
     final names = fullName.split(' ');
+
     if (names.length == 1) return fullName;
+
+    if (names.length > 2) {
+      return '${names.first[0]}. ${names[1][0]}. ${names.last[0]}${names.last.substring(1).toLowerCase()}';
+    }
     return '${names.first[0]}. ${names.last[0]}${names.last.substring(1).toLowerCase()}';
   }
 
   String _formatTimestamp(DateTime timestamp) {
-    return DateFormat('MMM dd, yyyy • hh:mm a').format(timestamp);
+    return intl.DateFormat('MMM dd, yyyy • hh:mm a').format(timestamp);
   }
 
   String _getTimeAgo(DateTime date) {
@@ -281,6 +372,17 @@ class _NotificationContentCardState extends State<NotificationContentCard> {
                       if (mentorName.isNotEmpty)
                         Text(
                           'Posted by: $mentorName',
+                          style: TextStyle(
+                            fontSize: screenWidth * 0.032,
+                            color: Colors.grey[600],
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      if (courseName.isNotEmpty)
+                        Text(
+                          'Course: $courseName',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: screenWidth * 0.032,
                             color: Colors.grey[600],

@@ -77,8 +77,8 @@ class _CreatePostState extends State<CreatePost> {
       builder: (context) => Center(
         child: Lottie.asset(
           'assets/images/loading.json',
-          width: MediaQuery.of(context).size.width * 0.3,
-          height: MediaQuery.of(context).size.width * 0.3,
+          width: MediaQuery.of(context).size.width * 0.2,
+          height: MediaQuery.of(context).size.width * 0.2,
           repeat: true,
         ),
       ),
@@ -110,7 +110,10 @@ class _CreatePostState extends State<CreatePost> {
       setState(() => _video = pickedVideoFile);
       Navigator.pop(context);
     } finally {
-      Navigator.pop(context);
+      if (mounted && _isPosting) {
+        // Close the loading dialog if it's still open
+        Navigator.of(context).pop();
+      }
     }
   }
 
@@ -121,18 +124,23 @@ class _CreatePostState extends State<CreatePost> {
       builder: (context) => Center(
         child: Lottie.asset(
           'assets/images/loading.json',
-          width: MediaQuery.of(context).size.width * 0.3,
-          height: MediaQuery.of(context).size.width * 0.3,
+          width: MediaQuery.of(context).size.width * 0.2,
+          height: MediaQuery.of(context).size.width * 0.2,
           repeat: true,
         ),
       ),
     );
+
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['pdf', 'doc', 'docx'],
         allowMultiple: true,
       );
+      if (result == null) {
+        Navigator.pop(context);
+        return;
+      }
       for (var file in result!.files) {
         final fileSize = file.size;
         // Check if the file size exceeds 5MB (5 * 1024 * 1024 bytes)
@@ -152,9 +160,7 @@ class _CreatePostState extends State<CreatePost> {
         });
       }
       Navigator.pop(context);
-    } finally {
-      Navigator.pop(context);
-    }
+    } finally {}
   }
 
   Future<void> postContent() async {
@@ -185,6 +191,31 @@ class _CreatePostState extends State<CreatePost> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Title and description cannot be empty'),
+          ),
+        );
+        setState(() {
+          _isPosting = false;
+          Navigator.pop(context);
+        });
+        return;
+      }
+
+      if (_titlePostController.text.length > 100) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Title cannot exceed 100 characters'),
+          ),
+        );
+        setState(() {
+          _isPosting = false;
+          Navigator.pop(context);
+        });
+        return;
+      }
+      if (_descriptionPostController.text.length > 750) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Description cannot exceed 750 characters'),
           ),
         );
         setState(() {
@@ -315,16 +346,10 @@ class _CreatePostState extends State<CreatePost> {
         top: false,
         child: Scaffold(
           appBar: AppBar(
+            toolbarHeight: screenSize.height * 0.07,
             leading: IconButton(
               onPressed: () {
-                Navigator.of(context).push(
-                  CustomPageRoute(
-                    page: widget.fromHome
-                        ? MentorDashboard(index: 1)
-                        : MentorDashboard(),
-                    direction: AxisDirection.right,
-                  ),
-                );
+                Navigator.pop(context);
               },
               icon: const Icon(Icons.arrow_back),
             ),
@@ -341,8 +366,8 @@ class _CreatePostState extends State<CreatePost> {
                             builder: (context) => Center(
                               child: Lottie.asset(
                                 'assets/images/loading.json',
-                                width: MediaQuery.of(context).size.width * 0.3,
-                                height: MediaQuery.of(context).size.width * 0.3,
+                                width: MediaQuery.of(context).size.width * 0.2,
+                                height: MediaQuery.of(context).size.width * 0.2,
                                 repeat: true,
                               ),
                             ),

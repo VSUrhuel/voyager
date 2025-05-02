@@ -9,6 +9,7 @@ import 'package:voyager/src/features/mentor/controller/video_controller.dart';
 import 'package:voyager/src/features/mentor/widget/post_content.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:flutter/material.dart';
+import 'package:voyager/src/widgets/custom_page_route.dart';
 
 class Post extends StatefulWidget {
   const Post({super.key});
@@ -121,24 +122,20 @@ class _PostState extends State<Post> {
           centerTitle: false,
           actions: [
             Padding(
-              padding: EdgeInsets.only(
-                top: screenHeight * 0.035,
-                right: screenWidth * 0.04,
-              ),
+              padding: const EdgeInsets.only(right: 16.0),
               child: CircleAvatar(
-                backgroundColor: Colors.grey[200],
-                child: IconButton(
-                  icon: Icon(Icons.notifications_none, color: Colors.black),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => NotificationScreen(),
-                      ),
-                    );
-                  },
-                ),
-              ),
+                  backgroundColor: Colors.grey[200],
+                  child: IconButton(
+                    icon: Icon(Icons.notifications_none, color: Colors.black),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        CustomPageRoute(
+                            page: NotificationScreen(),
+                            direction: AxisDirection.left),
+                      );
+                    },
+                  )),
             ),
           ],
         ),

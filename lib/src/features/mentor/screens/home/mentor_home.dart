@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:voyager/src/features/mentor/screens/mentor_dashboard.dart';
 import 'package:voyager/src/features/mentor/screens/profile/mentor_profile.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/controller/mentee_list_controller.dart';
@@ -305,7 +306,7 @@ class _MentorHomeState extends State<MentorHome> {
         onTap: () {
           Navigator.of(context).push(
             CustomPageRoute(
-              page: MentorProfile(),
+              page: MentorDashboard(index: 3),
               direction: AxisDirection.left,
             ),
           );

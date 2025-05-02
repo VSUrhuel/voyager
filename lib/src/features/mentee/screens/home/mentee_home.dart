@@ -7,11 +7,11 @@ import 'package:voyager/src/features/mentee/model/course_model.dart';
 import 'package:voyager/src/features/mentee/screens/home/course_offered.dart';
 import 'package:voyager/src/features/mentee/screens/home/mentors_list.dart';
 import 'package:voyager/src/features/mentee/screens/home/notification.dart';
-import 'package:voyager/src/features/mentee/screens/profile/mentee_profile.dart';
 import 'package:voyager/src/features/mentee/widgets/course_card.dart';
 import 'package:voyager/src/features/mentee/widgets/mentor_card.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
+import 'package:voyager/src/widgets/custom_page_route.dart';
 import 'package:voyager/src/widgets/horizontal_slider.dart';
 import 'package:voyager/src/widgets/horizontal_slider_mentor.dart';
 import 'package:voyager/src/widgets/search_bar.dart';
@@ -269,8 +269,9 @@ class _MenteeHomeState extends State<MenteeHome> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) => NotificationScreen()),
+                          CustomPageRoute(
+                              page: NotificationScreen(),
+                              direction: AxisDirection.left),
                         );
                       },
                     )),
@@ -335,8 +336,9 @@ class _MenteeHomeState extends State<MenteeHome> {
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(
-                                    builder: (context) => CourseOffered()),
+                                CustomPageRoute(
+                                    page: CourseOffered(),
+                                    direction: AxisDirection.left),
                               );
                             },
                             style: TextButton.styleFrom(
@@ -386,8 +388,9 @@ class _MenteeHomeState extends State<MenteeHome> {
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(
-                                    builder: (context) => MentorsList()),
+                                CustomPageRoute(
+                                    page: MentorsList(),
+                                    direction: AxisDirection.left),
                               );
                             },
                             style: TextButton.styleFrom(

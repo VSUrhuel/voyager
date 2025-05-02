@@ -9,6 +9,7 @@ import 'package:voyager/src/features/admin/screens/courses/add_course.dart';
 import 'package:voyager/src/features/admin/widgets/admin_course_card.dart';
 import 'package:voyager/src/features/admin/widgets/admin_search_bar.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
+import 'package:voyager/src/widgets/custom_page_route.dart';
 
 class CourseList extends StatefulWidget {
   const CourseList({super.key});
@@ -168,8 +169,9 @@ class _CourseListState extends State<CourseList> {
                             onPressed: () async {
                               await Navigator.push(
                                 context,
-                                MaterialPageRoute(
-                                  builder: (context) => const AddCourse(),
+                                CustomPageRoute(
+                                  page: const AddCourse(),
+                                  direction: AxisDirection.left,
                                 ),
                               );
                               refreshCourses(); // Refresh after returning from AddCourse

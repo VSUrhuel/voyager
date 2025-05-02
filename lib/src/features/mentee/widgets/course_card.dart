@@ -66,7 +66,7 @@ class _CourseCardState extends State<CourseCard> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     final endDate = DateFormat('MMM dd, yyyy')
-        .format(widget.courseModel.courseModifiedTimestamp as DateTime);
+        .format(widget.courseModel.courseModifiedTimestamp);
 
     return FutureBuilder<int>(
       future: totalMentorsFuture,
