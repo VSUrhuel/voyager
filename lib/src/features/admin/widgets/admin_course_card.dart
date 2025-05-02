@@ -179,13 +179,16 @@ class AdminCourseCard extends StatelessWidget {
                                 context,
                                 icon: Icons.group,
                                 value: '${courseMentors.length}',
-                                label: 'Mentors',
+                                label: courseMentors.length == 1
+                                    ? 'Mentor'
+                                    : 'Mentors',
                               ),
                               _buildStatItem(
                                 context,
                                 icon: FontAwesomeIcons.peopleGroup,
                                 value: '${mentees.length}',
-                                label: 'Mentees',
+                                label:
+                                    mentees.length == 1 ? 'Mentee' : 'Mentees',
                               ),
                               _buildStatItem(
                                 context,

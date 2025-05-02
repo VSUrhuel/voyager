@@ -269,6 +269,9 @@ class _CourseListState extends State<CourseList> {
                                           );
                                         },
                                       )),
+                                SizedBox(
+                                  height: screenHeight * 0.02,
+                                ),
                               ],
                             ),
                           ),
