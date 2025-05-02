@@ -36,7 +36,7 @@ class _PostContentState extends State<PostContent> {
   late String apiPhoto = '';
 
   bool _showAttachments = false;
-
+  bool isExpanded = false;
   @override
   void dispose() {
     Get.delete<PostController>();
@@ -202,6 +202,8 @@ class _PostContentState extends State<PostContent> {
                 alignment: Alignment.topLeft,
                 child: Text(
                   contentTitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
@@ -216,12 +218,78 @@ class _PostContentState extends State<PostContent> {
                 horizontal: screenHeight * 0.01,
                 vertical: screenHeight * 0.01,
               ),
-              child: Text(
-                contentDescription,
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: screenHeight * 0.019,
-                ),
+              child: StatefulBuilder(
+                builder: (context, setState) {
+                  // Move isExpanded outside the builder or make it persistent
+
+                  return Builder(
+                    builder: (context) {
+                      final textSpan = TextSpan(
+                        text: contentDescription,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: screenHeight * 0.019,
+                        ),
+                      );
+
+                      final textPainter = TextPainter(
+                        text: textSpan,
+                        maxLines: 3,
+                        textDirection: TextDirection.ltr,
+                      );
+                      textPainter.layout(maxWidth: screenWidth * 0.9);
+
+                      final hasOverflow = textPainter.didExceedMaxLines;
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: screenWidth * 0.9,
+                            child: AnimatedSize(
+                              duration: Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                              child: isExpanded
+                                  ? Text(
+                                      contentDescription,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: screenHeight * 0.019,
+                                      ),
+                                    )
+                                  : Text(
+                                      contentDescription,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: screenHeight * 0.019,
+                                      ),
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                            ),
+                          ),
+                          if (hasOverflow)
+                            GestureDetector(
+                              onTap: () => setState(() {
+                                if (isExpanded) {
+                                  isExpanded = false;
+                                } else {
+                                  isExpanded = true;
+                                }
+                              }),
+                              child: Text(
+                                isExpanded ? 'See Less' : 'See More',
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  fontSize: screenHeight * 0.018,
+                                ),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  );
+                },
               ),
             ),
 

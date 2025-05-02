@@ -549,10 +549,14 @@ class _ViewCourseState extends State<ViewCourse> {
                   builder: (context, mentorCardSnapshot) {
                     if (mentorCardSnapshot.connectionState ==
                         ConnectionState.waiting) {
-                      return const Center(
-                          child: CircularProgressIndicator(
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.blue)));
+                      return Center(
+                          child: Lottie.asset(
+                        'assets/images/loading.json',
+                        fit: BoxFit.cover,
+                        width: screenHeight * 0.08,
+                        height: screenWidth * 0.2,
+                        repeat: true,
+                      ));
                     }
                     final mentorCards = mentorCardSnapshot.data ?? [];
                     return SingleChildScrollView(

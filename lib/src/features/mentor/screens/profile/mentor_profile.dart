@@ -51,9 +51,10 @@ class _MentorProfileState extends State<MentorProfile> {
 
       mentorModel = await firestore.getMentorThroughAccId(currentUser.uid);
       userModel = await firestore.getUser(currentUser.uid);
-      
-         var cm = await firestore.getCourseMentorThroughMentor(mentorModel.mentorId);
-        courseMentorModel = cm!;
+
+      var cm =
+          await firestore.getCourseMentorThroughMentor(mentorModel.mentorId);
+      courseMentorModel = cm!;
       final courseModel = await firestore.getCourse(courseMentorModel.courseId);
 
       if (mounted) {
@@ -182,24 +183,21 @@ class _MentorProfileState extends State<MentorProfile> {
         child: Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
-            backgroundColor: Colors.white,
-            elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () => Navigator.of(context).push(
-                CustomPageRoute(
-                  page: MentorDashboard(index: 0),
-                  direction: AxisDirection.right,
+              backgroundColor: Colors.white,
+              elevation: 0,
+              leading: null,
+              toolbarHeight: screenHeight * 0.10,
+              automaticallyImplyLeading: false,
+              title: Padding(
+                padding: EdgeInsets.only(
+                    top: screenHeight * 0.013, left: screenHeight * 0.01),
+                child: Text(
+                  _appBarTitle,
+                  style: TextStyle(
+                      fontSize: screenWidth * 0.07,
+                      fontWeight: FontWeight.bold),
                 ),
-              ),
-            ),
-            title: const Text(
-              _appBarTitle,
-              style:
-                  TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-            ),
-            centerTitle: true,
-          ),
+              )),
           body: SingleChildScrollView(
             child: Column(
               children: [

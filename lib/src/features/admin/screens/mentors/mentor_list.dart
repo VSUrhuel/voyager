@@ -8,6 +8,7 @@ import 'package:voyager/src/repository/firebase_repository/firestore_instance.da
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:voyager/src/features/admin/screens/mentors/add_mentor.dart';
+import 'package:voyager/src/widgets/custom_page_route.dart';
 
 class MentorList extends StatefulWidget {
   const MentorList({super.key});
@@ -286,8 +287,9 @@ class _MentorListState extends State<MentorList> {
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(
-                                  builder: (context) => const AddMentor()),
+                              CustomPageRoute(
+                                  page: AddMentor(),
+                                  direction: AxisDirection.left),
                             );
                           },
                           padding: EdgeInsets.all(0),

@@ -23,7 +23,7 @@ class _MenteeDashboardState extends State<MenteeDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _screens = [
+    final List<Widget> screens = [
       MenteeHome(
           onProfileTap: () => _onItemTapped(3)), // 👈 Navigate to Profile tab
       Post(),
@@ -37,7 +37,7 @@ class _MenteeDashboardState extends State<MenteeDashboard> {
       child: Scaffold(
         body: IndexedStack(
           index: _selectedIndex,
-          children: _screens,
+          children: screens,
         ),
         bottomNavigationBar: BottomNavBarMentor(
           currentIndex: _selectedIndex,
