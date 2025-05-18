@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
 import 'package:voyager/src/features/mentee/screens/session/upcoming_card.dart';
-import 'package:voyager/src/features/mentee/widgets/course_card.dart';
 import 'package:voyager/src/features/mentee/widgets/normal_search_bar.dart';
 import 'package:voyager/src/features/mentee/widgets/small_course_card.dart';
 import 'package:flutter/material.dart';
@@ -130,6 +130,7 @@ class _CourseOfferedState extends State<CourseOffered> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     FirestoreInstance firestoreInstance = FirestoreInstance();
     User? user = FirebaseAuth.instance.currentUser;
 
@@ -163,14 +164,24 @@ class _CourseOfferedState extends State<CourseOffered> {
                 child: SingleChildScrollView(
                   child: Padding(
                     padding: EdgeInsets.only(
-                        left: screenWidth * 0.05, right: screenWidth * 0.05),
+                        left: screenWidth * 0.05,
+                        right: screenWidth * 0.05,
+                        bottom: screenHeight * 0.04),
                     child: Center(
                       child: FutureBuilder<List<CourseModel>>(
                         future: fetchCoursesWithDetails(user?.email ?? ''),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return Center(child: CircularProgressIndicator());
+                            return Center(
+                              child: Lottie.asset(
+                                'assets/images/loading.json',
+                                fit: BoxFit.cover,
+                                width: screenHeight * 0.08,
+                                height: screenWidth * 0.04,
+                                repeat: true,
+                              ),
+                            );
                           }
                           if (snapshot.hasError ||
                               !snapshot.hasData ||

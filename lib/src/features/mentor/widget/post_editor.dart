@@ -1,4 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:voyager/src/features/authentication/models/user_model.dart';
+import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 
 class PostEditor extends StatelessWidget {
   final double screenHeight;
@@ -90,8 +94,62 @@ class PostEditor extends StatelessWidget {
   }
 }
 
-class _UserProfileSection extends StatelessWidget {
+class _UserProfileSection extends StatefulWidget {
   const _UserProfileSection();
+
+  @override
+  State<_UserProfileSection> createState() => _UserProfileSectionState();
+}
+
+class _UserProfileSectionState extends State<_UserProfileSection> {
+  late UserModel _userModel = UserModel(
+    accountApiName: '',
+    accountApiEmail: '',
+    accountApiID: '',
+    accountPassword: '',
+    accountApiPhoto: '',
+    accountUsername: '',
+    accountRole: '',
+    accountStudentId: '',
+    accountSoftDeleted: false,
+    accountCreatedTimestamp: DateTime.now(),
+    accountModifiedTimestamp: DateTime.now(),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUser();
+  }
+
+  Future<void> _fetchUser() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('User not authenticated');
+      }
+
+      final FirestoreInstance firestoreInstance = Get.put(FirestoreInstance());
+      final userData = await firestoreInstance.getUser(user.uid);
+
+      setState(() {
+        _userModel = userData;
+      });
+    } catch (e) {
+      setState(() {});
+      debugPrint('Error fetching user: $e');
+    }
+  }
+
+  String _formatName(String name) {
+    if (name.isEmpty) return name;
+
+    return name.split(' ').map((part) {
+      if (part.isEmpty) return part;
+      if (part.length == 1) return part.toUpperCase();
+      return part[0].toUpperCase() + part.substring(1).toLowerCase();
+    }).join(' ');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,11 +162,11 @@ class _UserProfileSection extends StatelessWidget {
           child: Image.asset('assets/images/application_images/profile.png'),
         ),
         const SizedBox(width: 16),
-        const Column(
+        Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'John Rhuel Laurente',
+              _formatName(_userModel.accountApiName),
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 16,
@@ -116,7 +174,7 @@ class _UserProfileSection extends StatelessWidget {
               ),
             ),
             Text(
-              'johnrhuell@gmail.com',
+              _userModel.accountApiEmail,
               style: TextStyle(
                 color: Colors.grey,
                 fontSize: 14,

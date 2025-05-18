@@ -1,10 +1,12 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:lottie/lottie.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:voyager/src/features/mentor/model/content_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
@@ -40,6 +42,7 @@ class _CreatePostState extends State<CreatePost> {
   final List<File> _images = [];
   File? _video;
   final List<PlatformFile> _platformFiles = [];
+  bool _isPosting = false;
 
   // @override
   // void initState() {
@@ -51,75 +54,242 @@ class _CreatePostState extends State<CreatePost> {
       source: ImageSource.gallery,
     );
     if (pickedImage == null) return;
+    final imageFile = File(pickedImage.path);
+    final imageSize = await imageFile.length();
+    if (imageSize > 5 * 1024 * 1024) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Image size exceeds 5MB. Please select a smaller video or post it through links.'),
+        ),
+      );
+      return;
+    }
     final pickedImageFile = File(pickedImage.path);
     setState(() => _images.add(pickedImageFile));
     _showImagePreview(pickedImageFile);
   }
 
   Future<void> _pickVideo() async {
-    final pickedVideo = await ImagePicker().pickVideo(
-      source: ImageSource.gallery,
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(
+        child: Lottie.asset(
+          'assets/images/loading.json',
+          width: MediaQuery.of(context).size.width * 0.2,
+          height: MediaQuery.of(context).size.width * 0.2,
+          repeat: true,
+        ),
+      ),
     );
-    if (pickedVideo == null) return;
-    setState(() => _video = File(pickedVideo.path));
+    try {
+      final pickedVideo = await ImagePicker().pickVideo(
+        source: ImageSource.gallery,
+      );
+      if (pickedVideo == null) {
+        Navigator.of(context).pop(); // Close the loading dialog
+        return;
+      }
+
+      final pickedVideoFile = File(pickedVideo.path);
+      final videoSize = await pickedVideoFile.length();
+
+      // Check if the video size exceeds 10MB (10 * 1024 * 1024 bytes)
+      if (videoSize > 10 * 1024 * 1024) {
+        Navigator.of(context).pop(); // Close the loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+                'Video size exceeds 10MB. Please select a smaller video or post it through links.'),
+          ),
+        );
+        return;
+      }
+
+      setState(() => _video = pickedVideoFile);
+      Navigator.pop(context);
+    } finally {
+      if (mounted && _isPosting) {
+        // Close the loading dialog if it's still open
+        Navigator.of(context).pop();
+      }
+    }
   }
 
   Future<void> _pickFile() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf', 'doc', 'docx'],
-      allowMultiple: true,
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(
+        child: Lottie.asset(
+          'assets/images/loading.json',
+          width: MediaQuery.of(context).size.width * 0.2,
+          height: MediaQuery.of(context).size.width * 0.2,
+          repeat: true,
+        ),
+      ),
     );
 
-    if (result != null && result.files.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        setState(() => _platformFiles.addAll(result.files));
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'doc', 'docx'],
+        allowMultiple: true,
+      );
+      if (result == null) {
+        Navigator.pop(context);
+        return;
+      }
+      for (var file in result.files) {
+        final fileSize = file.size;
+        // Check if the file size exceeds 5MB (5 * 1024 * 1024 bytes)
+        if (fileSize > 5 * 1024 * 1024) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                  'File size exceeds 5MB. Please select a smaller file or post it through links.'),
+            ),
+          );
+          return;
+        }
+      }
+      if (result.files.isNotEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          setState(() => _platformFiles.addAll(result.files));
+        });
+      }
+      Navigator.pop(context);
+    } finally {}
+  }
+
+  Future<void> postContent() async {
+    if (_isPosting) return;
+    setState(() {
+      _isPosting = true;
+    });
+
+    try {
+      SupabaseInstance supabase = SupabaseInstance(Supabase.instance.client);
+      FirestoreInstance firestore = FirestoreInstance();
+      MentorModel mentor = await firestore
+          .getMentorThroughAccId(FirebaseAuth.instance.currentUser!.uid);
+      String courseMentor =
+          await firestore.getCourseMentorDocId(mentor.mentorId);
+      // Upload images
+      final imageUrls = await supabase.uploadImages(_images);
+
+      // Upload video
+      final videoUrl =
+          _video != null ? await supabase.uploadVideo(_video!) : null;
+
+      // Upload files
+      final fileUrls = await supabase.uploadFiles(_platformFiles);
+
+      if (_titlePostController.text.isEmpty ||
+          _descriptionPostController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Title and description cannot be empty'),
+          ),
+        );
+        setState(() {
+          _isPosting = false;
+          Navigator.pop(context);
+        });
+        return;
+      }
+
+      if (_titlePostController.text.length > 100) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Title cannot exceed 100 characters'),
+          ),
+        );
+        setState(() {
+          _isPosting = false;
+          Navigator.pop(context);
+        });
+        return;
+      }
+      if (_descriptionPostController.text.length > 750) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Description cannot exceed 750 characters'),
+          ),
+        );
+        setState(() {
+          _isPosting = false;
+          Navigator.pop(context);
+        });
+        return;
+      }
+
+      // Create post content
+      final postContent = PostContentModel(
+        contentCategory: _category.text == '0' ? 'Announcement' : 'Resources',
+        contentCreatedTimestamp: DateTime.now(),
+        contentDescription: _descriptionPostController.text,
+        contentFiles: fileUrls,
+        contentImage: imageUrls.whereType<String>().toList(),
+        contentModifiedTimestamp: DateTime.now(),
+        contentSoftDelete: false,
+        contentTitle: _titlePostController.text,
+        contentVideo: videoUrl != null ? [videoUrl] : [],
+        courseMentorId: courseMentor,
+        contentLinks: List<Map<String, String>>.from(_links),
+      );
+
+      await firestore.uploadPostContent(postContent);
+      Navigator.of(context).push(
+        CustomPageRoute(
+          page: MentorDashboard(),
+          direction: AxisDirection.right,
+        ),
+      );
+      //await uploadPostContent(postContent);
+    } finally {
+      setState(() {
+        _isPosting = false;
       });
     }
   }
 
-  Future<void> postContent() async {
-    SupabaseInstance supabase = SupabaseInstance(Supabase.instance.client);
-    FirestoreInstance firestore = FirestoreInstance();
-    MentorModel mentor = await firestore
-        .getMentorThroughAccId(FirebaseAuth.instance.currentUser!.uid);
-    String courseMentor = await firestore.getCourseMentorDocId(mentor.mentorId);
-    // Upload images
-    final imageUrls = await supabase.uploadImages(_images);
+  // In your FirestoreInstance class
+  Future<void> uploadPostContent(PostContentModel post) async {
+    // Check for recent posts with same title/content by same user
+    final query = await FirebaseFirestore.instance
+        .collection('posts')
+        .where('courseMentorId', isEqualTo: post.courseMentorId)
+        .where('contentTitle', isEqualTo: post.contentTitle)
+        .where('contentDescription', isEqualTo: post.contentDescription)
+        .orderBy('contentCreatedTimestamp', descending: true)
+        .limit(1)
+        .get();
 
-    // Upload video
-    final videoUrl =
-        _video != null ? await supabase.uploadVideo(_video!) : null;
-
-    // Upload files
-    final fileUrls = await supabase.uploadFiles(_platformFiles);
-
-    if (_titlePostController.text.isEmpty ||
-        _descriptionPostController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Title and description cannot be empty'),
-        ),
-      );
-      return;
+    if (query.docs.isNotEmpty) {
+      final lastPost = query.docs.first;
+      final lastPostTime = lastPost['contentCreatedTimestamp'] as Timestamp;
+      // If same post was created within last 5 seconds, reject
+      if (DateTime.now().difference(lastPostTime.toDate()).inSeconds < 5) {
+        throw Exception('Duplicate post detected');
+      }
     }
 
-    // Create post content
-    final postContent = PostContentModel(
-      contentCategory: _category.text == '0' ? 'Announcement' : 'Resources',
-      contentCreatedTimestamp: DateTime.now(),
-      contentDescription: _descriptionPostController.text,
-      contentFiles: fileUrls,
-      contentImage: imageUrls.whereType<String>().toList(),
-      contentModifiedTimestamp: DateTime.now(),
-      contentSoftDelete: false,
-      contentTitle: _titlePostController.text,
-      contentVideo: videoUrl != null ? [videoUrl] : [],
-      courseMentorId: courseMentor,
-      contentLinks: List<Map<String, String>>.from(_links),
-    );
-
-    await firestore.uploadPostContent(postContent);
+    // Proceed with upload
+    await FirebaseFirestore.instance.collection('posts').add({
+      'contentCategory': post.contentCategory,
+      'contentCreatedTimestamp': post.contentCreatedTimestamp,
+      'contentDescription': post.contentDescription,
+      'contentFiles': post.contentFiles,
+      'contentImage': post.contentImage,
+      'contentModifiedTimestamp': post.contentModifiedTimestamp,
+      'contentSoftDelete': post.contentSoftDelete,
+      'contentTitle': post.contentTitle,
+      'contentVideo': post.contentVideo,
+      'courseMentorId': post.courseMentorId,
+      'contentLinks': post.contentLinks,
+    });
   }
 
   void _removeImage(File image) => setState(() => _images.remove(image));
@@ -176,16 +346,10 @@ class _CreatePostState extends State<CreatePost> {
         top: false,
         child: Scaffold(
           appBar: AppBar(
+            toolbarHeight: screenSize.height * 0.07,
             leading: IconButton(
               onPressed: () {
-                Navigator.of(context).push(
-                  CustomPageRoute(
-                    page: widget.fromHome
-                        ? MentorDashboard(index: 1)
-                        : MentorDashboard(),
-                    direction: AxisDirection.right,
-                  ),
-                );
+                Navigator.pop(context);
               },
               icon: const Icon(Icons.arrow_back),
             ),
@@ -193,27 +357,49 @@ class _CreatePostState extends State<CreatePost> {
               Padding(
                 padding: EdgeInsets.only(right: screenSize.height * 0.02),
                 child: ElevatedButton(
-                  onPressed: () async {
-                    showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (context) => const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
-                    await postContent();
-                    Navigator.of(context).push(
-                      CustomPageRoute(
-                        page: MentorDashboard(),
-                        direction: AxisDirection.right,
-                      ),
-                    );
-                  },
+                  onPressed: _isPosting
+                      ? null
+                      : () async {
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) => Center(
+                              child: Lottie.asset(
+                                'assets/images/loading.json',
+                                width: MediaQuery.of(context).size.width * 0.2,
+                                height: MediaQuery.of(context).size.width * 0.2,
+                                repeat: true,
+                              ),
+                            ),
+                          );
+                          await postContent();
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1A73E8),
                     foregroundColor: Colors.white,
                   ),
-                  child: const Text('Post', style: TextStyle(fontSize: 16)),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    child: _isPosting
+                        ? const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: Colors.white,
+                                  backgroundColor: Colors.white30,
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Text('Posting...',
+                                  style: TextStyle(fontSize: 16)),
+                            ],
+                          )
+                        : Text('Post', style: TextStyle(fontSize: 16)),
+                  ),
                 ),
               ),
             ],

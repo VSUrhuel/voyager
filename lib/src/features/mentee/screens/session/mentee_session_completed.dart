@@ -79,8 +79,8 @@ class _MenteeSessionCompletedState extends State<MenteeSessionCompleted> {
             const SizedBox(height: 20),
             Lottie.asset(
               'assets/images/loading.json',
-              width: MediaQuery.of(context).size.width * 0.3,
-              height: MediaQuery.of(context).size.width * 0.3,
+              width: MediaQuery.of(context).size.width * 0.2,
+              height: MediaQuery.of(context).size.width * 0.2,
               repeat: true,
             ),
             Text(
@@ -98,7 +98,7 @@ class _MenteeSessionCompletedState extends State<MenteeSessionCompleted> {
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Lottie.asset(
                 'assets/images/empty-session.json',
@@ -126,19 +126,6 @@ class _MenteeSessionCompletedState extends State<MenteeSessionCompleted> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
-              FilledButton.icon(
-                onPressed: _loadData,
-                icon: const Icon(Icons.refresh, size: 20),
-                label: const Text("Refresh Sessions"),
-                style: FilledButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
             ],
           ),
         ),
@@ -156,7 +143,13 @@ class _MenteeSessionCompletedState extends State<MenteeSessionCompleted> {
                   completedSessions[index].courseMentorId),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(
+                      child: Lottie.asset(
+                    'assets/images/loading.json',
+                    width: MediaQuery.of(context).size.width * 0.2,
+                    height: MediaQuery.of(context).size.width * 0.2,
+                    repeat: true,
+                  ));
                 } else if (snapshot.hasError) {
                   return const Center(child: Text("Error loading course name"));
                 } else {
@@ -176,9 +169,10 @@ class _MenteeSessionCompletedState extends State<MenteeSessionCompleted> {
       );
     }
 
-    return SizedBox(
-      height: screenHeight * 0.65,
+    return SingleChildScrollView(
+        child: SizedBox(
+      height: screenHeight * 0.53,
       child: content,
-    );
+    ));
   }
 }

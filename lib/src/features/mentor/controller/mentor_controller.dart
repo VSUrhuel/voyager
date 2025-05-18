@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:flutter/material.dart';
@@ -91,6 +92,14 @@ class MentorController extends GetxController {
         mentorID = FirestoreInstance().generateUniqueId();
       }
 
+      String status = 'archived';
+      final CourseMentorModel? courseMentor = await FirestoreInstance()
+          .getCourseMentorThroughMentor(
+              FirestoreInstance().getFirebaseUser().email.toString());
+      if (courseMentor != null) {
+        status = 'active';
+      }
+
       final mentor = MentorModel(
         mentorId: mentorID,
         accountId: FirestoreInstance().getFirebaseUser().uid,
@@ -111,7 +120,7 @@ class MentorController extends GetxController {
         mentorRegEndTime: parseTime(
           mentorRegEndTime.text,
         ),
-        mentorStatus: "active",
+        mentorStatus: status,
         mentorSoftDeleted: false,
       );
       final firestore = FirestoreInstance();
@@ -151,7 +160,7 @@ class MentorController extends GetxController {
         mentorRegDay: selectedDays,
         mentorRegStartTime: parseTime(mentorRegStartTime.text),
         mentorRegEndTime: parseTime(mentorRegEndTime.text),
-        mentorStatus: mentorStatus.text == '' ? 'active' : mentorStatus.text,
+        mentorStatus: 'active',
         mentorSoftDeleted: false,
       );
       final firestore = FirestoreInstance();

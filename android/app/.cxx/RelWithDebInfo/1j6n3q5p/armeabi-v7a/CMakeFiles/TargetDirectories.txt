@@ -1,0 +1,2 @@
+C:/Users/johnr/OneDrive/Documents/Academe/BSCS-III/2nd Sem/Soft Eng II/Laboratory/voyager/android/app/.cxx/RelWithDebInfo/1j6n3q5p/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/johnr/OneDrive/Documents/Academe/BSCS-III/2nd Sem/Soft Eng II/Laboratory/voyager/android/app/.cxx/RelWithDebInfo/1j6n3q5p/armeabi-v7a/CMakeFiles/rebuild_cache.dir

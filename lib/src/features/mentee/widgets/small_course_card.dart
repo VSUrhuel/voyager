@@ -28,7 +28,8 @@ class SmallCourseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final currentUser = FirebaseAuth.instance.currentUser;
-
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     final startDate =
         DateFormat('MMM dd').format(courseModel.courseCreatedTimestamp);
     final endDate =
@@ -47,7 +48,7 @@ class SmallCourseCard extends StatelessWidget {
       future: fetchTotalMentors(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return Center();
         }
 
         final totalMentor = snapshot.data ?? 0;

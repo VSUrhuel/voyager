@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:voyager/src/features/authentication/widgets/password_text_field.dart';
 import 'package:voyager/src/features/mentor/controller/reset_pass_controller.dart';
 import 'package:voyager/src/repository/authentication_repository_firebase/authentication_repository.dart';

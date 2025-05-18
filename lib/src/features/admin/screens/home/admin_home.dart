@@ -60,7 +60,10 @@ class _AdminHomeState extends State<AdminHome> {
     final screenSize = MediaQuery.of(context).size;
     final auth = Get.put(FirebaseAuthenticationRepository());
 
-    return Scaffold(
+    return SafeArea(
+      top: false,
+      bottom: true,
+      child: Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
@@ -225,6 +228,7 @@ class _AdminHomeState extends State<AdminHome> {
           ],
         ),
       ),
+    )
     );
   }
 

@@ -78,8 +78,8 @@ class _MenteeSessionUpcomingState extends State<MenteeSessionUpcoming> {
             const SizedBox(height: 20),
             Lottie.asset(
               'assets/images/loading.json',
-              width: MediaQuery.of(context).size.width * 0.3,
-              height: MediaQuery.of(context).size.width * 0.3,
+              width: MediaQuery.of(context).size.width * 0.2,
+              height: MediaQuery.of(context).size.width * 0.2,
               repeat: true,
             ),
             Text(
@@ -93,55 +93,45 @@ class _MenteeSessionUpcomingState extends State<MenteeSessionUpcoming> {
         ),
       );
     } else if (upcomingSched.isEmpty) {
-      content = Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Lottie.asset(
-                'assets/images/empty-session.json',
-                width: MediaQuery.of(context).size.width * 0.5,
-                height: MediaQuery.of(context).size.width * 0.5,
-                repeat: true,
-              ),
-              const SizedBox(height: 24),
-              Text(
-                "No upcoming Sessions Yet",
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                "Your upcoming mentoring sessions will appear here",
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withOpacity(0.6)),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              FilledButton.icon(
-                onPressed: _loadData,
-                icon: const Icon(Icons.refresh, size: 20),
-                label: const Text("Refresh Sessions"),
-                style: FilledButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+      content = RefreshIndicator(
+          onRefresh: _loadData,
+          child: SingleChildScrollView(
+              child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Lottie.asset(
+                    'assets/images/empty-session.json',
+                    width: MediaQuery.of(context).size.width * 0.5,
+                    height: MediaQuery.of(context).size.width * 0.5,
+                    repeat: true,
                   ),
-                ),
+                  const SizedBox(height: 24),
+                  Text(
+                    "No upcoming Sessions Yet",
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Your upcoming mentoring sessions will appear here",
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.6)),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                ],
               ),
-              const SizedBox(height: 16),
-            ],
-          ),
-        ),
-      );
+            ),
+          )));
     } else {
       content = RefreshIndicator(
         onRefresh: _loadData,
@@ -163,7 +153,7 @@ class _MenteeSessionUpcomingState extends State<MenteeSessionUpcoming> {
     }
 
     return SizedBox(
-      height: screenHeight * 0.65,
+      height: screenHeight * 0.55,
       child: content,
     );
   }

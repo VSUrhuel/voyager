@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
@@ -8,6 +9,7 @@ import 'package:voyager/src/features/mentor/controller/video_controller.dart';
 import 'package:voyager/src/features/mentor/widget/post_content.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:flutter/material.dart';
+import 'package:voyager/src/widgets/custom_page_route.dart';
 
 class Post extends StatefulWidget {
   const Post({super.key});
@@ -98,14 +100,23 @@ class _PostState extends State<Post> {
         user?.photoURL ?? 'assets/images/application_images/profile.png';
     return Scaffold(
         appBar: AppBar(
+          systemOverlayStyle: SystemUiOverlayStyle.dark,
+          scrolledUnderElevation: 0,
+          toolbarHeight: screenHeight * 0.07,
           backgroundColor: Colors.white,
           elevation: 0,
-          title: Text(
-            'Posts',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: screenWidth * 0.07,
-              fontWeight: FontWeight.bold,
+          automaticallyImplyLeading: false,
+          title: Padding(
+            padding: EdgeInsets.only(
+              top: screenHeight * 0.02,
+            ),
+            child: Text(
+              'Posts',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: screenWidth * 0.07,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           centerTitle: false,
@@ -119,8 +130,9 @@ class _PostState extends State<Post> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => NotificationScreen()),
+                        CustomPageRoute(
+                            page: NotificationScreen(),
+                            direction: AxisDirection.left),
                       );
                     },
                   )),
@@ -142,9 +154,6 @@ class _PostState extends State<Post> {
                 return _buildErrorState(context, error);
               }
 
-              if (posts.isEmpty) {
-                return _buildEmptyState(context);
-              }
               return ListView.builder(
                 controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -170,7 +179,13 @@ class _PostState extends State<Post> {
 
   Widget _buildLoadingState() {
     return Center(
-      child: CircularProgressIndicator(),
+      child: Lottie.asset(
+        'assets/images/loading.json',
+        fit: BoxFit.cover,
+        width: 40,
+        height: 40,
+        repeat: true,
+      ),
     );
   }
 
@@ -179,7 +194,13 @@ class _PostState extends State<Post> {
       padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: Center(
         child: _isLoadingMore
-            ? CircularProgressIndicator()
+            ? Lottie.asset(
+                'assets/images/loading.json',
+                fit: BoxFit.cover,
+                width: 40,
+                height: 40,
+                repeat: true,
+              )
             : Text('No more posts available'),
       ),
     );
@@ -233,22 +254,6 @@ class _PostState extends State<Post> {
           onPressed: _refreshPosts,
           child: const Text('Retry'),
         ),
-      ],
-    );
-  }
-
-  Widget _buildEmptyState(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-        Icon(Icons.feed_outlined, size: 50, color: Colors.grey[400]),
-        const SizedBox(height: 16),
-        Text(
-          'No posts available!',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: 8),
       ],
     );
   }

@@ -214,7 +214,7 @@ class FirestoreInstance {
     }
   }
 
-  Future<CourseMentorModel> getCourseMentorThroughMentor(
+  Future<CourseMentorModel?> getCourseMentorThroughMentor(
       String mentorId) async {
     try {
       final courseMentor = await _db
@@ -223,11 +223,13 @@ class FirestoreInstance {
           .where('courseMentorSoftDeleted', isEqualTo: false)
           .limit(1)
           .get();
-      if (courseMentor.docs.isEmpty) {
-        throw Exception('No mentor found with ID: $mentorId');
-      }
+      // if (courseMentor.docs.isEmpty) {
+      //   throw Exception('No mentor found with ID: $mentorId');
+      // }
 
-      return CourseMentorModel.fromJson(courseMentor.docs.first.data());
+      return courseMentor.docs.isNotEmpty
+          ? CourseMentorModel.fromJson(courseMentor.docs.first.data())
+          : null;
     } catch (e) {
       rethrow;
     }
@@ -242,7 +244,7 @@ class FirestoreInstance {
           .limit(1)
           .get();
       if (courseMentor.docs.isEmpty) {
-        throw Exception('No mentor found with ID: $mentorId');
+        return '';
       }
 
       return courseMentor.docs.first.id;
@@ -643,7 +645,10 @@ class FirestoreInstance {
           .where((doc) => !ids.contains(doc.data()['accountApiID']))
           .map((doc) => UserModel.fromJson(doc.data()))
           .toList();
-      print(filteredUsers[0].accountApiName);
+      // print(filteredUsers[0].accountApiName);
+      if (filteredUsers.isEmpty) {
+        return [];
+      }
       return filteredUsers;
     } catch (e) {
       rethrow;
@@ -811,7 +816,9 @@ class FirestoreInstance {
       final mentor = await getMentorThroughAccId(
           firebase_auth.FirebaseAuth.instance.currentUser!.uid);
       final courseMentor = await getCourseMentorDocId(mentor.mentorId);
-
+      if (courseMentor == '') {
+        return [];
+      }
       // 2. Query mentee allocations with client-side soft delete filtering
       final allocationQuery = await _db
           .collection('menteeCourseAlloc')
@@ -824,16 +831,38 @@ class FirestoreInstance {
 
 // 2. Fix the logic for filtering allocations
       if (status != 'rejected') {
+        final Set<String> uniqueMenteeIds = {};
         validAllocations = allocationQuery.docs.where((doc) {
           final data = doc.data();
-          return data['mcaSoftDeleted'] != true &&
+          final menteeId = data['menteeId'];
+          if (menteeId == null || uniqueMenteeIds.contains(menteeId)) {
+            return false;
+          }
+          final meetsConditions = data['mcaSoftDeleted'] != true &&
               data['mcaAllocStatus'] == status;
+
+          if (meetsConditions) {
+            uniqueMenteeIds.add(menteeId);
+          }
+
+          return meetsConditions;
         }).toList();
       } else {
+        final Set<String> uniqueMenteeIds = {};
         validAllocations = allocationQuery.docs.where((doc) {
           final data = doc.data();
-          return data['mcaSoftDeleted'] == true ||
-              data['mcaAllocStatus'] == 'rejected';
+          final menteeId = data['menteeId'];
+          if (menteeId == null || uniqueMenteeIds.contains(menteeId)) {
+            return false;
+          }
+          final meetsConditions = data['mcaSoftDeleted'] != true ||
+              data['mcaAllocStatus'] == status;
+
+          if (meetsConditions) {
+            uniqueMenteeIds.add(menteeId);
+          }
+
+          return meetsConditions;
         }).toList();
       }
 
@@ -852,6 +881,24 @@ class FirestoreInstance {
       return users.whereType<UserModel>().toList();
     } catch (e) {
       debugPrint('Error fetching mentees: $e');
+      rethrow;
+    }
+  }
+
+  Future<bool> checkCourseAllocation() async {
+    try {
+      final mentor = await getMentorThroughAccId(
+          firebase_auth.FirebaseAuth.instance.currentUser!.uid);
+      final courseMentor = await getCourseMentorDocId(mentor.mentorId);
+      if (courseMentor == '') {
+        return false;
+      }
+      final allocationQuery = await _db
+          .collection('menteeCourseAlloc')
+          .where('courseMentorId', isEqualTo: courseMentor)
+          .get();
+      return allocationQuery.docs.isNotEmpty;
+    } catch (e) {
       rethrow;
     }
   }
@@ -1021,17 +1068,36 @@ class FirestoreInstance {
     }
   }
 
+  Future<void> setInitCourseMentor(String courseId, String mentorId) async {
+    try {
+      String uniqueID = generateUniqueId();
+      final cm = CourseMentorModel(
+        courseMentorId: uniqueID,
+        courseId: courseId,
+        mentorId: mentorId,
+        courseMentorCreatedTimestamp: DateTime.now(),
+        courseMentorSoftDeleted: true,
+      );
+      await _db.collection('courseMentor').doc(uniqueID).set(cm.toJson());
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> updateInitialCourseMentor(
       String email, String newMentorId) async {
     try {
-      CourseMentorModel courseMentor =
+      CourseMentorModel? courseMentor =
           await getCourseMentorThroughMentor(email);
-      await _db
-          .collection('courseMentor')
-          .doc(courseMentor.courseMentorId)
-          .update({
-        'mentorId': newMentorId,
-      });
+      if (courseMentor != null) {
+        await _db
+            .collection('courseMentor')
+            .doc(courseMentor.courseMentorId)
+            .update({
+          'mentorId': newMentorId,
+          'courseMentorSoftDeleted': false,
+        });
+      }
     } catch (e) {
       rethrow;
     }
@@ -1042,6 +1108,7 @@ class FirestoreInstance {
     try {
       final courseMentors = await _db
           .collection('courseMentor')
+          .where('courseMentorSoftDeleted', isEqualTo: false)
           .where('courseId', isEqualTo: courseId)
           .get();
       return courseMentors.docs
@@ -1193,10 +1260,10 @@ class FirestoreInstance {
   Future<String> getMenteeStatus(String mcaId) async {
     try {
       final mentee = await _db.collection('menteeCourseAlloc').doc(mcaId).get();
-      if (mentee.exists) {
+      if (mentee.exists && mentee.data()?['mcaSoftDeleted'] == false) {
         return mentee.data()!['mcaAllocStatus'];
       } else {
-        throw Exception('Mentee not found');
+        return 'rejected';
       }
     } catch (e) {
       rethrow;

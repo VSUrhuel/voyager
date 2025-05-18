@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
-import 'package:voyager/src/features/mentor/screens/mentor_dashboard.dart';
 import 'package:voyager/src/features/mentor/screens/profile/about.dart';
 import 'package:voyager/src/features/mentor/screens/profile/personal_information_mentor.dart';
 import 'package:voyager/src/features/mentor/screens/profile/security_password.dart';
@@ -51,9 +50,10 @@ class _MentorProfileState extends State<MentorProfile> {
 
       mentorModel = await firestore.getMentorThroughAccId(currentUser.uid);
       userModel = await firestore.getUser(currentUser.uid);
-      courseMentorModel =
-          await firestore.getCourseMentorThroughMentor(mentorModel.mentorId);
 
+      var cm =
+          await firestore.getCourseMentorThroughMentor(mentorModel.mentorId);
+      courseMentorModel = cm!;
       final courseModel = await firestore.getCourse(courseMentorModel.courseId);
 
       if (mounted) {
@@ -182,24 +182,21 @@ class _MentorProfileState extends State<MentorProfile> {
         child: Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
-            backgroundColor: Colors.white,
-            elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () => Navigator.of(context).push(
-                CustomPageRoute(
-                  page: MentorDashboard(index: 0),
-                  direction: AxisDirection.right,
+              backgroundColor: Colors.white,
+              elevation: 0,
+              leading: null,
+              toolbarHeight: screenHeight * 0.10,
+              automaticallyImplyLeading: false,
+              title: Padding(
+                padding: EdgeInsets.only(
+                    top: screenHeight * 0.013, left: screenHeight * 0.01),
+                child: Text(
+                  _appBarTitle,
+                  style: TextStyle(
+                      fontSize: screenWidth * 0.07,
+                      fontWeight: FontWeight.bold),
                 ),
-              ),
-            ),
-            title: const Text(
-              _appBarTitle,
-              style:
-                  TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-            ),
-            centerTitle: true,
-          ),
+              )),
           body: SingleChildScrollView(
             child: Column(
               children: [

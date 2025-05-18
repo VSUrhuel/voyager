@@ -48,6 +48,7 @@ dependencies:
   cached_network_image: ^3.4.1
   infinite_scroll_pagination: ^5.0.0
   lottie: ^3.3.1
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -56,14 +57,15 @@ dev_dependencies:
 
 flutter_native_splash:
   color: "#ffffff"
-  image: assets/images/application_images/eduvate_native_splash_logo.png
+  image: assets/images/application_images/new-native-splash.png
   android_12:
     icon_background_color: "#ffffff"
-    image: assets/images/application_images/eduvate_native_splash_logo.png
+    image: assets/images/application_images/new-native-splash.png
 
 flutter:
   uses-material-design: true
   assets:
+    - .env
     - assets/images/
     - assets/images/onboarding_images/
     - assets/images/login_images/
@@ -77,4 +79,4 @@ flutter:
 flutter_icons:
   anroid: true
   ios: true
-  image_path: "assets/images/application_images/eduvate_logo.png"
+  image_path: "assets/images/application_images/new-native-splash.png"

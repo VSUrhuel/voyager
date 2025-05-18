@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/admin/controllers/course_controller.dart';
 import 'package:voyager/src/features/admin/widgets/cover_photo_picker.dart';
 import 'package:voyager/src/widgets/custom_button.dart';
@@ -56,6 +57,8 @@ class _AddCourseState extends State<AddCourse> {
     final GlobalKey<CoverPhotoPickerState> pickerKey = GlobalKey();
 
     return SafeArea(
+      bottom: true,
+      top: false,
         child: Scaffold(
             resizeToAvoidBottomInset: false,
             appBar: AppBar(
@@ -164,17 +167,20 @@ class _AddCourseState extends State<AddCourse> {
                                 padding:
                                     EdgeInsets.only(top: screenHeight * 0.02),
                                 child: TextFormField(
-                                  controller:
-                                      _courseController.courseDescription,
+                                  controller: _courseController.courseDescription,
                                   style: TextStyle(
                                     fontSize: screenWidth * 0.04,
                                   ),
+                                  keyboardType: TextInputType.multiline,
+                                  maxLines: null, 
+                                  minLines: 1,  
                                   decoration: InputDecoration(
                                     contentPadding: EdgeInsets.only(
-                                        left: screenWidth * 0.05,
-                                        top: screenHeight * 0.016,
-                                        bottom: screenHeight * 0.016),
-                                    labelText: 'Enter Course Description ',
+                                      left: screenWidth * 0.05,
+                                      top: screenHeight * 0.016,
+                                      bottom: screenHeight * 0.016,
+                                    ),
+                                    labelText: 'Enter Course Description',
                                     labelStyle: TextStyle(
                                       fontSize: screenWidth * 0.04,
                                       height: 1,
@@ -186,6 +192,7 @@ class _AddCourseState extends State<AddCourse> {
                                     ),
                                   ),
                                 ),
+
                               ),
                               Container(
                                 padding:
@@ -239,7 +246,7 @@ class _AddCourseState extends State<AddCourse> {
                                       child: ListTile(
                                         title: Text(_courseController.courseDeliverables[index]),
                                         trailing: IconButton(
-                                          icon: Icon(Icons.delete),
+                                          icon: Icon(Icons.delete, color: Colors.red,),
                                           onPressed: () {
                                             setState(() {
                                               _courseController.courseDeliverables.removeAt(index);
@@ -308,8 +315,15 @@ class _AddCourseState extends State<AddCourse> {
                           showDialog(
                             context: currentContext,
                             barrierDismissible: false,
-                            builder: (_) => const Center(
-                                child: CircularProgressIndicator()),
+                            builder: (_) => Center(
+                                child: Lottie.asset(
+                                  'assets/images/loading.json',
+                                  fit: BoxFit.cover,
+                                  width: screenHeight * 0.08,
+                                  height: screenWidth * 0.04,
+                                  repeat: true,
+                                ),
+                              ),
                           );
                           await _courseController.createCourse();
                           _courseController.courseCode.clear();

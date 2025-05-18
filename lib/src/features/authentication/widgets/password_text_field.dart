@@ -20,13 +20,13 @@ class PasswordTextField extends StatefulWidget {
 
 class _PasswordTextFieldState extends State<PasswordTextField> {
   final textFieldFocusNode = FocusNode();
-  bool _obscured = false;
+  bool _obscured = true;
 
   void _toggleObscured() {
     setState(() {
       _obscured = !_obscured;
       if (textFieldFocusNode.hasPrimaryFocus) return;
-      textFieldFocusNode.canRequestFocus = false;
+      textFieldFocusNode.canRequestFocus = true;
     });
   }
 

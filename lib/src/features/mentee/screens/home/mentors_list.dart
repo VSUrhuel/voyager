@@ -1,3 +1,4 @@
+import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/mentee/widgets/mentor_card.dart';
 import 'package:voyager/src/features/mentee/widgets/normal_search_bar.dart';
 import 'package:flutter/material.dart';
@@ -67,7 +68,7 @@ class _MentorsListState extends State<MentorsList> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-
+    final screenHeight = MediaQuery.of(context).size.height;
     return SafeArea(
         bottom: true,
         top: false,
@@ -99,8 +100,24 @@ class _MentorsListState extends State<MentorsList> {
                   future: fetchMentorsWithDetails(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
+                      return Column(
+                        children: [
+                          SizedBox(
+                              height:
+                                  24.0), // space between searchbar and loader
+                          Center(
+                            child: Lottie.asset(
+                              'assets/images/loading.json',
+                              fit: BoxFit.cover,
+                              width: screenHeight * 0.08,
+                              height: screenWidth * 0.04,
+                              repeat: true,
+                            ),
+                          ),
+                        ],
+                      );
                     }
+
                     if (snapshot.hasError ||
                         !snapshot.hasData ||
                         snapshot.data!.isEmpty) {
@@ -122,33 +139,45 @@ class _MentorsListState extends State<MentorsList> {
                       );
                     }
 
-                    // In the build method, replace the rows building logic with this:
                     List<Widget> rows = [];
                     int itemCount = snapshot.data!.length;
 
-// Build the rows of mentor cards
                     for (int i = 0; i < itemCount; i += 2) {
-                      // Always create a row with two Expanded widgets
+                      bool isLastItem = (i == itemCount - 1);
+
                       rows.add(
                         Row(
                           children: [
-                            Expanded(child: snapshot.data![i]),
-                            if (i + 1 <
-                                itemCount) // Only add second card if it exists
-                              Expanded(child: snapshot.data![i + 1]),
-                            if (i + 1 >=
-                                itemCount) // If odd card, add an empty Expanded
-                              Expanded(child: Container()),
+                            // First card - always exists
+                            Expanded(
+                              flex: isLastItem
+                                  ? 2
+                                  : 1, // Flex 2 for full width when last odd item
+                              child: snapshot.data![i],
+                            ),
+
+                            // Second card - only if exists and not last odd item
+                            if (!isLastItem)
+                              Expanded(
+                                flex: 1,
+                                child: snapshot.data![i + 1],
+                              ),
                           ],
                         ),
                       );
-                      rows.add(SizedBox(height: 8.0));
+
+                      // Add spacing between rows except after last row
+                      if (i + 2 < itemCount) {
+                        rows.add(const SizedBox(height: 8.0));
+                      }
                     }
 
                     return SingleChildScrollView(
                       child: Padding(
                         padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.05),
+                          horizontal: screenWidth * 0.05,
+                          vertical: screenHeight * 0.02,
+                        ),
                         child: Column(children: rows),
                       ),
                     );

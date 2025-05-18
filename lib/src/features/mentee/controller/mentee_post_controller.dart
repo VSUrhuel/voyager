@@ -90,11 +90,11 @@ class MenteePostController {
       List<String> courseMentorIds = [];
       List<String> menteeMcaIds = mentee.menteeMcaId ?? [];
       print(menteeMcaIds.length);
+
       for (var menteeMcaId in menteeMcaIds) {
         final String status =
             await firestoreInstance.getMenteeStatus(menteeMcaId);
         if (status != 'accepted') continue;
-
         print('Course Mentor ID: $menteeMcaId');
         final courseMentorId =
             await firestoreInstance.getCourseMentorIdFromMca(menteeMcaId);
@@ -111,8 +111,13 @@ class MenteePostController {
 
       // Filter out soft-deleted posts and ensure timestamps are non-null
       allPosts = allPosts.where((post) => !post.contentSoftDelete).toList()
-        ..sort((a, b) =>
-            b.contentModifiedTimestamp.compareTo(a.contentModifiedTimestamp));
+        ..sort((a, b) {
+          final timeCompare =
+              b.contentModifiedTimestamp.compareTo(a.contentModifiedTimestamp);
+          if (timeCompare != 0) return timeCompare;
+          return b.contentDescription.compareTo(
+              a.contentDescription); // Assuming your model has an id field
+        }); // Assuming your model has an id field))};
 
       // Find starting index
       int startIndex = 0;

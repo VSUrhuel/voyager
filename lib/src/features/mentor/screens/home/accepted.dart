@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/controller/mentee_list_controller.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
@@ -112,7 +113,13 @@ class _AcceptedListState extends State<AcceptedList> {
                               return SizedBox(
                                   height: screenHeight * 0.25,
                                   child: Center(
-                                      child: CircularProgressIndicator()));
+                                      child: Lottie.asset(
+                                    'assets/images/loading.json',
+                                    fit: BoxFit.cover,
+                                    width: screenWidth * 0.2,
+                                    height: screenWidth * 0.2,
+                                    repeat: true,
+                                  )));
                             }
                             refreshAcceptedMentees(); // Refresh accepted mentees after loading
                             return Center(
@@ -122,27 +129,75 @@ class _AcceptedListState extends State<AcceptedList> {
                       }
 
                       if (snapshot.hasError) {
-                        return Column(
+                        return Center(
+                            child: SingleChildScrollView(
+                                child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            const Text('Failed to load mentees'),
-                            const SizedBox(height: 16),
-                            ElevatedButton(
-                              onPressed: refreshAcceptedMentees,
-                              child: const Text('Retry'),
+                            Lottie.asset(
+                              'assets/images/error.json',
+                              fit: BoxFit.cover,
+                              width: screenWidth *
+                                  0.3, // Slightly larger for better visibility
+                              height: screenWidth * 0.3,
+                              repeat: true,
                             ),
+                            SizedBox(height: 20),
+                            Text(
+                              'Oops! Something went wrong',
+                              style: TextStyle(
+                                fontSize: screenWidth * 0.045,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.red[700],
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'Failed to load mentees data',
+                              style: TextStyle(
+                                fontSize: screenWidth * 0.035,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            SizedBox(height: 16),
                           ],
-                        );
+                        )));
                       }
 
                       if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return Text(
-                          'No accepted mentees found',
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: screenWidth * 0.033,
-                          ),
-                        );
+                        return Center(
+                            child: SingleChildScrollView(
+                                child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Lottie.asset(
+                              'assets/images/empty-list.json', // Consider adding a dedicated empty state animation
+                              width: screenWidth * 0.3,
+                              height: screenWidth * 0.3,
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'No Accepted Mentees',
+                              style: TextStyle(
+                                fontSize: screenWidth * 0.04,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[800],
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'When you accept mentee requests,\nthey will appear here',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: screenWidth * 0.033,
+                                color: Colors.grey[600],
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        )));
                       }
 
                       return SizedBox(

@@ -1,9 +1,11 @@
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:voyager/src/features/mentor/controller/post_controller.dart';
 import 'package:voyager/src/features/mentor/controller/video_controller.dart';
 import 'package:voyager/src/features/mentor/model/content_model.dart';
 import 'package:voyager/src/features/mentor/screens/post/create_post.dart';
 import 'package:voyager/src/features/mentor/widget/post_content.dart';
+import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/widgets/custom_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -22,6 +24,7 @@ class _PostState extends State<Post> {
   bool _isLoadingMore = false;
   bool _isRefreshing = false;
   bool _hasMorePosts = true;
+  bool _hasCourseAllocation = false;
   late Future<List<PostContentModel>> postsFuture;
   VideoPlaybackController videoPlaybackController =
       Get.put(VideoPlaybackController());
@@ -29,8 +32,18 @@ class _PostState extends State<Post> {
   @override
   void initState() {
     _initializePosts();
+    _updateCourseAllocationStatus();
     _scrollController.addListener(_scrollListener);
     super.initState();
+  }
+
+  void _updateCourseAllocationStatus() async {
+    // Check if the user has a course allocation
+    FirestoreInstance firestoreInstance = Get.put(FirestoreInstance());
+    final val = await firestoreInstance.checkCourseAllocation();
+    setState(() {
+      _hasCourseAllocation = val;
+    });
   }
 
   void _scrollListener() {
@@ -112,29 +125,59 @@ class _PostState extends State<Post> {
               ],
             ),
             actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 16.0),
-                child: IconButton(
-                  icon: Container(
-                    padding: const EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Theme.of(context).primaryColor.withOpacity(0.1),
-                    ),
-                    child: Icon(Icons.edit,
-                        color: Theme.of(context).primaryColor,
-                        size: screenWidth * 0.065),
-                  ),
-                  onPressed: () {
-                    // Handle the button press here
-                    Navigator.push(
-                      context,
-                      CustomPageRoute(
-                        page: CreatePost(),
-                        direction: AxisDirection.left,
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 1.0, end: 1.0),
+                duration: Duration(milliseconds: 200),
+                builder: (context, scale, child) {
+                  return Transform.scale(
+                    scale: scale,
+                    child: child,
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: IconButton(
+                    icon: Container(
+                      padding: const EdgeInsets.all(10.0),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [
+                            Theme.of(context).primaryColor.withOpacity(0.15),
+                            Theme.of(context).primaryColor.withOpacity(0.25),
+                          ],
+                        ),
                       ),
-                    );
-                  },
+                      child: Icon(
+                        FontAwesomeIcons
+                            .solidPenToSquare, // Alternative solid version
+                        color: Theme.of(context).primaryColor,
+                        size: screenWidth * 0.05,
+                      ),
+                    ),
+                    onPressed: () {
+                      if (_hasCourseAllocation == false) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'You need to be allocated a course to create a post.',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        return;
+                      }
+
+                      Navigator.push(
+                        context,
+                        CustomPageRoute(
+                          page: CreatePost(),
+                          direction: AxisDirection.left,
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
@@ -340,12 +383,26 @@ class _PostState extends State<Post> {
 
             // Filled button with icon
             FilledButton.icon(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const CreatePost(),
-                ),
-              ).then((_) => _refreshPosts()),
+              onPressed: () {
+                if (_hasCourseAllocation == false) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'You need to be allocated a course to create a post.',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CreatePost(),
+                  ),
+                ).then((_) => _refreshPosts());
+              },
               icon: const Icon(Icons.add, size: 20),
               label: const Text('Create First Post'),
               style: FilledButton.styleFrom(

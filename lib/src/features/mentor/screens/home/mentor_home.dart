@@ -2,7 +2,9 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:voyager/src/features/mentor/screens/mentor_dashboard.dart';
 import 'package:voyager/src/features/mentor/screens/profile/mentor_profile.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/controller/mentee_list_controller.dart';
@@ -28,6 +30,7 @@ class _MentorHomeState extends State<MentorHome> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
   final isChanged = false;
+  bool _hasCourseAllocation = false;
 
   // Keys to access the list states
   final GlobalKey _pendingListKey = GlobalKey();
@@ -54,7 +57,17 @@ class _MentorHomeState extends State<MentorHome> {
   @override
   void initState() {
     super.initState();
+    _updateCourseAllocationStatus();
     fetchData();
+  }
+
+  void _updateCourseAllocationStatus() async {
+    // Check if the user has a course allocation
+    FirestoreInstance firestoreInstance = Get.put(FirestoreInstance());
+    final val = await firestoreInstance.checkCourseAllocation();
+    setState(() {
+      _hasCourseAllocation = val;
+    });
   }
 
   void fetchData() async {
@@ -123,29 +136,58 @@ class _MentorHomeState extends State<MentorHome> {
               ],
             ),
             actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 16.0),
-                child: IconButton(
-                  icon: Container(
-                    padding: const EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Theme.of(context).primaryColor.withOpacity(0.1),
-                    ),
-                    child: Icon(Icons.edit,
-                        color: Theme.of(context).primaryColor,
-                        size: screenWidth * 0.065),
-                  ),
-                  onPressed: () {
-                    // Handle the button press here
-                    Navigator.push(
-                      context,
-                      CustomPageRoute(
-                        page: CreatePost(),
-                        direction: AxisDirection.left,
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 1.0, end: 1.0),
+                duration: Duration(milliseconds: 200),
+                builder: (context, scale, child) {
+                  return Transform.scale(
+                    scale: scale,
+                    child: child,
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: IconButton(
+                    icon: Container(
+                      padding: const EdgeInsets.all(10.0),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [
+                            Theme.of(context).primaryColor.withOpacity(0.15),
+                            Theme.of(context).primaryColor.withOpacity(0.25),
+                          ],
+                        ),
                       ),
-                    ).then((_) => _refreshIndicatorKey.currentState?.show());
-                  },
+                      child: Icon(
+                        FontAwesomeIcons
+                            .solidPenToSquare, // Alternative solid version
+                        color: Theme.of(context).primaryColor,
+                        size: screenWidth * 0.05,
+                      ),
+                    ),
+                    onPressed: () {
+                      if (_hasCourseAllocation == false) {
+                        Get.snackbar(
+                          'No Course Allocation',
+                          'You need to allocate a course before creating a post.',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.red,
+                          colorText: Colors.white,
+                        );
+                        return;
+                      }
+                      // Scale animation on press
+
+                      Navigator.push(
+                        context,
+                        CustomPageRoute(
+                          page: CreatePost(),
+                          direction: AxisDirection.left,
+                        ),
+                      ).then((_) => _refreshIndicatorKey.currentState?.show());
+                    },
+                  ),
                 ),
               ),
             ],
@@ -264,7 +306,7 @@ class _MentorHomeState extends State<MentorHome> {
         onTap: () {
           Navigator.of(context).push(
             CustomPageRoute(
-              page: MentorProfile(),
+              page: MentorDashboard(index: 3),
               direction: AxisDirection.left,
             ),
           );

@@ -37,27 +37,31 @@ class _AdminProfileState extends State<AdminProfile> {
     String text,
     double screenWidth,
   ) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: screenWidth * 0.01),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            icon,
-            size: screenWidth * 0.05,
-            color: Theme.of(context).primaryColor.withOpacity(0.7),
-          ),
-          SizedBox(width: screenWidth * 0.03),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: screenWidth * 0.038,
-                color: Colors.black87,
+    return SafeArea(
+      bottom: true,
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: screenWidth * 0.01),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              icon,
+              size: screenWidth * 0.05,
+              color: Theme.of(context).primaryColor.withOpacity(0.7),
+            ),
+            SizedBox(width: screenWidth * 0.03),
+            Expanded(
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: screenWidth * 0.038,
+                  color: Colors.black87,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -116,11 +120,15 @@ class _AdminProfileState extends State<AdminProfile> {
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
-          title: const Text(
-            "My Profile",
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          title: Padding(
+            padding: EdgeInsets.only(
+                top: screenHeight * 0.013, left: screenHeight * 0.01),
+            child: Text(
+              'My Profile',
+              style: TextStyle(
+                  fontSize: screenWidth * 0.07, fontWeight: FontWeight.bold),
+            ),
           ),
-          centerTitle: true,
         ),
         body: SingleChildScrollView(
             child: Column(

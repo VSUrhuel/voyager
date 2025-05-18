@@ -160,7 +160,8 @@ class _CourseCardState extends State<CourseCard> {
                                   _buildStatItem(
                                     icon: Icons.group,
                                     value: '$totalMentor',
-                                    label: 'Mentors',
+                                    label:
+                                        totalMentor > 1 ? 'Mentors' : 'Mentor',
                                     theme: theme,
                                   ),
                                   FutureBuilder<int>(
@@ -171,7 +172,9 @@ class _CourseCardState extends State<CourseCard> {
                                       return _buildStatItem(
                                         icon: FontAwesomeIcons.users,
                                         value: '$menteeCount',
-                                        label: 'Mentee',
+                                        label: menteeCount > 1
+                                            ? 'Mentees'
+                                            : 'Mentee',
                                         theme: theme,
                                       );
                                     },
