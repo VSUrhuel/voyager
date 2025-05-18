@@ -141,7 +141,7 @@ class _CreatePostState extends State<CreatePost> {
         Navigator.pop(context);
         return;
       }
-      for (var file in result!.files) {
+      for (var file in result.files) {
         final fileSize = file.size;
         // Check if the file size exceeds 5MB (5 * 1024 * 1024 bytes)
         if (fileSize > 5 * 1024 * 1024) {

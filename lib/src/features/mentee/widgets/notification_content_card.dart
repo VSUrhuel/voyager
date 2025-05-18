@@ -124,7 +124,7 @@ class _NotificationContentCardState extends State<NotificationContentCard> {
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(
+                              SizedBox(
                                 width: screenWidth * 0.9,
                                 child: AnimatedSize(
                                   duration: Duration(milliseconds: 300),

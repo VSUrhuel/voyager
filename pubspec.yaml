@@ -48,6 +48,7 @@ dependencies:
   cached_network_image: ^3.4.1
   infinite_scroll_pagination: ^5.0.0
   lottie: ^3.3.1
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -64,6 +65,7 @@ flutter_native_splash:
 flutter:
   uses-material-design: true
   assets:
+    - .env
     - assets/images/
     - assets/images/onboarding_images/
     - assets/images/login_images/
