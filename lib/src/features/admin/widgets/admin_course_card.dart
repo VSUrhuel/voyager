@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/admin/controllers/course_controller.dart';
 import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
@@ -257,6 +258,11 @@ class AdminCourseCard extends StatelessWidget {
                             ),
                           );
                           if (confirmed == true) {
+                            if (courseMentors.isNotEmpty)
+                            {
+                              Get.snackbar("Error", "Unable to delete course. Please remove all mentors before deleting the course.");
+                              break;
+                            }
                             await CourseController().deleteCourse(course.docId);
                             onUpdate();
                           }
