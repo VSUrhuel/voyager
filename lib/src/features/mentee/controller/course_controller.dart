@@ -32,7 +32,7 @@ class CourseController extends GetxController {
             doc.data(), doc.id); // Pass doc.id as the docId
       }).toList();
     } catch (e) {
-      print('Error fetching courses: $e');
+      throw Exception('Error fetching courses: $e');
     } finally {
       isLoading.value = false;
     }

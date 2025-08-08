@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
@@ -95,9 +94,6 @@ class _PostState extends State<Post> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    User? user = FirebaseAuth.instance.currentUser;
-    String profileImageURL =
-        user?.photoURL ?? 'assets/images/application_images/profile.png';
     return Scaffold(
         appBar: AppBar(
           systemOverlayStyle: SystemUiOverlayStyle.dark,

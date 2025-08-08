@@ -60,7 +60,6 @@ class _MentorsListState extends State<MentorsList> {
       }
       return mentors;
     } catch (e) {
-      print("Error fetching mentors: $e");
       return []; // Return an empty list in case of an error
     }
   }

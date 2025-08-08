@@ -8,7 +8,7 @@ class CourseModel {
   final List<String> courseDeliverables;
   final String courseImgUrl;
   final bool courseSoftDelete;
-  final String courseStatus;
+  late final String courseStatus;
   final DateTime courseCreatedTimestamp;
   final DateTime courseModifiedTimestamp;
 

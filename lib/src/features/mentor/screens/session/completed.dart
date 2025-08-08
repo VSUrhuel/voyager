@@ -1,9 +1,11 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
-import 'package:voyager/src/features/mentor/controller/schedule_conrtoller.dart';
+import 'package:voyager/src/features/mentor/controller/schedule_controller.dart';
 import 'package:voyager/src/features/mentor/model/schedule_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/widgets/completed_sched_card.dart';
@@ -17,7 +19,7 @@ class CompletedSession extends StatefulWidget {
 
 class _CompletedSessionState extends State<CompletedSession> {
   final FirestoreInstance firestore = Get.put(FirestoreInstance());
-  final ScheduleConrtoller scheduleController = Get.put(ScheduleConrtoller());
+  final ScheduleController scheduleController = Get.put(ScheduleController());
   late UserModel user;
   late List<ScheduleModel> completedSessions = [];
   bool isLoading = true;

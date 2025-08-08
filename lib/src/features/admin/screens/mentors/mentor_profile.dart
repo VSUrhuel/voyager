@@ -56,7 +56,6 @@ class _MentorProfileState extends State<MentorProfile> {
           .join(' ');
     }
 
-    final theme = Theme.of(context);
     final formattedName = toTitleCase(userModel.accountApiName);
     return SafeArea(
         bottom: true,
@@ -494,9 +493,9 @@ class _MentorProfileState extends State<MentorProfile> {
       child: InkWell(
         onTap: () async {
           final uri = Uri.tryParse(url);
-          print(uri);
           if (uri != null) {
             if (!await launchUrl(uri)) {
+              // ignore: use_build_context_synchronously
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Failed to open $uri! Contact your mentor.'),

@@ -34,8 +34,6 @@ class MRouteMiddleware extends GetMiddleware {
             Get.context!, MaterialPageRoute(builder: (context) => Welcome()));
         return;
       }
-      print("im here");
-      print(user.emailVerified);
       if (user.emailVerified == false) {
         Get.offAll(() => EmailVerification());
         return;

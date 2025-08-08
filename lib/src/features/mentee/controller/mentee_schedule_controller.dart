@@ -1,11 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/features/mentor/model/schedule_model.dart';
-
-import '../../authentication/models/user_model.dart';
 
 class MenteeScheduleController extends GetxController {
   static MenteeScheduleController get instance => Get.find();
@@ -13,7 +11,6 @@ class MenteeScheduleController extends GetxController {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  /// Public getter to access current user email
   String get currentUserEmail => _auth.currentUser?.email ?? "";
 
   Future<String> getUserIdThroughEmail(String email) async {
@@ -21,6 +18,7 @@ class MenteeScheduleController extends GetxController {
       final userSnapshot = await _db
           .collection('users')
           .where('accountApiEmail', isEqualTo: email)
+          .limit(1)
           .get();
 
       if (userSnapshot.docs.isEmpty) {
@@ -32,6 +30,7 @@ class MenteeScheduleController extends GetxController {
       final menteeSnapshot = await _db
           .collection('mentee')
           .where('accountId', isEqualTo: userId)
+          .limit(1)
           .get();
 
       if (menteeSnapshot.docs.isEmpty) {
@@ -40,7 +39,6 @@ class MenteeScheduleController extends GetxController {
 
       return menteeSnapshot.docs.first.id;
     } catch (e) {
-      print("❌ Error in getUserIdThroughEmail: $e");
       rethrow;
     }
   }
@@ -58,7 +56,6 @@ class MenteeScheduleController extends GetxController {
           .map((doc) => doc.data()['courseMentorId'] as String)
           .toList();
     } catch (e) {
-      print("❌ Error getting course mentor IDs 1: $e");
       return [];
     }
   }
@@ -80,229 +77,110 @@ class MenteeScheduleController extends GetxController {
           .map((doc) => ScheduleModel.fromJson(doc.data()))
           .toList();
     } catch (e) {
-      print("❌ Error fetching schedule sessions: $e");
-      throw Exception("Failed to fetch schedule sessions: $e");
+      rethrow;
     }
   }
 
-  Future<String> getDayOfTheWeek(DateTime selectedDay) async {
-    try {
-      List<String> days = [
-        'Monday',
-        'Tuesday',
-        'Wednesday',
-        'Thursday',
-        'Friday',
-        'Saturday',
-        'Sunday'
-      ];
-      int dayIndex = selectedDay.weekday - 1; // Adjust for 0-based index
-      return days[dayIndex];
-    } catch (e) {
-      print("❌ Error getting day of the week: $e");
-      throw Exception("Failed to fetch day of the week: $e");
-    }
+  String getDayOfTheWeek(DateTime selectedDay) {
+    const List<String> days = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
+    ];
+    return days[selectedDay.weekday - 1];
   }
 
   Future<List<MentorModel>> getRegScheduleToday(String day) async {
-    const maxRetries = 3;
-    const initialDelay = Duration(seconds: 1);
-    int attempt = 0;
-
-    while (attempt < maxRetries) {
-      attempt++;
-      try {
-        final userId = await getUserIdThroughEmail(currentUserEmail);
-        final courseMentorIds = await getCourseMentorIdsForMentee(userId);
-
-        // Get mentor details for each course mentor with error handling
-        final mentors = await Future.wait(
-          courseMentorIds.map((courseMentorId) async {
-            final mentorSnapshot =
-                await _db.collection('courseMentor').doc(courseMentorId).get();
-
-            if (!mentorSnapshot.exists) throw Exception('Mentor not found');
-
-            final mentorId =
-                mentorSnapshot.data()?['mentorId'] as String? ?? '';
-            final mentorDoc =
-                await _db.collection('mentors').doc(mentorId).get();
-
-            if (!mentorDoc.exists) throw Exception('Mentor details not found');
-
-            return MentorModel.fromJson(
-                mentorDoc.data() as Map<String, dynamic>);
-          }),
-          eagerError: true, // Fail fast if any request fails
-        );
-        List<MentorModel> mentorsReturn = [];
-        for (var mentor in mentors) {
-          if (mentor.mentorRegDay.contains(day)) {
-            mentorsReturn.add(mentor);
-          }
-        }
-        return mentorsReturn;
-      } catch (e) {
-        if (e is FirebaseException && e.code == 'unavailable') {
-          if (attempt == maxRetries) {
-            // Log the error and return false as a fallback
-            ScaffoldMessenger.of(Get.context!).showSnackBar(
-              SnackBar(
-                  content:
-                      Text('Service unavailable. Please try again later.')),
-            );
-
-            return []; // Or consider throwing the exception
-          }
-
-          // Exponential backoff
-          final delay = initialDelay * (1 << (attempt - 1));
-          await Future.delayed(delay);
-          continue;
-        }
-
-        // For other errors, either rethrow or handle as needed
-        ScaffoldMessenger.of(Get.context!).showSnackBar(
-          SnackBar(content: Text('Error fetching schedule: $e')),
-        );
-        rethrow; // Or return false if you prefer to fail silently
-      }
-    }
-
-    return []; // Fallback return
-  }
-
-  Future<List<ScheduleModel>> getRegScheduleByDay(String date) async {
     try {
-      DateTime parsedDate = DateTime.parse(date);
-      DateTime startOfDay =
-          DateTime(parsedDate.year, parsedDate.month, parsedDate.day);
-      DateTime endOfDay = DateTime(
-          parsedDate.year, parsedDate.month, parsedDate.day, 23, 59, 59);
-
       final userId = await getUserIdThroughEmail(currentUserEmail);
       final courseMentorIds = await getCourseMentorIdsForMentee(userId);
 
       if (courseMentorIds.isEmpty) return [];
 
-      // First get all non-deleted schedules for these courseMentorIds
-      final snapshot = await _db
-          .collection('schedule')
-          .where('courseMentorId', whereIn: courseMentorIds)
-          .where('scheduleSoftDelete', isEqualTo: false)
-          .get();
+      final mentors = await Future.wait(
+        courseMentorIds.map((courseMentorId) async {
+          final mentorSnapshot =
+              await _db.collection('courseMentor').doc(courseMentorId).get();
+          if (!mentorSnapshot.exists) {
+            throw Exception('Mentor mapping not found');
+          }
 
-      // Then filter client-side for the date range
-      return snapshot.docs
-          .map((doc) => ScheduleModel.fromJson(doc.data()))
-          .where((schedule) =>
-              schedule.scheduleDate.isAfter(startOfDay) &&
-              schedule.scheduleDate.isBefore(endOfDay))
+          final mentorId = mentorSnapshot.data()?['mentorId'] as String? ?? '';
+          if (mentorId.isEmpty) throw Exception('Mentor ID is empty');
+
+          final mentorDoc = await _db.collection('mentors').doc(mentorId).get();
+          if (!mentorDoc.exists) throw Exception('Mentor details not found');
+
+          return MentorModel.fromJson(mentorDoc.data() as Map<String, dynamic>);
+        }),
+      );
+
+      return mentors
+          .where((mentor) => mentor.mentorRegDay.contains(day))
           .toList();
     } catch (e) {
-      print("❌ Error fetching schedule by day: $e");
-      throw Exception("Failed to fetch schedule sessions: $e");
+      rethrow;
     }
   }
 
   Future<bool> hasRegScheduleToday(String day) async {
-    const maxRetries = 3;
-    const initialDelay = Duration(seconds: 1);
-    int attempt = 0;
+    try {
+      final userId = await getUserIdThroughEmail(currentUserEmail);
+      final courseMentorIds = await getCourseMentorIdsForMentee(userId);
 
-    while (attempt < maxRetries) {
-      attempt++;
-      try {
-        final userId = await getUserIdThroughEmail(currentUserEmail);
-        final courseMentorIds = await getCourseMentorIdsForMentee(userId);
+      if (courseMentorIds.isEmpty) return false;
 
-        if (courseMentorIds.isEmpty) return false;
-
-        // Get mentor details for each course mentor with error handling
-        final mentors = await Future.wait(
-          courseMentorIds.map((courseMentorId) async {
-            final mentorSnapshot =
-                await _db.collection('courseMentor').doc(courseMentorId).get();
-
-            if (!mentorSnapshot.exists) throw Exception('Mentor not found');
-
-            final mentorId =
-                mentorSnapshot.data()?['mentorId'] as String? ?? '';
-            final mentorDoc =
-                await _db.collection('mentors').doc(mentorId).get();
-
-            if (!mentorDoc.exists) throw Exception('Mentor details not found');
-
-            return MentorModel.fromJson(
-                mentorDoc.data() as Map<String, dynamic>);
-          }),
-          eagerError: true, // Fail fast if any request fails
-        );
-        for (var mentor in mentors) {
-          print(mentor.mentorRegDay);
-        }
-        print(day);
-        // Check if any mentor has this day as a regular day
-        return mentors.any((mentor) => mentor.mentorRegDay.contains(day));
-      } catch (e) {
-        if (e is FirebaseException && e.code == 'unavailable') {
-          if (attempt == maxRetries) {
-            // Log the error and return false as a fallback
-            ScaffoldMessenger.of(Get.context!).showSnackBar(
-              SnackBar(
-                  content:
-                      Text('Service unavailable. Please try again later.')),
-            );
-
-            return false; // Or consider throwing the exception
+      final mentors = await Future.wait(
+        courseMentorIds.map((courseMentorId) async {
+          final mentorSnapshot =
+              await _db.collection('courseMentor').doc(courseMentorId).get();
+          if (!mentorSnapshot.exists) {
+            throw Exception('Mentor mapping not found');
           }
 
-          // Exponential backoff
-          final delay = initialDelay * (1 << (attempt - 1));
-          await Future.delayed(delay);
-          continue;
-        }
+          final mentorId = mentorSnapshot.data()?['mentorId'] as String? ?? '';
+          if (mentorId.isEmpty) throw Exception('Mentor ID is empty');
 
-        // For other errors, either rethrow or handle as needed
-        ScaffoldMessenger.of(Get.context!).showSnackBar(
-          SnackBar(content: Text('Error fetching schedule: $e')),
-        );
-        rethrow; // Or return false if you prefer to fail silently
-      }
+          final mentorDoc = await _db.collection('mentors').doc(mentorId).get();
+          if (!mentorDoc.exists) throw Exception('Mentor details not found');
+
+          return MentorModel.fromJson(mentorDoc.data() as Map<String, dynamic>);
+        }),
+      );
+
+      return mentors.any((mentor) => mentor.mentorRegDay.contains(day));
+    } catch (e) {
+      rethrow;
     }
-
-    return false; // Fallback return
   }
 
   Future<List<ScheduleModel>> getScheduleByDay(String date) async {
     try {
-      // Parse the input date (format: "YYYY-MM-DD")
       DateTime queryDate = DateTime.parse(date);
-
       final userId = await getUserIdThroughEmail(currentUserEmail);
       final courseMentorIds = await getCourseMentorIdsForMentee(userId);
 
       if (courseMentorIds.isEmpty) return [];
 
-      // Get all non-deleted schedules for these courseMentorIds
       final snapshot = await _db
           .collection('schedule')
           .where('courseMentorId', whereIn: courseMentorIds)
           .where('scheduleSoftDelete', isEqualTo: false)
           .get();
 
-      // Filter for schedules that match the query date
       return snapshot.docs
           .map((doc) => ScheduleModel.fromJson(doc.data()))
-          .where((schedule) {
-        // Compare just the date parts (year, month, day)
-        return schedule.scheduleDate.year == queryDate.year &&
-            schedule.scheduleDate.month == queryDate.month &&
-            schedule.scheduleDate.day == queryDate.day;
-      }).toList();
+          .where((schedule) =>
+              schedule.scheduleDate.year == queryDate.year &&
+              schedule.scheduleDate.month == queryDate.month &&
+              schedule.scheduleDate.day == queryDate.day)
+          .toList();
     } catch (e) {
-      print("❌ Error fetching schedule by day: $e");
-      throw Exception("Failed to fetch schedule sessions: $e");
+      rethrow;
     }
   }
 
@@ -314,180 +192,45 @@ class MenteeScheduleController extends GetxController {
       if (courseMentorIds.isEmpty) {
         throw Exception("No course mentors found for this mentee");
       }
-
-      // Get the first course mentor's mentor details
       final courseMentorDoc =
           await _db.collection('courseMentor').doc(courseMentorIds.first).get();
       final mentorId = courseMentorDoc.data()?['mentorId'] as String? ?? '';
-      final mentorDoc = await _db.collection('mentor').doc(mentorId).get();
+      final mentorDoc = await _db.collection('mentors').doc(mentorId).get();
 
       return MentorModel.fromJson(mentorDoc.data() as Map<String, dynamic>);
     } catch (e) {
-      print("❌ Error fetching mentor details: $e");
-      throw Exception("Failed to fetch mentor details: $e");
+      rethrow;
     }
   }
 
-  Future<List<UserModel>> getMentorsForUpcoming(String email) async {
-    try {
-      final userId = await getUserIdThroughEmail(email);
-      final courseMentorIds = await getCourseMentorIdsForMentee(userId);
+  /// Refactored helper to fetch schedules based on a time condition.
+  Future<List<ScheduleModel>> _getSchedulesByTimeCondition(
+      String email, bool Function(DateTime) condition) async {
+    final userId = await getUserIdThroughEmail(email);
+    final courseMentorIds = await getCourseMentorIdsForMentee(userId);
 
-      if (courseMentorIds.isEmpty) return [];
+    if (courseMentorIds.isEmpty) return [];
 
-      final now = DateTime.now();
+    final snapshot = await _db
+        .collection('schedule')
+        .where('courseMentorId', whereIn: courseMentorIds)
+        .where('scheduleSoftDelete', isEqualTo: false)
+        .get();
 
-      // Step 1: Fetch upcoming schedules
-      final scheduleSnapshot = await _db
-          .collection('schedule')
-          .where('courseMentorId', whereIn: courseMentorIds)
-          .where('scheduleSoftDelete', isEqualTo: false)
-          .get();
-
-      // Step 2: Filter only future schedules
-      final upcomingSchedules = scheduleSnapshot.docs
-          .map((doc) => ScheduleModel.fromJson(doc.data()))
-          .where((schedule) => schedule.scheduleDate.isAfter(now))
-          .toList();
-
-      if (upcomingSchedules.isEmpty) return [];
-
-      // Step 3: Extract courseMentorIds from upcoming schedules
-      final upcomingCourseMentorIds =
-          upcomingSchedules.map((s) => s.courseMentorId).toList();
-
-      List<UserModel> mentorUsers = [];
-
-      for (final courseMentorId in upcomingCourseMentorIds) {
-        // Get courseMentor document
-        final courseMentorDoc =
-            await _db.collection('courseMentor').doc(courseMentorId).get();
-
-        final courseMentorData = courseMentorDoc.data();
-        if (courseMentorData == null || courseMentorData['mentorId'] == null) {
-          continue;
-        }
-
-        final mentorId = courseMentorData['mentorId'];
-
-        // Get mentor document
-        final mentorDoc = await _db.collection('mentors').doc(mentorId).get();
-        final mentorData = mentorDoc.data();
-
-        if (mentorData == null || mentorData['accountId'] == null) {
-          continue;
-        }
-
-        final accountId = mentorData['accountId'];
-
-        // Get user document
-        final userDoc = await _db.collection('users').doc(accountId).get();
-        final userData = userDoc.data();
-        if (userData != null) {
-          mentorUsers.add(
-              UserModel.fromJson(userData)); // Append mentor even if repeating
-        }
-      }
-
-      return mentorUsers;
-    } catch (e) {
-      print("❌ Error fetching mentors with upcoming schedules: $e");
-      return [];
-    }
+    return snapshot.docs
+        .map((doc) => ScheduleModel.fromJson(doc.data()))
+        .where((schedule) => condition(schedule.scheduleDate))
+        .toList();
   }
 
   Future<List<ScheduleModel>> getUpcomingScheduleForMentee(String email) async {
     try {
-      final userId = await getUserIdThroughEmail(email);
-      final courseMentorIds = await getCourseMentorIdsForMentee(userId);
-
-      if (courseMentorIds.isEmpty) return [];
-
       final now = DateTime.now();
-
-      final snapshot = await _db
-          .collection('schedule')
-          .where('courseMentorId', whereIn: courseMentorIds)
-          .where('scheduleSoftDelete', isEqualTo: false)
-          .get();
-
-      final upcoming = snapshot.docs
-          .map((doc) => ScheduleModel.fromJson(doc.data()))
-          .where((schedule) => schedule.scheduleDate.isAfter(now))
-          .toList();
-
+      final upcoming = await _getSchedulesByTimeCondition(
+          email, (date) => date.isAfter(now));
       upcoming.sort((a, b) => a.scheduleDate.compareTo(b.scheduleDate));
       return upcoming;
     } catch (e) {
-      print("❌ Error fetching upcoming mentee schedule: $e");
-      return [];
-    }
-  }
-
-  Future<List<UserModel>> getMentorsForCompleted(String email) async {
-    try {
-      final userId = await getUserIdThroughEmail(email);
-      final courseMentorIds = await getCourseMentorIdsForMentee(userId);
-
-      if (courseMentorIds.isEmpty) return [];
-
-      final now = DateTime.now();
-
-      // Step 1: Fetch all schedules for this mentee that are completed
-      final scheduleSnapshot = await _db
-          .collection('schedule')
-          .where('courseMentorId', whereIn: courseMentorIds)
-          .where('scheduleSoftDelete', isEqualTo: false)
-          .get();
-
-      // Step 2: Filter only past schedules
-      final completedSchedules = scheduleSnapshot.docs
-          .map((doc) => ScheduleModel.fromJson(doc.data()))
-          .where((schedule) => schedule.scheduleDate.isBefore(now))
-          .toList();
-
-      if (completedSchedules.isEmpty) return [];
-
-      // Step 3: Extract courseMentorIds from completed schedules
-      final completedCourseMentorIds =
-          completedSchedules.map((s) => s.courseMentorId).toList();
-
-      List<UserModel> mentorUsers = [];
-
-      for (final courseMentorId in completedCourseMentorIds) {
-        // Get courseMentor document
-        final courseMentorDoc =
-            await _db.collection('courseMentor').doc(courseMentorId).get();
-
-        final courseMentorData = courseMentorDoc.data();
-        if (courseMentorData == null || courseMentorData['mentorId'] == null) {
-          continue;
-        }
-
-        final mentorId = courseMentorData['mentorId'];
-
-        // Get mentor document
-        final mentorDoc = await _db.collection('mentors').doc(mentorId).get();
-        final mentorData = mentorDoc.data();
-
-        if (mentorData == null || mentorData['accountId'] == null) {
-          continue;
-        }
-
-        final accountId = mentorData['accountId'];
-
-        // Get user document
-        final userDoc = await _db.collection('users').doc(accountId).get();
-        final userData = userDoc.data();
-        if (userData != null) {
-          mentorUsers.add(
-              UserModel.fromJson(userData)); // Append mentor even if repeating
-        }
-      }
-      print("❌ Mentors with completed schedules: $mentorUsers");
-      return mentorUsers;
-    } catch (e) {
-      print("❌ Error fetching mentors with completed schedules: $e");
       return [];
     }
   }
@@ -495,35 +238,73 @@ class MenteeScheduleController extends GetxController {
   Future<List<ScheduleModel>> getCompletedScheduleForMentee(
       String email) async {
     try {
-      final userId = await getUserIdThroughEmail(email);
-      final courseMentorIds = await getCourseMentorIdsForMentee(userId);
-
-      if (courseMentorIds.isEmpty) return [];
-
       final now = DateTime.now();
-
-      final snapshot = await _db
-          .collection('schedule')
-          .where('courseMentorId', whereIn: courseMentorIds)
-          .where('scheduleSoftDelete', isEqualTo: false)
-          .get();
-
-      final completed = snapshot.docs
-          .map((doc) => ScheduleModel.fromJson(doc.data()))
-          .where((schedule) => schedule.scheduleDate.isBefore(now))
-          .toList();
-
+      final completed = await _getSchedulesByTimeCondition(
+          email, (date) => date.isBefore(now));
       completed.sort((a, b) => b.scheduleDate.compareTo(a.scheduleDate));
       return completed;
     } catch (e) {
-      print("❌ Error fetching completed mentee schedule: $e");
+      return [];
+    }
+  }
+
+  /// Refactored helper to fetch mentors based on schedules.
+  Future<List<UserModel>> _getMentorsFromSchedules(
+      List<ScheduleModel> schedules) async {
+    if (schedules.isEmpty) return [];
+
+    final courseMentorIds =
+        schedules.map((s) => s.courseMentorId).toSet().toList();
+    List<UserModel> mentorUsers = [];
+
+    for (final courseMentorId in courseMentorIds) {
+      try {
+        final courseMentorDoc =
+            await _db.collection('courseMentor').doc(courseMentorId).get();
+        final courseMentorData = courseMentorDoc.data();
+        if (courseMentorData == null || courseMentorData['mentorId'] == null) {
+          continue;
+        }
+
+        final mentorId = courseMentorData['mentorId'];
+        final mentorDoc = await _db.collection('mentors').doc(mentorId).get();
+        final mentorData = mentorDoc.data();
+        if (mentorData == null || mentorData['accountId'] == null) continue;
+
+        final accountId = mentorData['accountId'];
+        final userDoc = await _db.collection('users').doc(accountId).get();
+        final userData = userDoc.data();
+        if (userData != null) {
+          mentorUsers.add(UserModel.fromJson(userData));
+        }
+      } catch (e) {
+        // Log this error silently if needed, but continue the loop
+        continue;
+      }
+    }
+    return mentorUsers;
+  }
+
+  Future<List<UserModel>> getMentorsForUpcoming(String email) async {
+    try {
+      final upcomingSchedules = await getUpcomingScheduleForMentee(email);
+      return await _getMentorsFromSchedules(upcomingSchedules);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<List<UserModel>> getMentorsForCompleted(String email) async {
+    try {
+      final completedSchedules = await getCompletedScheduleForMentee(email);
+      return await _getMentorsFromSchedules(completedSchedules);
+    } catch (e) {
       return [];
     }
   }
 
   Future<String> getCourseNameFromCourseMentorId(String courseMentorId) async {
     try {
-      // Step 1: Get the courseMentor document
       final courseMentorDoc =
           await _db.collection('courseMentor').doc(courseMentorId).get();
       final courseMentorData = courseMentorDoc.data();
@@ -533,8 +314,6 @@ class MenteeScheduleController extends GetxController {
       }
 
       final courseId = courseMentorData['courseId'];
-
-      // Step 2: Get the course document
       final courseDoc = await _db.collection('course').doc(courseId).get();
       final courseData = courseDoc.data();
 
@@ -544,8 +323,7 @@ class MenteeScheduleController extends GetxController {
 
       return courseData['courseName'];
     } catch (e) {
-      print("❌ Error fetching course name: $e");
-      throw Exception("Failed to fetch course name: $e");
+      rethrow;
     }
   }
 }

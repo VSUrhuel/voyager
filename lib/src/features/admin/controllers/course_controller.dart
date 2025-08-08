@@ -10,64 +10,78 @@ import 'package:voyager/src/repository/supabase_repository/supabase_instance.dar
 class CourseController extends GetxController {
   static CourseController get instance => Get.find();
 
-  // Reactive lists for courses
+  // Service Instances
+  final _firestore = FirestoreInstance();
+  final _supabase = SupabaseInstance(Supabase.instance.client);
+
+  // Reactive state variables
   final activeCourses = <CourseModel>[].obs;
   final archivedCourses = <CourseModel>[].obs;
   final allCourses = <CourseModel>[].obs;
   final isLoading = false.obs;
-   XFile? courseImage;
+  XFile? courseImage;
 
-  // Text controllers
+  // Text editing controllers for the form
   final courseCode = TextEditingController();
   final courseDeliverables = <String>[].obs;
   final courseDescription = TextEditingController();
-  final courseImgUrl = TextEditingController();
   final courseName = TextEditingController();
-  final courseStatus = TextEditingController();
 
-  void addCourseDeliverable(String deliverable) {
-    courseDeliverables.add(deliverable);
+  @override
+  void onClose() {
+    // Dispose controllers to prevent memory leaks
+    courseCode.dispose();
+    courseDescription.dispose();
+    courseName.dispose();
+    super.onClose();
   }
 
-  void removeCourseDeliverable(String deliverable) {
-    if (courseDeliverables.isNotEmpty) {
-      courseDeliverables.remove(deliverable);
-    } else {
-      Get.snackbar("Error", "No deliverables to remove");
+  void addCourseDeliverable(String deliverable) {
+    if (deliverable.isNotEmpty) {
+      courseDeliverables.add(deliverable);
     }
   }
 
-  Future<void> createCourse() async {
+  void removeCourseDeliverable(String deliverable) {
+    if (courseDeliverables.contains(deliverable)) {
+      courseDeliverables.remove(deliverable);
+    } else {
+      Get.snackbar("Error", "Deliverable not found.");
+    }
+  }
+
+Future<void> createCourse() async {
     try {
       isLoading.value = true;
-      String? url = '';
-      
+      String imageUrl = '';
+
       if (courseImage != null) {
-        final File file = File(courseImage!.path);
-        final supabase = SupabaseInstance(Supabase.instance.client);
-        url = await supabase.uploadCourseImage(file);
+        final file = File(courseImage!.path);
+        imageUrl = await _supabase.uploadCourseImage(file) as String;
       }
 
-      final course = CourseModel(
-        docId: '',
+      final newCourse = CourseModel(
+        docId: '', // Firestore will generate this
         courseCode: courseCode.text,
         courseCreatedTimestamp: DateTime.now(),
         courseDeliverables: courseDeliverables.toList(),
         courseDescription: courseDescription.text,
-        courseImgUrl: url ?? '',
+        courseImgUrl: imageUrl,
         courseModifiedTimestamp: DateTime.now(),
         courseName: courseName.text,
         courseSoftDelete: false,
         courseStatus: 'active',
       );
 
-      final firestoreInstance = FirestoreInstance();
-      await firestoreInstance.setCourse(course);
-      
-      // Refresh all course lists after creation
+      // Call the void function without trying to assign its result.
+      await _firestore.setCourse(newCourse);
+
+      // Re-fetch all courses from the server to get the updated list,
+      // including the newly created course with its correct docId.
       await fetchAllCourses();
-      Get.back(); // Close the add course screen
-      Get.snackbar("Success", "Course created successfully");
+
+      Get.back();
+      Get.snackbar("Success", "Course created successfully.");
     } catch (e) {
       Get.snackbar("Error", "Failed to create course: ${e.toString()}");
     } finally {
@@ -75,42 +89,19 @@ class CourseController extends GetxController {
     }
   }
 
-  Future<void> fetchActiveCourses() async {
-    try {
-      isLoading.value = true;
-      final firestoreInstance = FirestoreInstance();
-      final courses = await firestoreInstance.getActiveCourses();
-      activeCourses.assignAll(courses);
-    } catch (e) {
-      Get.snackbar("Error", "Failed to fetch active courses: ${e.toString()}");
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> fetchArchivedCourses() async {
-    try {
-      isLoading.value = true;
-      final firestoreInstance = FirestoreInstance();
-      final courses = await firestoreInstance.getArchivedCourses();
-      archivedCourses.assignAll(courses);
-    } catch (e) {
-      Get.snackbar("Error", "Failed to fetch archived courses: ${e.toString()}");
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
+  // Optimized to use a single database read
   Future<void> fetchAllCourses() async {
     try {
       isLoading.value = true;
-      final firestoreInstance = FirestoreInstance();
-      final courses = await firestoreInstance.getCourses();
+      final courses = await _firestore.getCourses();
       allCourses.assignAll(courses);
-      
-      // Also update active and archived courses
-      await fetchActiveCourses();
-      await fetchArchivedCourses();
+
+      // Populate other lists from the main list in memory
+      activeCourses.assignAll(
+          courses.where((course) => course.courseStatus == 'active').toList());
+      archivedCourses.assignAll(courses
+          .where((course) => course.courseStatus == 'archived')
+          .toList());
     } catch (e) {
       Get.snackbar("Error", "Failed to fetch courses: ${e.toString()}");
     } finally {
@@ -121,10 +112,19 @@ class CourseController extends GetxController {
   Future<bool> archiveCourse(String courseId) async {
     try {
       isLoading.value = true;
-      final firestoreInstance = FirestoreInstance();
-      await firestoreInstance.archiveCourse(courseId);
-      await fetchAllCourses();
-      Get.snackbar("Success", "Course archived successfully");
+      await _firestore.archiveCourse(courseId);
+
+      // Update local state without re-fetching from the database
+      final courseIndex = allCourses.indexWhere((c) => c.docId == courseId);
+      if (courseIndex != -1) {
+        final course = allCourses[courseIndex];
+        course.courseStatus = 'archived';
+        allCourses[courseIndex] = course; // Trigger update
+        activeCourses.removeWhere((c) => c.docId == courseId);
+        archivedCourses.insert(0, course);
+      }
+
+      Get.snackbar("Success", "Course archived successfully.");
       return true;
     } catch (e) {
       Get.snackbar("Error", "Failed to archive course: ${e.toString()}");
@@ -134,13 +134,23 @@ class CourseController extends GetxController {
     }
   }
 
+
   Future<bool> restoreCourse(String courseId) async {
     try {
       isLoading.value = true;
-      final firestoreInstance = FirestoreInstance();
-      await firestoreInstance.unarchiveCourse(courseId);
-      await fetchAllCourses();
-      Get.snackbar("Success", "Course restored successfully");
+      await _firestore.unarchiveCourse(courseId);
+
+      // Update local state without re-fetching
+      final courseIndex = allCourses.indexWhere((c) => c.docId == courseId);
+      if (courseIndex != -1) {
+        final course = allCourses[courseIndex];
+        course.courseStatus = 'active';
+        allCourses[courseIndex] = course; // Trigger update
+        archivedCourses.removeWhere((c) => c.docId == courseId);
+        activeCourses.insert(0, course);
+      }
+
+      Get.snackbar("Success", "Course restored successfully.");
       return true;
     } catch (e) {
       Get.snackbar("Error", "Failed to restore course: ${e.toString()}");
@@ -153,10 +163,14 @@ class CourseController extends GetxController {
   Future<bool> deleteCourse(String courseId) async {
     try {
       isLoading.value = true;
-      final firestoreInstance = FirestoreInstance();
-      await firestoreInstance.deleteCourse(courseId);
-      await fetchAllCourses();
-      Get.snackbar("Success", "Course deleted successfully");
+      await _firestore.deleteCourse(courseId);
+
+      // Update local state without re-fetching
+      allCourses.removeWhere((c) => c.docId == courseId);
+      activeCourses.removeWhere((c) => c.docId == courseId);
+      archivedCourses.removeWhere((c) => c.docId == courseId);
+
+      Get.snackbar("Success", "Course deleted successfully.");
       return true;
     } catch (e) {
       Get.snackbar("Error", "Failed to delete course: ${e.toString()}");
@@ -166,24 +180,11 @@ class CourseController extends GetxController {
     }
   }
 
-  // Clear form fields
   void clearForm() {
     courseCode.clear();
     courseDeliverables.clear();
     courseDescription.clear();
-    courseImgUrl.clear();
     courseName.clear();
-    courseStatus.clear();
     courseImage = null;
-  }
-
-  @override
-  void onClose() {
-    courseCode.dispose();
-    courseDescription.dispose();
-    courseImgUrl.dispose();
-    courseName.dispose();
-    courseStatus.dispose();
-    super.onClose();
   }
 }

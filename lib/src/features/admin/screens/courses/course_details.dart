@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:voyager/src/features/admin/controllers/course_mentor_controller.dart';
@@ -229,10 +231,9 @@ class _CourseDetailsState extends State<CourseDetails> {
           try {
             await CourseMentorController().removeMentorFromCourse(
                 courseMentor.courseMentorId, mentor.mentorId);
-            print('Remove mentor selected');
             Navigator.pop(context);
           } catch (e) {
-            print('Error removing mentor: $e');
+            throw Exception('Error removing mentor: $e');
           }
         }
       }

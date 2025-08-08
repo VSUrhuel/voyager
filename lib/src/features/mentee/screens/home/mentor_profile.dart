@@ -39,7 +39,6 @@ class MentorProfilePage extends StatelessWidget {
     }
 
     final formattedName = toTitleCase(user.accountApiName);
-    final theme = Theme.of(context);
     final screenSize = MediaQuery.of(context).size;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
@@ -650,9 +649,9 @@ class MentorProfilePage extends StatelessWidget {
       child: InkWell(
         onTap: () async {
           final uri = Uri.tryParse(url);
-          print(uri);
           if (uri != null) {
             if (!await launchUrl(uri)) {
+              // ignore: use_build_context_synchronously
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Failed to open $uri! Contact your mentor.'),

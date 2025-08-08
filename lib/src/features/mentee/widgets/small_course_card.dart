@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,7 +21,6 @@ class SmallCourseCard extends StatelessWidget {
           await firestoreInstance.getCourseMentors(courseModel.docId);
       return users.length;
     } catch (e) {
-      print("Error fetching mentors: $e");
       return 0;
     }
   }
@@ -28,12 +29,8 @@ class SmallCourseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final currentUser = FirebaseAuth.instance.currentUser;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
     final startDate =
         DateFormat('MMM dd').format(courseModel.courseCreatedTimestamp);
-    final endDate =
-        DateFormat('MMM dd').format(courseModel.courseModifiedTimestamp);
 
     final supabase = Supabase.instance.client;
     final imageUrl = (courseModel.courseImgUrl.isNotEmpty)

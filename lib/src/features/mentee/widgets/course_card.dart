@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
@@ -48,7 +50,6 @@ class _CourseCardState extends State<CourseCard> {
           await firestoreInstance.getCourseMentors(widget.courseModel.docId);
       return users.length;
     } catch (e) {
-      print("Error fetching mentors: $e");
       return 0;
     }
   }

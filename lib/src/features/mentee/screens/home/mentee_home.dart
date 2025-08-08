@@ -23,6 +23,7 @@ class MenteeHome extends StatefulWidget {
   const MenteeHome({super.key, required this.onProfileTap});
 
   @override
+  // ignore: library_private_types_in_public_api
   _MenteeHomeState createState() => _MenteeHomeState();
 }
 
@@ -86,7 +87,6 @@ class _MenteeHomeState extends State<MenteeHome> {
           .get();
 
       if (userSnapshot.docs.isEmpty) {
-        print("⚠️ No user found with email: $email");
         return null;
       }
 
@@ -98,13 +98,11 @@ class _MenteeHomeState extends State<MenteeHome> {
           .get();
 
       if (menteeSnapshot.docs.isEmpty) {
-        print("⚠️ No mentee found with accountId: $userId");
         return null;
       }
 
       return menteeSnapshot.docs.first.id;
     } catch (e) {
-      print("❌ Error in getUserIdThroughEmail: $e");
       return null;
     }
   }
@@ -121,7 +119,6 @@ class _MenteeHomeState extends State<MenteeHome> {
           .map((doc) => doc.data()['courseMentorId'] as String)
           .toList();
     } catch (e) {
-      print("❌ Error getting course mentor IDs: $e");
       return [];
     }
   }
@@ -135,19 +132,15 @@ class _MenteeHomeState extends State<MenteeHome> {
       List<CourseModel> availableCourses;
 
       if (menteeId == null || menteeId.isEmpty) {
-        print("❌ I am still not a mentee");
         // If no menteeId, return all active and non-soft-deleted courses
         availableCourses = allCourses.where((course) {
           return course.courseSoftDelete == false &&
               course.courseStatus == 'active';
         }).toList();
       } else {
-        // Otherwise filter based on enrolled course mentor IDs
-        print("❌ I am now a mentee");
         final enrolledCourseMentorIds =
             await getCourseMentorIdsForMentee(menteeId);
 
-        print("❌ Enrolled in: $enrolledCourseMentorIds");
         List<CourseModel> enrolledCourses = [];
         for (String mentorId in enrolledCourseMentorIds) {
           final course =
@@ -176,13 +169,11 @@ class _MenteeHomeState extends State<MenteeHome> {
         return CourseCard(courseModel: availableCourses[index]);
       });
     } catch (e) {
-      print("❌ Error fetching courses with details: $e");
       return [];
     }
   }
 
   String getName(String? name) {
-    print("❌ Name: $name");
     if (name == null || name.isEmpty) return "User";
     List<String> names = name.split(' ');
     return names.length > 1
