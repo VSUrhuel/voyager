@@ -923,6 +923,15 @@ class FirestoreInstance {
     }
   }
 
+  Future<CourseModel> getCourse(String courseId) async {
+    try {
+      final course = await _db.collection('course').doc(courseId).get();
+      return CourseModel.fromJson(course.data()!, course.id);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> uploadPostContent(PostContentModel postContent) async {
     try {
       String uniqueID = generateUniqueId();
@@ -979,21 +988,28 @@ class FirestoreInstance {
     }
   }
 
-  Future<CourseModel> getCourse(String courseId) async {
-    try {
-      final course = await _db.collection('course').doc(courseId).get();
-      return CourseModel.fromJson(course.data()!, course.id);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
   Future<bool> archiveCourse(String courseId) async {
     try {
       await _db.collection('course').doc(courseId).update({
         'courseStatus': 'archived',
       });
       return true;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<CourseModel> getCourseThroughCourseMentor(
+      String courseMentorId) async {
+    try {
+      final courseMentor =
+          await _db.collection('courseMentor').doc(courseMentorId).get();
+      if (courseMentor.exists) {
+        final courseId = courseMentor.data()!['courseId'];
+        return await getCourse(courseId);
+      } else {
+        throw Exception("CourseMentor not found");
+      }
     } catch (e) {
       rethrow;
     }
