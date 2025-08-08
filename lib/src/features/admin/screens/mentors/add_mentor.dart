@@ -30,7 +30,7 @@ class _AddMentorState extends State<AddMentor> {
 
   Future<void> fetchCourses() async {
     final CourseController courseController = Get.put(CourseController());
-    await courseController.fetchActiveCourses();
+    courseController.activeCourses;
   }
 
   @override

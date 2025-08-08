@@ -54,7 +54,6 @@ class SupabaseInstance {
 
       final url =
           _supabase.storage.from('profile-picture').getPublicUrl(fileName);
-      print('Uploaded profile image URL: $url');
       return url;
     } on StorageException catch (e) {
       throw Exception('Supabase storage error: ${e.message}');

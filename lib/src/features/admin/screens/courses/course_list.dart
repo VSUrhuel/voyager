@@ -26,15 +26,15 @@ class _CourseListState extends State<CourseList> {
   @override
   void initState() {
     super.initState();
-    courseController.fetchActiveCourses();
-    courseController.fetchArchivedCourses();
+    courseController.activeCourses;
+    courseController.archivedCourses;
   }
 
   void refreshCourses() {
     if (show == 'active') {
-      courseController.fetchActiveCourses();
+      courseController.activeCourses;
     } else {
-      courseController.fetchArchivedCourses();
+      courseController.archivedCourses;
     }
   }
 

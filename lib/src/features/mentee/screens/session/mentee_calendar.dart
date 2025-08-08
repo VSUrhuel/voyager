@@ -33,17 +33,10 @@ class _MenteeCalendarViewState extends State<MenteeCalendarView> {
       final formatDate =
           "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
       String dayOfTheWeek =
-          await menteeScheduleController.getDayOfTheWeek(selectedDay);
+          menteeScheduleController.getDayOfTheWeek(selectedDay);
       final scheduleListTodayTemp =
           await menteeScheduleController.getScheduleByDay(formatDate);
-      final schedules =
-          await menteeScheduleController.getUpcomingScheduleForMentee(
-              menteeScheduleController.currentUserEmail);
-      final filteredSchedules = schedules.where((schedule) {
-        return schedule.scheduleDate.year == day.year &&
-            schedule.scheduleDate.month == day.month &&
-            schedule.scheduleDate.day == day.day;
-      }).toList();
+      
       bool hasSchedule = false;
       if (selectedDay.month > 5) {
         hasSchedule = false;

@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:lottie/lottie.dart';
@@ -6,7 +8,6 @@ import 'package:voyager/src/features/mentee/screens/session/upcoming_card.dart';
 import 'package:voyager/src/features/mentee/widgets/normal_search_bar.dart';
 import 'package:voyager/src/features/mentee/widgets/small_course_card.dart';
 import 'package:flutter/material.dart';
-import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 
 class CourseOffered extends StatefulWidget {
   const CourseOffered({super.key});
@@ -40,7 +41,6 @@ class _CourseOfferedState extends State<CourseOffered> {
           .get();
 
       if (userSnapshot.docs.isEmpty) {
-        print("⚠️ No user found with email: $email");
         return null;
       }
 
@@ -52,14 +52,12 @@ class _CourseOfferedState extends State<CourseOffered> {
           .get();
 
       if (menteeSnapshot.docs.isEmpty) {
-        print("⚠️ No mentee found with accountId: $userId");
         return null;
       }
 
       return menteeSnapshot.docs.first.id;
     } catch (e) {
-      print("❌ Error in getUserIdThroughEmail: $e");
-      return null;
+      throw Exception("❌ Error in getUserIdThroughEmail: $e");
     }
   }
 
@@ -75,7 +73,6 @@ class _CourseOfferedState extends State<CourseOffered> {
           .map((doc) => doc.data()['courseMentorId'] as String)
           .toList();
     } catch (e) {
-      print("❌ Error getting course mentor IDs: $e");
       return [];
     }
   }
@@ -89,20 +86,15 @@ class _CourseOfferedState extends State<CourseOffered> {
       List<CourseModel> availableCourses;
 
       if (menteeId == null || menteeId.isEmpty) {
-        print("❌ I am still not a mentee");
         // If no menteeId, return all active and non-soft-deleted courses
         availableCourses = allCourses.where((course) {
           return course.courseSoftDelete == false &&
               course.courseStatus == 'active';
         }).toList();
       } else {
-        // Otherwise filter based on enrolled course mentor IDs
-        print("❌ I am now a mentee");
         final enrolledCourseMentorIds =
             await getCourseMentorIdsForMentee(menteeId);
 
-        //Problem
-        print("❌ Enrolled in: $enrolledCourseMentorIds");
         List<CourseModel> enrolledCourses = [];
         for (String mentorId in enrolledCourseMentorIds) {
           final course =
@@ -122,7 +114,6 @@ class _CourseOfferedState extends State<CourseOffered> {
       }
       return availableCourses;
     } catch (e) {
-      print("❌ Error fetching courses with details: $e");
       return [];
     }
   }
@@ -131,7 +122,6 @@ class _CourseOfferedState extends State<CourseOffered> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    FirestoreInstance firestoreInstance = FirestoreInstance();
     User? user = FirebaseAuth.instance.currentUser;
 
     return SafeArea(

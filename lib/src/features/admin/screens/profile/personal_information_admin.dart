@@ -38,6 +38,7 @@ class _AdminPersonalInformationState extends State<AdminPersonalInformation> {
           Icon(
             icon,
             size: screenWidth * 0.05,
+            // ignore: deprecated_member_use
             color: Theme.of(context).primaryColor.withOpacity(0.7),
           ),
           SizedBox(width: screenWidth * 0.03),
@@ -63,6 +64,7 @@ class _AdminPersonalInformationState extends State<AdminPersonalInformation> {
       height: screenHeight * 0.45,
       width: screenWidth * 0.9,
       decoration: BoxDecoration(
+        // ignore: deprecated_member_use
         color: Theme.of(context).primaryColor.withOpacity(0.1),
         border: Border.all(
           color: Theme.of(context).primaryColor,
@@ -114,6 +116,7 @@ class _AdminPersonalInformationState extends State<AdminPersonalInformation> {
                     vertical: screenHeight * 0.01,
                   ),
                   decoration: BoxDecoration(
+                    // ignore: deprecated_member_use
                     color: Theme.of(context).primaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
@@ -185,6 +188,7 @@ class _AdminPersonalInformationState extends State<AdminPersonalInformation> {
                 // Footer note with divider
                 SizedBox(height: screenHeight * 0.03),
                 Divider(
+                  // ignore: deprecated_member_use
                   color: Colors.grey.withOpacity(0.3),
                   thickness: 1,
                 ),
@@ -291,6 +295,7 @@ class _AdminPersonalInformationState extends State<AdminPersonalInformation> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
+                              // ignore: deprecated_member_use
                               color: Colors.indigo.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(20),
                             ),
@@ -336,46 +341,6 @@ class _AdminPersonalInformationState extends State<AdminPersonalInformation> {
         fontSize: 18,
         fontWeight: FontWeight.bold,
         color: Color(0xFF1877F2),
-      ),
-    );
-  }
-
-  Widget _buildInfoCard(String text, BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Text(
-          text,
-          style: TextStyle(
-            fontSize: screenWidth * 0.035,
-            height: 1.5,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildResponsibilityItem(String text, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5.0),
-      child: Row(
-        children: [
-          Icon(icon, color: Color(0xFF1877F2), size: 20),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(
-                fontSize: 16,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

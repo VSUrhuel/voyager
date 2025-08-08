@@ -9,18 +9,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:voyager/src/routing/app_routes.dart';
 import 'package:voyager/src/routing/routes.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 int initScreen = 0;
 
 Future<void> main() async {
+
   WidgetsFlutterBinding.ensureInitialized();
+  
+  await dotenv.load(fileName: ".env");
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // Initialize Supabase
   await Supabase.initialize(
-    url: 'https://zyqxnzxudwofrlvdzbvf.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5cXhuenh1ZHdvZnJsdmR6YnZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE3MDQ1NjEsImV4cCI6MjA1NzI4MDU2MX0.Sbj42rsklbYOk0ug5rjswXefwlksX8MwkjFq5T6DH0E',
+    url: dotenv.env['SUPABASE_URL']!,
+    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
+
 
   // Set system UI overlay style
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(

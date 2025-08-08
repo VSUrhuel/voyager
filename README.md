@@ -9,7 +9,79 @@ Development of a Mobile-based Mentorship Application using Flutter for Computer 
 | VG.010.003            | 2025-03-29    |
 | VG.010.004            | 2025-04-02    |
 | VG.010.005            | 2025-04-12    |
+| VG.010.006            | 2025-04-15    |
+| VG.010.007            | 2025-04-21    |
+| VG.010.008            | 2025-04-24    |
 
+## VG.010.008 Release Notes
+**Admin Features**  
+- Added custome photos for admin's mentor card
+- Added safearea on dashboard for three interfaces
+- Fix bugs on coverphot, create of empty course, mentor pop-up, and number of mentees bugs
+- Improve UI in admin interface
+- Implemented darft view in mentors list
+  
+**Mentor Features**
+- UI improvement in mentor screen
+- Improve the native splash
+- Ensurve valid link and input checking
+- Added lottie files to improve UI
+- Fix bugs in the update of mentor information
+- Update mentee home interface
+- Improve UI of the splash screen when transitioning
+- Fix the functionality in the reject feature of a mentee
+- Add interface for error and encapsulate the screens on the scaffold
+
+ **Mentee Features**
+- Update course list and mentor list
+- Add refresh functionality on mentee home
+- Update course display logic
+- Improve interface in mentee UI
+- Update course card
+
+
+## VG.010.007 Release Notes
+**Admin Features**  
+- Alignment of mentor status
+- Refactor the widget cards for improve UI
+- Proper navigation for canceling adding mentor
+  
+**Mentor Features**
+- Implemented search functionality in mentee interface
+- Implemented display feature for course view
+- Improve UI for expertise to make it responsive design
+- Implemented a notification view
+- Implemented regular schedule view in calendar
+- Enhance and improve the mentor profile view across the interfaces
+
+ **Mentee Features**
+- Improve the session filtering
+- Improve the interface for mentee home
+- Added features for mentor profile
+- Implemented the mentee personal information
+
+## VG.010.006 Release Notes
+**Admin Features**  
+- Fixed social account links 
+- Added course details interface
+- Fix issue in connecting with firestore
+- Add additional content for admin profile
+- Add additional administrative actions (update, edit, archive)
+- Adjusted the UI for admin to follow standard designs
+  
+**Mentor Features**
+- Replace Stack with CustomScrollView in viewing mentor info
+- Implemented sorting for upcoming schedule
+- Ensury query posts can be shown only for enrolled and accepted mentee
+- Ensure links are clickable in post and adaptive sizing for mentee list
+- Centralize video control for post to pause on screen transition
+
+ **Mentee Features**
+- Update the viewing of session for mentee
+- Implement the backend for notifications to query from database
+- Update the firestore instance to add backend features for mentee (enroll functionality)
+- Fix issue in overlapping card elements
+- Fix bug in incorrect parameters passed 
 
 ## VG.010.005 Release Notes
 **Admin Features**  
@@ -21,6 +93,7 @@ Development of a Mobile-based Mentorship Application using Flutter for Computer 
 - Automated Firebase Firestore document generation
 - Added comprehensive mentor detail modals
 - Multi-select interface for mentor assignment
+
 
 **Mentor Features**
 - Improve mentor info update experience and multiselect UI
@@ -97,4 +170,6 @@ Development of a Mobile-based Mentorship Application using Flutter for Computer 
   
 Important Links:
 - Design Specs: https://github.com/VSUrhuel/voyager-dev/
+- Code Based: https://github.com/VSUrhuel/voyager
+- Testing timeline: https://docs.google.com/spreadsheets/d/1zHLYSz4JuLxLTUGvIjhp0272QfydunSh-wI66Z5jg2I/edit?usp=sharing
 

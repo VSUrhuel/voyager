@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -15,6 +17,7 @@ class AdminHome extends StatefulWidget {
   const AdminHome({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _AdminHomeState createState() => _AdminHomeState();
 }
 

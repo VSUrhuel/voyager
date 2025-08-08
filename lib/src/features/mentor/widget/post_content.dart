@@ -244,7 +244,7 @@ class _PostContentState extends State<PostContent> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
+                          SizedBox(
                             width: screenWidth * 0.9,
                             child: AnimatedSize(
                               duration: Duration(milliseconds: 300),

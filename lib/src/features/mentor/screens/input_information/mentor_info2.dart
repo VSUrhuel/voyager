@@ -55,8 +55,6 @@ class _MentorInfo2State extends State<MentorInfo2> {
           widget.mentorModel!.mentorLanguages.join(',');
 
       controller.selectedSkills.value = widget.mentorModel!.mentorExpertise;
-      print(
-          "Selected header: ${controller.mentorExpHeader.text}"); // Debug print
     }
   }
 
