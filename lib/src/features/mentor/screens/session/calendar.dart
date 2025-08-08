@@ -42,7 +42,7 @@ class _CalendarViewState extends State<CalendarView> {
       final schedules = await scheduleController.getScheduleByDay(formatDate);
       final mentorData = await scheduleController.getMentorDetails();
       final bool hasSchedule;
-      if (selectedDay.month > 5) {
+      if (selectedDay.month > 12) {
         hasSchedule = false;
       } else {
         hasSchedule =
