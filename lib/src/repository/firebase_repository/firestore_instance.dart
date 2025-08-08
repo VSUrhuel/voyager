@@ -893,13 +893,9 @@ class FirestoreInstance {
       if (courseMentor == '') {
         return false;
       }
-      final allocationQuery = await _db
-          .collection('menteeCourseAlloc')
-          .where('courseMentorId', isEqualTo: courseMentor)
-          .get();
-      return allocationQuery.docs.isNotEmpty;
+      return true;
     } catch (e) {
-      rethrow;
+      return false;
     }
   }
 
@@ -1173,7 +1169,6 @@ class FirestoreInstance {
         menteeCount += menteeQuerySnapshot.docs.length;
       }
 
-
       return menteeCount;
     } catch (e) {
       return 0;
@@ -1323,7 +1318,6 @@ class FirestoreInstance {
         'mcaSoftDeleted': false,
         'menteeId': userId,
       });
-
     } catch (e) {
       throw Exception("Error enrolling in the course: $e");
     }

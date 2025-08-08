@@ -48,7 +48,7 @@ class _UpcomingCardState extends State<UpcomingCard> {
           } else if (snapshot.hasData) {
             return MeetingCard(
               scheduleModel: widget.scheduleModel,
-              email: snapshot.data!.accountApiName,
+              email: snapshot.data!.accountApiEmail,
             );
           } else {
             return const Text('No user data available');
@@ -101,25 +101,24 @@ class _MeetingCardState extends State<MeetingCard> {
   var profileImageURL = '';
   bool _isLoading = true;
   bool _hasError = false;
+  var formattedName = '';
 
   @override
   void initState() {
     super.initState();
-    fetchImage();
+    fetchInfo(widget.email);
   }
 
-  void fetchImage() async {
+  void fetchInfo(String email) async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        final firestoreInstance = Get.put(FirestoreInstance());
-        final userData = await firestoreInstance.getUser(user.uid);
-        if (mounted) {
-          setState(() {
-            profileImageURL = userData.accountApiPhoto;
-            _isLoading = false;
-          });
-        }
+      final firestoreInstance = Get.put(FirestoreInstance());
+      final userData = await firestoreInstance.getUserThroughEmail(email);
+      if (mounted) {
+        setState(() {
+          profileImageURL = userData.accountApiPhoto;
+          formattedName = formatName(userData.accountApiName);
+          _isLoading = false;
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -130,13 +129,10 @@ class _MeetingCardState extends State<MeetingCard> {
       }
     }
   }
-
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    String fullName = widget.email;
-    String formattedName = formatName(fullName);
 
     return Container(
       width: screenWidth * 0.9,
