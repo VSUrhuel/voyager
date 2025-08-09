@@ -236,6 +236,24 @@ class FirestoreInstance {
     }
   }
 
+    Future<CourseMentorModel?> getCourseMentorThroughEmail(
+      String email) async {
+    try {
+      final courseMentor = await _db
+          .collection('courseMentor')
+          .where('mentorId', isEqualTo: email)
+          .where('courseMentorSoftDeleted', isEqualTo: true)
+          .limit(1)
+          .get();
+
+      return courseMentor.docs.isNotEmpty
+          ? CourseMentorModel.fromJson(courseMentor.docs.first.data())
+          : null;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<String> getCourseMentorDocId(String mentorId) async {
     try {
       final courseMentor = await _db
@@ -1184,7 +1202,7 @@ Future<bool> deleteCourse(String courseId) async {
       String email, String newMentorId) async {
     try {
       CourseMentorModel? courseMentor =
-          await getCourseMentorThroughMentor(email);
+          await getCourseMentorThroughEmail(email);
       if (courseMentor != null) {
         await _db
             .collection('courseMentor')
