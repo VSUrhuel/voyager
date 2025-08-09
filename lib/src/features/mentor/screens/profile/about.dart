@@ -35,7 +35,7 @@ class AboutScreen extends StatelessWidget {
                   ),
                 ),
                 const Text(
-                  'Version 011.001',
+                  'Version 002.000',
                   style: TextStyle(color: Colors.grey),
                 ),
                 const SizedBox(height: 30),

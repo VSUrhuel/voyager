@@ -75,6 +75,7 @@ class FirestoreInstance {
       }
 
       SupabaseInstance supabase = SupabaseInstance(Supabase.instance.client);
+      // ignore: unused_local_variable
       String imageUrl = '';
 
       if (auth.firebaseUser.value?.photoURL != null) {
@@ -636,7 +637,6 @@ class FirestoreInstance {
       List<MentorModel> mentors) async {
     try {
       final ids = (await getMentors()).map((doc) => doc.accountApiID).toList();
-      print(ids);
       final initialUsers = await _db
           .collection('users')
           .where('accountRole', isEqualTo: 'mentor')
@@ -893,13 +893,9 @@ class FirestoreInstance {
       if (courseMentor == '') {
         return false;
       }
-      final allocationQuery = await _db
-          .collection('menteeCourseAlloc')
-          .where('courseMentorId', isEqualTo: courseMentor)
-          .get();
-      return allocationQuery.docs.isNotEmpty;
+      return true;
     } catch (e) {
-      rethrow;
+      return false;
     }
   }
 
@@ -922,6 +918,15 @@ class FirestoreInstance {
       }
 
       return users;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<CourseModel> getCourse(String courseId) async {
+    try {
+      final course = await _db.collection('course').doc(courseId).get();
+      return CourseModel.fromJson(course.data()!, course.id);
     } catch (e) {
       rethrow;
     }
@@ -983,21 +988,28 @@ class FirestoreInstance {
     }
   }
 
-  Future<CourseModel> getCourse(String courseId) async {
-    try {
-      final course = await _db.collection('course').doc(courseId).get();
-      return CourseModel.fromJson(course.data()!, course.id);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
   Future<bool> archiveCourse(String courseId) async {
     try {
       await _db.collection('course').doc(courseId).update({
         'courseStatus': 'archived',
       });
       return true;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<CourseModel> getCourseThroughCourseMentor(
+      String courseMentorId) async {
+    try {
+      final courseMentor =
+          await _db.collection('courseMentor').doc(courseMentorId).get();
+      if (courseMentor.exists) {
+        final courseId = courseMentor.data()!['courseId'];
+        return await getCourse(courseId);
+      } else {
+        throw Exception("CourseMentor not found");
+      }
     } catch (e) {
       rethrow;
     }
@@ -1142,7 +1154,6 @@ class FirestoreInstance {
 
       return querySnapshot.docs.length; // Return the count
     } catch (e) {
-      print('Error fetching course mentors: $e');
       return 0;
     }
   }
@@ -1158,8 +1169,6 @@ class FirestoreInstance {
 
       // Initialize mentee count
       int menteeCount = 0;
-      print("Total Coursementores--------");
-      print(courseMentorQuerySnapshot.docs.length);
 
       // Step 2: For each courseMentor, get the matching menteeCourseAllocID
       for (var courseMentorDoc in courseMentorQuerySnapshot.docs) {
@@ -1176,11 +1185,8 @@ class FirestoreInstance {
         menteeCount += menteeQuerySnapshot.docs.length;
       }
 
-      print("Total Mentees for Course $docId: $menteeCount");
-
       return menteeCount;
     } catch (e) {
-      print('Error fetching course mentees: $e');
       return 0;
     }
   }
@@ -1197,8 +1203,6 @@ class FirestoreInstance {
 
       // Initialize mentee count
       List<String> menteesIds = [];
-      print("Total Coursementores--------");
-      print(courseMentorQuerySnapshot.docs.length);
 
       // Step 2: For each courseMentor, get the matching menteeCourseAllocID
       for (var courseMentorDoc in courseMentorQuerySnapshot.docs) {
@@ -1227,7 +1231,6 @@ class FirestoreInstance {
 
       return users;
     } catch (e) {
-      print('Error fetching course mentees: $e');
       return [];
     }
   }
@@ -1317,7 +1320,6 @@ class FirestoreInstance {
       final courseMentorSnapshot = await courseMentorQuery.get();
 
       if (courseMentorSnapshot.docs.isEmpty) {
-        print("CourseMentor does not exist. Cannot enroll.");
         return;
       }
 
@@ -1332,10 +1334,8 @@ class FirestoreInstance {
         'mcaSoftDeleted': false,
         'menteeId': userId,
       });
-
-      print("Successfully enrolled in the course!");
     } catch (e) {
-      print("Error enrolling in the course: $e");
+      throw Exception("Error enrolling in the course: $e");
     }
   }
 
@@ -1446,13 +1446,11 @@ class FirestoreInstance {
           .get();
 
       if (!courseMentorSnap.exists) {
-        print("❌ courseMentor not found.");
         return null;
       }
 
       final courseId = courseMentorSnap.data()?['courseId'];
       if (courseId == null) {
-        print("❌ courseId not found in courseMentor.");
         return null;
       }
 
@@ -1462,13 +1460,11 @@ class FirestoreInstance {
           .get();
 
       if (!courseSnap.exists) {
-        print("❌ Course not found for courseId: $courseId");
         return null;
       }
 
       return CourseModel.fromJson(courseSnap.data()!, courseSnap.id);
     } catch (e) {
-      print("❌ Error in getMentorCourseThroughId: $e");
       return null;
     }
   }

@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:voyager/src/features/mentor/screens/session/calendar.dart';
 import 'package:voyager/src/features/mentor/widget/toggle_button.dart';
 import 'package:voyager/src/widgets/custom_page_route.dart';

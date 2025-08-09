@@ -1,6 +1,4 @@
 import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:voyager/src/features/mentee/model/mentee_model.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
@@ -8,9 +6,22 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:voyager/src/features/mentor/model/content_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MenteePostController {
   static MenteePostController get instance => Get.find();
+
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirestoreInstance _firestoreInstance = FirestoreInstance();
+
+  final posts = <PostContentModel>[].obs;
+  final isLoading = false.obs;
+  final error = ''.obs;
+
+  final int _limit = 10;
+  DocumentSnapshot? _lastDocument;
+  bool _hasMore = true;
 
   String getTimePosted(DateTime time) {
     final now = DateTime.now();
@@ -26,143 +37,156 @@ class MenteePostController {
     }
   }
 
-  final posts = <PostContentModel>[].obs;
-  final isLoading = false.obs;
-  final error = ''.obs;
-  final int _limit = 10;
-  DateTime? lastTimesTamp = DateTime.now();
-  bool _hasMore = true;
-
-  // Future<PostsResult> getPosts(
-  //     {required int limit, DocumentSnapshot? lastDocument}) async {
-  //   FirestoreInstance firestoreInstance = FirestoreInstance();
-
-  //   MentorModel mentor = await firestoreInstance
-  //       .getMentorThroughAccId(FirebaseAuth.instance.currentUser!.uid);
-
-  //   String courseMentor =
-  //       await firestoreInstance.getCourseMentorDocId(mentor.mentorId);
-
-  //   List<PostContentModel> posts =
-  //       await firestoreInstance.getPostContentThroughCourseMentor(courseMentor);
-
-  //     Query query = FirebaseFirestore.instance
-  //       .collection('posts') // Replace with your actual collection name
-  //       .where('courseMentorId', isEqualTo: courseMentor)
-  //       .orderBy('contentModifiedTimestamp', descending: true)
-  //       .limit(limit);
-
-  //   // Apply pagination if lastDocument is provided
-  //   if (lastDocument != null) {
-  //     query = query.startAfterDocument(lastDocument);
-  //   }
-
-  //   // Execute query
-  //   QuerySnapshot querySnapshot = await query.get();
-
-  //   // Convert documents to PostContentModel
-  //   List<PostContentModel> postsList = querySnapshot.docs.map((doc) {
-  //     return PostContentModel.fromFirestore(doc); // Ensure you have this method
-  //   }).toList();
-
-  //   // Get the last document for pagination
-  //   DocumentSnapshot? newLastDocument =
-  //       querySnapshot.docs.isNotEmpty ? querySnapshot.docs.last : null;
-
-  //   return PostsResult(
-  //     posts: postsList,
-  //     lastDocument: newLastDocument,
-  //     hasMore: postsList.length == limit,
-  //   );
-  // }
   Future<PostsResult> getPosts({
     required int limit,
-    DateTime? lastPostTimestamp,
+    DocumentSnapshot? lastDocument,
   }) async {
     try {
-      final currentUser = FirebaseAuth.instance.currentUser;
+      final currentUser = _auth.currentUser;
       if (currentUser == null) throw Exception("User not logged in");
 
-      FirestoreInstance firestoreInstance = FirestoreInstance();
-      MenteeModel mentee =
-          await firestoreInstance.getMenteeThroughAccId(currentUser.uid);
-
-      List<String> courseMentorIds = [];
-      List<String> menteeMcaIds = mentee.menteeMcaId ?? [];
-      print(menteeMcaIds.length);
-
-      for (var menteeMcaId in menteeMcaIds) {
-        final String status =
-            await firestoreInstance.getMenteeStatus(menteeMcaId);
-        if (status != 'accepted') continue;
-        print('Course Mentor ID: $menteeMcaId');
-        final courseMentorId =
-            await firestoreInstance.getCourseMentorIdFromMca(menteeMcaId);
-        if (courseMentorId.isNotEmpty) {
-          courseMentorIds.add(courseMentorId);
-        }
-      }
-      List<PostContentModel> allPosts = [];
-      for (var courseMentorId in courseMentorIds) {
-        List<PostContentModel> postContent = await firestoreInstance
-            .getPostContentThroughCourseMentor(courseMentorId);
-        allPosts.addAll(postContent);
+      // 1. Get mentee's course allocations and associated mentor IDs
+      final mentee =
+          await _firestoreInstance.getMenteeThroughAccId(currentUser.uid);
+      if (mentee.menteeMcaId.isEmpty) {
+        return PostsResult(posts: [], lastDocument: null, hasMore: false);
       }
 
-      // Filter out soft-deleted posts and ensure timestamps are non-null
-      allPosts = allPosts.where((post) => !post.contentSoftDelete).toList()
+      final mcaSnapshot = await _db
+          .collection('menteeCourseAlloc')
+          .where(FieldPath.documentId, whereIn: mentee.menteeMcaId)
+          .where('mcaAllocStatus', isEqualTo: 'accepted')
+          .get();
+
+      if (mcaSnapshot.docs.isEmpty) {
+        return PostsResult(posts: [], lastDocument: null, hasMore: false);
+      }
+
+      // List of course-links the mentee is directly enrolled in
+      final enrolledCourseMentorIds = mcaSnapshot.docs
+          .map((doc) => doc.data()['courseMentorId'] as String)
+          .toList();
+
+      final coursesEnrolled = await _db
+          .collection("courseMentor")
+          .where(
+            FieldPath.documentId,
+            whereIn: enrolledCourseMentorIds,
+          )
+          .get()
+          .then((snapshot) => snapshot.docs
+              .map((doc) => doc.data()['courseId'] as String)
+              .toList());
+
+      final courseMentorEnrolled = await _db
+          .collection("courseMentor")
+          .where('courseId', whereIn: coursesEnrolled)
+          .get()
+          .then((snapshot) => snapshot.docs.map((doc) => doc.id).toList());
+
+      final uniqueMentorIds = await _db
+          .collection('courseMentor')
+          .where(FieldPath.documentId, whereIn: enrolledCourseMentorIds)
+          .get()
+          .then((snapshot) => snapshot.docs
+              .map((doc) => doc.data()['mentorId'] as String)
+              .toList());
+
+      List<String> allMentorCourseLinks = [];
+      if (uniqueMentorIds.isNotEmpty) {
+        final allMentorCoursesSnapshot = await _db
+            .collection('courseMentor')
+            .where('mentorId', whereIn: uniqueMentorIds)
+            .get();
+        allMentorCourseLinks =
+            allMentorCoursesSnapshot.docs.map((doc) => doc.id).toList();
+      }
+      final resourcesQueryFuture = _db
+          .collection('postContent')
+          .where('courseMentorId', whereIn: courseMentorEnrolled)
+          .where('contentCategory', isEqualTo: 'Resources')
+          .where('contentSoftDelete', isEqualTo: false)
+          .get();
+
+      final mentorPostsQueryFuture = allMentorCourseLinks.isEmpty
+          ? Future.value(null) // Avoid empty 'whereIn' query which throws error
+          : _db
+              .collection('postContent')
+              .where('courseMentorId', whereIn: allMentorCourseLinks)
+              .where('contentSoftDelete', isEqualTo: false)
+              .get();
+      final results =
+          await Future.wait([resourcesQueryFuture, mentorPostsQueryFuture]);
+      final resourcesSnapshot =
+          results[0] as QuerySnapshot<Map<String, dynamic>>;
+      final mentorPostsSnapshot =
+          results[1] as QuerySnapshot<Map<String, dynamic>>;
+      // 4. Merge and Deduplicate snapshots
+      final uniqueSnapshots = <String, DocumentSnapshot>{};
+      for (final doc in resourcesSnapshot.docs) {
+        uniqueSnapshots[doc.id] = doc;
+      }
+      for (final doc in mentorPostsSnapshot.docs) {
+        uniqueSnapshots[doc.id] = doc;
+      }
+      // 5. Sort and Paginate
+      final sortedSnapshots = uniqueSnapshots.values.toList()
         ..sort((a, b) {
-          final timeCompare =
-              b.contentModifiedTimestamp.compareTo(a.contentModifiedTimestamp);
-          if (timeCompare != 0) return timeCompare;
-          return b.contentDescription.compareTo(
-              a.contentDescription); // Assuming your model has an id field
-        }); // Assuming your model has an id field))};
+          final aTimestamp = (a.data()
+              as Map<String, dynamic>)['contentModifiedTimestamp'] as Timestamp;
+          final bTimestamp = (b.data()
+              as Map<String, dynamic>)['contentModifiedTimestamp'] as Timestamp;
+          return bTimestamp.compareTo(aTimestamp);
+        });
 
-      // Find starting index
       int startIndex = 0;
-      if (lastPostTimestamp != null) {
-        startIndex = allPosts.indexWhere(
-                (post) => post.contentModifiedTimestamp == lastPostTimestamp) +
+      if (lastDocument != null) {
+        final lastTimestamp = (lastDocument.data()
+            as Map<String, dynamic>)['contentModifiedTimestamp'] as Timestamp;
+        startIndex = sortedSnapshots.indexWhere((doc) {
+              final currentTimestamp = (doc.data()
+                      as Map<String, dynamic>)['contentModifiedTimestamp']
+                  as Timestamp;
+              return currentTimestamp.microsecondsSinceEpoch ==
+                  lastTimestamp.microsecondsSinceEpoch;
+            }) +
             1;
-        if (startIndex < 0) startIndex = 0;
       }
 
-      // Get paginated results
-      int endIndex = startIndex + limit;
-      if (endIndex > allPosts.length) endIndex = allPosts.length;
+      final endIndex = (startIndex + limit > sortedSnapshots.length)
+          ? sortedSnapshots.length
+          : startIndex + limit;
+      final paginatedSnapshots =
+          (startIndex >= 0 && startIndex < sortedSnapshots.length)
+              ? sortedSnapshots.sublist(startIndex, endIndex)
+              : <DocumentSnapshot>[];
 
-      List<PostContentModel> paginatedPosts =
-          allPosts.sublist(startIndex, endIndex);
-
-      DateTime? newLastTimestamp = paginatedPosts.isNotEmpty
-          ? paginatedPosts.last.contentModifiedTimestamp
-          : null;
+      final postList = paginatedSnapshots
+          .map((doc) => PostContentModel.fromFirestore(doc))
+          .toList();
+      final newLastDocument =
+          paginatedSnapshots.isNotEmpty ? paginatedSnapshots.last : null;
 
       return PostsResult(
-        posts: paginatedPosts,
-        lastTimestamp: newLastTimestamp,
-        hasMore: endIndex < allPosts.length,
+        posts: postList,
+        lastDocument: newLastDocument,
+        hasMore: endIndex < sortedSnapshots.length,
       );
     } catch (e) {
-      debugPrint('Error getting posts: $e');
       rethrow;
     }
   }
 
   Future<void> loadPosts() async {
+    if (isLoading.value) return;
+    isLoading.value = true;
+    error.value = '';
+
     try {
-      if (isLoading.value) return;
-      isLoading.value = true;
-      error.value = '';
-      PostsResult postsResult = await getPosts(
-        limit: _limit,
-      );
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        posts.assignAll(postsResult.posts);
-        lastTimesTamp = postsResult.lastTimestamp;
-        _hasMore = postsResult.hasMore;
-      });
+      PostsResult postsResult = await getPosts(limit: _limit);
+      posts.assignAll(postsResult.posts);
+      _lastDocument = postsResult.lastDocument;
+      _hasMore = postsResult.hasMore;
     } catch (e) {
       error.value = e.toString();
     } finally {
@@ -178,14 +202,14 @@ class MenteePostController {
   Future<bool> loadMorePosts() async {
     if (!_hasMore || isLoading.value) return false;
 
+    isLoading.value = true;
     try {
-      isLoading.value = true;
       final result = await getPosts(
         limit: _limit,
-        lastPostTimestamp: lastTimesTamp, // Use timestamp for pagination
+        lastDocument: _lastDocument,
       );
       posts.addAll(result.posts);
-      lastTimesTamp = result.lastTimestamp;
+      _lastDocument = result.lastDocument;
       _hasMore = result.hasMore;
       return _hasMore;
     } catch (e) {
@@ -197,103 +221,59 @@ class MenteePostController {
   }
 
   void resetPagination() {
-    lastTimesTamp = DateTime.now();
+    _lastDocument = null;
     _hasMore = true;
   }
 
   Future<String> getUsername() async {
-    String uid = FirebaseAuth.instance.currentUser!.uid;
-    FirestoreInstance firestoreInstance = FirestoreInstance();
-    String username = await firestoreInstance.getUsername(uid);
-    return username;
+    String uid = _auth.currentUser!.uid;
+    return await _firestoreInstance.getUsername(uid);
   }
 
   Future<String> getApiPhoto() async {
-    String uid = FirebaseAuth.instance.currentUser!.uid;
-    FirestoreInstance firestoreInstance = FirestoreInstance();
-    String apiPhoto = await firestoreInstance.getAccountPhoto(uid);
-    return apiPhoto;
+    String uid = _auth.currentUser!.uid;
+    return await _firestoreInstance.getAccountPhoto(uid);
   }
 
   Future<bool> requestStoragePermission() async {
-    try {
-      // Add this critical line first
-      WidgetsFlutterBinding.ensureInitialized();
-
-      // Check Android version
-      if (Platform.isAndroid) {
-        final androidInfo = await DeviceInfoPlugin().androidInfo;
-
-        // For Android 13+ (API 33+)
-        if (androidInfo.version.sdkInt >= 33) {
-          final photosStatus = await Permission.photos.status;
-          if (!photosStatus.isGranted) {
-            final result = await Permission.photos.request();
-            return result.isGranted;
-          }
-          return true;
-        }
-        // For Android 10-12
-        else if (androidInfo.version.sdkInt >= 29) {
-          final status = await Permission.storage.status;
-          if (!status.isGranted) {
-            final result = await Permission.storage.request();
-            return result.isGranted;
-          }
-          return true;
-        }
-        // For Android <10
-        else {
-          final status = await Permission.storage.status;
-          if (!status.isGranted) {
-            final result = await Permission.storage.request();
-            return result.isGranted;
-          }
-          return true;
-        }
+    PermissionStatus status;
+    if (Platform.isAndroid) {
+      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      // Android 13+ (API 33+) uses granular permissions.
+      if (androidInfo.version.sdkInt >= 33) {
+        status = await Permission.photos.request();
+      } else {
+        // Earlier versions use general storage permission.
+        status = await Permission.storage.request();
       }
-      // For iOS
-      else if (Platform.isIOS) {
-        final status = await Permission.photos.status;
-        if (!status.isGranted) {
-          final result = await Permission.photos.request();
-          return result.isGranted;
-        }
-        return true;
-      }
-
-      return false;
-    } catch (e) {
-      return false;
+    } else {
+      // iOS uses photos permission.
+      status = await Permission.photos.request();
     }
+
+    return status.isGranted;
   }
 
   Future<String> getPublicDownloadsPath() async {
-    if (Platform.isAndroid) {
-      // Try standard Downloads path
-      const downloadsDir = '/storage/emulated/0/Download';
-      if (await Directory(downloadsDir).exists()) return downloadsDir;
-
-      // Try alternative path
-      const altDownloadsDir = '/sdcard/Download';
-      if (await Directory(altDownloadsDir).exists()) return altDownloadsDir;
+    // This is the correct and stable way to get the downloads directory.
+    // Avoid hardcoding paths like '/storage/emulated/0/Download'.
+    final Directory? dir = await getDownloadsDirectory();
+    if (dir != null) {
+      return dir.path;
+    } else {
+      throw Exception('Could not access downloads directory');
     }
-
-    // Fallback
-    final dir = await getDownloadsDirectory();
-    return dir?.path ??
-        (throw Exception('Could not access downloads directory'));
   }
 }
 
 class PostsResult {
   final List<PostContentModel> posts;
-  final DateTime? lastTimestamp; // Changed from DocumentSnapshot
+  final DocumentSnapshot? lastDocument;
   final bool hasMore;
 
   PostsResult({
     required this.posts,
-    this.lastTimestamp,
+    required this.lastDocument,
     required this.hasMore,
   });
 }

@@ -159,7 +159,12 @@ class _UserProfileSectionState extends State<_UserProfileSection> {
       children: [
         CircleAvatar(
           radius: screenHeight * 0.027,
-          child: Image.asset('assets/images/application_images/profile.png'),
+          child: CircleAvatar(
+            radius: screenHeight * 0.027,
+            backgroundImage: _userModel.accountApiPhoto == ''
+                ? AssetImage('assets/images/application_images/profile.png')
+                : NetworkImage(_userModel.accountApiPhoto) as ImageProvider,
+          ),
         ),
         const SizedBox(width: 16),
         Column(

@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
@@ -6,7 +8,7 @@ import 'package:voyager/src/features/admin/models/course_mentor_model.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
 import 'package:voyager/src/features/mentee/controller/notification_controller.dart';
 import 'package:voyager/src/features/mentee/model/course_model.dart';
-import 'package:voyager/src/features/mentee/screens/profile/view-course.dart';
+import 'package:voyager/src/features/mentee/screens/profile/view_course.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
 import 'package:voyager/src/widgets/custom_page_route.dart';
 
@@ -45,7 +47,7 @@ class _MenteePersonalInformationState extends State<MenteePersonalInformation> {
         courseMentorModels = courseMentor;
       });
     } catch (e) {
-      print("❌ Error fetching course mentor: $e");
+      throw Exception("❌ Error fetching course mentor: $e");
     }
   }
 
@@ -119,7 +121,6 @@ class _MenteePersonalInformationState extends State<MenteePersonalInformation> {
         isLoadingCourses = false;
       });
     } catch (e) {
-      print("❌ Error fetching enrolled courses: $e");
       setState(() {
         isLoadingCourses = false;
       });

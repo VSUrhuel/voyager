@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:voyager/src/features/mentor/controller/schedule_conrtoller.dart';
+import 'package:voyager/src/features/mentor/controller/schedule_controller.dart';
 import 'package:voyager/src/features/mentor/model/mentor_model.dart';
 import 'package:voyager/src/features/mentor/model/schedule_model.dart';
 import 'package:voyager/src/features/mentor/widget/task.dart';
@@ -22,7 +22,7 @@ class CalendarView extends StatefulWidget {
 
 class _CalendarViewState extends State<CalendarView> {
   FirestoreInstance firestore = Get.put(FirestoreInstance());
-  ScheduleConrtoller scheduleConrtoller = Get.put(ScheduleConrtoller());
+  ScheduleController scheduleController = Get.put(ScheduleController());
   DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now(); // Ensure it's a state variable
   bool _isLoading = false;
@@ -38,15 +38,15 @@ class _CalendarViewState extends State<CalendarView> {
       final formatDate =
           "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
       String dayOfTheWeek =
-          await scheduleConrtoller.getDayOfTheWeek(selectedDay);
-      final schedules = await scheduleConrtoller.getScheduleByDay(formatDate);
-      final mentorData = await scheduleConrtoller.getMentorDetails();
+           scheduleController.getDayOfTheWeek(selectedDay);
+      final schedules = await scheduleController.getScheduleByDay(formatDate);
+      final mentorData = await scheduleController.getMentorDetails();
       final bool hasSchedule;
-      if (selectedDay.month > 5) {
+      if (selectedDay.month > 12) {
         hasSchedule = false;
       } else {
         hasSchedule =
-            await scheduleConrtoller.hasRegScheduleToday(dayOfTheWeek);
+            await scheduleController.hasRegScheduleToday(dayOfTheWeek);
       }
       if (mounted) {
         setState(() {
@@ -66,11 +66,11 @@ class _CalendarViewState extends State<CalendarView> {
 
   @override
   void dispose() {
-    scheduleConrtoller.scheduleTitle.text = "";
-    scheduleConrtoller.scheduleDescription.text = "";
-    scheduleConrtoller.scheduleStartTime.text = "";
-    scheduleConrtoller.scheduleEndTime.text = "";
-    scheduleConrtoller.scheduleRoomName.text = "";
+    scheduleController.scheduleTitle.text = "";
+    scheduleController.scheduleDescription.text = "";
+    scheduleController.scheduleStartTime.text = "";
+    scheduleController.scheduleEndTime.text = "";
+    scheduleController.scheduleRoomName.text = "";
     super.dispose();
   }
 
@@ -83,14 +83,14 @@ class _CalendarViewState extends State<CalendarView> {
   }
 
   void clearController() {
-    scheduleConrtoller.scheduleDate.text = '';
-    scheduleConrtoller.scheduleDescription.text = '';
-    scheduleConrtoller.scheduleEndTime.text = '';
-    scheduleConrtoller.scheduleStartTime.text = '';
-    scheduleConrtoller.scheduleRoomName.text = '';
-    scheduleConrtoller.scheduleMenteeId.text = '';
-    scheduleConrtoller.scheduleMentorId.text = '';
-    scheduleConrtoller.scheduleTitle.text = '';
+    scheduleController.scheduleDate.text = '';
+    scheduleController.scheduleDescription.text = '';
+    scheduleController.scheduleEndTime.text = '';
+    scheduleController.scheduleStartTime.text = '';
+    scheduleController.scheduleRoomName.text = '';
+    scheduleController.scheduleMenteeId.text = '';
+    scheduleController.scheduleMentorId.text = '';
+    scheduleController.scheduleTitle.text = '';
   }
 
   FirestoreInstance firestoreInstance = Get.put(FirestoreInstance());
@@ -103,19 +103,19 @@ class _CalendarViewState extends State<CalendarView> {
     Future<void> showMyDialog() async {
       final formatDate =
           "${selectedDay.year}-${selectedDay.month.toString().padLeft(2, '0')}-${selectedDay.day.toString().padLeft(2, '0')}";
-      final sched = await scheduleConrtoller.getScheduleByDay(formatDate);
+      final sched = await scheduleController.getScheduleByDay(formatDate);
       if (mounted) {
         setState(() {
           scheduleListToday = sched;
           _isLoading = false; // Set loading to false after data is fetched
-          scheduleConrtoller.scheduleDate.text = formatDate;
+          scheduleController.scheduleDate.text = formatDate;
         });
       }
       return showDialog<void>(
         context: context,
         barrierDismissible: false, // user must tap button!
         builder: (BuildContext context) {
-          scheduleConrtoller.scheduleDate.text = formatDate;
+          scheduleController.scheduleDate.text = formatDate;
           return AlertDialog(
             title: const Text('New Schedule'),
             content: SingleChildScrollView(
@@ -130,7 +130,7 @@ class _CalendarViewState extends State<CalendarView> {
                   ),
                   SizedBox(height: screenHeight * 0.02),
                   CustomTextField(
-                    controllerParam: scheduleConrtoller.scheduleTitle,
+                    controllerParam: scheduleController.scheduleTitle,
                     hintText: 'Schedule Title',
                     fieldWidth: screenWidth * 0.8,
                     fontSize: screenWidth * 0.04,
@@ -152,13 +152,13 @@ class _CalendarViewState extends State<CalendarView> {
                       children: [
                         TimePicker(
                           titleLabel: "Start Time",
-                          controller: scheduleConrtoller.scheduleStartTime,
+                          controller: scheduleController.scheduleStartTime,
                         ),
 
                         // Add spacing between the pickers
                         TimePicker(
                             titleLabel: "End Time",
-                            controller: scheduleConrtoller.scheduleEndTime),
+                            controller: scheduleController.scheduleEndTime),
                       ],
                     ),
                   ),
@@ -198,13 +198,13 @@ class _CalendarViewState extends State<CalendarView> {
                         );
                       }).toList(),
                       onChanged: (value) {
-                        scheduleConrtoller.scheduleRoomName.text =
+                        scheduleController.scheduleRoomName.text =
                             value.toString();
                       },
                     ),
                   ),
                   TextFormField(
-                    controller: scheduleConrtoller.scheduleDescription,
+                    controller: scheduleController.scheduleDescription,
                     style: TextStyle(
                       fontSize: screenWidth * 0.04,
                     ),
@@ -245,11 +245,11 @@ class _CalendarViewState extends State<CalendarView> {
               TextButton(
                 child: const Text('Save'),
                 onPressed: () async {
-                  if (scheduleConrtoller.scheduleTitle.text == '' ||
-                      scheduleConrtoller.scheduleDescription.text == '' ||
-                      scheduleConrtoller.scheduleStartTime.text.isEmpty ||
-                      scheduleConrtoller.scheduleEndTime.text.isEmpty ||
-                      scheduleConrtoller.scheduleRoomName.text.isEmpty) {
+                  if (scheduleController.scheduleTitle.text == '' ||
+                      scheduleController.scheduleDescription.text == '' ||
+                      scheduleController.scheduleStartTime.text.isEmpty ||
+                      scheduleController.scheduleEndTime.text.isEmpty ||
+                      scheduleController.scheduleRoomName.text.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
@@ -261,9 +261,9 @@ class _CalendarViewState extends State<CalendarView> {
                   }
                   if (!firestoreInstance
                       .parseTimeString(
-                          scheduleConrtoller.scheduleStartTime.text)
+                          scheduleController.scheduleStartTime.text)
                       .isBefore(firestoreInstance.parseTimeString(
-                          scheduleConrtoller.scheduleEndTime.text))) {
+                          scheduleController.scheduleEndTime.text))) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
@@ -274,7 +274,7 @@ class _CalendarViewState extends State<CalendarView> {
                     return;
                   }
 
-                  await scheduleConrtoller.generateSchedule();
+                  await scheduleController.generateSchedule();
                   Navigator.of(context).pop();
                   clearController();
                 },

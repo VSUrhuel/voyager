@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:voyager/src/features/mentor/screens/session/completed.dart';
 import 'package:voyager/src/features/mentor/screens/session/upcoming.dart';
 
+// ignore: must_be_immutable
 class ToggleButton extends StatefulWidget {
   ToggleButton({super.key, this.index = 0});
   int? index;

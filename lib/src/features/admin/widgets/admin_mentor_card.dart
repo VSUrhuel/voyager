@@ -64,11 +64,13 @@ class AdminMentorCard extends StatelessWidget {
                 .createCourseMentor(courseId!, mentorModel.mentorId);
             await AdminMentorController()
                 .updateMentorStatus(mentorModel.mentorId, 'active');
+            // ignore: use_build_context_synchronously
             Navigator.pop(context);
           } else if (confirmed == false) {
             // Navigator.pop(context);
           } else {
             Navigator.push(
+                // ignore: use_build_context_synchronously
                 context,
                 MaterialPageRoute(
                     builder: (context) => MentorProfile(
@@ -375,26 +377,4 @@ class AdminMentorCard extends StatelessWidget {
     return days;
   }
 
-  Widget _buildDayPill(String day, BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: screenWidth * 0.02,
-        vertical: screenHeight * 0.003,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.blue,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        day,
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: day.length > 1 ? screenWidth * 0.025 : screenWidth * 0.028,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
 }
