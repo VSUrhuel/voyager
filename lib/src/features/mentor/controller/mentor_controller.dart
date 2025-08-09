@@ -142,10 +142,11 @@ class MentorController extends GetxController {
       isLoading.value = true;
       final firebaseID = FirestoreInstance().getFirebaseUser().uid;
 
-      String mentorID = await FirestoreInstance().getMentorID(firebaseID);
+      // String mentorID = await FirestoreInstance().getMentorID(firebaseID);
+      final _mentor = await FirestoreInstance().getMentorThroughAccId(firebaseID);
 
       final mentor = MentorModel(
-        mentorId: mentorID,
+        mentorId: _mentor.mentorId,
         accountId: FirestoreInstance().getFirebaseUser().uid,
         mentorYearLvl: mentorYearLvl.text,
         mentorAbout: mentorAbout.text,
@@ -160,7 +161,7 @@ class MentorController extends GetxController {
         mentorRegDay: selectedDays,
         mentorRegStartTime: parseTime(mentorRegStartTime.text),
         mentorRegEndTime: parseTime(mentorRegEndTime.text),
-        mentorStatus: '',
+        mentorStatus: _mentor.mentorStatus,
         mentorSoftDeleted: false,
       );
       final firestore = FirestoreInstance();
