@@ -25,7 +25,7 @@ class GoogleHttpClient extends http.BaseClient {
 
 class FirebaseAuthenticationRepository extends GetxController {
   static FirebaseAuthenticationRepository get instance => Get.find();
-
+  final _firestore = FirestoreInstance();
   final _auth = FirebaseAuth.instance;
   late final Rx<User?> firebaseUser;
 
@@ -86,22 +86,50 @@ class FirebaseAuthenticationRepository extends GetxController {
   Future<void> loginUserWithEmailandPassword(
       String email, String password) async {
     try {
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
+      final userCredential = await _auth.signInWithEmailAndPassword(
+          email: email, password: password);
 
-      Get.offAllNamed(MRoutes.splash);
-      ScaffoldMessenger.of(Get.context!).showSnackBar(
-        SnackBar(
-          content: AwesomeSnackbarContent(
-            title: 'Welcome Back!',
-            message: "You have sucessfully log in your account!",
-            contentType: ContentType.success,
-          ),
-          width: MediaQuery.of(Get.context!).size.width,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent, // Makes it seamless
-          elevation: 0,
-        ),
-      );
+      if (userCredential.user != null) {
+        // Step 2: Check user status in Firestore BEFORE proceeding
+        final user = userCredential.user!;
+
+        // Step 2: Check for deleted/suspended status in Firestore
+        final userDetails = await _firestore.getUser(user.uid);
+
+        if (userDetails.accountSoftDeleted) {
+          // If account is deleted, sign out immediately and show error
+          await _auth.signOut();
+          ScaffoldMessenger.of(Get.context!).showSnackBar(
+            SnackBar(
+              content: AwesomeSnackbarContent(
+                  title: "Deleted Account",
+                  message:
+                      "This account has been deleted. Contact the administrator!",
+                  contentType: ContentType.failure,
+                  color: Colors.red),
+              width: MediaQuery.of(Get.context!).size.width,
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.transparent, // Makes it seamless
+              elevation: 0,
+            ),
+          );
+          return;
+        }
+
+        // (Optional) Add a similar check for a suspended status if you have one
+        // if (userDetails.isSuspended) {
+        //   await _auth.signOut();
+        //   throw const AuthenticationExceptions(message: 'Your account is suspended. Please contact support.');
+        // }
+        if (!user.emailVerified) {
+          // This is the missing step. If the email is not verified,
+          // send the verification link before proceeding.
+          await user.sendEmailVerification();
+        }
+        // Step 3: If status is OK, proceed to the app
+        Get.offAllNamed(MRoutes.splash);
+      }
+
     } on FirebaseAuthException catch (e) {
       final ex = AuthenticationExceptions.code(e.code);
       ScaffoldMessenger.of(Get.context!).showSnackBar(
@@ -228,8 +256,16 @@ class FirebaseAuthenticationRepository extends GetxController {
       // Once signed in, return the UserCredential
       final UserCredential userCredential =
           await FirebaseAuth.instance.signInWithCredential(credential);
-
-      // After Firebase authentication, call Google Calendar API
+      if (userCredential.user == null) {
+        throw AuthenticationExceptions("Failed to sign in with Google.");
+      }
+      final userDetails = await _firestore.getUser(userCredential.user!.uid);
+      if (userDetails.accountSoftDeleted) {
+        await _auth.signOut();
+        throw const AuthenticationExceptions(
+            'This user account has been deleted.');
+      }
+      
 
       return userCredential;
     } on FirebaseAuthException catch (e) {

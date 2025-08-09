@@ -8,54 +8,123 @@ import 'package:flutter/material.dart';
 
 class EmailVerificationController extends GetxController {
   late Timer _timer;
+  // Get an instance of the repository.
+  final _authRepo = Get.find<FirebaseAuthenticationRepository>();
 
   @override
   void onInit() {
     super.onInit();
-    sendVerificationEmail();
+    // Show a notification to the user that an email has been sent.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ScaffoldMessenger.of(Get.context!).showSnackBar(
+        SnackBar(
+          content: AwesomeSnackbarContent(
+            title: 'Check Your Inbox!',
+            message: 'A verification link has been sent to your email.',
+            contentType: ContentType.help,
+          ),
+          // Completed styling for consistency
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+      );
+    });
     setTimerForAutoRedirect();
   }
 
+  /// Called when the controller is removed from memory.
+  /// This is CRUCIAL to prevent memory leaks from the timer.
+  @override
+  void onClose() {
+    _timer.cancel();
+    super.onClose();
+  }
+
+  /// Sends another verification email, typically used for a "Resend Email" button.
   Future<void> sendVerificationEmail() async {
     try {
-      FirebaseAuthenticationRepository auth =
-          Get.put(FirebaseAuthenticationRepository());
-      await auth.sendEmailVerification();
-    } on Exception {
-      rethrow;
+      await _authRepo.sendEmailVerification();
+      // Show a success message
+      ScaffoldMessenger.of(Get.context!).showSnackBar(
+        SnackBar(
+          content: AwesomeSnackbarContent(
+            title: 'Email Sent!',
+            message: 'A new verification link has been sent to your inbox.',
+            contentType: ContentType.success,
+          ),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      // Handle specific Firebase errors, like "too-many-requests"
+      ScaffoldMessenger.of(Get.context!).showSnackBar(
+        SnackBar(
+          content: AwesomeSnackbarContent(
+            title: 'Oh Snap!',
+            message: e.message ?? 'An error occurred. Please try again later.',
+            contentType: ContentType.failure,
+          ),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+      );
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error: $e');
     }
   }
 
+  /// Sets a periodic timer to check the email verification status automatically.
   void setTimerForAutoRedirect() {
-    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      FirebaseAuth.instance.currentUser!.reload();
+    // Increased duration to 5 seconds to avoid "too-many-requests" errors from Firebase.
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) async {
+      // The reload() method must be awaited to get the latest user data.
+      await FirebaseAuth.instance.currentUser?.reload();
+
       final user = FirebaseAuth.instance.currentUser;
-      if (user!.emailVerified) {
-        _timer.cancel();
+      // Check if the user's email has been verified.
+      if (user?.emailVerified ?? false) {
+        timer.cancel(); // Stop the timer.
+        // Redirect to splash screen to trigger auth middleware for correct routing.
         Get.offAllNamed(MRoutes.splash);
       }
     });
   }
 
-  void manuallyCheckEmailVerificationStatus() {
-    FirebaseAuth.instance.currentUser!.reload();
+  /// Manually checks the verification status, typically via a button press.
+  Future<void> manuallyCheckEmailVerificationStatus() async {
+    // The reload() method must be awaited.
+    await FirebaseAuth.instance.currentUser?.reload();
+
     final user = FirebaseAuth.instance.currentUser;
-    if (user!.emailVerified) {
+    if (user?.emailVerified ?? false) {
       Get.offAllNamed(MRoutes.splash);
     } else {
+      // Notify user that the email is still not verified.
       ScaffoldMessenger.of(Get.context!).showSnackBar(
         SnackBar(
           content: AwesomeSnackbarContent(
-              title: 'Email not verified',
-              message: "Please verify your email to continue",
+              title: 'Not Verified',
+              message:
+                  "Please check your inbox and click the verification link.",
               contentType: ContentType.failure,
               color: Colors.red),
-          width: MediaQuery.of(Get.context!).size.width,
           behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent, // Makes it seamless
+          backgroundColor: Colors.transparent,
           elevation: 0,
         ),
       );
     }
+  }
+
+  /// Signs the user out and navigates to the Welcome screen.
+  /// Useful if the user wants to sign in with a different account.
+  Future<void> signOut() async {
+    await _authRepo.logout();
+    Get.offAllNamed(MRoutes.welcome);
   }
 }

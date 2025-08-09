@@ -59,4 +59,11 @@ class ResetPassController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  @override
+  void dispose() {
+    initialPassword.dispose();
+    confirmedPassword.dispose();
+    super.dispose();
+  }
 }

@@ -450,40 +450,55 @@ class FirestoreInstance {
 
   TimeOfDay parseTimeString(String timeString) {
     try {
-      // Clean the input string
-      final cleanedTime = timeString
-          .trim()
-          .replaceAll(RegExp(r'[^\w\s:]'), '')
-          .replaceAll(RegExp(r'\s+'), ' '); // Normalize spaces
+      // Normalize the string to uppercase and trim whitespace.
+      final String normalizedTime = timeString.trim().toUpperCase();
 
-      if (cleanedTime.contains('PM') || cleanedTime.contains('pm')) {
-        final timeWithoutSuffix =
-            cleanedTime.replaceAll(RegExp(r'[APMapm]'), '').trim();
-        final parts = timeWithoutSuffix.split(':');
-        var hour = int.parse(parts[0]);
-        final minute = int.parse(parts[1]);
-        if (hour < 12) hour += 12;
-        return TimeOfDay(hour: hour, minute: minute);
-      } else if (cleanedTime.contains('AM') || cleanedTime.contains('am')) {
-        final timeWithoutSuffix =
-            cleanedTime.replaceAll(RegExp(r'[APMapm]'), '').trim();
-        final parts = timeWithoutSuffix.split(':');
-        var hour = int.parse(parts[0]);
-        final minute = int.parse(parts[1]);
-        if (hour == 12) hour = 0;
-        return TimeOfDay(hour: hour, minute: minute);
+      // Determine if the time is AM or PM.
+      final bool isPM = normalizedTime.endsWith('PM');
+      final bool isAM = normalizedTime.endsWith('AM');
+
+      // Remove the AM/PM suffix to isolate the time digits.
+      String timeDigits;
+      if (isPM || isAM) {
+        timeDigits =
+            normalizedTime.substring(0, normalizedTime.length - 2).trim();
       } else {
-        // 24-hour format
-        final parts = cleanedTime.split(':');
-        return TimeOfDay(
-          hour: int.parse(parts[0]),
-          minute: int.parse(parts[1]),
-        );
+        timeDigits = normalizedTime;
       }
+
+      // Split into hour and minute parts.
+      final parts = timeDigits.split(':');
+      if (parts.length != 2) {
+        throw const FormatException('Invalid time format, expected hh:mm.');
+      }
+
+      // Parse the hour and minute as integers.
+      int hour = int.parse(parts[0]);
+      final int minute = int.parse(parts[1]);
+
+      // Adjust the hour for 12-hour format.
+      if (isPM) {
+        // For PM, add 12 to hours 1-11. "12 PM" is a special case and should not be changed.
+        // 1:00 PM becomes 13:00. 12:00 PM remains 12:00.
+        if (hour >= 1 && hour <= 11) {
+          hour += 12;
+        }
+      } else if (isAM) {
+        // For AM, "12 AM" is the special case for midnight, which should be hour 0.
+        // 12:00 AM becomes 00:00. 1:00 AM remains 1:00.
+        if (hour == 12) {
+          hour = 0;
+        }
+      }
+
+      return TimeOfDay(hour: hour, minute: minute);
     } catch (e) {
-      return const TimeOfDay(hour: 0, minute: 0); // Return midnight as fallback
+      // If any error occurs during parsing, return a default value.
+      debugPrint('Failed to parse time string "$timeString": $e');
+      return const TimeOfDay(hour: 0, minute: 0); // Default to midnight
     }
   }
+
 
   Future<List<ScheduleModel>> getSchedule(String courseMentorId) async {
     try {
