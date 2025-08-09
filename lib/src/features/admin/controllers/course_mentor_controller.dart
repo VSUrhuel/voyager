@@ -49,7 +49,6 @@ Future<bool> removeMentorFromCourse(
     FirestoreInstance firestoreInstance = FirestoreInstance();
     try {
       await firestoreInstance.softDeleteCourseMentor(courseMentorId);
-      await firestoreInstance.softDeleteCourseAllocatedMentee(courseMentorId);
       await firestoreInstance.updateMentorStatus(mentorId, 'archived');
       return true;
     } catch (e) {

@@ -236,6 +236,24 @@ class FirestoreInstance {
     }
   }
 
+    Future<CourseMentorModel?> getCourseMentorThroughEmail(
+      String email) async {
+    try {
+      final courseMentor = await _db
+          .collection('courseMentor')
+          .where('mentorId', isEqualTo: email)
+          .where('courseMentorSoftDeleted', isEqualTo: true)
+          .limit(1)
+          .get();
+
+      return courseMentor.docs.isNotEmpty
+          ? CourseMentorModel.fromJson(courseMentor.docs.first.data())
+          : null;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<String> getCourseMentorDocId(String mentorId) async {
     try {
       final courseMentor = await _db
@@ -671,14 +689,47 @@ class FirestoreInstance {
   }
 
   Future<void> deleteMentor(String mentorId) async {
-    try {
-      await _db.collection('mentors').doc(mentorId).update({
-        'mentorSoftDeleted': true,
-      });
-    } catch (e) {
-      rethrow;
+  try {
+    final batch = _db.batch();
+
+    final mentorRef = _db.collection('mentors').doc(mentorId);
+    batch.update(mentorRef, {'mentorSoftDeleted': true});
+
+      final mentorSnapshot = await mentorRef.get();
+      if (!mentorSnapshot.exists) throw Exception('Mentor not found');
+      final accountId = mentorSnapshot.data()!['accountId'] as String; 
+      final accountRef = _db.collection('users').doc(accountId);
+      batch.update(accountRef, {'accountSoftDeleted': true});
+
+    final cM = await _db
+        .collection('courseMentor')
+        .where('mentorId', isEqualTo: mentorId)
+        .where('courseMentorSoftDeleted', isEqualTo: false)
+        .get();
+
+    for (final cmDoc in cM.docs) {
+      batch.update(cmDoc.reference, {'courseMentorSoftDeleted': true});
+
+      final mcaDocs = await _db
+          .collection('menteeCourseAlloc')
+          .where('courseMentorId', isEqualTo: cmDoc.id)
+          .get();
+
+      for (final mcaDoc in mcaDocs.docs) {
+        batch.update(mcaDoc.reference, {'mcaSoftDeleted': true});
+        final menteeRef = _db.collection('mentee').doc(mcaDoc.data()['menteeId']);
+        batch.update(menteeRef, {
+          'menteeMcaId': FieldValue.arrayRemove([mcaDoc.id])
+        });
+      }
     }
+
+    await batch.commit(); 
+  } catch (e) {
+    debugPrint('Error deleting mentor: $e');
+    rethrow;
   }
+}
 
   Future<void> updateMentorStatus(String mentorId, String status) async {
     try {
@@ -771,6 +822,7 @@ class FirestoreInstance {
           .where('courseMentorId', isEqualTo: courseMentorId)
           .get();
       if (docRef.docs.isNotEmpty) {
+       
         _db.collection('menteeCourseAlloc').doc(docRef.docs[0].id).update({
           'mcaSoftDeleted': true,
         });
@@ -781,13 +833,26 @@ class FirestoreInstance {
   }
 
   Future<void> softDeleteCourseMentor(String courseMentorId) async {
-    try {
-      await _db.collection('courseMentor').doc(courseMentorId).update({
-        'courseMentorSoftDeleted': true,
-      });
-    } catch (e) {
-      rethrow;
-    }
+      try {
+    final batch = _db.batch();
+
+    final cM = await _db.collection('courseMentor').where('courseMentorId', isEqualTo: courseMentorId).get();
+      batch.update(cM.docs[0].reference, {'courseMentorSoftDeleted': true});
+
+      final mca = await _db.collection('menteeCourseAlloc').where('courseMentorId', isEqualTo: courseMentorId).get();
+      for (var mcaDoc in mca.docs) {
+        batch.update(mcaDoc.reference, {'mcaSoftDeleted': true});
+        final menteeRef = _db.collection('mentee').doc(mcaDoc.data()['menteeId']);
+        batch.update(menteeRef, {
+          'menteeMcaId': FieldValue.arrayRemove([mcaDoc.id])
+        });
+      }
+
+    await batch.commit(); 
+  } catch (e) {
+    debugPrint('Error deleting course: $e');
+    rethrow;
+  }
   }
 
   Future<String> getCourseMentorId(String mentorId) async {
@@ -796,6 +861,8 @@ class FirestoreInstance {
           .collection('courseMentor')
           .where("mentorId", isEqualTo: mentorId)
           .get();
+
+          
       return CourseMentorModel.fromJson(courseMentor.docs.first.data())
           .courseMentorId;
     } catch (e) {
@@ -1068,16 +1135,36 @@ class FirestoreInstance {
     }
   }
 
-  Future<bool> deleteCourse(String courseId) async {
-    try {
-      await _db.collection('course').doc(courseId).update({
-        'courseSoftDelete': true,
-      });
-      return true;
-    } catch (e) {
-      rethrow;
+Future<bool> deleteCourse(String courseId) async {
+  try {
+    final batch = _db.batch();
+
+    final courseRef = _db.collection('course').doc(courseId);
+    batch.update(courseRef, {'courseSoftDelete': true});
+
+    final cM = await _db.collection('courseMentor').where('courseId', isEqualTo: courseId).where('courseMentorSoftDeleted', isEqualTo: false).get();
+    if(cM.docs.isNotEmpty)
+    {
+    for (var doc in cM.docs) {
+      batch.update(doc.reference, {'courseMentorSoftDeleted': true});
+
+      final mca = await _db.collection('menteeCourseAlloc').where('courseMentorId', isEqualTo: doc.id).get();
+        for (var mcaDoc in mca.docs) {
+          batch.update(mcaDoc.reference, {'mcaSoftDeleted': true});
+          final menteeRef = _db.collection('mentee').doc(mcaDoc.data()['menteeId']);
+          batch.update(menteeRef, {
+            'menteeMcaId': FieldValue.arrayRemove([mcaDoc.id])
+          });
+        }
     }
+    }
+    await batch.commit(); 
+    return true;
+  } catch (e) {
+    debugPrint('Error deleting course: $e');
+    rethrow;
   }
+}
 
   Future<void> setCourseMentor(String courseId, String mentorId) async {
     try {
@@ -1115,7 +1202,7 @@ class FirestoreInstance {
       String email, String newMentorId) async {
     try {
       CourseMentorModel? courseMentor =
-          await getCourseMentorThroughMentor(email);
+          await getCourseMentorThroughEmail(email);
       if (courseMentor != null) {
         await _db
             .collection('courseMentor')

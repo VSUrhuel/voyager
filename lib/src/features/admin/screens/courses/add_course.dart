@@ -47,6 +47,11 @@ class _AddCourseState extends State<AddCourse> {
   void dispose() {
     _textController.dispose();
     _focusNode.dispose();
+    _courseController.courseCode.clear();
+    _courseController.courseName.clear();
+    _courseController.courseDescription.clear();
+    _courseController.courseDeliverables.clear();
+    _courseController.courseImage = null;
     super.dispose();
   }
 

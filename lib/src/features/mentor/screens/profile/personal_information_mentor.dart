@@ -166,22 +166,39 @@ class _MentorPersonalInformationState extends State<MentorPersonalInformation> {
                                       color: Colors.grey[100],
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    child: Text(
-                                      '@${userModel.accountUsername}',
+                                    child: Builder(builder: (context){
+                                      String userName = '@${userModel.accountUsername}';
+                                      double baseFontSize = screenWidth * 0.04;
+                                      double dynamicFontSize = userName.length > 12
+                                          ? baseFontSize * (12 / userName.length)
+                                          : baseFontSize;
+
+                                      return Text(
+                                      userName,
                                       style: TextStyle(
-                                        fontSize: screenWidth * 0.04,
+                                        // fontSize: screenWidth * 0.04,
+                                        fontSize: dynamicFontSize,
                                         color: Colors.grey[600],
                                       ),
-                                    ),
+                                    );
+                                    },)
                                   ),
                                   const SizedBox(width: 10),
                                   Text('|'),
                                   const SizedBox(width: 10),
-                                  Text(
+                                  Builder(builder: (context){
+                                    String email = userModel.accountApiEmail;
+                                    double baseFontSize = 14;
+                                    double dynamicFontSize = email.length > 25
+                                        ? baseFontSize * (25 / email.length)
+                                        : baseFontSize;
+
+                                    return Text(
                                     userModel.accountApiEmail,
                                     style: TextStyle(
-                                        color: Colors.black54, fontSize: 14),
-                                  ),
+                                    color: Colors.black54, fontSize: dynamicFontSize),
+                                  );
+                                  },)
                                 ])),
                             const SizedBox(height: 10),
                             Row(
@@ -537,8 +554,8 @@ class _MentorPersonalInformationState extends State<MentorPersonalInformation> {
 
   // Experience Section with Improved UI
   Widget _experienceSection(double screenHeight) {
-    final isExperienceEmpty = mentorModel.mentorExpHeader.isEmpty ||
-        mentorModel.mentorExpDesc.isEmpty;
+    final isExperienceEmpty = (mentorModel.mentorExpHeader.length <= 1 && mentorModel.mentorExpHeader[0].length <= 1) ||
+        (mentorModel.mentorExpDesc.length <= 1 && mentorModel.mentorExpDesc[0].length <= 1);
 
     return Container(
       height: screenHeight * 0.4,
