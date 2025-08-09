@@ -2,7 +2,6 @@ import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:voyager/src/features/authentication/controllers/user_role_enum.dart';
 import 'package:voyager/src/features/authentication/models/user_model.dart';
-import 'package:voyager/src/features/authentication/screens/email_verification/email_verification.dart';
 import 'package:voyager/src/repository/authentication_repository_firebase/authentication_repository.dart';
 import 'package:voyager/src/repository/authentication_repository_firebase/exceptions/authentication_exceptions.dart';
 import 'package:voyager/src/repository/firebase_repository/firestore_instance.dart';
@@ -24,12 +23,12 @@ class SignupController extends GetxController {
   final isLoading = false.obs;
 
   void registerUser(String email, String password) async {
-    try {
-      if (email.isEmpty ||
-          password.isEmpty ||
-          fullName.text.isEmpty ||
-          studentID.text.isEmpty) {
-        ScaffoldMessenger.of(Get.context!).showSnackBar(
+    // Check for empty fields first
+    if (email.isEmpty ||
+        password.isEmpty ||
+        fullName.text.isEmpty ||
+        studentID.text.isEmpty) {
+      ScaffoldMessenger.of(Get.context!).showSnackBar(
           SnackBar(
             content: AwesomeSnackbarContent(
               title: 'Missing Fields!',
@@ -41,16 +40,18 @@ class SignupController extends GetxController {
             backgroundColor: Colors.transparent, // Makes it seamless
             elevation: 0,
           ),
-        );
+      );
+      return;
+    }
 
-        return;
-      }
-      isLoading.value = true;
+    try {
+      isLoading.value = true; // Set loading state to true
+
+      // --- Start of your logic ---
       final firestore = FirestoreInstance();
       await auth.createUserWithEmailandPassword(email, password);
 
       if (auth.firebaseUser.value == null) {
-        isLoading.value = false;
         ScaffoldMessenger.of(Get.context!).showSnackBar(
           SnackBar(
             content: AwesomeSnackbarContent(
@@ -64,20 +65,17 @@ class SignupController extends GetxController {
             elevation: 0,
           ),
         );
-        return;
+        return; // Return early
       }
 
       UserModel user = UserModel(
-        accountApiID:
-            auth.firebaseUser.value?.uid ?? "", // Use empty string if null
-        accountApiEmail:
-            auth.firebaseUser.value?.email ?? "", // Provide a default
+        accountApiID: auth.firebaseUser.value!.uid,
+        accountApiEmail: auth.firebaseUser.value!.email!,
         accountApiName: fullName.text,
         accountApiPhoto:
-            "https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/profile-picture//profile.png", // Handle null safely
+            "https://zyqxnzxudwofrlvdzbvf.supabase.co/storage/v1/object/public/profile-picture//profile.png",
         accountPassword: '',
-        accountUsername: auth.firebaseUser.value?.displayName ??
-            "Unknown", // Provide default username
+        accountUsername: auth.firebaseUser.value?.displayName ?? "Unknown",
         accountRole: UserRoleEnum.mentee,
         accountStudentId: studentID.text,
         accountCreatedTimestamp: DateTime.now(),
@@ -85,11 +83,9 @@ class SignupController extends GetxController {
         accountSoftDeleted: false,
       );
 
-      firestore.setUser(user);
-      Get.offAll(() => EmailVerification());
-      isLoading.value = false;
+      await firestore.setUser(user);
+      // --- End of your logic ---
     } on AuthenticationExceptions catch (e) {
-      isLoading.value = false;
       ScaffoldMessenger.of(Get.context!).showSnackBar(
         SnackBar(
           content: AwesomeSnackbarContent(
@@ -104,13 +100,11 @@ class SignupController extends GetxController {
         ),
       );
     } catch (e) {
-      Get.snackbar('Error', e.toString());
-      isLoading.value = false;
       ScaffoldMessenger.of(Get.context!).showSnackBar(
         SnackBar(
           content: AwesomeSnackbarContent(
-              title: 'Unexpected Error',
-              message: 'An unexpected error occurred. Please try again.',
+              title: 'Registration Error',
+              message: "An unknown error occurred.",
               contentType: ContentType.failure,
               color: Colors.red),
           width: MediaQuery.of(Get.context!).size.width,
@@ -119,8 +113,11 @@ class SignupController extends GetxController {
           elevation: 0,
         ),
       );
+    } finally {
+      isLoading.value = false;
     }
   }
+
 
   Future<void> googleSignUp() async {
     try {
