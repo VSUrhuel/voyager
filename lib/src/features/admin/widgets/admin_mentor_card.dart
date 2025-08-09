@@ -35,6 +35,7 @@ class AdminMentorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    bool _isProcessing = false;
 
     return InkWell(
       onTap: () async {
@@ -52,18 +53,25 @@ class AdminMentorCard extends StatelessWidget {
                   child: const Text('Cancel'),
                 ),
                 TextButton(
-                  onPressed: () => Navigator.pop(context, true),
+                  onPressed: () => {
+                    if(!_isProcessing)
+                    {
+                    Navigator.pop(context, true),
+                    _isProcessing = true,
+                    }
+                    },
                   child: const Text('Confirm'),
                 ),
               ],
             ),
           );
 
-          if (confirmed == true) {
+          if (confirmed == true ) {
             await CourseMentorController()
                 .createCourseMentor(courseId!, mentorModel.mentorId);
             await AdminMentorController()
                 .updateMentorStatus(mentorModel.mentorId, 'active');
+                _isProcessing = false;
             // ignore: use_build_context_synchronously
             Navigator.pop(context);
           } else if (confirmed == false) {
@@ -187,8 +195,8 @@ class AdminMentorCard extends StatelessWidget {
                               String sched = schedule.substring(
                                 schedule.indexOf(' ') + 1);
                                 double baseFontSize = screenWidth * 0.035;
-                                double dynamicFontSize = sched.length > 10
-                                    ? baseFontSize * (10 / sched.length)
+                                double dynamicFontSize = sched.length > 15
+                                    ? baseFontSize * (15 / sched.length)
                                     : baseFontSize;
 
                                 return Text(
