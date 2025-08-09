@@ -12,7 +12,20 @@
           "package_name": "com.mentorship.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "539125746584-oq9fto65h3q64f83o1a0mkjh5cktbjni.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mentorship.app",
+            "certificate_hash": "3e53ad79d28a8273d493bd1d9163fc70dd5bebb9"
+          }
+        },
+        {
+          "client_id": "539125746584-bg908087aq4b31ao5ktouhnu3bqg4f35.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBLoQDDBI6_CuYSXe1eqSK_UVn_kY4FY-o"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "539125746584-bg908087aq4b31ao5ktouhnu3bqg4f35.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "539125746584-6f5gjata4po8ep742g8uajs7ui5esdu3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.cs3MentorshipApp"
+              }
+            }
+          ]
         }
       }
     }

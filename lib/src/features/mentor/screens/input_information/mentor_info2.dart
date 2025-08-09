@@ -55,8 +55,6 @@ class _MentorInfo2State extends State<MentorInfo2> {
           widget.mentorModel!.mentorLanguages.join(',');
 
       controller.selectedSkills.value = widget.mentorModel!.mentorExpertise;
-      print(
-          "Selected header: ${controller.mentorExpHeader.text}"); // Debug print
     }
   }
 
@@ -409,18 +407,46 @@ class _MentorInfo2State extends State<MentorInfo2> {
                           setState(() {
                             isLoading = true;
                           });
-                          await controller.generateMentor();
+                          setState(() {
+                            isLoading = true;
+                          });
 
-                          await controller.updateUsername(widget.image);
+                          try {
+                            // Perform all async operations
+                            await controller.generateMentor();
+                            await controller.updateUsername(widget.image);
+                            if (widget.userModel != null &&
+                                widget.mentorModel != null) {
+                              await controller.updateMentorInformation();
+                            }
 
-                          if (widget.userModel != null &&
-                              widget.mentorModel != null) {
-                            await controller.updateMentorInformation();
+                            // --- 3. Safely navigate after async operations ---
+
+                            // This check ensures the widget is still mounted before navigating.
+                            // It safely resolves the `use_build_context_synchronously` warning.
+                            if (!mounted) return;
+
+                            // Use Get.offAllNamed to clear the info screens from the navigation stack.
+                            // This prevents the user from pressing 'back' to get to this form again.
+
+                            Get.offAllNamed(MRoutes.splash);
+                          } catch (e) {
+                            // Handle any potential errors during the submission process
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        'An error occurred: ${e.toString()}')),
+                              );
+                            }
+                          } finally {
+                            // Ensure the loading indicator is always turned off, even if an error occurs.
+                            if (mounted) {
+                              setState(() {
+                                isLoading = false;
+                              });
+                            }
                           }
-                          Navigator.pushNamed(
-                            context,
-                            MRoutes.splash,
-                          );
                           //controller.dispose();
                         },
                       ),

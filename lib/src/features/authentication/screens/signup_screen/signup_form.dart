@@ -95,10 +95,11 @@ class SignupForm extends StatelessWidget {
                 borderColor: Colors.transparent,
                 isLoading: controller.isLoading.value ? true : false,
                 onPressed: controller.isLoading.value
-                    ? () {}
+                    ? null
                     : () => controller.registerUser(
                         controller.email.text.trim(),
                         controller.password.text.trim()),
+                
               )),
         ],
       ),

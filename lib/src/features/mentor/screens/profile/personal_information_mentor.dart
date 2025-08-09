@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -676,7 +676,6 @@ class _MentorPersonalInformationState extends State<MentorPersonalInformation> {
       child: InkWell(
         onTap: () async {
           final uri = Uri.tryParse(url);
-          print(uri);
           if (uri != null) {
             if (!await launchUrl(uri)) {
               ScaffoldMessenger.of(context).showSnackBar(

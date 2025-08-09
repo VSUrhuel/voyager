@@ -75,6 +75,7 @@ class FirestoreInstance {
       }
 
       SupabaseInstance supabase = SupabaseInstance(Supabase.instance.client);
+      // ignore: unused_local_variable
       String imageUrl = '';
 
       if (auth.firebaseUser.value?.photoURL != null) {
@@ -449,40 +450,55 @@ class FirestoreInstance {
 
   TimeOfDay parseTimeString(String timeString) {
     try {
-      // Clean the input string
-      final cleanedTime = timeString
-          .trim()
-          .replaceAll(RegExp(r'[^\w\s:]'), '')
-          .replaceAll(RegExp(r'\s+'), ' '); // Normalize spaces
+      // Normalize the string to uppercase and trim whitespace.
+      final String normalizedTime = timeString.trim().toUpperCase();
 
-      if (cleanedTime.contains('PM') || cleanedTime.contains('pm')) {
-        final timeWithoutSuffix =
-            cleanedTime.replaceAll(RegExp(r'[APMapm]'), '').trim();
-        final parts = timeWithoutSuffix.split(':');
-        var hour = int.parse(parts[0]);
-        final minute = int.parse(parts[1]);
-        if (hour < 12) hour += 12;
-        return TimeOfDay(hour: hour, minute: minute);
-      } else if (cleanedTime.contains('AM') || cleanedTime.contains('am')) {
-        final timeWithoutSuffix =
-            cleanedTime.replaceAll(RegExp(r'[APMapm]'), '').trim();
-        final parts = timeWithoutSuffix.split(':');
-        var hour = int.parse(parts[0]);
-        final minute = int.parse(parts[1]);
-        if (hour == 12) hour = 0;
-        return TimeOfDay(hour: hour, minute: minute);
+      // Determine if the time is AM or PM.
+      final bool isPM = normalizedTime.endsWith('PM');
+      final bool isAM = normalizedTime.endsWith('AM');
+
+      // Remove the AM/PM suffix to isolate the time digits.
+      String timeDigits;
+      if (isPM || isAM) {
+        timeDigits =
+            normalizedTime.substring(0, normalizedTime.length - 2).trim();
       } else {
-        // 24-hour format
-        final parts = cleanedTime.split(':');
-        return TimeOfDay(
-          hour: int.parse(parts[0]),
-          minute: int.parse(parts[1]),
-        );
+        timeDigits = normalizedTime;
       }
+
+      // Split into hour and minute parts.
+      final parts = timeDigits.split(':');
+      if (parts.length != 2) {
+        throw const FormatException('Invalid time format, expected hh:mm.');
+      }
+
+      // Parse the hour and minute as integers.
+      int hour = int.parse(parts[0]);
+      final int minute = int.parse(parts[1]);
+
+      // Adjust the hour for 12-hour format.
+      if (isPM) {
+        // For PM, add 12 to hours 1-11. "12 PM" is a special case and should not be changed.
+        // 1:00 PM becomes 13:00. 12:00 PM remains 12:00.
+        if (hour >= 1 && hour <= 11) {
+          hour += 12;
+        }
+      } else if (isAM) {
+        // For AM, "12 AM" is the special case for midnight, which should be hour 0.
+        // 12:00 AM becomes 00:00. 1:00 AM remains 1:00.
+        if (hour == 12) {
+          hour = 0;
+        }
+      }
+
+      return TimeOfDay(hour: hour, minute: minute);
     } catch (e) {
-      return const TimeOfDay(hour: 0, minute: 0); // Return midnight as fallback
+      // If any error occurs during parsing, return a default value.
+      debugPrint('Failed to parse time string "$timeString": $e');
+      return const TimeOfDay(hour: 0, minute: 0); // Default to midnight
     }
   }
+
 
   Future<List<ScheduleModel>> getSchedule(String courseMentorId) async {
     try {
@@ -636,7 +652,6 @@ class FirestoreInstance {
       List<MentorModel> mentors) async {
     try {
       final ids = (await getMentors()).map((doc) => doc.accountApiID).toList();
-      print(ids);
       final initialUsers = await _db
           .collection('users')
           .where('accountRole', isEqualTo: 'mentor')
@@ -893,13 +908,9 @@ class FirestoreInstance {
       if (courseMentor == '') {
         return false;
       }
-      final allocationQuery = await _db
-          .collection('menteeCourseAlloc')
-          .where('courseMentorId', isEqualTo: courseMentor)
-          .get();
-      return allocationQuery.docs.isNotEmpty;
+      return true;
     } catch (e) {
-      rethrow;
+      return false;
     }
   }
 
@@ -922,6 +933,15 @@ class FirestoreInstance {
       }
 
       return users;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<CourseModel> getCourse(String courseId) async {
+    try {
+      final course = await _db.collection('course').doc(courseId).get();
+      return CourseModel.fromJson(course.data()!, course.id);
     } catch (e) {
       rethrow;
     }
@@ -983,21 +1003,28 @@ class FirestoreInstance {
     }
   }
 
-  Future<CourseModel> getCourse(String courseId) async {
-    try {
-      final course = await _db.collection('course').doc(courseId).get();
-      return CourseModel.fromJson(course.data()!, course.id);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
   Future<bool> archiveCourse(String courseId) async {
     try {
       await _db.collection('course').doc(courseId).update({
         'courseStatus': 'archived',
       });
       return true;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<CourseModel> getCourseThroughCourseMentor(
+      String courseMentorId) async {
+    try {
+      final courseMentor =
+          await _db.collection('courseMentor').doc(courseMentorId).get();
+      if (courseMentor.exists) {
+        final courseId = courseMentor.data()!['courseId'];
+        return await getCourse(courseId);
+      } else {
+        throw Exception("CourseMentor not found");
+      }
     } catch (e) {
       rethrow;
     }
@@ -1142,7 +1169,6 @@ class FirestoreInstance {
 
       return querySnapshot.docs.length; // Return the count
     } catch (e) {
-      print('Error fetching course mentors: $e');
       return 0;
     }
   }
@@ -1158,8 +1184,6 @@ class FirestoreInstance {
 
       // Initialize mentee count
       int menteeCount = 0;
-      print("Total Coursementores--------");
-      print(courseMentorQuerySnapshot.docs.length);
 
       // Step 2: For each courseMentor, get the matching menteeCourseAllocID
       for (var courseMentorDoc in courseMentorQuerySnapshot.docs) {
@@ -1176,11 +1200,8 @@ class FirestoreInstance {
         menteeCount += menteeQuerySnapshot.docs.length;
       }
 
-      print("Total Mentees for Course $docId: $menteeCount");
-
       return menteeCount;
     } catch (e) {
-      print('Error fetching course mentees: $e');
       return 0;
     }
   }
@@ -1197,8 +1218,6 @@ class FirestoreInstance {
 
       // Initialize mentee count
       List<String> menteesIds = [];
-      print("Total Coursementores--------");
-      print(courseMentorQuerySnapshot.docs.length);
 
       // Step 2: For each courseMentor, get the matching menteeCourseAllocID
       for (var courseMentorDoc in courseMentorQuerySnapshot.docs) {
@@ -1227,7 +1246,6 @@ class FirestoreInstance {
 
       return users;
     } catch (e) {
-      print('Error fetching course mentees: $e');
       return [];
     }
   }
@@ -1317,7 +1335,6 @@ class FirestoreInstance {
       final courseMentorSnapshot = await courseMentorQuery.get();
 
       if (courseMentorSnapshot.docs.isEmpty) {
-        print("CourseMentor does not exist. Cannot enroll.");
         return;
       }
 
@@ -1332,10 +1349,8 @@ class FirestoreInstance {
         'mcaSoftDeleted': false,
         'menteeId': userId,
       });
-
-      print("Successfully enrolled in the course!");
     } catch (e) {
-      print("Error enrolling in the course: $e");
+      throw Exception("Error enrolling in the course: $e");
     }
   }
 
@@ -1446,13 +1461,11 @@ class FirestoreInstance {
           .get();
 
       if (!courseMentorSnap.exists) {
-        print("❌ courseMentor not found.");
         return null;
       }
 
       final courseId = courseMentorSnap.data()?['courseId'];
       if (courseId == null) {
-        print("❌ courseId not found in courseMentor.");
         return null;
       }
 
@@ -1462,13 +1475,11 @@ class FirestoreInstance {
           .get();
 
       if (!courseSnap.exists) {
-        print("❌ Course not found for courseId: $courseId");
         return null;
       }
 
       return CourseModel.fromJson(courseSnap.data()!, courseSnap.id);
     } catch (e) {
-      print("❌ Error in getMentorCourseThroughId: $e");
       return null;
     }
   }

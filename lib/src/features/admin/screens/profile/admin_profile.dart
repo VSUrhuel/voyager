@@ -31,41 +31,6 @@ class _AdminProfileState extends State<AdminProfile> {
     userModel = await firestore.getUser(FirebaseAuth.instance.currentUser!.uid);
   }
 
-  Widget _buildCapabilityItem(
-    BuildContext context,
-    IconData icon,
-    String text,
-    double screenWidth,
-  ) {
-    return SafeArea(
-      bottom: true,
-      top: false,
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: screenWidth * 0.01),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              icon,
-              size: screenWidth * 0.05,
-              color: Theme.of(context).primaryColor.withOpacity(0.7),
-            ),
-            SizedBox(width: screenWidth * 0.03),
-            Expanded(
-              child: Text(
-                text,
-                style: TextStyle(
-                  fontSize: screenWidth * 0.038,
-                  color: Colors.black87,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildAdminCardInfo(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
@@ -79,6 +44,7 @@ class _AdminProfileState extends State<AdminProfile> {
             vertical: screenHeight * 0.01,
           ),
           decoration: BoxDecoration(
+            // ignore: deprecated_member_use
             color: Theme.of(context).primaryColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(20),
           ),

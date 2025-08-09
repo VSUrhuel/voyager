@@ -24,20 +24,17 @@ class _CourseListState extends State<CourseList> {
   final CourseController courseController = Get.put(CourseController());
 
   @override
-  void initState() {
+void initState() {
     super.initState();
-    courseController.fetchActiveCourses();
-    courseController.fetchArchivedCourses();
+    // Call the method to fetch all data when the screen starts.
+    courseController.fetchAllCourses();
   }
 
-  void refreshCourses() {
-    if (show == 'active') {
-      courseController.fetchActiveCourses();
-    } else {
-      courseController.fetchArchivedCourses();
-    }
+void refreshCourses() {
+    // To refresh, you simply call the same method again
+    // to get the latest data from the server.
+    courseController.fetchAllCourses();
   }
-
   List<CourseModel> _filterCourses(List<CourseModel> courses) {
     if (searchQuery.isEmpty) return courses;
     return courses

@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:voyager/src/features/mentor/controller/post_controller.dart';
@@ -94,197 +96,79 @@ class _PostState extends State<Post> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final textTheme = Theme.of(context).textTheme;
+    return Scaffold(
+        appBar: AppBar(
+          systemOverlayStyle: SystemUiOverlayStyle.dark,
+          scrolledUnderElevation: 0,
+          toolbarHeight: screenHeight * 0.07,
+          backgroundColor: Colors.white,
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          title: Padding(
+            padding: EdgeInsets.only(
+              top: screenHeight * 0.02,
+            ),
+            child: Text(
+              'Posts',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: screenWidth * 0.07,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          centerTitle: false,
+          actions: [
+            _buildCreatePostButton(context, postController),
+          ],
+        ),
+        body: RefreshIndicator(
+            onRefresh: _refreshPosts,
+            child: Obx(() {
+              final posts = postController.posts;
+              final isLoading = postController.isLoading.value;
+              final error = postController.error.value;
 
-    return SafeArea(
-        bottom: true,
-        top: false,
-        child: Scaffold(
-          appBar: AppBar(
-            systemOverlayStyle: SystemUiOverlayStyle.dark,
-            scrolledUnderElevation: 0,
-            backgroundColor: Colors.transparent,
-            automaticallyImplyLeading: false,
-            toolbarHeight: screenHeight * 0.10,
-            titleTextStyle: textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-            elevation: 0,
-            title: Row(
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(
-                      top: screenHeight * 0.013, left: screenHeight * 0.01),
-                  child: Text(
-                    'Posts',
-                    style: TextStyle(
-                        fontSize: screenWidth * 0.07,
-                        fontWeight: FontWeight.bold),
-                  ),
+              if (isLoading && posts.isEmpty && !_isRefreshing) {
+                return _buildLoadingState();
+              }
+
+              if (posts.isEmpty) {
+                return _buildErrorState(context, error);
+              }
+
+              return ListView.builder(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.symmetric(
+                  horizontal: screenWidth * 0.05,
+                  vertical: screenHeight * 0.02,
                 ),
-              ],
-            ),
-            actions: [
-              TweenAnimationBuilder<double>(
-                tween: Tween(begin: 1.0, end: 1.0),
-                duration: Duration(milliseconds: 200),
-                builder: (context, scale, child) {
-                  return Transform.scale(
-                    scale: scale,
-                    child: child,
+                itemCount: posts.length + (_hasMorePosts ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index == posts.length) {
+                    return _buildMoreIndicator();
+                  }
+                  return Column(
+                    children: [
+                      PostContent(post: posts[index]),
+                      SizedBox(height: screenHeight * 0.02),
+                    ],
                   );
                 },
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: IconButton(
-                    icon: Container(
-                      padding: const EdgeInsets.all(10.0),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: [
-                            Theme.of(context).primaryColor.withOpacity(0.15),
-                            Theme.of(context).primaryColor.withOpacity(0.25),
-                          ],
-                        ),
-                      ),
-                      child: Icon(
-                        FontAwesomeIcons
-                            .solidPenToSquare, // Alternative solid version
-                        color: Theme.of(context).primaryColor,
-                        size: screenWidth * 0.05,
-                      ),
-                    ),
-                    onPressed: () {
-                      if (_hasCourseAllocation == false) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'You need to be allocated a course to create a post.',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                        return;
-                      }
-
-                      Navigator.push(
-                        context,
-                        CustomPageRoute(
-                          page: CreatePost(),
-                          direction: AxisDirection.left,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
-          body: RefreshIndicator(
-              onRefresh: _refreshPosts,
-              child: Obx(() {
-                final posts = postController.posts;
-                final isLoading = postController.isLoading.value;
-                final error = postController.error.value;
-
-                if (isLoading && posts.isEmpty && !_isRefreshing) {
-                  return _buildLoadingState();
-                }
-
-                if (error.isNotEmpty) {
-                  return _buildErrorState(context, error);
-                }
-
-                if (posts.isEmpty) {
-                  return _buildEmptyState(context);
-                }
-                return ListView.builder(
-                  controller: _scrollController,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: screenWidth * 0.05,
-                    vertical: screenHeight * 0.02,
-                  ),
-                  itemCount: posts.length + (_hasMorePosts ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index >= posts.length) {
-                      // Trigger load more when we reach the end
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        postController.loadMorePosts();
-                      });
-                      return _buildMoreIndicator();
-                    }
-                    return Column(
-                      children: [
-                        PostContent(post: posts[index]),
-                        SizedBox(height: screenHeight * 0.02),
-                      ],
-                    );
-                  },
-                );
-              })
-              // child: SingleChildScrollView(
-              //   physics: const AlwaysScrollableScrollPhysics(),
-              //   child: Padding(
-              //     padding: EdgeInsets.symmetric(
-              //       horizontal: screenWidth * 0.05,
-              //       vertical: screenHeight * 0.02,
-              //     ),
-              //     child: Column(
-              //       children: [
-              //         const Divider(thickness: 1),
-              //         SizedBox(height: screenHeight * 0.02),
-              //         FutureBuilder<List<PostContentModel>>(
-              //           future: postsFuture,
-              //           builder: (context, snapshot) {
-              //             if (_isRefreshing) {
-              //               return SizedBox(
-              //                 height: screenHeight * 0.5,
-              //                 child: Center(child: CircularProgressIndicator()),
-              //               );
-              //             }
-
-              //             if (snapshot.connectionState == ConnectionState.waiting) {
-              //               return SizedBox(
-              //                 child: const Center(child: CircularProgressIndicator()),
-              //               );
-              //             }
-
-              //             if (snapshot.hasError) {
-              //               debugPrint('Post loading error: ${snapshot.error}');
-              //               debugPrintStack(stackTrace: snapshot.stackTrace);
-              //               return _buildErrorState(context);
-              //             }
-
-              //             if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              //               return _buildEmptyState(context);
-              //             }
-
-              //             return Column(
-              //               children: snapshot.data!
-              //                   .map((post) => Column(
-              //                         children: [
-              //                           PostContent(post: post),
-              //                           SizedBox(height: screenHeight * 0.02),
-              //                         ],
-              //                       ))
-              //                   .toList(),
-              //             );
-              //           },
-              //         ),
-              //       ],
-              //     ),
-              //   ),
-              // ),
-              ),
-        ));
+              );
+            })));
   }
 
   Widget _buildLoadingState() {
     return Center(
-      child: CircularProgressIndicator(),
+      child: Lottie.asset(
+        'assets/images/loading.json',
+        fit: BoxFit.cover,
+        width: 40,
+        height: 40,
+        repeat: true,
+      ),
     );
   }
 
@@ -293,7 +177,13 @@ class _PostState extends State<Post> {
       padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: Center(
         child: _isLoadingMore
-            ? CircularProgressIndicator()
+            ? Lottie.asset(
+                'assets/images/loading.json',
+                fit: BoxFit.cover,
+                width: 40,
+                height: 40,
+                repeat: true,
+              )
             : Text('No more posts available'),
       ),
     );
@@ -306,21 +196,35 @@ class _PostState extends State<Post> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-        Lottie.asset(
-          'assets/images/error.json',
-          fit: BoxFit.cover,
-          width: screenWidth * 0.6,
-          height: screenWidth * 0.4,
-          repeat: true,
-        ),
-        const SizedBox(height: 16),
         Center(
-            child: Text(
-          'Failed to load posts',
-          style: Theme.of(context).textTheme.titleMedium,
-        )),
-        const SizedBox(height: 8),
-        const SizedBox(height: 16),
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: screenWidth * 0.05),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Lottie.asset(
+                  'assets/images/empty-post.json',
+                  fit: BoxFit.cover,
+                  width: screenWidth * 0.6,
+                  height: screenWidth * 0.4,
+                  repeat: true,
+                ),
+                SizedBox(height: screenWidth * 0.05),
+                Text(
+                  'No Posts!',
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontSize: screenWidth * 0.04,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: screenWidth * 0.02),
+                
+              ],
+            ),
+          ),
+        ),
         ElevatedButton(
           onPressed: _refreshPosts,
           child: const Text('Retry'),
@@ -329,104 +233,54 @@ class _PostState extends State<Post> {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
-    final theme = Theme.of(context);
-    final size = MediaQuery.of(context).size;
-    final isDarkMode = theme.brightness == Brightness.dark;
-
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: size.width * 0.05,
-          right: size.width * 0.05,
+  Widget _buildCreatePostButton(
+      BuildContext context, PostController controller) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: IconButton(
+        icon: Container(
+          padding: const EdgeInsets.all(10.0),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).primaryColor.withOpacity(0.15),
+                Theme.of(context).primaryColor.withOpacity(0.25),
+              ],
+            ),
+          ),
+          child: Icon(
+            FontAwesomeIcons.solidPenToSquare,
+            color: Theme.of(context).primaryColor,
+            size: MediaQuery.of(context).size.width * 0.05,
+          ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Animated illustration
-            Lottie.asset(
-              'assets/images/empty-post.json',
-              fit: BoxFit.cover,
-              width: size.width * 0.6,
-              height: size.width * 0.4,
-              repeat: true,
-            ),
-
-            const SizedBox(height: 24),
-
-            // Title with better typography
-            Text(
-              'No Posts Yet',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: isDarkMode ? Colors.white70 : Colors.grey[800],
+        onPressed: () {
+          // Reads the allocation status directly from the controller
+          if (!_hasCourseAllocation) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content:
+                    Text('You need to be allocated a course to create a post.'),
+                backgroundColor: Colors.red,
               ),
-              textAlign: TextAlign.center,
+            );
+            return;
+          }
+          // Navigate to the create post screen
+          Navigator.push(
+            context,
+            CustomPageRoute(
+              page: const CreatePost(),
+              direction: AxisDirection.left,
             ),
-
-            const SizedBox(height: 8),
-
-            // More descriptive subtitle
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Text(
-                'The feed is empty right now. Start sharing your knowledge or questions with the community!',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: isDarkMode ? Colors.white60 : Colors.grey[600],
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Filled button with icon
-            FilledButton.icon(
-              onPressed: () {
-                if (_hasCourseAllocation == false) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'You need to be allocated a course to create a post.',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                  return;
-                }
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const CreatePost(),
-                  ),
-                ).then((_) => _refreshPosts());
-              },
-              icon: const Icon(Icons.add, size: 20),
-              label: const Text('Create First Post'),
-              style: FilledButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-
-            // Alternative action
-            const SizedBox(height: 16),
-            TextButton(
-              onPressed: _refreshPosts,
-              child: Text(
-                'Refresh Feed',
-                style: TextStyle(
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ),
-          ],
-        ),
+          ).then((didPost) {
+            // Refresh posts if a new post was created
+            if (didPost == true) {
+              controller.refreshPosts();
+            }
+          });
+        },
       ),
     );
   }
