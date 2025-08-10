@@ -94,7 +94,7 @@ class MentorController extends GetxController {
 
       String status = 'archived';
       final CourseMentorModel? courseMentor = await FirestoreInstance()
-          .getCourseMentorThroughMentor(
+          .getCourseMentorThroughEmail(
               FirestoreInstance().getFirebaseUser().email.toString());
       if (courseMentor != null) {
         status = 'active';
