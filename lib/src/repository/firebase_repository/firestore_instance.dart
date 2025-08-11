@@ -56,6 +56,11 @@ class FirestoreInstance {
     }
   }
 
+  Future<bool> doesUserExist(String uid) async {
+    final doc = await _db.collection("users").doc(uid).get();
+    return doc.exists;
+  }
+
   Future<void> setUserFromGoogle(Rx<firebase_auth.User>? user) async {
     try {
       if (user?.value == null) {

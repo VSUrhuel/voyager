@@ -240,34 +240,21 @@ class FirebaseAuthenticationRepository extends GetxController {
 
   Future<UserCredential?> sigInWithGoogle() async {
     try {
-      // Trigger the authentication flow
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        // User cancelled the sign-in
+        return null;
+      }
 
-      // Obtain the auth details from the request
-      final GoogleSignInAuthentication? googleAuth =
-          await googleUser?.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
-      // Create a new credential
       final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
-        idToken: googleAuth?.idToken,
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
       );
 
-      // Once signed in, return the UserCredential
-      final UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithCredential(credential);
-      if (userCredential.user == null) {
-        throw AuthenticationExceptions("Failed to sign in with Google.");
-      }
-      final userDetails = await _firestore.getUser(userCredential.user!.uid);
-      if (userDetails.accountSoftDeleted) {
-        await _auth.signOut();
-        throw const AuthenticationExceptions(
-            'This user account has been deleted.');
-      }
-      
-
-      return userCredential;
+      return await FirebaseAuth.instance.signInWithCredential(credential);
     } on FirebaseAuthException catch (e) {
       final ex = AuthenticationExceptions.code(e.code);
       AwesomeSnackbarContent(

@@ -35,7 +35,7 @@ class AdminMentorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    bool _isProcessing = false;
+    bool isProcessing = false;
 
     return InkWell(
       onTap: () async {
@@ -54,10 +54,10 @@ class AdminMentorCard extends StatelessWidget {
                 ),
                 TextButton(
                   onPressed: () => {
-                    if(!_isProcessing)
+                    if (!isProcessing)
                     {
                     Navigator.pop(context, true),
-                    _isProcessing = true,
+                        isProcessing = true,
                     }
                     },
                   child: const Text('Confirm'),
@@ -71,7 +71,7 @@ class AdminMentorCard extends StatelessWidget {
                 .createCourseMentor(courseId!, mentorModel.mentorId);
             await AdminMentorController()
                 .updateMentorStatus(mentorModel.mentorId, 'active');
-                _isProcessing = false;
+            isProcessing = false;
             // ignore: use_build_context_synchronously
             Navigator.pop(context);
           } else if (confirmed == false) {

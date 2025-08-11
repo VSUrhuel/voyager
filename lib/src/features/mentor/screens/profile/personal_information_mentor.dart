@@ -554,7 +554,10 @@ class _MentorPersonalInformationState extends State<MentorPersonalInformation> {
 
   // Experience Section with Improved UI
   Widget _experienceSection(double screenHeight) {
-    final isExperienceEmpty = (mentorModel.mentorExpHeader.length <= 1 && mentorModel.mentorExpHeader[0].length <= 1) ||
+    final isExperienceEmpty = (mentorModel.mentorExpHeader.isEmpty &&
+            mentorModel.mentorExpDesc.isEmpty) ||
+        (mentorModel.mentorExpHeader.length <= 1 &&
+            mentorModel.mentorExpHeader[0].length <= 1) ||
         (mentorModel.mentorExpDesc.length <= 1 && mentorModel.mentorExpDesc[0].length <= 1);
 
     return Container(

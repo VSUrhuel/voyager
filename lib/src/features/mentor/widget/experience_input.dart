@@ -52,10 +52,7 @@ class _ExperienceInputState extends State<ExperienceInput> {
           updateController: false,
         );
       }
-    } else {
-      // Start with one empty experience by default
-      _addExperience();
-    }
+    } 
   }
 
   void _addExperience({

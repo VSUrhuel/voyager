@@ -122,13 +122,23 @@ class SignupController extends GetxController {
   Future<void> googleSignUp() async {
     try {
       isGoogleLoading.value = true;
-      await auth.sigInWithGoogle();
-      final firestore = FirestoreInstance();
-      if (auth.firebaseUser.value == null) {
-        Get.snackbar('Error', "User is null");
+      // 1. Authenticate with Google
+      final userCredential = await auth.sigInWithGoogle();
+
+      // User might have cancelled the sign-in flow
+      if (userCredential == null || userCredential.user == null) {
+        isGoogleLoading.value = false;
         return;
       }
-      await firestore.setUserFromGoogle(Rx<User>(auth.firebaseUser.value!));
+
+      // 2. Check if the user document already exists in Firestore
+      final firestore = FirestoreInstance();
+      final userExists =
+          await firestore.doesUserExist(userCredential.user!.uid);
+      if (!userExists) {
+        await firestore.setUserFromGoogle(Rx<User>(auth.firebaseUser.value!));
+      }
+      
       Get.offAllNamed(MRoutes.splash);
       isGoogleLoading.value = false;
     } catch (e) {
