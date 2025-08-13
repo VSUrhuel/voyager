@@ -9,7 +9,6 @@ import 'package:get/get.dart';
 class ResetPass extends StatelessWidget {
   const ResetPass({super.key});
 
-
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(ResetPassController());
@@ -119,6 +118,8 @@ class ResetPass extends StatelessWidget {
                                         controller.resetPassword(controller
                                             .confirmedPassword.text
                                             .trim());
+                                        controller.initialPassword.text = '';
+                                        controller.confirmedPassword.text = '';
                                         controller.dispose();
                                       }
                                     },

@@ -292,6 +292,10 @@ class _MentorInfo1State extends State<MentorInfo1> {
                     Container(
                       padding: EdgeInsets.only(top: screenHeight * 0.015),
                       child: TextFormField(
+                        keyboardType: TextInputType.number,
+                        inputFormatters: <TextInputFormatter>[
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
                         controller:
                             MentorController.instance.mentorSessionCompleted,
                         style: TextStyle(

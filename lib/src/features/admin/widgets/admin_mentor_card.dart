@@ -35,6 +35,7 @@ class AdminMentorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    bool isProcessing = false;
 
     return InkWell(
       onTap: () async {
@@ -52,18 +53,25 @@ class AdminMentorCard extends StatelessWidget {
                   child: const Text('Cancel'),
                 ),
                 TextButton(
-                  onPressed: () => Navigator.pop(context, true),
+                  onPressed: () => {
+                    if (!isProcessing)
+                    {
+                    Navigator.pop(context, true),
+                        isProcessing = true,
+                    }
+                    },
                   child: const Text('Confirm'),
                 ),
               ],
             ),
           );
 
-          if (confirmed == true) {
+          if (confirmed == true ) {
             await CourseMentorController()
                 .createCourseMentor(courseId!, mentorModel.mentorId);
             await AdminMentorController()
                 .updateMentorStatus(mentorModel.mentorId, 'active');
+            isProcessing = false;
             // ignore: use_build_context_synchronously
             Navigator.pop(context);
           } else if (confirmed == false) {
@@ -136,28 +144,40 @@ class AdminMentorCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(mentor,
+                        Builder(builder: (context){
+                          mentor;
+                          double baseFontSize = screenWidth * 0.040;
+                          double dynamicFontSize = mentor.length > 17
+                              ? baseFontSize * (18 / mentor.length)
+                              : baseFontSize;
+
+                          return Text(mentor,
                             style: TextStyle(
                               color: Colors.black,
-                              fontSize: screenWidth * 0.04,
+                              // fontSize: screenWidth * 0.04,
+                              fontSize: dynamicFontSize,
                               fontWeight: FontWeight.bold,
                               height: 1.0,
-                            )),
+                            ));
+
+                        },),
+                        
                         SizedBox(height: screenHeight * 0.002),
                         Row(children: [
                           Builder(
                             builder: (context) {
                               email;
-                              // double baseFontSize = screenWidth * 0.027;
-                              // double dynamicFontSize = email.length > 20
-                              //     ? baseFontSize * (20 / email.length)
-                              //     : baseFontSize;
+                              double baseFontSize = screenWidth * 0.035;
+                              double dynamicFontSize = email.length > 20
+                                  ? baseFontSize * (20 / email.length)
+                                  : baseFontSize;
 
                               return Text(
                                 email,
                                 style: TextStyle(
                                   color: Colors.blue,
-                                  fontSize: screenWidth * 0.035,
+                                  // fontSize: screenWidth * 0.035,
+                                  fontSize: dynamicFontSize,
                                   fontWeight: FontWeight.w600,
                                 ),
                               );
@@ -170,15 +190,27 @@ class AdminMentorCard extends StatelessWidget {
                           SizedBox(width: screenWidth * 0.015),
 
                           // Time range
-                          Text(
-                            schedule.substring(
-                                schedule.indexOf(' ') + 1), // Get time portion
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontSize: screenWidth * 0.035,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
+                          Builder(
+                            builder: (context) {
+                              String sched = schedule.substring(
+                                schedule.indexOf(' ') + 1);
+                                double baseFontSize = screenWidth * 0.035;
+                                double dynamicFontSize = sched.length > 15
+                                    ? baseFontSize * (15 / sched.length)
+                                    : baseFontSize;
+
+                                return Text(
+                                sched, // Get time portion
+                                style: TextStyle(
+                                  color: Colors.black87,
+                                  // fontSize: screenWidth * 0.035,
+                                  fontSize: dynamicFontSize,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              );
+                            }
+                          )
+                          
 
                           // IntrinsicWidth(
                           //   child: Container(
@@ -350,14 +382,22 @@ class AdminMentorCard extends StatelessWidget {
           fontWeight: FontWeight.bold,
         ),
       ),
-      Text(
-        days.join(''),
-        style: TextStyle(
-          color: Colors.black87,
-          fontSize: screenWidth * 0.035,
-          fontWeight: FontWeight.w500,
-        ),
-      )
+      Builder(builder: (context){
+        String day = days.join('');
+        double baseFontSize = screenWidth * 0.035;
+        double dynamicFontSize = day.length > 3
+            ? baseFontSize * (4 / day.length)
+            : baseFontSize;
+        return Text(
+          day,
+          style: TextStyle(
+            color: Colors.black87,
+            // fontSize: screenWidth * 0.035,
+            fontSize: dynamicFontSize,
+            fontWeight: FontWeight.w500,
+          ),
+        );
+      },)
     ]);
   }
 
