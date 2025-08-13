@@ -302,91 +302,101 @@ class _MentorListState extends State<MentorList> {
                 SizedBox(height: 10),
 
                 // List of Mentor Cards in Scrollable View
-                SingleChildScrollView(
-                  child: Padding(
+                 SizedBox(
+                  height: screenHeight * 0.70,
+                  child: SingleChildScrollView(
+                    child:Column(
+                    children: [
+                       Padding(
                     padding: EdgeInsets.only(
                       left: screenWidth * 0.05,
                       right: screenWidth * 0.05,
                     ),
                     child: Center(
-                      child: Column(
-                        children: [
-                          if (isLoading)
-                            Lottie.asset(
-                              'assets/images/loading.json',
-                              fit: BoxFit.cover,
-                              width: screenHeight * 0.08,
-                              height: screenWidth * 0.04,
-                              repeat: true,
-                            ),
-                          if (mentorCards.isNotEmpty)
-                            for (var mentorCard in filteredMentorCards)
-                              AdminMentorCard(
-                                mentorModel: mentorCard.mentorModel,
-                                userModel: mentorCard.userModel,
-                                mentor: mentorCard.mentor,
-                                email: mentorCard.email,
-                                studentId: mentorCard.studentId,
-                                schedule: mentorCard.schedule,
-                                course: mentorCard.course,
-                                onActionComplete: () => getMentors(show),
+                      child: SizedBox(
+                          height: show == 'archived'? (screenHeight * 0.1 )* mentorCards.length : screenHeight * 0.70,
+                          child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            if (isLoading)
+                              Lottie.asset(
+                                'assets/images/loading.json',
+                                fit: BoxFit.cover,
+                                width: screenHeight * 0.08,
+                                height: screenWidth * 0.04,
+                                repeat: true,
                               ),
-                          // if (show == 'archived' && mentorDraftCards.isNotEmpty)
-                          //   for (var mentorCard in mentorDraftCards)
-                          //     MentorDraftCard(
-                          //       userModel: mentorCard.userModel,
-                          //       // onActionComplete: () => getMentors(show),
-                          //     ),
-                          SizedBox(height: 10),
-                          Builder(
-                            builder: (context) {
-                              if (isLoading) {
-                                return Text('');
-                              }
-                              if (mentorCards.isEmpty && show != 'archived') {
-                                return Text('No $show mentor',
+                            if (mentorCards.isNotEmpty)
+                              for (var mentorCard in filteredMentorCards)
+                                AdminMentorCard(
+                                  mentorModel: mentorCard.mentorModel,
+                                  userModel: mentorCard.userModel,
+                                  mentor: mentorCard.mentor,
+                                  email: mentorCard.email,
+                                  studentId: mentorCard.studentId,
+                                  schedule: mentorCard.schedule,
+                                  course: mentorCard.course,
+                                  onActionComplete: () => getMentors(show),
+                                ),
+                            // if (show == 'archived' && mentorDraftCards.isNotEmpty)
+                            //   for (var mentorCard in mentorDraftCards)
+                            //     MentorDraftCard(
+                            //       userModel: mentorCard.userModel,
+                            //       // onActionComplete: () => getMentors(show),
+                            //     ),
+                            SizedBox(height: 10),
+                            Builder(
+                              builder: (context) {
+                                if (isLoading) {
+                                  return Text('');
+                                }
+                                if (mentorCards.isEmpty && show != 'archived') {
+                                  return Text('No $show mentor',
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: screenWidth * 0.033,
+                                      ));
+                                }
+                                if (mentorDraftCards.isEmpty &&
+                                    mentorCards.isEmpty &&
+                                    show == 'archived') {
+                                  return Text('No archived pending mentor',
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: screenWidth * 0.033,
+                                      ));
+                                }
+                                if (show != 'archived') {
+                                  return Text('Nothing follows',
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: screenWidth * 0.033,
+                                      ));
+                                }
+                                return Text('',
                                     style: TextStyle(
                                       color: Colors.grey,
-                                      fontSize: screenWidth * 0.033,
+                                      fontSize: screenWidth * 0.01,
                                     ));
-                              }
-                              if (mentorDraftCards.isEmpty &&
-                                  mentorCards.isEmpty &&
-                                  show == 'archived') {
-                                return Text('No archived pending mentor',
-                                    style: TextStyle(
-                                      color: Colors.grey,
-                                      fontSize: screenWidth * 0.033,
-                                    ));
-                              }
-                              if (show != 'archived') {
-                                return Text('Nothing follows',
-                                    style: TextStyle(
-                                      color: Colors.grey,
-                                      fontSize: screenWidth * 0.033,
-                                    ));
-                              }
-                              return Text('',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: screenWidth * 0.01,
-                                  ));
-                            },
-                          ),
-                        ],
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
                       ),
                     ),
                   ),
-                ),
                 if (show == 'archived' && mentorDraftCards.isNotEmpty)
-                  SingleChildScrollView(
-                    child: Padding(
+                    Padding(
                       padding: EdgeInsets.only(
                         left: screenWidth * 0.05,
                         right: screenWidth * 0.05,
                       ),
                       child: Center(
-                        child: Column(
+                        child: SizedBox(
+                          height: (screenHeight * 0.11)*mentorDraftCards.length,
+                          child: SingleChildScrollView(
+                            child: Column(
                           children: [
                             if (mentorDraftCards.isNotEmpty)
                               for (var mentorCard in mentorDraftCards)
@@ -416,9 +426,14 @@ class _MentorListState extends State<MentorList> {
                             ),
                           ],
                         ),
+                          ),
+                          ),
                       ),
                     ),
+                    ],
                   ),
+                  ),
+                 ),
               ],
             ),
           ],
