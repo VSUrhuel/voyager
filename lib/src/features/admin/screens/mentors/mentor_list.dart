@@ -313,17 +313,8 @@ class _MentorListState extends State<MentorList> {
                       right: screenWidth * 0.05,
                     ),
                     child: Center(
-                      child: Builder(
-                        builder: (context){
-                          int length;
-                          if (mentorCards.length > 5)
-                          {
-                            length = 5;
-                          } else {
-                            length = mentorCards.length;
-                          }
-                          return SizedBox(
-                          height: show == 'archived'? (screenHeight * 0.1 )* length : screenHeight * 0.70,
+                      child: SizedBox(
+                          height: show == 'archived'? (screenHeight * 0.1 )* mentorCards.length : screenHeight * 0.70,
                           child: SingleChildScrollView(
                         child: Column(
                           children: [
@@ -392,8 +383,6 @@ class _MentorListState extends State<MentorList> {
                           ],
                         ),
                       ),
-                      );
-                        }
                       ),
                     ),
                   ),
@@ -409,13 +398,6 @@ class _MentorListState extends State<MentorList> {
                           child: SingleChildScrollView(
                             child: Column(
                           children: [
-                           Container(
-                            height: 7,
-                           decoration: BoxDecoration(
-                            border: Border(top: BorderSide(color: Colors.grey, width: 4)
-                           ),
-                           ),
-                           ),
                             if (mentorDraftCards.isNotEmpty)
                               for (var mentorCard in mentorDraftCards)
                                 MentorDraftCard(
