@@ -156,7 +156,10 @@ class _MentorPopupState extends State<MentorPopup> {
                     right: screenWidth * 0.05,
                   ),
                   child: Center(
-                    child: Column(
+                    child: SizedBox(
+                      height: screenHeight * 0.7,
+                      child: SingleChildScrollView(
+                        child: Column(
                       children: [
                         if (isLoading) Lottie.asset(
                             'assets/images/loading.json',
@@ -190,6 +193,8 @@ class _MentorPopupState extends State<MentorPopup> {
                           },
                         ),
                       ],
+                    ),
+                      ),
                     ),
                   ),
                 ),
