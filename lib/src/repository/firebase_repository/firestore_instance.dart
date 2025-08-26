@@ -353,6 +353,24 @@ class FirestoreInstance {
       rethrow;
     }
   }
+  Future<String> getMentorDocIdThroughAccId(String accId) async {
+    try {
+      final mentor = await _db
+          .collection('mentors')
+          .where('accountId', isEqualTo: accId)
+          .where('mentorSoftDeleted', isEqualTo: false)
+          .get();
+
+      if (mentor.docs.isEmpty) {
+        throw Exception('No mentor found for account ID: $accId');
+      }
+
+      return mentor
+          .docs.first.id; // Returns the document ID instead of parsing data
+    } catch (e) {
+      rethrow;
+    }
+  }
 
   Future<List<ScheduleModel>> getScheduleByDay(
       DateTime date, String courseMentorId) async {

@@ -71,10 +71,13 @@ class _EnrollCourseState extends State<EnrollCourse> {
       final firestore = FirebaseFirestore.instance;
       final createdTimestamp = Timestamp.now();
 
+      final mentorId =
+          await firestoreInstance.getMentorDocIdThroughAccId(selectedMentorId!);
+
       final courseMentorQuery = await firestore
           .collection('courseMentor')
           .where('courseId', isEqualTo: widget.courseModel.docId)
-          .where('mentorId', isEqualTo: selectedMentorId)
+          .where('mentorId', isEqualTo: mentorId)
           .where('courseMentorSoftDeleted', isEqualTo: false)
           .limit(1)
           .get();
